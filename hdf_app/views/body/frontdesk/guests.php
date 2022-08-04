@@ -1,0 +1,202 @@
+<div class="content pb-0">
+  <div class="row">
+    <div class="col-md-12">
+      <h5>GUEST LIST</h5>
+      <div class="wizard-container">
+        <div class="card card-wizard active" data-color="primary" id="wizardProfile">
+          <div class="card-header text-center">
+            <div class="wizard-navigation">
+              <ul>
+                <li class="nav-item">
+                  <a class="nav-link active" href="#available" data-toggle="tab" role="tab" aria-controls="available" aria-selected="true">
+                    <i class="fa fa-check"></i> Active
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="#unavailable" data-toggle="tab" role="tab" aria-controls="unavailable">
+                    <i class="fa fa-ban"></i> Inactive
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </div>
+          <div class="card-body pt-0">
+            <div class="tab-content pt-0">
+              <button class="btn btn-primary ml-3 mb-3 mt-0" id="addGuest">
+                <i class="nc-icon nc-simple-add"></i> Add New Guest
+              </button>
+              <div class="tab-pane show active" id="available">
+                <table class="table table-striped table-bordered tbl_guest" cellspacing="0" width="100%">
+                  <thead>
+                    <tr>
+                      <th>Guest Name</th>
+                      <th>Contact Details</th>
+                      <th>Company Details</th>
+                      <th>Last Check-In</th>
+                      <th class="disabled-sorting text-center">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <?php foreach ($guests_active as $data) { ?>
+                      <tr>
+                        <td>
+                          <?= $data['last_name'] ?>, <?= $data['first_name'] ?> <?= $data['middle_name'] ?><br>
+                          <small><?= $data['address'] ?></small>
+                        </td>
+                        <td>
+                          <?= $data['contact'] ?><br>
+                          <small><?= $data['email'] ?></small>
+                        </td>
+                        <td>
+                          <?= $data['company_name'] ?><br>
+                          <small><?= $data['company_address'] ?></small>
+                        </td>
+                        <td><?= $data['last_checkin'] ?></td>
+                        <td class="action">
+                          <a href="javascript:" class="btn btn-default btn-sm">View</a>
+                          <button class="btn btn-success btn-sm updateGuest" data='<?= json_encode($data) ?>'>Update</button>
+                          <a href="<?= base_url('index.php/main/statusGuest/1/' . $data['guest_id']) ?>" class="btn btn-warning btn-sm confirm">Disable</a>
+                        </td>
+                      </tr>
+                    <?php } ?>
+                  </tbody>
+                </table>
+              </div>
+              <div class="tab-pane" id="unavailable">
+                <table class="table table-striped table-bordered tbl_guest" cellspacing="0" width="100%">
+                  <thead>
+                    <tr>
+                      <th>Guest Name</th>
+                      <th>Contact Details</th>
+                      <th>Company Details</th>
+                      <th>Last Check-In</th>
+                      <th class="disabled-sorting text-center">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <?php foreach ($guests_inactive as $data) { ?>
+                      <tr>
+                        <td>
+                          <?= $data['last_name'] ?>, <?= $data['first_name'] ?> <?= $data['middle_name'] ?><br>
+                          <small><?= $data['address'] ?></small>
+                        </td>
+                        <td>
+                          <?= $data['contact'] ?><br>
+                          <small><?= $data['email'] ?></small>
+                        </td>
+                        <td>
+                          <?= $data['company_name'] ?><br>
+                          <small><?= $data['company_address'] ?></small>
+                        </td>
+                        <td><?= $data['last_checkin'] ?></td>
+                        <td>
+                          <button class="btn btn-success btn-sm updateGuest" data='<?= json_encode($data) ?>'>Update</button>
+                          <a href="<?= base_url('index.php/main/statusGuest/0/' . $data['guest_id']) ?>" class="btn btn-primary btn-sm confirm">Enable</a>
+                        </td>
+                      </tr>
+                    <?php } ?>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="modalGuest" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header justify-content-center">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <i class="nc-icon nc-simple-remove"></i>
+        </button>
+        <h4 class="title title-up">Guest Details</h4>
+      </div>
+      <?= form_open('main/addGuest', ['id' => 'frmGuest']); ?>
+      <input type="hidden" name="guest_id">
+      <div class="modal-body">
+        <div class="row">
+          <div class="form-group col-md-4">
+            <label>First Name</label>
+            <input type="text" class="form-control" name="first_name" required>
+          </div>
+          <div class="form-group col-md-4">
+            <label>Middle Name</label>
+            <input type="text" class="form-control" name="middle_name">
+          </div>
+          <div class="form-group col-md-4">
+            <label>Last Name</label>
+            <input type="text" class="form-control" name="last_name" required>
+          </div>
+        </div>
+        <div class="row">
+          <div class="form-group col-md-6">
+            <label>Company Name</label>
+            <input type="text" class="form-control" name="company_name">
+          </div>
+          <div class="form-group col-md-6">
+            <label>Company Address</label>
+            <input type="text" class="form-control" name="company_address">
+          </div>
+        </div>
+        <div class="row">
+          <div class="form-group col-md-5">
+            <label>Contact Number</label>
+            <input type="text" class="form-control" name="contact" required>
+          </div>
+          <div class="form-group col-md-7">
+            <label>Email <small class="text-muted">(optional)</small></label>
+            <input type="text" class="form-control" name="email">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Address <small class="text-muted">(optional)</small></label>
+          <input type="text" class="form-control" name="address">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <div class="left-side">
+          <button type="submit" class="btn btn-link" form="frmGuest" id="btnGuest">Add Guest</button>
+        </div>
+        <div class="divider"></div>
+        <div class="right-side">
+          <button type="button" class="btn btn-link" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+    <?= form_close() ?>
+  </div>
+</div>
+
+<script>
+  $(document).ready(function() {
+    demo.initWizard();
+    $('.tbl_guest').dataTable();
+  });
+
+  $('.updateGuest').click(function() {
+    const data = JSON.parse($(this).attr('data'));
+    $('[name=guest_id]').val(data.guest_id);
+    $('[name=first_name]').val(data.first_name);
+    $('[name=middle_name]').val(data.middle_name);
+    $('[name=last_name]').val(data.last_name);
+    $('[name=company_name]').val(data.company_name);
+    $('[name=company_address]').val(data.company_address);
+    $('[name=contact]').val(data.contact);
+    $('[name=email]').val(data.email);
+    $('[name=address]').val(data.address);
+    $('#frmGuest').attr('action', 'updateGuest');
+    $('#btnGuest').text('Update Guest');
+    $('#modalGuest').modal('show');
+  });
+
+  $('#addGuest').click(function() {
+    $('#frmGuest').attr('action', 'addGuest');
+    $('#frmGuest').trigger('reset');
+    $('#btnGuest').text('Add Guest');
+    $('#modalGuest').modal('show');
+  });
+</script>

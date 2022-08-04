@@ -1,0 +1,279 @@
+<?php
+if (!$this->session->userdata('connect')) {
+  redirect('user');
+}
+?>
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <link rel="icon" type="jpeg" href="<?= base_url('assets/img/logo.jpg') ?>">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+  <title>Hotel de Fides | iHotelier by WSM IT Services</title>
+  <meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, shrink-to-fit=no' name='viewport' />
+  <!--  Fonts and icons -->
+  <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700,200" rel="stylesheet" />
+  <link href="https://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css" rel="stylesheet">
+  <!-- CSS Files -->
+  <link href="<?= base_url() ?>assets/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="<?= base_url() ?>assets/css/paper-dashboard.css?v=2.0.1" rel="stylesheet" />
+  <!-- CSS Just for demo purpose, don't include it in your project -->
+  <link href="<?= base_url() ?>assets/demo/demo.css" rel="stylesheet" />
+  <!-- Scripts -->
+  <script src="<?= base_url() ?>assets/js/core/jquery.min.js"></script>
+  <script src="<?= base_url() ?>assets/js/core/popper.min.js"></script>
+  <script src="<?= base_url() ?>assets/js/core/bootstrap.min.js"></script>
+  <script src="<?= base_url() ?>assets/js/plugins/moment.min.js"></script>
+  <script src="<?= base_url() ?>assets/js/plugins/bootstrap-datetimepicker.js"></script>
+  <script src="<?= base_url() ?>assets/js/functions.js"></script>
+
+  <style type="text/css">
+    .dataTables_paginate {
+      float: right;
+    }
+
+    .form-check-label {
+      cursor: pointer;
+    }
+
+    .action>* {
+      padding-left: 8px;
+      padding-right: 8px;
+    }
+
+    .separator {
+      display: flex;
+      align-items: center;
+      text-align: center;
+      color: #9A9A9A;
+    }
+
+    .separator::before,
+    .separator::after {
+      content: '';
+      flex: 1;
+      border-bottom: 1px solid #dee2e6;
+    }
+
+    .separator:not(:empty)::before {
+      margin-right: .25em;
+    }
+
+    .separator:not(:empty)::after {
+      margin-left: .25em;
+    }
+
+    .alert {
+      z-index: 9999;
+      bottom: 16px;
+      right: 16px;
+      min-width: 400px;
+    }
+
+    small {
+      color: #6c757d;
+      font-weight: normal !important;
+    }
+  </style>
+
+  <script>
+    $(document).ready(function() {
+      setTimeout(() => {
+        $('.alert').fadeOut();
+      }, 8000);
+
+      $('.close').click(function() {
+        $('.alert').fadeOut();
+      });
+    });
+  </script>
+</head>
+
+<?php if ($this->session->flashdata('success') || $this->session->flashdata('error')) : ?>
+  <?php $alert = $this->session->flashdata('success') ? 'success' : 'danger'; ?>
+  <div class="alert alert-<?= $alert ?> alert-dismissible fade show position-absolute">
+    <button type="button" class="close">
+      <i class="nc-icon nc-simple-remove"></i>
+    </button>
+    <div class="d-flex align-items-center">
+      <span class="nc-icon nc-bell-55 mr-2"></span>
+      <span><?= $this->session->flashdata($alert == 'success' ? 'success' : 'error') ?></span>
+    </div>
+  </div>
+<?php endif; ?>
+
+<body class="">
+  <div class="wrapper ">
+    <div class="sidebar" data-color="brown" data-active-color="danger">
+      <div class="sidebar-wrapper">
+        <div class="user">
+          <div class="photo">
+            <img src="<?= base_url('uploaded_files/' . $this->session->userdata('image')) ?>" alt="profile pic" />
+          </div>
+          <div class="info">
+            <a data-toggle="collapse" href="#collapseExample" class="collapsed" aria-expanded="<?= $active == 'account' ? 'true' : 'false' ?>">
+              <span>
+                <?= $this->session->userdata('name') ?>
+                <b class="caret"></b>
+              </span>
+            </a>
+            <div class="clearfix"></div>
+            <div class="collapse <?= $active == 'account' ? 'show' : '' ?>" id="collapseExample">
+              <ul class="nav">
+                <li class="<?= $active == 'account' ? 'active' : '' ?>">
+                  <a href="<?= base_url() ?>index.php/main/profile">
+                    <span class="sidebar-mini-icon">AD</span>
+                    <span class="sidebar-normal">Account Details</span>
+                  </a>
+                </li>
+                <li>
+                  <a href="<?= base_url() ?>index.php/user/destroy">
+                    <span class="sidebar-mini-icon">SO</span>
+                    <span class="sidebar-normal">Sign out</span>
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <ul class="nav">
+          <li class="<?= $active == 'dashboard' ? 'active' : '' ?>">
+            <a href="<?= base_url() ?>index.php/main/">
+              <i class="fa fa-home"></i>
+              <p>Dashboard</p>
+            </a>
+          </li>
+
+          <li class="<?= $active == 'calendar' ? 'active' : '' ?>">
+            <a href="<?= base_url('index.php/main/calendar/' . date('Y') . '/' . date('m')) ?>">
+              <i class="fa fa-calendar"></i>
+              <p>Express Calendar</p>
+            </a>
+          </li>
+
+          <li class="<?= $active == 'rooms' ? 'active' : '' ?>">
+            <a href="<?= base_url() ?>index.php/main/rooms">
+              <i class="fa fa-bed "></i>
+              <p>Rooms</p>
+            </a>
+          </li>
+
+          <li class="<?= $active == 'bookings' ? 'active' : '' ?>">
+            <a href="<?= base_url() ?>index.php/main/listOfCheckedIn">
+              <i class="fa fa-bookmark"></i>
+              <p>Bookings</p>
+            </a>
+          </li>
+
+          <li>
+            <a data-toggle="collapse" href="#collapseReservation" aria-expanded="<?= $active == 'online' || $active == 'walkin' ? 'true' : 'false' ?>">
+              <i class="fa fa-check-square-o"></i>
+              <p>Reservations
+                <b class="caret"></b>
+              </p>
+            </a>
+            <div class="collapse  <?= $active == 'online' || $active == 'walkin' ? 'show' : '' ?>" id="collapseReservation">
+              <ul class="nav">
+                <li class="<?= $active == 'online' ? 'active' : '' ?>">
+                  <a href="<?= base_url() ?>index.php/main/reservations/online">
+                    <span class="sidebar-mini-icon">O</span>
+                    <span class="sidebar-normal">Online</span>
+                  </a>
+                </li>
+                <li class="<?= $active == 'walkin' ? 'active' : '' ?>">
+                  <a href="<?= base_url() ?>index.php/main/reservations/walkin">
+                    <span class="sidebar-mini-icon">WI</span>
+                    <span class="sidebar-normal">Walk-In</span>
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </li>
+
+          <li class="<?= $active == 'guests' ? 'active' : '' ?>">
+            <a href="<?= base_url() ?>index.php/main/guests">
+              <i class="fa fa-users"></i>
+              <p>Guest List</p>
+            </a>
+          </li>
+
+          <li class="<?= $active == 'transactions' ? 'active' : '' ?>">
+            <a href="<?= base_url() ?>index.php/main/frontdeskTransactions">
+              <i class="fa fa-tasks"></i>
+              <p>Transactions</p>
+            </a>
+          </li>
+
+          <li class="<?= $active == 'reports' ? 'active' : '' ?>">
+            <a href="<?= base_url() ?>index.php/main/FrontdeskReports">
+              <i class="fa fa-list-alt"></i>
+              <p>Reports</p>
+            </a>
+          </li>
+
+          <script>
+            function popupCenter(url, title, w, h) {
+              var left = (screen.width / 2) - (w / 2);
+              var top = (screen.height / 2) - (h / 2);
+              return window.open(url, title, 'toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=no, resizable=no, copyhistory=no, width=' + w + ', height=' + h + ', top=' + top + ', left=' + left);
+            }
+          </script>
+          </li>
+        </ul>
+      </div>
+    </div>
+    <div class="main-panel">
+      <nav class="navbar navbar-expand-lg navbar-absolute fixed-top navbar-transparent">
+        <div class="container-fluid">
+          <div class="navbar-wrapper">
+            <div class="navbar-minimize">
+              <button id="minimizeSidebar" class="btn btn-icon btn-round">
+                <i class="nc-icon nc-minimal-right text-center visible-on-sidebar-mini"></i>
+                <i class="nc-icon nc-minimal-left text-center visible-on-sidebar-regular"></i>
+              </button>
+            </div>
+            <div class="navbar-toggle">
+              <button type="button" class="navbar-toggler">
+                <span class="navbar-toggler-bar bar1"></span>
+                <span class="navbar-toggler-bar bar2"></span>
+                <span class="navbar-toggler-bar bar3"></span>
+              </button>
+            </div>
+          </div>
+          <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navigation" aria-controls="navigation-index" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-bar navbar-kebab"></span>
+            <span class="navbar-toggler-bar navbar-kebab"></span>
+            <span class="navbar-toggler-bar navbar-kebab"></span>
+          </button>
+          <div class="collapse navbar-collapse justify-content-end" id="navigation">
+            <ul class="navbar-nav">
+              <li class="nav-item btn-rotate dropdown">
+                <a class="nav-link dropdown-toggle" href="" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  <i class="nc-icon nc-bell-55"></i>
+                </a>
+                <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdownMenuLink">
+                  <?php foreach ($notif as $data) { ?>
+                    <a class="dropdown-item" href="<?= base_url() ?><?= $data['redirection'] ?>"><?= $data['content'] ?></a>
+                  <?php } ?>
+                  <a class="dropdown-item" href="#">View all</a>
+                </div>
+              </li>
+
+              <li class="nav-item dropdown">
+                <a href="#paper-kit" class="nav-link" data-toggle="dropdown" width="30" height="30" aria-expanded="false">
+                  <div class="profile-photo-small btn-rotate">
+                    <i class="nc-icon nc-settings-gear-65"></i>
+                  </div>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-right dropdown-default">
+                  <a class="dropdown-item" href="<?= base_url() ?>index.php/main/profile">Account Details</a>
+                  <li class="divider"></li>
+                  <a class="dropdown-item" href="<?= base_url() ?>index.php/user/destroy">Sign out</a>
+                </ul>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </nav>

@@ -1,0 +1,174 @@
+.list-group-item {
+	background: #78574e;
+}
+
+.list-icon {
+	font-size: 20px;
+	color:#fff;
+}
+
+.badge-dark {
+	background: #d7ba74;
+}
+
+.bg-semi-light {
+	background: #ebebeb;
+}
+
+.text-green {
+	color: #78574e;
+}
+
+.bg-solid-green, .bootstrap-datetimepicker-widget table td.active:hover>div, .bootstrap-datetimepicker-widget table td.active>div {
+	background: #78574e;
+}
+
+.w100 {
+	width: 100%;
+}
+
+.btn-green {
+	border: 0;
+	background: #78574e;
+}
+
+.btn-green:hover {
+	opacity: 0.9;
+}
+
+.btn-primarily {
+	border: 0;
+}
+
+.reservation {
+	height: 377px;
+}
+
+/*// Small devices (landscape phones, 576px and up)*/
+@media (max-width: 576px) { 
+	.hide-this {
+		display:block;
+	}
+
+	.wizard:not(.left-arrow) a:after, .wizard:not(.left-arrow) a:before {
+		display: none;
+	}
+
+	.col-xs-2 {
+		flex:0 0 16.666667%;
+		max-width: 16.666667%;
+	}
+	
+	.bootstrap-datetimepicker-widget {
+		opacity: 100;
+	}
+
+	.mt-top-sm {
+		margin-top: 20px;
+	}
+}
+
+/*// Medium devices (tablets, 768px and up)*/
+@media (max-width: 768px){
+	.hide-this {
+		display:none;
+	}
+
+	.wizard:not(.left-arrow) a:after, .wizard:not(.left-arrow) a:before {
+		display: none;
+	}
+
+	.col-xs-2 {
+		flex:0 0 16.666667%;
+		max-width: 16.666667%;
+	}
+	
+	.bootstrap-datetimepicker-widget {
+		opacity: 100;
+	}
+}
+
+/*// Large devices (desktops, 992px and up)*/
+@media (max-width: 992px) { 
+	.wizard:not(.left-arrow) a:after, .wizard:not(.left-arrow) a:before {
+		display: none;
+	}
+}
+
+/*// Extra large devices (large desktops, 1200px and up)*/
+@media (max-width: 1200px) {}
+
+
+
+/* ----------------------- wizard ----------------------- */
+.wizard a {
+	padding: 20px 12px 16px;
+	min-width: 24.75%;
+	margin-left: 0.30%;
+	text-align: center;
+	color: #707070;
+	background: #ebebeb;
+	text-transform: uppercase;
+	cursor: pointer;
+}
+
+.wizard a:first-child {
+	margin-left: 0;
+}
+
+.wizard:not(.left-arrow) a:before {
+	width: 0;
+	height: 0;
+	border-top: 30px inset transparent;
+	border-bottom: 30px inset transparent;
+	border-left: 30px solid white;
+	position: absolute;
+	content: "";
+	top: 0;
+	left: 0;
+}
+
+.wizard:not(.left-arrow) a:after {
+	width: 0;
+	height: 0;
+	border-top: 29px inset transparent;
+	border-bottom: 30px inset transparent;
+	border-left: 30px solid #ebebeb;
+	position: absolute;
+	content: "";
+	top: 1.49px;
+	right: -30px;
+	z-index: 2;
+}
+
+.wizard a:first-child:before, .wizard a:last-child:after {
+	border: none;
+}
+
+.wizard .active {
+	background: #78574e;
+	color:white;
+}
+
+.wizard:not(.left-arrow) .active:after{
+	border-left: 30px solid #78574e;
+	color:white;
+}
+
+/* ----------------------- wizard ----------------------- */
+
+/* ---------------------- calendar ---------------------- */
+.bootstrap-datetimepicker-widget table td.today>div:before {
+	width: 0;
+	height: 0;
+	border: none;
+	border-bottom: 10px solid #68b3c8;
+	border-left: 10px solid transparent;
+	bottom: -1px;
+	right: -5px;
+}
+
+.bootstrap-datetimepicker-widget table td.day>div {
+	z-index: 1;
+}
+/* ---------------------- calendar ---------------------- */
