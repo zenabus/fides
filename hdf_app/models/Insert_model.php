@@ -109,24 +109,6 @@ class Insert_model extends CI_Model {
     unset($_POST['company_name']);
   }
 
-  // function getDaysInBetween($check_in, $check_out) {
-  //   $days = [];
-  //   $start = new DateTime($check_in);
-  //   $end = new DateTime($check_out);
-  //   $end = $end->modify('+1 day');
-
-  //   $interval = new DateInterval('P1D');
-  //   $dates = new DatePeriod($start, $interval, $end);
-
-  //   foreach ($dates as $date) {
-  //     array_push($days, $date->format("Y-m-d"));
-  //   }
-
-  //   return $days;
-  // }
-
-  // $booking_number = strtoupper($_POST['first_name'][0] . $_POST['middle_name'][0] . $_POST['last_name'][0] . date('ymdhis'));
-
   function book() {
     if ($_POST['booking_type'] == 'Check In') {
       $_POST['reservation_type'] = NULL;
@@ -137,9 +119,6 @@ class Insert_model extends CI_Model {
       $_POST['reservation_status'] = $_POST['reservation_type'] == 'Online' ? 2 : 1;
     }
     $_POST['booking_number'] = '';
-    // $_POST['check_in_date'] = $this->toDashedDate($_POST['check_in']);
-    // $_POST['check_out_date'] = $this->toDashedDate($_POST['check_out']);
-    // $_POST['dates'] = json_encode($this->getDaysInBetween($_POST['check_in'], $_POST['check_out']));
     $this->unsetGuestPost();
     $this->db->insert('bookings', $_POST);
     $booking_id = $this->db->insert_id();

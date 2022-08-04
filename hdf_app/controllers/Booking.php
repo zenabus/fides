@@ -7,19 +7,36 @@ class Booking extends MY_Controller {
     $this->load->view('booking/booking');
   }
 
+  function success() {
+    $this->load->view('booking/success'); 
+  }
+
+  // ------ book franz - do not delete - book franz ------ //
+  // function book() {
+  //   $guest = $this->get_model->checkGuest();
+  //   $last_name = $_POST['last_name'];
+  //   $email = $_POST['email'];
+  //   $_POST['guest_id'] = $guest ? $guest->guest_id : $this->insert_model->addGuest($_POST, TRUE);
+  //   $data['booking_number'] = $this->insert_model->book();
+  //   $data['date'] = date('l, F d, Y');
+  //   $data['from'] = $_POST['check_in'];
+  //   $data['to'] = $_POST['check_out'];
+  //   $data['message'] = 'Mr/Mrs. ' . $last_name . ', this is your booking number. Please enter this code to the booking website to confirm your reservation. Thank you!';
+  //   $reservation = $this->load->view('booking/reservation', $data, TRUE);
+  //   // $this->sendMail($email, $reservation, 'Reservation Confirmation');
+  //   echo $data['booking_number'];
+  // }
+  // ------ book franz - do not delete - book franz ------ //
+
   function book() {
     $guest = $this->get_model->checkGuest();
     $last_name = $_POST['last_name'];
     $email = $_POST['email'];
     $_POST['guest_id'] = $guest ? $guest->guest_id : $this->insert_model->addGuest($_POST, TRUE);
-    $data['booking_number'] = $this->insert_model->book();
-    $data['date'] = date('l, F d, Y');
-    $data['from'] = $_POST['check_in'];
-    $data['to'] = $_POST['check_out'];
-    $data['message'] = 'Mr/Mrs. ' . $last_name . ', this is your booking number. Please enter this code to the booking website to confirm your reservation. Thank you!';
-    $reservation = $this->load->view('booking/reservation', $data, TRUE);
-    // $this->sendMail($email, $reservation, 'Reservation Confirmation');
-    echo $data['booking_number'];
+    $booking_number = $this->insert_model->book();
+    $message = $this->reservationMessage($last_name, $booking_number);
+    $this->sendMail($email, $message, 'Reservation Confirmation');
+    echo $booking_number;
   }
 
   function verify($booking_number) {
@@ -40,36 +57,89 @@ class Booking extends MY_Controller {
       }
 
       $bookings = $this->get_model->getBookingsByRoomType($room_type['id']);
-      // log_message('error', 'Bookings: ' . json_encode($bookings));
-      // log_message('error', '------------------------------------');
       foreach ($bookings as $booking) {
-
         $in = $this->toDashedDate($booking['check_in']);
         $out = $this->toDashedDate($booking['check_out']);
-        // log_message('error', 'check_in: ' . $check_in);
-        // log_message('error', 'check_out: ' . $check_out);
-        // log_message('error', 'dates: ' . json_encode($dates));
-        // log_message('error', 'in: ' . in_array($in, $dates, TRUE));
-        // log_message('error', 'out: ' . in_array($out, $dates, TRUE));
         if (in_array($in, $dates, TRUE) || in_array($out, $dates, TRUE)) {
-          // log_message('error', 'pushed');
           array_push($occupied, $booking['room_id']);
         }
       }
-      log_message('error', 'all_rooms: ' . json_encode($all_rooms));
-      log_message('error', 'occupied: ' . json_encode($occupied));
       $vacant = $this->removeDuplicate($all_rooms, $occupied);
       $room_count = $this->get_model->getRoomCountByRoomType($room_type['id']);
       $room_types[$key]['available'] =  $room_count > count($occupied) ? TRUE : FALSE;
       $room_types[$key]['room_id'] = isset($vacant[0]) ? $vacant[0] : 0;
-
-      // log_message('error', '------------------------------------');
-      log_message('error', 'vacant: ' . json_encode($vacant));
-      // $this->dd($vacant);
-      // log_message('error', 'booking_count: ' . $booking_count);
-      // log_message('error', 'room_count: ' . $room_count);
     }
 
     echo json_encode($room_types);
+  }
+
+  function reservationMessage($last_name, $booking_number) {
+    $check_in = $_POST['check_in'];
+    $check_out = $_POST['check_out'];
+    $nights = $_POST['nights'];
+    $room_type = $this->get_model->getRoomById($_POST['room_id']);
+    $price = number_format($room_type->pricing_type, 2);
+    $amount = number_format($room_type->pricing_type * .25, 2);
+    $remarks = $_POST['remarks'];
+    $verify_url = base_url('index.php/booking/verify/') . $booking_number;
+
+    $message = "Good day <strong>Sir/Madam {$last_name}!</strong><br>
+      <p>Your reservation details are as follow(s):</p>
+      Check In Date(s): <strong>{$check_in}</strong><br>
+      Check Out Date(s): <strong>{$check_out}</strong><br>
+      Number of Night(s): <strong>{$nights}</strong><br>
+      Room Type Reservation: <strong>{$room_type->room_type}</strong><br>
+      Total Price: <strong>Php {$price}</strong><br>
+      Amount to be paid: <strong>Php {$amount}</strong> / (25%)<br>
+      Special Request(s): <strong>{$remarks}</strong>
+      <p>To verify your email please click the button below:</p>
+      <a href='{$verify_url}'>
+        <img src='https://studentclearinghouse.info/help/wp-content/uploads/2015/12/verify-now.png' height='60'>
+      </a>
+      <p>We look forward to welcoming you soon!</p>
+      <img src='https://booking.hoteldefides.com/assets/assets/img/hdf_logo_brown.png' height='40'>";
+
+    return $message;
+  }
+
+  function successMessage() {    
+    $message = "Good day <strong>".$fname." ".$lname."!</strong><br>
+      <p><strong>Your reservation has been verified!</strong></p>
+      <p>Your Reservation ID: <strong>RBHDF".$form_id."</strong></p>
+      <p>Your reservation details are as follow(s):</p>
+      Check In Date(s): <strong>".$checkin."</strong><br>
+      Check Out Date(s): <strong>".$checkout."</strong><br>
+      Number of Night(s): <strong>".$days_ren."</strong><br>
+      Room Type Reservation: <strong>".$type."</strong><br>
+      Total Price: <strong>Php ".$amFormat."</strong><br>
+      Amount to be paid: <strong>Php ".$perFormat."</strong> / (25%)<br>
+      Special Request(s): <strong>".$special."</strong><br>
+      <p>As part of our Payment Policy, we will be collecting you the amount of <strong>Php ".$perFormat."</strong> / (25%) from your total amount of <strong>Php ".$amFormat."</strong> as guaranteed booking within three (3) days.</p>
+      <p>You can pay thru GCash or Bank Deposit with the following details:</p>
+      <strong>For GCash Payment:</strong>
+      <ul>
+        <li>Name: <strong>Carlos Ortiz</strong></li>
+        <li>Number: <strong>0946 346 0194</strong></li>
+        <li>Message: <strong>Reservation Payment for **Your Reservation ID**</strong></li>
+      </ul>
+      <strong>For Bank Deposit:</strong>
+      <ol>
+        <li>Banco De Oro (BDO)</li>
+        <ul>
+          <li>Account Name: <strong>JACO and JULS HOTEL & RESTAURANT CORP.</strong></li>
+          <li>Account Number: <strong>010588002648</strong></li>
+        </ul>
+        <li>Landbank</li>
+        <ul>
+          <li>Account Name: <strong>JACO and JULS HOTEL & RESTAURANT CORP.</strong></li>
+          <li>Account Number: <strong>000182-1227-00</strong></li>
+        </ul>
+      </ol>
+
+      If payment has successfully made kindly send a copy or a screenshot in reply of this email or to our Facebook Page <strong>https://www.facebook.com/HoteldeFides/</strong>.
+           
+      <p>We look forward to welcoming you soon!</p>
+
+      <img src='https://booking.hoteldefides.com/assets/assets/img/hdf_logo_brown.png' height='40'>";
   }
 }

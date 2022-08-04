@@ -38,3 +38,4 @@ Adjust payment method on booking modal
 // Change booking status after verifying
 // Insert number of nights to database in online booking
 Add "All" checkbox on Dashboard
+Div to image not working
