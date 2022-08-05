@@ -172,6 +172,13 @@
         <div class="card-body shadow-none">
           <div class="row text-center">
             <div class="col-md-12">
+              <div class="form-check form-check-inline">
+                <label class="form-check-label">
+                  <input class="form-check-input all" type="checkbox" value="All" checked>
+                  <span class="form-check-sign"></span>
+                  All
+                </label>
+              </div>
               <?php foreach ($room_types as $row) { ?>
                 <div class="form-check form-check-inline">
                   <label class="form-check-label">
@@ -400,5 +407,10 @@
       } else {
         $(`.${checked}`).fadeOut();
       }
+    });
+
+    $('.all').change(function() {
+      const checked = $(this).val();
+      $('.room_types').prop('checked', this.checked).trigger('change');
     });
   </script>

@@ -73,7 +73,7 @@
                           </td>
                           <td class="action">
                             <a href="javascript:" class="btn btn-sm btn-default">Check In</a>
-                            <a href="javascript:" class="btn btn-sm btn-danger confirm">Cancel</a>
+                            <a href="<?= base_url('index.php/main/updateReservationStatus/4/' . $row['booking_id']) ?>" class="btn btn-sm btn-danger confirm">Cancel</a>
                           </td>
                         </tr>
                     <?php }
@@ -96,7 +96,7 @@
                   </thead>
                   <tbody>
                     <?php foreach ($reservations as $row) { ?>
-                      <?php if ($row['reservation_status'] == 0) { ?>
+                      <?php if ($row['reservation_status'] == 4) { ?>
                         <tr>
                           <td>
                             <?= $row['booking_number'] ?>

@@ -137,7 +137,7 @@
                 <tr>
                   <th class="white sticky-top border-shadow-1 text-center"><?= $y ?></th>
                   <?php for ($i = 1; $i <= $days; $i++) { ?>
-                    <th colspan="2" class="text-center sticky-top border-shadow <?= $i % 2 ? 'bg-light' : '' ?>" id="<?= date('Y-m-d') == $y . '-' . $m . '-' . $i ? 'today' : '' ?>">
+                    <th colspan="2" class="text-center sticky-top border-shadow<?= $i % 2 ? ' bg-light' : '' ?>" id="<?= date('Y-m-d') == $y . '-' . $m . '-' . str_pad($i, 2, '0', STR_PAD_LEFT) ? 'today' : '' ?>">
                       <?= $i ?>-<?= substr($month, 0, 3) ?>
                     </th>
                   <?php } ?>
@@ -279,11 +279,13 @@
 
   $('#current').click(function() {
     const today = document.getElementById("today");
-    today.scrollIntoView({
-      behavior: "smooth",
-      block: "end",
-      inline: "start"
-    });
+    if (today) {
+      today.scrollIntoView({
+        behavior: "smooth",
+        block: "end",
+        inline: "start"
+      });
+    }
   });
 
   $(document).ready(function() {

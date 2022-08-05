@@ -37,5 +37,5 @@ Adjust payment method on booking modal
 // Filter rooms that are not vacant on that date on online booking
 // Change booking status after verifying
 // Insert number of nights to database in online booking
-Add "All" checkbox on Dashboard
+// Add "All" checkbox on Dashboard
 Div to image not working

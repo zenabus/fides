@@ -7,10 +7,6 @@ class Booking extends MY_Controller {
     $this->load->view('booking/booking');
   }
 
-  function success() {
-    $this->load->view('booking/success'); 
-  }
-
   // ------ book franz - do not delete - book franz ------ //
   // function book() {
   //   $guest = $this->get_model->checkGuest();
@@ -30,18 +26,20 @@ class Booking extends MY_Controller {
 
   function book() {
     $guest = $this->get_model->checkGuest();
-    $last_name = $_POST['last_name'];
     $email = $_POST['email'];
     $_POST['guest_id'] = $guest ? $guest->guest_id : $this->insert_model->addGuest($_POST, TRUE);
     $booking_number = $this->insert_model->book();
-    $message = $this->reservationMessage($last_name, $booking_number);
-    $this->sendMail($email, $message, 'Reservation Confirmation');
+    $message = $this->reservationMessage($_POST['guest_id'], $booking_number);
+    $this->sendMail($email, $message, 'Verify your reservation');
     echo $booking_number;
   }
 
   function verify($booking_number) {
     $this->update_model->verifyReservation($booking_number);
-    echo TRUE;
+    $booking = $this->get_model->getBookingByBookingNumber($booking_number);
+    $message = $this->successMessage($booking);
+    $this->sendMail($booking->email, $message, 'Reservation Verified');
+    $this->load->view('booking/success');
   }
 
   function getAvailableRoomTypes($check_in, $check_out) {
@@ -73,7 +71,8 @@ class Booking extends MY_Controller {
     echo json_encode($room_types);
   }
 
-  function reservationMessage($last_name, $booking_number) {
+  function reservationMessage($guest_id, $booking_number) {
+    $guest = $this->get_model->getGuest($guest_id);
     $check_in = $_POST['check_in'];
     $check_out = $_POST['check_out'];
     $nights = $_POST['nights'];
@@ -83,7 +82,7 @@ class Booking extends MY_Controller {
     $remarks = $_POST['remarks'];
     $verify_url = base_url('index.php/booking/verify/') . $booking_number;
 
-    $message = "Good day <strong>Sir/Madam {$last_name}!</strong><br>
+    $message = "Good day <strong>{$guest->first_name} {$guest->last_name}!</strong><br>
       <p>Your reservation details are as follow(s):</p>
       Check In Date(s): <strong>{$check_in}</strong><br>
       Check Out Date(s): <strong>{$check_out}</strong><br>
@@ -102,19 +101,21 @@ class Booking extends MY_Controller {
     return $message;
   }
 
-  function successMessage() {    
-    $message = "Good day <strong>".$fname." ".$lname."!</strong><br>
+  function successMessage($booking) {
+    $price = number_format($booking->pricing_type, 2);
+    $minimum = number_format($booking->pricing_type * 0.25, 2);
+    $message = "Good day <strong>{$booking->first_name} {$booking->last_name}!</strong><br>
       <p><strong>Your reservation has been verified!</strong></p>
-      <p>Your Reservation ID: <strong>RBHDF".$form_id."</strong></p>
+      <p>Your Reservation ID: <strong>{$booking->booking_number}</strong></p>
       <p>Your reservation details are as follow(s):</p>
-      Check In Date(s): <strong>".$checkin."</strong><br>
-      Check Out Date(s): <strong>".$checkout."</strong><br>
-      Number of Night(s): <strong>".$days_ren."</strong><br>
-      Room Type Reservation: <strong>".$type."</strong><br>
-      Total Price: <strong>Php ".$amFormat."</strong><br>
-      Amount to be paid: <strong>Php ".$perFormat."</strong> / (25%)<br>
-      Special Request(s): <strong>".$special."</strong><br>
-      <p>As part of our Payment Policy, we will be collecting you the amount of <strong>Php ".$perFormat."</strong> / (25%) from your total amount of <strong>Php ".$amFormat."</strong> as guaranteed booking within three (3) days.</p>
+      Check In Date(s): <strong>{$booking->check_in}</strong><br>
+      Check Out Date(s): <strong>{$booking->check_out}</strong><br>
+      Number of Night(s): <strong>{$booking->nights}</strong><br>
+      Room Type Reservation: <strong>{$booking->room_type}</strong><br>
+      Total Price: <strong>Php {$price}</strong><br>
+      Amount to be paid: <strong>Php {$minimum}</strong> / (25%)<br>
+      Special Request(s): <strong>{$booking->remarks}</strong><br>
+      <p>As part of our Payment Policy, we will be collecting you the amount of <strong>Php {$minimum}</strong> / (25%) from your total amount of <strong>Php {$price}</strong> as guaranteed booking within three (3) days.</p>
       <p>You can pay thru GCash or Bank Deposit with the following details:</p>
       <strong>For GCash Payment:</strong>
       <ul>
@@ -141,5 +142,6 @@ class Booking extends MY_Controller {
       <p>We look forward to welcoming you soon!</p>
 
       <img src='https://booking.hoteldefides.com/assets/assets/img/hdf_logo_brown.png' height='40'>";
+    return $message;
   }
 }

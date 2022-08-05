@@ -1155,99 +1155,6 @@ class Main extends MY_Controller {
     //$this->load->view('body/frontdesk/layout/footer');
   }
 
-  // ----------------------------------------------- CHECKED ----------------------------------------------- //  
-
-  function index() {
-    $data = array(
-      'result_room' => $this->get_model->frontdeskRooms(),
-      'result_av' => $this->get_model->getFrontDeskRooms(),
-      'result_un' => $this->get_model->getFrontDeskRooms(0),
-      'room_types' => $this->get_model->getRoomTypes(),
-      'rooms' => $this->get_model->getRooms(),
-      'guests' => $this->get_model->getGuests(),
-      'notif' => $this->get_model->frontdeskGetNotif(),
-      'active' => 'dashboard'
-    );
-
-    $this->load->view('body/frontdesk/layout/header', $data);
-    $this->load->view('body/frontdesk/dashboard');
-    $this->load->view('body/frontdesk/components/modal-reservation');
-    $this->load->view('body/frontdesk/layout/footer');
-  }
-
-  function calendar($year, $month) {
-    $this->load->library('calendar');
-
-    $data = [
-      'active' => 'calendar',
-      'rooms' => $this->get_model->getRoomsWithRoomType(),
-      'bookings' => $this->get_model->getBookings(),
-      'days' => $this->calendar->get_total_days($month, $year),
-      'month' => $this->calendar->get_month_name($month),
-      'guests' => $this->get_model->getGuests(),
-      'm' => str_pad($month, 2, '0', STR_PAD_LEFT),
-      'y' => $year,
-      'notif' => $this->get_model->frontdeskGetNotif(),
-    ];
-
-    $this->load->view('body/frontdesk/layout/header', $data);
-    $this->load->view('body/frontdesk/calendar');
-    $this->load->view('body/frontdesk/components/modal-reservation');
-    $this->load->view('body/frontdesk/layout/footer');
-  }
-
-  function rooms() {
-    $data = [
-      'active' => 'rooms',
-      'rooms' => $this->get_model->getRoomsWithRoomType(),
-      'notif' => $this->get_model->frontdeskGetNotif(),
-      'guests' => $this->get_model->getGuests(),
-    ];
-
-    $this->load->view('body/frontdesk/layout/header', $data);
-    $this->load->view('body/frontdesk/rooms');
-    $this->load->view('body/frontdesk/components/modal-reservation');
-    $this->load->view('body/frontdesk/layout/footer');
-  }
-
-  function guests() {
-    $data = array(
-      'active' => 'guests',
-      'guests_active' => $this->get_model->getGuests(),
-      'guests_inactive' => $this->get_model->getGuests(1),
-      'notif' => $this->get_model->frontdeskGetNotif(),
-      'getRoomType' => $this->get_model->getRoomTypes(),
-      'getRoom' => $this->get_model->getRoom()
-    );
-    $this->load->view('body/frontdesk/layout/header', $data);
-    $this->load->view('body/frontdesk/guests');
-    $this->load->view('body/frontdesk/layout/footer');
-  }
-
-  function profile() {
-    $data = array(
-      'active' => 'account',
-      'notif' => $this->get_model->frontdeskGetNotif(),
-      'profile' => $this->get_model->getProfile()
-    );
-    $this->load->view('body/frontdesk/layout/header', $data);
-    $this->load->view('body/frontdesk/profile');
-    $this->load->view('body/frontdesk/layout/footer');
-  }
-
-  function reservations($reservation_type) {
-    $data = array(
-      'active' => $reservation_type,
-      'notif' => $this->get_model->frontdeskGetNotif(),
-      'getRoomType' => $this->get_model->getRoomTypes(),
-      'getRoom' => $this->get_model->getRoom()
-    );
-
-    $data['reservations'] = $this->get_model->getReservations($reservation_type == 'walkin' ? ['Arrival/Tentative', 'Confirmed'] : ['Online']);
-    $this->load->view('body/frontdesk/layout/header', $data);
-    $this->load->view('body/frontdesk/reservations-' . $reservation_type, $data);
-    $this->load->view('body/frontdesk/layout/footer');
-  }
 
   // ------------------------------------------------------------------------------------------------------- //
   // ------------------------------------------------ VIEWS ------------------------------------------------ //
@@ -4658,8 +4565,6 @@ class Main extends MY_Controller {
     $this->redirect();
   }
 
-
-
   function insertChargestoAmenities() {
     echo $type = $this->input->post('type');
 
@@ -4905,9 +4810,6 @@ class Main extends MY_Controller {
     $this->redirect();
   }
 
-
-
-
   function deleteBookingCancel($id) {
     //id and check id
     //connect_check
@@ -4935,6 +4837,101 @@ class Main extends MY_Controller {
 
     $this->session->set_flashdata('success', '$$');
     $this->redirect();
+  }
+
+  // ------------------------------------------------------------------------------------------------------- //
+  // ------------------------------------------------ VIEWS ------------------------------------------------ //
+  // ------------------------------------------------------------------------------------------------------- //
+
+  function index() {
+    $data = array(
+      'result_room' => $this->get_model->frontdeskRooms(),
+      'result_av' => $this->get_model->getFrontDeskRooms(),
+      'result_un' => $this->get_model->getFrontDeskRooms(0),
+      'room_types' => $this->get_model->getRoomTypes(),
+      'rooms' => $this->get_model->getRooms(),
+      'guests' => $this->get_model->getGuests(),
+      'notif' => $this->get_model->frontdeskGetNotif(),
+      'active' => 'dashboard'
+    );
+
+    $this->load->view('body/frontdesk/layout/header', $data);
+    $this->load->view('body/frontdesk/dashboard');
+    $this->load->view('body/frontdesk/components/modal-reservation');
+    $this->load->view('body/frontdesk/layout/footer');
+  }
+
+  function calendar($year, $month) {
+    $this->load->library('calendar');
+
+    $data = [
+      'active' => 'calendar',
+      'rooms' => $this->get_model->getRoomsWithRoomType(),
+      'bookings' => $this->get_model->getBookings(),
+      'days' => $this->calendar->get_total_days($month, $year),
+      'month' => $this->calendar->get_month_name($month),
+      'guests' => $this->get_model->getGuests(),
+      'm' => str_pad($month, 2, '0', STR_PAD_LEFT),
+      'y' => $year,
+      'notif' => $this->get_model->frontdeskGetNotif(),
+    ];
+
+    $this->load->view('body/frontdesk/layout/header', $data);
+    $this->load->view('body/frontdesk/calendar');
+    $this->load->view('body/frontdesk/components/modal-reservation');
+    $this->load->view('body/frontdesk/layout/footer');
+  }
+
+  function rooms() {
+    $data = [
+      'active' => 'rooms',
+      'rooms' => $this->get_model->getRoomsWithRoomType(),
+      'notif' => $this->get_model->frontdeskGetNotif(),
+      'guests' => $this->get_model->getGuests(),
+    ];
+
+    $this->load->view('body/frontdesk/layout/header', $data);
+    $this->load->view('body/frontdesk/rooms');
+    $this->load->view('body/frontdesk/components/modal-reservation');
+    $this->load->view('body/frontdesk/layout/footer');
+  }
+
+  function guests() {
+    $data = array(
+      'active' => 'guests',
+      'guests_active' => $this->get_model->getGuests(),
+      'guests_inactive' => $this->get_model->getGuests(1),
+      'notif' => $this->get_model->frontdeskGetNotif(),
+      'getRoomType' => $this->get_model->getRoomTypes(),
+      'getRoom' => $this->get_model->getRoom()
+    );
+    $this->load->view('body/frontdesk/layout/header', $data);
+    $this->load->view('body/frontdesk/guests');
+    $this->load->view('body/frontdesk/layout/footer');
+  }
+
+  function profile() {
+    $data = array(
+      'active' => 'account',
+      'notif' => $this->get_model->frontdeskGetNotif(),
+      'profile' => $this->get_model->getProfile()
+    );
+    $this->load->view('body/frontdesk/layout/header', $data);
+    $this->load->view('body/frontdesk/profile');
+    $this->load->view('body/frontdesk/layout/footer');
+  }
+
+  function reservations($reservation_type) {
+    $data = array(
+      'active' => $reservation_type,
+      'notif' => $this->get_model->frontdeskGetNotif(),
+      'getRoomType' => $this->get_model->getRoomTypes(),
+      'getRoom' => $this->get_model->getRoom()
+    );
+    $data['reservations'] = $this->get_model->getReservations($reservation_type == 'walkin' ? ['Arrival/Tentative', 'Confirmed'] : ['Online']);
+    $this->load->view('body/frontdesk/layout/header', $data);
+    $this->load->view('body/frontdesk/reservations-' . $reservation_type, $data);
+    $this->load->view('body/frontdesk/layout/footer');
   }
 
   // ------------------------------------------------------------------------------------------------------- //

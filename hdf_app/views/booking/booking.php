@@ -96,19 +96,19 @@
     <div class="row ml-1 mr-1">
       <div class="col-md-12">
         <div class="wizard row">
-          <a href="#reservation" class="col-md-2 col-sm-2 col-xs-2 active wizard-btn" id="w1">
+          <a href="javascript:" class="col-md-2 col-sm-2 col-xs-2 active wizard-btn" id="w1">
             <span class="badge badge-dark">1</span>
             <span class="hide-this">Select Date</span>
           </a>
-          <a href="#reservation" class="col-md-2 col-sm-2 col-xs-2 wizard-btn" id="w2">
+          <a href="javascript:" class="col-md-2 col-sm-2 col-xs-2 wizard-btn" id="w2">
             <span class="badge badge-dark">2</span>
             <span class="hide-this">Select Room</span>
           </a>
-          <a href="#reservation" class="col-md-2 col-sm-2 col-xs-2 wizard-btn invalid" id="w3">
+          <a href="javascript:" class="col-md-2 col-sm-2 col-xs-2 wizard-btn invalid" id="w3">
             <span class="badge badge-dark">3</span>
             <span class="hide-this">Information</span>
           </a>
-          <a href="#reservation" class="col-md-2 col-sm-2 col-xs-2 wizard-btn invalid" id="w4">
+          <a href="javascript:" class="col-md-2 col-sm-2 col-xs-2 wizard-btn invalid" id="w4">
             <span class="badge badge-dark">4</span>
             <span class="hide-this">Confirmation</span>
           </a>
@@ -279,10 +279,6 @@
                   <input type="text" class="form-control form-control-sm rounded-0 roomType" readonly>
                 </div>
                 <div class="form-group">
-                  <label>Room Number</label>
-                  <input type="text" class="form-control form-control-sm rounded-0 roomNumber" readonly>
-                </div>
-                <div class="form-group">
                   <label>Max Occupancy</label>
                   <input type="text" class="form-control form-control-sm rounded-0 occupancy" readonly>
                 </div>
@@ -349,8 +345,16 @@
                             <td class="p-1" id="td_nights"></td>
                           </tr>
                           <tr>
+                            <th class="p-1">Room Type</th>
+                            <td class="p-1" id="td_room_type"></td>
+                          </tr>
+                          <tr>
                             <th class="p-1">Nightly Rate</th>
                             <td class="p-1" id="td_rate"></td>
+                          </tr>
+                          <tr>
+                            <th class="p-1">Amount to be Paid</th>
+                            <td class="p-1" id="td_amount"></td>
                           </tr>
                           <tr>
                             <th class="p-1">Payment Option</th>
@@ -844,7 +848,7 @@
             $('#td_contact').text(contact);
             $('#td_arrival').text(check_in);
             $('#td_departure').text(`${check_out}`);
-            $('#td_nights').text(`${nights == 1 ? 'night' : 'nights'}`);
+            $('#td_nights').text(`${nights} ${nights == 1 ? 'night' : 'nights'}`);
             $('#td_option').text(payment_option);
             $('.verified').show();
           },
@@ -884,7 +888,7 @@
       forPayment = forPayment.split('//');
       $('.room_id').val(forPayment[0]);
       $('.roomType').val(forPayment[1]);
-      console.log(forPayment)
+      $('#td_room_type').text(forPayment[1]);
       $('.occupancy').val(forPayment[2]);
       total = $('.nights').val() * forPayment[3];
       if (total == 0) {
@@ -894,8 +898,10 @@
         minimum = 0.25 * total;
       }
       total = `₱ ${formatNumber(total + '.00')}`;
+      minimum = `₱ ${formatNumber(minimum + '.00')}`;
       $('.total').val(total);
       $('#td_rate').text(total);
+      $('#td_amount').text(minimum);
       $('#w3').click();
       $('#btn-no').click();
     });

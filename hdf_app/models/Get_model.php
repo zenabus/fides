@@ -9,26 +9,6 @@ class Get_model extends CI_Model {
     die;
   }
 
-  // ---------------------------------------------- NO OCCURENCE ---------------------------------------------- //
-
-  function AdmingetProductRes($res) {
-    if ($res == 'Restaurant') {
-      return $this->db->get('product_restaurant')->result_array();
-    } else {
-      return $this->db->get('product_coffeeshop')->result_array();
-    }
-  }
-
-  function frontdeskaddPricingBed() {
-    $this->db->get('room_bed');
-  }
-
-  function frontdeskaddPricingPerson() {
-    $this->db->get('room_person');
-  }
-
-  // ---------------------------------------------- NO OCCURENCE ---------------------------------------------- //
-
   function getRooms() {
     return $this->db->order_by('rank', "asc")->get('room_type')->result_array();
   }
@@ -504,6 +484,10 @@ class Get_model extends CI_Model {
     return $this->db->query('select *,check_form.id as che_id from check_form inner join bookings on check_form.connect_booking = bookings.booking_id inner join rooms_booking on bookings.room_id = rooms_booking.id inner join room_type on rooms_booking.type = room_type.id inner join all_reports on check_form.id=all_reports.if_frontdesk where check_form.last_name="' . $fname . '" and check_form.first_name="' . $lname . '" or check_form.last_name="' . $fname . ',' . $lname . '"')->result_array();
   }
 
+  // ------------------------------------------------------------------------------------------------------- //
+  // ------------------------------------------------ FRANZ ------------------------------------------------ //
+  // ------------------------------------------------------------------------------------------------------- //
+
   function getFrontDeskRooms($status = 1) {
     $status = $status ? 'room_status_id' : 'room_status_id!=';
     return $this->db->select('*, rooms.id as room_id')
@@ -552,6 +536,14 @@ class Get_model extends CI_Model {
       ->get('bookings')->result_array();
   }
 
+  function getBookingByBookingNumber($booking_number) {
+    return $this->db->join('rooms', 'rooms.id=bookings.room_id')
+      ->join('room_type', 'room_type.id=rooms.room_type_id')
+      ->join('guests', 'guests.guest_id=bookings.guest_id')
+      ->where('booking_number', $booking_number)
+      ->get('bookings')->row();
+  }
+
   function authenticate() {
     $data = $this->db->where('username', $_POST['username'])->get('users')->row();
 
@@ -588,34 +580,13 @@ class Get_model extends CI_Model {
     return $this->db->join('guests', 'guests.guest_id=bookings.guest_id')
       ->join('rooms', 'rooms.id=bookings.room_id')
       ->join('room_type', 'room_type.id=rooms.room_type_id')
-      ->where_in('reservation_type', $type)->get('bookings')->result_array();
+      ->where_in('reservation_type', $type)
+      ->get('bookings')->result_array();
   }
 
   function getRoomTypes() {
     return $this->db->order_by('rank')->get('room_type')->result_array();
   }
-
-  // function getRoomTypesWithDetails() {
-  //   return $this->db->select('*, rooms.id as room_id, room_type.id as room_type_id')
-  //     ->join('rooms', 'rooms.room_type_id=room_type.id')
-  //     ->order_by('rank')
-  //     ->group_by('room_type')
-  //     ->get('room_type')->result_array();
-  // }
-
-  // function getBookingsByDatesAndRoomType($check_in, $check_out, $room_type_id) {
-  //   return $this->db->select('check_in_date, check_out_date, room_number, room_type, rooms.id as room_id')
-  //     ->join('rooms', 'rooms.id=bookings.room_id')
-  //     ->join('room_type', 'room_type.id=rooms.room_type_id')
-  //     ->where('room_type_id', $room_type_id)
-  //     ->where('check_in_date >=', $check_in)
-  //     ->where('check_in_date <=', $check_out)
-  //     ->or_where('check_out_date >=', $check_in)
-  //     ->where('check_out_date <=', $check_out)
-
-  //     // ->group_by('room_id')
-  //     ->get('bookings')->result_array();
-  // }
 
   function getBookingsByRoomType($room_type_id) {
     return $this->db->select('check_in, check_out, room_number, room_type, rooms.id as room_id')
