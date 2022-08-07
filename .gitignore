@@ -1,12 +1,12 @@
 .DS_Store
 
-application/cache/*
-!application/cache/index.html
+hdf_app/cache/*
+!hdf_app/cache/index.html
 
-application/logs/*
-!application/logs/index.html
+hdf_app/logs/*
+!hdf_app/logs/index.html
 
-!application/*/.htaccess
+!hdf_app/*/.htaccess
 
 composer.lock
 
