@@ -849,7 +849,7 @@
             $('#td_arrival').text(check_in);
             $('#td_departure').text(`${check_out}`);
             $('#td_nights').text(`${nights} ${nights == 1 ? 'night' : 'nights'}`);
-            $('#td_option').text(payment_option);
+            $('#td_option').text('GCash/Card');
             $('.verified').show();
           },
           beforeSend: function() {

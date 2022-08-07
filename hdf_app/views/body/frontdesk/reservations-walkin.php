@@ -23,7 +23,7 @@
           <div class="card-body">
             <div class="tab-content">
               <div class="tab-pane show active" id="available">
-                <table class="table table-striped table-bordered datatables" cellspacing="0" width="100%">
+                <table class="table table-striped table-bordered tbl_reservations" cellspacing="0" width="100%">
                   <thead>
                     <tr>
                       <th>Booking No.</th>
@@ -82,7 +82,7 @@
                 </table>
               </div>
               <div class="tab-pane" id="unavailable">
-                <table class="table table-striped table-bordered datatables" cellspacing="0" width="100%">
+                <table class="table table-striped table-bordered tbl_reservations" cellspacing="0" width="100%">
                   <thead>
                     <tr>
                       <th>Booking No.</th>
@@ -150,5 +150,16 @@
 <script>
   $(document).ready(function() {
     demo.initWizard();
+
+    $('.tbl_reservations').DataTable({
+      "autoWidth": false,
+      "columnDefs": [
+      { "width": "11%", "targets": 0 },
+      { "width": "16%", "targets": 1 },
+      { "width": "16%", "targets": 2 },
+      { "width": "16%", "targets": 3 },
+      { "width": "12%", "targets": 4 },
+      { "width": "16%", "targets": 5 },
+    ]});
   });
 </script>
