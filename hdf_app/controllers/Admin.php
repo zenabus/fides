@@ -15,7 +15,7 @@ class Admin extends CI_Controller {
       // 'count_room_types' => $this->get_model->countRoomTypes(),
       'rooms' => $this->get_model->countRoom(),
       'guests' => $this->get_model->getGuests(),
-      'notif' => $this->get_model->frontdeskGetNotif(),
+
       'active' => 'dashboard'
     );
     $this->load->view('body/admin/layout/header', $data);
@@ -1328,7 +1328,7 @@ class Admin extends CI_Controller {
     if ($this->session->userdata('connect') == true);
     $id = $this->session->userdata('user_id');
     $data = array(
-      'notif' => $this->get_model->restaurantGetNotif(),
+
       'result' => $this->get_model->reportTransactionsAdmin(),
     );
     $this->load->view('body/admin/layout/header', $data);

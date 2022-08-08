@@ -1,3 +1,9 @@
+<style>
+  #new_guest {
+    display: none;
+  }
+</style>
+
 <div class="content pb-0">
   <div class="row">
     <div class="col-md-12">
@@ -8,18 +14,18 @@
             <div class="wizard-navigation">
               <ul>
                 <li class="nav-item">
-                  <a class="nav-link active" href="#verified" data-toggle="tab" role="tab" aria-controls="verified" aria-selected="true">
-                    <i class="fa fa-check"></i> Verified
+                  <a class="nav-link active" href="#confirmed" data-toggle="tab" role="tab" aria-controls="confirmed" aria-selected="true">
+                    <i class="fa fa-check" title="5"></i> Confirmed
                   </a>
                 </li>
                 <li class="nav-item">
                   <a class="nav-link" href="#pending" data-toggle="tab" role="tab" aria-controls="pending" aria-selected="true">
-                    <i class="fa fa-hourglass"></i> Pending
+                    <i class="fa fa-hourglass" title="2/3"></i> Pending
                   </a>
                 </li>
                 <li class="nav-item">
                   <a class="nav-link" href="#cancelled" data-toggle="tab" role="tab" aria-controls="cancelled" aria-selected="true">
-                    <i class="fa fa-ban"></i> Cancelled
+                    <i class="fa fa-ban" title="4"></i> Cancelled
                   </a>
                 </li>
               </ul>
@@ -27,7 +33,7 @@
           </div>
           <div class="card-body">
             <div class="tab-content">
-              <div class="tab-pane show active" id="verified">
+              <div class="tab-pane show active" id="confirmed">
                 <table class="table table-striped table-bordered tbl_reservations" cellspacing="0" width="100%">
                   <thead>
                     <tr>
@@ -36,7 +42,7 @@
                       <th>Contact Details</th>
                       <th>Room Details</th>
                       <th>Payment Details</th>
-                      <th>Date</th>
+                      <th>Date(s)</th>
                       <th class="disabled-sorting">Action</th>
                     </tr>
                   </thead>
@@ -69,17 +75,17 @@
                               <?php if ($row['payment_option'] == 'Cash') { ?>
                                 <small><?= $row['payment_option'] ?></small>
                               <?php } else { ?>
-                                <small><?= $row['card_number'] ?> / <?= $row['card_name'] ?></small>
+                                <small>(<?= $row['payment_option'] ?>) <?= $row['card_number'] ?> / <?= $row['card_name'] ?></small>
                               <?php } ?>
                             <?php } ?>
                           </td>
                           <td>
                             <?= $row['check_in'] ?> - <?= $row['check_out'] ?><br>
-                            <small>Number of nights: <?= $row['nights'] ?></small>
+                            <small>Number of night(s): <?= $row['nights'] ?></small>
                           </td>
                           <td class="action">
-                            <a href="javascript:" class="btn btn-sm btn-default">Check In</a>
-                            <a href="<?= base_url('index.php/main/updateReservationStatus/4/' . $row['booking_id']) ?>" class="btn btn-sm btn-danger confirm">Cancel</a>
+                            <a href="<?= base_url('index.php/main/checked/') ?>" class="btn btn-sm btn-default mb-2">Check In</a>
+                            <a href="<?= base_url('index.php/main/updateReservationStatus/4/' . $row['booking_id']) ?>" class="btn btn-sm btn-danger confirm mb-2">Cancel</a>
                           </td>
                         </tr>
                     <?php }
@@ -132,16 +138,16 @@
                               <?php if ($row['payment_option'] == 'Cash') { ?>
                                 <small><?= $row['payment_option'] ?></small>
                               <?php } else { ?>
-                                <small><?= $row['card_number'] ?> / <?= $row['card_name'] ?></small>
+                                <small>(<?= $row['payment_option'] ?>) <?= $row['card_number'] ?> / <?= $row['card_name'] ?></small>
                               <?php } ?>
                             <?php } ?>
                           </td>
                           <td>
                             <?= $row['check_in'] ?> - <?= $row['check_out'] ?><br>
-                            <small>Number of nights: <?= $row['nights'] ?></small>
+                            <small>Number of night(s): <?= $row['nights'] ?></small>
                           </td>
                           <td>
-                            <a href="javascript:" class="btn btn-sm btn-default" data-toggle="modal" data-target="#modalVerify">Verify</a>
+                            <a href="javascript:" class="btn btn-sm btn-default confirm-reservation" data='<?= json_encode($row) ?>'>Confirm</a>
                             <a href="<?= base_url('index.php/main/updateReservationStatus/4/' . $row['booking_id']) ?>" class="btn btn-sm btn-danger confirm">Cancel</a>
                           </td>
                         </tr>
@@ -191,13 +197,13 @@
                               <?php if ($row['payment_option'] == 'Cash') { ?>
                                 <small><?= $row['payment_option'] ?></small>
                               <?php } else { ?>
-                                <small><?= $row['card_number'] ?> / <?= $row['card_name'] ?></small>
+                                <small>(<?= $row['payment_option'] ?>) <?= $row['card_number'] ?> / <?= $row['card_name'] ?></small>
                               <?php } ?>
                             <?php } ?>
                           </td>
                           <td>
                             <?= $row['check_in'] ?> - <?= $row['check_out'] ?><br>
-                            <small>Number of nights: <?= $row['nights'] ?></small>
+                            <small>Number of night(s): <?= $row['nights'] ?></small>
                           </td>
                         </tr>
                     <?php }
@@ -215,108 +221,31 @@
   </div>
 </div>
 
-<div class="modal fade" id="modalVerify" tabindex="-1" role="dialog">
+<div class="modal fade" id="modalConfirm" tabindex="-1" role="dialog">
   <div class="modal-dialog pt-0" role="document">
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <i class="nc-icon nc-simple-remove"></i>
         </button>
-        <h4 class="title title-up titleBooking">Booking Details</h4>
+        <h4 class="title title-up titleBooking">Verify Reservation</h4>
       </div>
       <div class="modal-body">
-        <?= form_open('main/book', ['id' => 'frmBook']) ?>
-        <input type="hidden" name="room_id">
-        <input type="hidden" name="guest_id">
-        <input type="hidden" name="booking_type">
-        <div class="form-group reservation-div">
-          <label>Reservation Type</label>
-          <div class="d-flex justify-content-around">
-            <div class="form-check-radio">
-              <label class="form-check-label">
-                <input class="form-check-input" type="radio" name="reservation_type" id="reservation_type" value="Arrival/Tentative" checked>
-                Arrival/Tentative
-                <span class="form-check-sign"></span>
-              </label>
-            </div>
-            <div class="form-check-radio">
-              <label class="form-check-label">
-                <input class="form-check-input" type="radio" name="reservation_type" id="reservation_type" value="Confirmed">
-                Confirmed
-                <span class="form-check-sign"></span>
-              </label>
-            </div>
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group col-md-8">
-            <label>Room Type</label>
-            <input type="text" class="form-control" id="room_type" readonly>
-          </div>
-          <div class="form-group col-md-4">
-            <label>Room Number</label>
-            <input type="number" class="form-control text-center" id="room_number" readonly>
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group col-md-4">
-            <label>Check In</label>
-            <input type="text" class="form-control datepicker text-center" name="check_in" readonly>
-          </div>
-          <div class="form-group col-md-4">
-            <label>Check Out</label>
-            <input type="text" class="form-control datepicker text-center" name="check_out">
-          </div>
-          <div class="form-group col-md-4">
-            <label>Night(s)</label>
-            <input type="number" class="form-control text-center" name="nights" value="1" min="0">
-          </div>
-        </div>
-        <div class="form-group text-center">
-          <a href="javascript:" id="returning_guest">Returning Guest?</a>
-          <a href="javascript:" id="new_guest">New Guest?</a>
-        </div>
-        <div class=" form-row">
-          <div class="form-group col-md-4">
-            <label>First Name</label>
-            <input type="text" class="form-control guest_details" name="first_name" required>
-          </div>
-          <div class="form-group col-md-4">
-            <label>Middle Name</label>
-            <input type="text" class="form-control guest_details" name="middle_name">
-          </div>
-          <div class="form-group col-md-4">
-            <label>Last Name</label>
-            <input type="text" class="form-control guest_details" name="last_name" required>
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group col-md-4">
-            <label>Contact Number</label>
-            <input type="text" class="form-control guest_details" name="contact" required>
-          </div>
-          <div class="form-group col-md-8">
-            <label>E-mail <small>(optional)</small></label>
-            <input type="text" class="form-control guest_details" name="email">
-          </div>
-        </div>
-        <div class="form-group">
-          <label>Company Name <small>(optional)</small></label>
-          <input type="text" class="form-control guest_details" name="company_name">
-        </div>
+        <?= form_open('main/confirm', ['id' => 'frmConfirm']) ?>
+        <input type="hidden" name="booking_id">
         <div class="form-group">
           <label>Advance Payment Option</label>
           <div class="d-flex justify-content-around">
             <div class="form-check-radio mb-0">
               <label class="form-check-label">
-                <input class="form-check-input" type="radio" name="payment_option" value="Cash" checked>
+                <input class="form-check-input" type="radio" name="payment_option" value="Cash">
                 Cash
                 <span class="form-check-sign"></span>
               </label>
             </div>
             <div class="form-check-radio mb-0">
               <label class="form-check-label">
-                <input class="form-check-input" type="radio" name="payment_option" value="Card">
+                <input class="form-check-input" type="radio" name="payment_option" value="Card" checked>
                 Card
                 <span class="form-check-sign"></span>
               </label>
@@ -325,17 +254,17 @@
         </div>
         <div class="form-group">
           <label>Amount</label>
-          <input type="number" name="amount" class="form-control" value="0" min="0">
+          <input type="number" name="amount" class="form-control" value="0" min="0" required>
         </div>
         <div class="card-div">
           <div class="row">
             <div class="form-group col-md-6">
               <label>Account Number</label>
-              <input type="text" name="card_number" class="form-control" placeholder="XXXX XXXX XXXX XXXX" maxlength="19">
+              <input type="text" name="card_number" class="form-control" placeholder="XXXX XXXX XXXX XXXX" maxlength="19" required>
             </div>
             <div class="form-group col-md-6">
               <label>Account Name</label>
-              <input type="text" name="card_name" class="form-control">
+              <input type="text" name="card_name" class="form-control" required>
             </div>
           </div>
         </div>
@@ -347,7 +276,7 @@
       </div>
       <div class="modal-footer">
         <div class="left-side">
-          <input type="submit" value="Check In" class="btn btn-link" form="frmBook" id="btnBooking">
+          <input type="submit" value="Confirm" class="btn btn-link" form="frmConfirm">
         </div>
         <div class="divider"></div>
         <div class="right-side">
@@ -359,18 +288,50 @@
 </div>
 
 <script>
+  const guests = JSON.parse('<?= json_encode($guests) ?>');
+</script>
+<script defer src="<?= base_url('assets/js/modal-reservation.js') ?>"></script>
+<script>
   $(document).ready(function() {
     demo.initWizard();
 
     $('.tbl_reservations').DataTable({
       "autoWidth": false,
-      "columnDefs": [
-      { "width": "11%", "targets": 0 },
-      { "width": "16%", "targets": 1 },
-      { "width": "16%", "targets": 2 },
-      { "width": "16%", "targets": 3 },
-      { "width": "12%", "targets": 4 },
-      { "width": "16%", "targets": 5 },
-    ]});
+      "columnDefs": [{
+          "width": "11%",
+          "targets": 0
+        },
+        {
+          "width": "16%",
+          "targets": 1
+        },
+        {
+          "width": "16%",
+          "targets": 2
+        },
+        {
+          "width": "16%",
+          "targets": 3
+        },
+        {
+          "width": "12%",
+          "targets": 4
+        },
+        {
+          "width": "16%",
+          "targets": 5
+        },
+      ]
+    });
+  });
+
+  $('.confirm-reservation').click(function() {
+    const data = JSON.parse($(this).attr('data'));
+    $('[name=booking_id]').val(data.booking_id);
+    $('[name=amount]').val(data.amount);
+    $('[name=card_number]').val(data.card_number);
+    $('[name=card_name]').val(data.card_name);
+    $('[name=remarks]').val(data.remarks);
+    $('#modalConfirm').modal('show');
   });
 </script>

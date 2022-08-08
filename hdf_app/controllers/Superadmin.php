@@ -1348,7 +1348,7 @@ class Superadmin extends CI_Controller {
     if ($this->session->userdata('connect') == true);
     $id = $this->session->userdata('user_id');
     $data = array(
-      'notif' => $this->get_model->restaurantGetNotif(),
+
       'get_user' => $this->get_model->frontdeskGetUserDatails($id),
       'result' => $this->get_model->reportTransactionsAdmin(),
     );

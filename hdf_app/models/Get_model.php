@@ -196,16 +196,6 @@ class Get_model extends CI_Model {
     return $this->db->where('form_id', $id)->get('reserve_room_type')->result_array();
   }
 
-  function frontdeskListOfCheckedIn() {
-    //return $this->db->where('status','Checkin')->get('check_form')->result_array();
-    return $this->db->query('select *,check_form.id as che_id from  check_form inner join bookings on check_form.connect_booking = bookings.booking_id inner join rooms_booking on bookings.room_id = rooms_booking.id inner join room_type on rooms_booking.type = room_type.id where check_form.status ="Checkin"')->result_array();
-  }
-
-  function frontdeskListOfCheckedInLock() {
-    //return $this->db->where('status','Checkin')->get('check_form')->result_array();
-    return $this->db->query('select *,check_form.id as che_id from  check_form inner join bookings on check_form.connect_booking = bookings.booking_id inner join rooms_booking on bookings.room_id = rooms_booking.id inner join room_type on rooms_booking.type = room_type.id where check_form.status ="Locked"')->result_array();
-  }
-
   function frontdeskListOfCheckedInbyId($id) {
     return $this->db->where('id', $id)->get('check_form')->result_array();
   }
@@ -581,6 +571,14 @@ class Get_model extends CI_Model {
       ->join('rooms', 'rooms.id=bookings.room_id')
       ->join('room_type', 'room_type.id=rooms.room_type_id')
       ->where_in('reservation_type', $type)
+      ->get('bookings')->result_array();
+  }
+
+  function getBookingsByStatus($status = 0) {
+    return $this->db->join('guests', 'guests.guest_id=bookings.guest_id')
+      ->join('rooms', 'rooms.id=bookings.room_id')
+      ->join('room_type', 'room_type.id=rooms.room_type_id')
+      ->where('reservation_status', $status)
       ->get('bookings')->result_array();
   }
 

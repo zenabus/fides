@@ -75,6 +75,10 @@ if (!$this->session->userdata('connect')) {
       color: #6c757d;
       font-weight: normal !important;
     }
+
+    th {
+      white-space: pre;
+    }
   </style>
 
   <script>
@@ -161,7 +165,7 @@ if (!$this->session->userdata('connect')) {
           </li>
 
           <li class="<?= $active == 'bookings' ? 'active' : '' ?>">
-            <a href="<?= base_url() ?>index.php/main/listOfCheckedIn">
+            <a href="<?= base_url() ?>index.php/main/bookings">
               <i class="fa fa-bookmark"></i>
               <p>Bookings</p>
             </a>

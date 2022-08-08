@@ -16,7 +16,7 @@ class coffeeshop extends CI_Controller {
     if ($this->session->userdata('connect') == true);
     $id = $this->session->userdata('user_id');
     $data = array(
-      'notif' => $this->get_model->restaurantGetNotif(),
+
       'get_user' => $this->get_model->frontdeskGetUserDatails($id)
     );
     $this->load->view('body/coffeeshop/layout/header', $data);
@@ -29,7 +29,7 @@ class coffeeshop extends CI_Controller {
     $id = $this->session->userdata('user_id');
     $data = array(
       'get_user' => $this->get_model->frontdeskGetUserDatails($id),
-      'notif' => $this->get_model->restaurantGetNotif(),
+
 
     );
     $this->load->view('body/coffeeshop/layout/header', $data);
@@ -125,7 +125,7 @@ class coffeeshop extends CI_Controller {
     $id = $this->session->userdata('user_id');
     $data = array(
       'result_table' => $this->get_model->getTables(),
-      'notif' => $this->get_model->restaurantGetNotif(),
+
       'get_user' => $this->get_model->frontdeskGetUserDatails($id)
     );
     $this->load->view('body/coffeeshop/layout/header', $data);
@@ -207,7 +207,7 @@ class coffeeshop extends CI_Controller {
       'product_cart_deleted' => $this->get_model->getDataCartDelivered(),
       'result_deduction' => $this->get_model->frontdeskgetDeduction(),
       'total_amount' => $this->get_model->restaurantTotalBalance(),
-      'notif' => $this->get_model->restaurantGetNotif(),
+
       'get_user' => $this->get_model->frontdeskGetUserDatails($id)
 
 
@@ -634,7 +634,7 @@ class coffeeshop extends CI_Controller {
     if ($this->session->userdata('connect') == true);
     $id = $this->session->userdata('user_id');
     $data = array(
-      'notif' => $this->get_model->restaurantGetNotif(),
+
       'get_user' => $this->get_model->frontdeskGetUserDatails($id)
     );
     $this->load->view('body/coffeeshop/layout/header', $data);

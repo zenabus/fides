@@ -404,8 +404,10 @@
       const checked = $(this).val();
       if (this.checked) {
         $(`.${checked}`).fadeIn();
+        if ($('.room_types:checked').length == 6) $('.all').prop('checked', true);
       } else {
         $(`.${checked}`).fadeOut();
+        $('.all').prop('checked', false);
       }
     });
 

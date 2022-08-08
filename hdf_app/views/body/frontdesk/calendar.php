@@ -137,9 +137,7 @@
                 <tr>
                   <th class="white sticky-top border-shadow-1 text-center"><?= $y ?></th>
                   <?php for ($i = 1; $i <= $days; $i++) { ?>
-                    <th colspan="2" class="text-center sticky-top border-shadow<?= $i % 2 ? ' bg-light' : '' ?>" id="<?= date('Y-m-d') == $y . '-' . $m . '-' . str_pad($i, 2, '0', STR_PAD_LEFT) ? 'today' : '' ?>">
-                      <?= $i ?>-<?= substr($month, 0, 3) ?>
-                    </th>
+                    <th colspan="2" class="text-center sticky-top border-shadow<?= $i % 2 ? ' bg-light' : '' ?>" id="<?= date('Y-m-d') == $y . '-' . $m . '-' . str_pad($i, 2, '0', STR_PAD_LEFT) ? 'today' : '' ?>"><?= $i ?>-<?= substr($month, 0, 3) ?></th>
                   <?php } ?>
                 </tr>
               </thead>
@@ -159,9 +157,11 @@
                     </tr>
                   <?php } ?>
                   <tr>
-                    <td class="text-center d-flex border-0">
-                      <div class="d-inline-block" style="width:50px;"><?= $row['room_number'] ?> <?= $row['room_type_abbr'] ?></div>
-                      <div class="d-inline-block" style="width:50px;"><?= $row['name'] ?></div>
+                    <td class="text-center border-0 sticky">
+                      <div class="d-flex">
+                        <div class="d-inline-block" style="width:50px;"><?= $row['room_number'] ?> <?= $row['room_type_abbr'] ?></div>
+                        <div class="d-inline-block" style="width:50px;"><?= $row['name'] ?></div>
+                      </div>
                     </td>
                     <?php for ($i = 1; $i <= $days; $i++) { ?>
                       <?php

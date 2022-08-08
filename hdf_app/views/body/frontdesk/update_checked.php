@@ -1,37 +1,3 @@
-<script type="text/javascript">
-  //window.location.reload();
-  window.onload = function() {
-    if (!window.location.hash) {
-      window.location = window.location + '#loaded';
-      window.location.reload();
-    }
-  }
-</script>
-
-<?php if ($result_room_form[0]['status'] == 'Locked1') {
-  redirect('main/ListOfCheckedIn');
-} ?>
-
-<?php if ($this->session->flashdata('error')) : ?>
-  <script>
-    $(document).ready(function() {
-      demo.showNotification_error('top', 'right');
-    });
-  </script>
-
-<?php endif; ?>
-
-<?php if ($this->session->flashdata('success')) : ?>
-  <script>
-    $(document).ready(function() {
-      demo.showNotification('top', 'right');
-    });
-  </script>
-
-<?php endif; ?>
-
-
-
 <div class="content pb-0">
   <div class="row">
     <div class="col-md-6">
@@ -108,7 +74,7 @@
                   <td><?php echo $RT ?>
                   <td><?php echo $connect_book[0]['label'] ?> <?php //echo $connect_book[0]['rooms_id'] 
                                                               ?> <?php //echo $connect_book[0]['status'] 
-                                                                                                            ?></td>
+                                                                  ?></td>
 
                   <td class="text-center"><?php echo $status //$connect_book[0]['name'] 
                                           ?></td>
@@ -960,7 +926,7 @@
 
                                     <option id="<?php //echo $data['room_type_id'] 
                                                 ?>"><?php //echo $data['room_number'] 
-                                                                                        ?></option>
+                                                    ?></option>
 
                                     <?php //} 
                                     ?>

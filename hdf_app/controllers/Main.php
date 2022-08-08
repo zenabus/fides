@@ -3,6 +3,13 @@ defined('BASEPATH') or exit('No direct script access allowed');
 
 class Main extends MY_Controller {
 
+  function __construct() {
+    parent::__construct();
+    $this->load->vars([
+      'notif' => $this->get_model->frontdeskGetNotif()
+    ]);
+  }
+
   // ------------------------------------------------------------------------------------------------------- //
   // ------------------------------------------------ VIEWS ------------------------------------------------ //
   // ------------------------------------------------------------------------------------------------------- //
@@ -15,7 +22,6 @@ class Main extends MY_Controller {
 
     $data = array(
       'result_checked' => $this->get_model->frontdeskListOfCheckedIn(),
-      'notif' => $this->get_model->frontdeskGetNotif(),
       'get_user' => $this->get_model->frontdeskGetUserDatails($id)
     );
     $this->load->view('body/admin/layout/header', $data);
@@ -71,7 +77,7 @@ class Main extends MY_Controller {
 
     $data = array(
       'active' => 'transactions',
-      'notif' => $this->get_model->restaurantGetNotif(),
+
       'result' => $this->get_model->reportTransactionsfrontdesk(),
     );
 
@@ -91,7 +97,7 @@ class Main extends MY_Controller {
     $id = $this->session->userdata('user_id');
     $data = array(
       'result_reservation' => $this->get_model->frontdeskGetReservation(),
-      'notif' => $this->get_model->frontdeskGetNotif(),
+
     );
     $this->load->view('body/frontdesk/layout/header', $data);
     $this->load->view('body/frontdesk/list_of_reservation', $data);
@@ -104,7 +110,7 @@ class Main extends MY_Controller {
     $data = array(
       'result_rooms' => $this->get_model->frontdeskRooms(),
       'result_room_types' => $this->get_model->getRoomTypes(),
-      'notif' => $this->get_model->frontdeskGetNotif(),
+
       'get_user' => $this->get_model->frontdeskGetUserDatails($id)
 
     );
@@ -119,7 +125,7 @@ class Main extends MY_Controller {
       'active' => 'online',
       'result_reservation' => [],
       'result_reservation_cancel' => [],
-      'notif' => $this->get_model->frontdeskGetNotif(),
+
       'getRoomType' => $this->get_model->getRoomTypes(),
       'getRoom' => $this->get_model->getRoom()
 
@@ -141,7 +147,7 @@ class Main extends MY_Controller {
       'result_rooms' => $this->get_model->frontdeskRooms(),
       'result_res_id' => $this->get_model->frontdeskGetReservationById($id),
       'result_room_type' => $this->get_model->frontdeskGetRoomTypeById($id),
-      'notif' => $this->get_model->frontdeskGetNotif(),
+
       'get_user' => $this->get_model->frontdeskGetUserDatails($ids)
 
 
@@ -164,28 +170,6 @@ class Main extends MY_Controller {
     $this->load->view('body/frontdesk/layout/header', $data);
     $this->load->view('body/frontdesk/walkin_check_in_form');
     $this->load->view('body/frontdesk/layout/footer');
-  }
-
-  function listOfCheckedIn() {
-    if ($this->session->userdata('connect') == true) {
-      $id = $this->session->userdata('user_id');
-    }
-
-    $data = array(
-      'active' => 'bookings',
-      'result_checked' => $this->get_model->frontdeskListOfCheckedIn(),
-      'result_locked' => $this->get_model->frontdeskListOfCheckedInLock(),
-      'notif' => $this->get_model->frontdeskGetNotif(),
-      'get_user' => $this->get_model->frontdeskGetUserDatails($id)
-    );
-
-    $this->load->view('body/frontdesk/layout/header', $data);
-    $this->load->view('body/frontdesk/list_of_check_in', $data);
-
-
-    // $this->load->view('body/frontdesk/layout/footer');
-
-    $this->generateToInsert();
   }
 
   function checked($id) {
@@ -223,38 +207,38 @@ class Main extends MY_Controller {
 
     $data = array(
       'active' => 'bookings',
-      'id_reports' => $id_reports,
-      'account' => $sess,
-      'amount_give' => $give,
-      'card_number' => $card,
+      // 'id_reports' => $id_reports,
+      // 'account' => $sess,
+      // 'amount_give' => $give,
+      // 'card_number' => $card,
       'connect_book' => $this->get_model->frontdeskConnectBooking($id),
       'result_room_form' => $this->get_model->frontdeskListOfCheckedInbyId($id),
-      'room_number' => $this->get_model->frondeskGetRoom(),
+      // 'room_number' => $this->get_model->frondeskGetRoom(),
       'result_room_checked' => $this->get_model->frondeskGetRoomCheckedById($id),
-      'result_room_type' => $this->get_model->getRoomTypes(),
-      'result_deduction' => $this->get_model->frontdeskgetDeduction(),
-      'result_total' => $this->get_model->frontdeskTOtalBalance($id),
-      'result_reservation' => $this->get_model->frontdeskgetReservationDetails($id_if_reserve),
-      'notif' => $this->get_model->frontdeskGetNotif(),
-      'get_user' => $this->get_model->frontdeskGetUserDatails($ids),
-      'total_amount' => $this->get_model->frontdeskCharge($id),
-      'result_restaurant_charge' => $this->get_model->frontdeskgetChargeToRoom($id),
-      'result_restaurant_charge_cof' => $this->get_model->frontdeskgetChargeToRoomcof($id),
-      'lols' => $id,
-      /////updaate 2.0////
-      'total_charge_resto' => $this->get_model->counttotalFOchargeresto($id),
-      'total_charge_coffee' => $this->get_model->counttotalFOchargecoffee($id),
-      'total_charge_amen' => $this->get_model->counttotalFOchargeAmenites($id),
-      'get_charge_resto' => $this->get_model->selectChargeResto($id),
-      'get_charge_coffee' => $this->get_model->selectChargeCoffee($id),
-      'get_charge_amen' => $this->get_model->selectChargeAmen($id),
-      'getFrontLogs' => $this->get_model->forntdesklogs_user($id),
+      // 'result_room_type' => $this->get_model->getRoomTypes(),
+      // 'result_deduction' => $this->get_model->frontdeskgetDeduction(),
+      // 'result_total' => $this->get_model->frontdeskTOtalBalance($id),
+      // 'result_reservation' => $this->get_model->frontdeskgetReservationDetails($id_if_reserve),
+
+      // 'get_user' => $this->get_model->frontdeskGetUserDatails($ids),
+      // 'total_amount' => $this->get_model->frontdeskCharge($id),
+      // 'result_restaurant_charge' => $this->get_model->frontdeskgetChargeToRoom($id),
+      // 'result_restaurant_charge_cof' => $this->get_model->frontdeskgetChargeToRoomcof($id),
+      // 'lols' => $id,
+      // /////updaate 2.0////
+      // 'total_charge_resto' => $this->get_model->counttotalFOchargeresto($id),
+      // 'total_charge_coffee' => $this->get_model->counttotalFOchargecoffee($id),
+      // 'total_charge_amen' => $this->get_model->counttotalFOchargeAmenites($id),
+      // 'get_charge_resto' => $this->get_model->selectChargeResto($id),
+      // 'get_charge_coffee' => $this->get_model->selectChargeCoffee($id),
+      // 'get_charge_amen' => $this->get_model->selectChargeAmen($id),
+      // 'getFrontLogs' => $this->get_model->forntdesklogs_user($id),
       ////edn update 2.0//
     );
 
     $this->load->view('body/frontdesk/layout/header', $data);
     $this->load->view('body/frontdesk/update_checked');
-    //$this->load->view('body/frontdesk/layout/footer');
+    $this->load->view('body/frontdesk/layout/footer');
   }
 
   function refresh($id) {
@@ -307,7 +291,7 @@ class Main extends MY_Controller {
       'result_deduction' => $this->get_model->frontdeskgetDeduction(),
       'result_total' => $this->get_model->frontdeskTOtalBalance($id),
       'result_reservation' => $this->get_model->frontdeskgetReservationDetails($id_if_reserve),
-      'notif' => $this->get_model->frontdeskGetNotif(),
+
       'get_user' => $this->get_model->frontdeskGetUserDatails($ids),
       'total_amount' => $this->get_model->frontdeskCharge($id),
       'result_restaurant_charge' => $this->get_model->frontdeskgetChargeToRoom($id),
@@ -355,7 +339,7 @@ class Main extends MY_Controller {
     $data = array(
       'result_room_form' => $this->get_model->frontdeskgetRoomAndCheck($id),
       'result_room_by_id' => $this->get_model->frontdeskgetRoomById($id),
-      'notif' => $this->get_model->frontdeskGetNotif(),
+
       'get_user' => $this->get_model->frontdeskGetUserDatails($ids)
     );
 
@@ -458,7 +442,7 @@ class Main extends MY_Controller {
     if ($this->session->userdata('connect') == true);
     $id = $this->session->userdata('user_id');
     $data = array(
-      'notif' => $this->get_model->restaurantGetNotif(),
+
       'count_tables' => $this->get_model->countRoomTableRestaurant(),
       'count_product' => $this->get_model->countRoomRestaurantProduct(),
       'count_active' => $this->get_model->countRoomRestaurantProductActive(),
@@ -477,7 +461,7 @@ class Main extends MY_Controller {
     $id = $this->session->userdata('user_id');
     $res = $this->session->userdata('restaurant');
     $data = array(
-      'notif' => $this->get_model->restaurantGetNotif(),
+
       'result' => $this->get_model->reportTransactionsRestaurant($res),
     );
     $this->load->view('body/restaurant/layout/header', $data);
@@ -489,10 +473,7 @@ class Main extends MY_Controller {
     if ($this->session->userdata('connect') == true);
     # code...
     $id = $this->session->userdata('user_id');
-    $data = array(
-      'notif' => $this->get_model->restaurantGetNotif(),
-
-    );
+    $data = array();
     $this->load->view('body/restaurant/layout/header', $data);
     $this->load->view('body/restaurant/userprofile', $data);
     $this->load->view('body/restaurant/layout/footer');
@@ -503,7 +484,7 @@ class Main extends MY_Controller {
     $id = $this->session->userdata('user_id');
     $data = array(
       'result_table' => $this->get_model->getTables(),
-      'notif' => $this->get_model->restaurantGetNotif(),
+
       'get_user' => $this->get_model->frontdeskGetUserDatails($id)
     );
     $this->load->view('body/restaurant/layout/header', $data);
@@ -577,7 +558,7 @@ class Main extends MY_Controller {
       'product_cart_deleted' => $this->get_model->getDataCartDelivered($res),
       'result_deduction' => $this->get_model->frontdeskgetDeduction(),
       'total_amount' => $this->get_model->restaurantTotalBalance(),
-      'notif' => $this->get_model->restaurantGetNotif(),
+
       'product_cart_receipt' => $this->get_model->getDataCartReciept($id_reports, $res),
       'total_amount_receipt' => $this->get_model->restaurantTotalBalanceReciept($id_reports, $res),
 
@@ -594,7 +575,7 @@ class Main extends MY_Controller {
     if ($this->session->userdata('connect') == true);
     $id = $this->session->userdata('user_id');
     $data = array(
-      'notif' => $this->get_model->restaurantGetNotif(),
+
       'get_user' => $this->get_model->frontdeskGetUserDatails($id)
     );
     $this->load->view('body/restaurant/layout/header', $data);
@@ -625,7 +606,7 @@ class Main extends MY_Controller {
     $id = $this->session->userdata('user_id');
     $data = array(
       'active' => 'reports',
-      'notif' => $this->get_model->restaurantGetNotif(),
+
       'get_user' => $this->get_model->frontdeskGetUserDatails($id)
     );
     $this->load->view('body/frontdesk/layout/header', $data);
@@ -920,7 +901,7 @@ class Main extends MY_Controller {
       'result_deduction' => $this->get_model->frontdeskgetDeduction(),
       'result_total' => $this->get_model->frontdeskTOtalBalance($id),
       'result_reservation' => $this->get_model->frontdeskgetReservationDetails($id_if_reserve),
-      'notif' => $this->get_model->frontdeskGetNotif(),
+
       'get_user' => $this->get_model->frontdeskGetUserDatails($ids),
       'total_amount' => $this->get_model->frontdeskCharge($id),
       'result_restaurant_charge' => $this->get_model->frontdeskgetChargeToRoom($id),
@@ -1078,25 +1059,6 @@ class Main extends MY_Controller {
     $this->load->view('body/housekeeping/sample');
   }
 
-  function lockTransaction() {
-    if ($this->session->userdata('connect') == true)
-      $sess = $this->session->userdata('username');
-    if ($this->session->userdata('connect') == true);
-    $id = $this->session->userdata('user_id');
-
-    $data = array(
-      'result_checked' => $this->get_model->frontdeskListOfCheckedInLock(),
-      'notif' => $this->get_model->frontdeskGetNotif(),
-      'get_user' => $this->get_model->frontdeskGetUserDatails($id)
-    );
-
-
-
-    $this->load->view('body/frontdesk/layout/header', $data);
-    $this->load->view('body/frontdesk/lock', $data);
-    $this->generateToInsert();
-  }
-
   function CountReserve() {
     if ($this->session->userdata('connect') == true);
     $ids = $this->session->userdata('user_id');
@@ -1114,7 +1076,7 @@ class Main extends MY_Controller {
     );
     $data2 = array(
       'get_user' => $this->get_model->frontdeskGetUserDatails($ids),
-      'notif' => $this->get_model->frontdeskGetNotif(),
+
     );
 
     if ($ty == "admin") {
@@ -1142,7 +1104,7 @@ class Main extends MY_Controller {
     $sess = $this->session->userdata('username');
     $id = $this->session->userdata('user_id');
     $data = array(
-      'notif' => $this->get_model->restaurantGetNotif(),
+
       'result' => $this->get_model->guestTransactionbyId($fname, $lname),
       'firstname' => $fname,
       'lastname' => $lname,
@@ -4851,7 +4813,6 @@ class Main extends MY_Controller {
       'room_types' => $this->get_model->getRoomTypes(),
       'rooms' => $this->get_model->getRooms(),
       'guests' => $this->get_model->getGuests(),
-      'notif' => $this->get_model->frontdeskGetNotif(),
       'active' => 'dashboard'
     );
 
@@ -4873,7 +4834,6 @@ class Main extends MY_Controller {
       'guests' => $this->get_model->getGuests(),
       'm' => str_pad($month, 2, '0', STR_PAD_LEFT),
       'y' => $year,
-      'notif' => $this->get_model->frontdeskGetNotif(),
     ];
 
     $this->load->view('body/frontdesk/layout/header', $data);
@@ -4886,7 +4846,6 @@ class Main extends MY_Controller {
     $data = [
       'active' => 'rooms',
       'rooms' => $this->get_model->getRoomsWithRoomType(),
-      'notif' => $this->get_model->frontdeskGetNotif(),
       'guests' => $this->get_model->getGuests(),
     ];
 
@@ -4901,7 +4860,6 @@ class Main extends MY_Controller {
       'active' => 'guests',
       'guests_active' => $this->get_model->getGuests(),
       'guests_inactive' => $this->get_model->getGuests(1),
-      'notif' => $this->get_model->frontdeskGetNotif(),
       'getRoomType' => $this->get_model->getRoomTypes(),
       'getRoom' => $this->get_model->getRoom()
     );
@@ -4913,7 +4871,6 @@ class Main extends MY_Controller {
   function profile() {
     $data = array(
       'active' => 'account',
-      'notif' => $this->get_model->frontdeskGetNotif(),
       'profile' => $this->get_model->getProfile()
     );
     $this->load->view('body/frontdesk/layout/header', $data);
@@ -4924,13 +4881,25 @@ class Main extends MY_Controller {
   function reservations($reservation_type) {
     $data = array(
       'active' => $reservation_type,
-      'notif' => $this->get_model->frontdeskGetNotif(),
       'getRoomType' => $this->get_model->getRoomTypes(),
-      'getRoom' => $this->get_model->getRoom()
+      'getRoom' => $this->get_model->getRoom(),
+      'guests' => $this->get_model->getGuests(),
     );
     $data['reservations'] = $this->get_model->getReservations($reservation_type == 'walkin' ? ['Arrival/Tentative', 'Confirmed'] : ['Online']);
     $this->load->view('body/frontdesk/layout/header', $data);
     $this->load->view('body/frontdesk/reservations-' . $reservation_type, $data);
+    $this->load->view('body/frontdesk/components/modal-reservation');
+    $this->load->view('body/frontdesk/layout/footer');
+  }
+
+  function bookings() {
+    $data = [
+      'active' => 'bookings',
+      'bookings' => $this->get_model->getBookingsByStatus(),
+    ];
+
+    $this->load->view('body/frontdesk/layout/header', $data);
+    $this->load->view('body/frontdesk/booking');
     $this->load->view('body/frontdesk/layout/footer');
   }
 
@@ -5003,6 +4972,13 @@ class Main extends MY_Controller {
   function updateReservationStatus($reservation_status, $booking_id) {
     $this->update_model->updateReservationStatus($reservation_status, $booking_id);
     $this->session->set_flashdata('success', 'Reservation status successfully cancelled.');
+    $this->redirect();
+  }
+
+  function confirm() {
+    $this->update_model->updateReservationStatus(5, $_POST['booking_id']);
+    $this->update_model->confirm();
+    $this->session->set_flashdata('success', 'Reservation successfully verified!');
     $this->redirect();
   }
 }

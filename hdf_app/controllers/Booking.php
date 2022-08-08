@@ -35,9 +35,9 @@ class Booking extends MY_Controller {
   }
 
   function verify($booking_number) {
-    $this->update_model->verifyReservation($booking_number);
     $booking = $this->get_model->getBookingByBookingNumber($booking_number);
     $message = $this->successMessage($booking);
+    $this->update_model->updateReservationStatus(3, $booking->booking_id);
     $this->sendMail($booking->email, $message, 'Reservation Verified');
     $this->load->view('booking/success');
   }
