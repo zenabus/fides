@@ -124,7 +124,7 @@ class Insert_model extends CI_Model {
     $this->unsetGuestPost();
     $this->db->insert('bookings', $_POST);
     $booking_id = $this->db->insert_id();
-    $booking_number = 'HDF' . $booking_id;
+    $booking_number = 'HDF' . str_pad($booking_id, 5, '0', STR_PAD_LEFT);
     $this->db->where('booking_id', $booking_id)->update('bookings', ['booking_number' => $booking_number]);
     return $booking_number;
   }

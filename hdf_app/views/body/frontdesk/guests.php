@@ -22,8 +22,8 @@
           </div>
           <div class="card-body pt-0">
             <div class="tab-content pt-0">
-              <button class="btn btn-primary ml-3 mb-3 mt-0" id="addGuest">
-                <i class="nc-icon nc-simple-add"></i> Add New Guest
+              <button class="btn btn-default ml-3 mb-3 mt-0" id="addGuest">
+                Add New Guest
               </button>
               <div class="tab-pane show active" id="available">
                 <table class="table table-striped table-bordered tbl_guest" cellspacing="0" width="100%">
@@ -90,8 +90,9 @@
                         </td>
                         <td><?= $data['last_checkin'] ?></td>
                         <td>
-                          <button class="btn btn-success btn-sm updateGuest" data='<?= json_encode($data) ?>'>Update</button>
-                          <a href="<?= base_url('index.php/main/statusGuest/0/' . $data['guest_id']) ?>" class="btn btn-primary btn-sm confirm">Enable</a>
+                          <a href="javascript:" class="btn mb-1 btn-default btn-sm">View</a>
+                          <a href="javascript:" class="btn mb-1 btn-success btn-sm updateGuest" data='<?= json_encode($data) ?>'>Update</a>
+                          <a href="<?= base_url('index.php/main/statusGuest/0/' . $data['guest_id']) ?>" class="btn mb-1 btn-primary btn-sm confirm">Enable</a>
                         </td>
                       </tr>
                     <?php } ?>

@@ -172,7 +172,8 @@ class Main extends MY_Controller {
     $this->load->view('body/frontdesk/layout/footer');
   }
 
-  function checked($id) {
+  function checked($booking_number) {
+    $id = 242;
     if ($this->session->userdata('connect') == true);
     $sess = $this->session->userdata('username');
     //$ids = $this->session->userdata('user_id');
@@ -211,10 +212,10 @@ class Main extends MY_Controller {
       // 'account' => $sess,
       // 'amount_give' => $give,
       // 'card_number' => $card,
-      'connect_book' => $this->get_model->frontdeskConnectBooking($id),
+      // 'connect_book' => $this->get_model->frontdeskConnectBooking($id),
       'result_room_form' => $this->get_model->frontdeskListOfCheckedInbyId($id),
       // 'room_number' => $this->get_model->frondeskGetRoom(),
-      'result_room_checked' => $this->get_model->frondeskGetRoomCheckedById($id),
+      // 'result_room_checked' => $this->get_model->frondeskGetRoomCheckedById($id),
       // 'result_room_type' => $this->get_model->getRoomTypes(),
       // 'result_deduction' => $this->get_model->frontdeskgetDeduction(),
       // 'result_total' => $this->get_model->frontdeskTOtalBalance($id),
@@ -232,9 +233,12 @@ class Main extends MY_Controller {
       // 'get_charge_resto' => $this->get_model->selectChargeResto($id),
       // 'get_charge_coffee' => $this->get_model->selectChargeCoffee($id),
       // 'get_charge_amen' => $this->get_model->selectChargeAmen($id),
+      // 'getFrontLogs' => [],
       // 'getFrontLogs' => $this->get_model->forntdesklogs_user($id),
       ////edn update 2.0//
     );
+
+    $data['booking'] = $this->get_model->getBookingByBookingNumber($booking_number);
 
     $this->load->view('body/frontdesk/layout/header', $data);
     $this->load->view('body/frontdesk/update_checked');

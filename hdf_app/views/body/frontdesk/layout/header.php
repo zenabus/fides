@@ -79,6 +79,10 @@ if (!$this->session->userdata('connect')) {
     th {
       white-space: pre;
     }
+
+    .arrow {
+      display: none !important
+    }
   </style>
 
   <script>

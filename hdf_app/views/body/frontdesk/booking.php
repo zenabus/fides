@@ -73,7 +73,7 @@
                             <small>Number of nights: <?= $row['nights'] ?></small>
                           </td>
                           <td class="action">
-                            <a href="javascript:" class="btn btn-sm btn-default">Check In</a>
+                            <a href=" <?= base_url('index.php/main/checked/' . $row['booking_number']) ?>" class="btn btn-sm btn-default">Check In</a>
                             <a href="<?= base_url('index.php/main/updateReservationStatus/4/' . $row['booking_id']) ?>" class="btn btn-sm btn-danger confirm">Cancel</a>
                           </td>
                         </tr>
@@ -133,7 +133,6 @@
                             <small>Number of nights: <?= $row['nights'] ?></small>
                           </td>
                           <td class="action">
-                            <a href="javascript:" class="btn btn-sm btn-default">Check In</a>
                             <a href="<?= base_url('index.php/main/updateReservationStatus/4/' . $row['booking_id']) ?>" class="btn btn-sm btn-danger confirm">Cancel</a>
                           </td>
                         </tr>
