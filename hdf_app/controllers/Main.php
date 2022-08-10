@@ -170,80 +170,7 @@ class Main extends MY_Controller {
     $this->load->view('body/frontdesk/layout/header', $data);
     $this->load->view('body/frontdesk/walkin_check_in_form');
     $this->load->view('body/frontdesk/layout/footer');
-  }
-
-  function checked($booking_number) {
-    $id = 242;
-    if ($this->session->userdata('connect') == true);
-    $sess = $this->session->userdata('username');
-    //$ids = $this->session->userdata('user_id');
-    $reports = $this->db->query('select * from all_reports where if_frontdesk="' . $id . '" order by id_reports desc limit 1');
-    $id_reports = "";
-    $view = "";
-    $give = "";
-    $card = "";
-    $acc  = "";
-
-    if ($reports->num_rows() > 0) {
-      $row = $reports->row();
-      $id_reports = $row->id_reports;
-      $view = $row->view_reciept;
-      $give = $row->amount_give;
-      $card = $row->card_number;
-      $acc = $row->account_process;
-    }
-
-    if ($this->session->userdata('connect') == true);
-    # code...
-    $sess = $this->session->userdata('username');
-
-    if ($this->session->userdata('connect') == true);
-    $ids = $this->session->userdata('user_id');
-    $prompt = $this->db->query('select * from check_form where id="' . $id . '"');
-    $id_if_reserve = "";
-    if ($prompt->num_rows() > 0) {
-      $row = $prompt->row();
-      $id_if_reserve = $row->id_if_reserve;
-    }
-
-    $data = array(
-      'active' => 'bookings',
-      // 'id_reports' => $id_reports,
-      // 'account' => $sess,
-      // 'amount_give' => $give,
-      // 'card_number' => $card,
-      // 'connect_book' => $this->get_model->frontdeskConnectBooking($id),
-      'result_room_form' => $this->get_model->frontdeskListOfCheckedInbyId($id),
-      // 'room_number' => $this->get_model->frondeskGetRoom(),
-      // 'result_room_checked' => $this->get_model->frondeskGetRoomCheckedById($id),
-      // 'result_room_type' => $this->get_model->getRoomTypes(),
-      // 'result_deduction' => $this->get_model->frontdeskgetDeduction(),
-      // 'result_total' => $this->get_model->frontdeskTOtalBalance($id),
-      // 'result_reservation' => $this->get_model->frontdeskgetReservationDetails($id_if_reserve),
-
-      // 'get_user' => $this->get_model->frontdeskGetUserDatails($ids),
-      // 'total_amount' => $this->get_model->frontdeskCharge($id),
-      // 'result_restaurant_charge' => $this->get_model->frontdeskgetChargeToRoom($id),
-      // 'result_restaurant_charge_cof' => $this->get_model->frontdeskgetChargeToRoomcof($id),
-      // 'lols' => $id,
-      // /////updaate 2.0////
-      // 'total_charge_resto' => $this->get_model->counttotalFOchargeresto($id),
-      // 'total_charge_coffee' => $this->get_model->counttotalFOchargecoffee($id),
-      // 'total_charge_amen' => $this->get_model->counttotalFOchargeAmenites($id),
-      // 'get_charge_resto' => $this->get_model->selectChargeResto($id),
-      // 'get_charge_coffee' => $this->get_model->selectChargeCoffee($id),
-      // 'get_charge_amen' => $this->get_model->selectChargeAmen($id),
-      // 'getFrontLogs' => [],
-      // 'getFrontLogs' => $this->get_model->forntdesklogs_user($id),
-      ////edn update 2.0//
-    );
-
-    $data['booking'] = $this->get_model->getBookingByBookingNumber($booking_number);
-
-    $this->load->view('body/frontdesk/layout/header', $data);
-    $this->load->view('body/frontdesk/update_checked');
-    $this->load->view('body/frontdesk/layout/footer');
-  }
+  }  
 
   function refresh($id) {
     if ($this->session->userdata('connect') == true);
@@ -4811,11 +4738,10 @@ class Main extends MY_Controller {
 
   function index() {
     $data = array(
-      'result_room' => $this->get_model->frontdeskRooms(),
-      'result_av' => $this->get_model->getFrontDeskRooms(),
-      'result_un' => $this->get_model->getFrontDeskRooms(0),
+      'rooms' => $this->get_model->getRoomsWithRoomType(),
+      'available' => $this->get_model->getFrontDeskRooms(),
+      'unavailable' => $this->get_model->getFrontDeskRooms(0),
       'room_types' => $this->get_model->getRoomTypes(),
-      'rooms' => $this->get_model->getRooms(),
       'guests' => $this->get_model->getGuests(),
       'active' => 'dashboard'
     );
@@ -4900,6 +4826,17 @@ class Main extends MY_Controller {
     $data = [
       'active' => 'bookings',
       'bookings' => $this->get_model->getBookingsByStatus(),
+    ];
+
+    $this->load->view('body/frontdesk/layout/header', $data);
+    $this->load->view('body/frontdesk/bookings');
+    $this->load->view('body/frontdesk/layout/footer');
+  }
+
+  function booking($booking_number) {
+    $data = [
+      'active' => 'bookings',
+      'booking' =>  $this->get_model->getBookingByBookingNumber($booking_number)
     ];
 
     $this->load->view('body/frontdesk/layout/header', $data);

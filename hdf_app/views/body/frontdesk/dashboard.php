@@ -120,7 +120,7 @@
             <div class="col-7 col-md-8">
               <div class="numbers">
                 <p class="card-category">Available</p>
-                <p class="card-title"><?= count($result_av) ?></p>
+                <p class="card-title"><?= count($available) ?></p>
               </div>
             </div>
           </div>
@@ -140,7 +140,7 @@
             <div class="col-7 col-md-8">
               <div class="numbers">
                 <p class="card-category">Unavailable</p>
-                <p class="card-title"><?= count($result_un) ?></p>
+                <p class="card-title"><?= count($unavailable) ?></p>
               </div>
             </div>
           </div>
@@ -194,7 +194,7 @@
             <div class="tab-pane show active px-4" id="available">
               <div class="separator mb-4">2nd Floor</div>
               <div class="row">
-                <?php foreach ($result_av as $data) { ?>
+                <?php foreach ($available as $data) { ?>
                   <?php if ($data['room_number'] < 299) { ?>
                     <div class="col-lg-2 col-md-6 col-sm-6 float-left <?= $data['room_type_abbr'] ?>">
                       <div class="card card-stats border shadow-none room" data='<?= json_encode($data) ?>'>
@@ -224,7 +224,7 @@
               </div>
               <div class="separator mb-4">3rd Floor</div>
               <div class="row">
-                <?php foreach ($result_av as $data) { ?>
+                <?php foreach ($available as $data) { ?>
                   <?php if ($data['room_number'] < 399 && $data['room_number'] > 300) { ?>
                     <div class="col-lg-2 col-md-6 col-sm-6 float-left <?= $data['room_type_abbr'] ?>">
                       <div class="card card-stats border shadow-none room" data='<?= json_encode($data) ?>'>
@@ -254,7 +254,7 @@
               </div>
               <div class="separator mb-4">4th Floor</div>
               <div class="row">
-                <?php foreach ($result_av as $data) { ?>
+                <?php foreach ($available as $data) { ?>
                   <?php if ($data['room_number'] < 499 && $data['room_number'] > 400) { ?>
                     <div class="col-lg-2 col-md-6 col-sm-6 float-left <?= $data['room_type_abbr'] ?>">
                       <div class="card card-stats border shadow-none room" data='<?= json_encode($data) ?>'>
@@ -286,7 +286,7 @@
             <div class="tab-pane px-4" id="unavailable">
               <div class="separator mb-4">2nd Floor</div>
               <div class="row">
-                <?php foreach ($result_un as $data) { ?>
+                <?php foreach ($unavailable as $data) { ?>
                   <?php if ($data['room_number'] < 299) { ?>
                     <div class="col-lg-2 col-md-6 col-sm-6 float-left <?= $data['room_type_abbr'] ?>">
                       <div class="card card-stats border shadow-none room">
@@ -316,7 +316,7 @@
               </div>
               <div class="separator mb-4">3rd Floor</div>
               <div class="row">
-                <?php foreach ($result_un as $data) { ?>
+                <?php foreach ($unavailable as $data) { ?>
                   <?php if ($data['room_number'] < 399 && $data['room_number'] > 300) { ?>
                     <div class="col-lg-2 col-md-6 col-sm-6 float-left <?= $data['room_type_abbr'] ?>">
                       <div class="card card-stats border shadow-none room">
@@ -346,7 +346,7 @@
               </div>
               <div class="separator mb-4">4th Floor</div>
               <div class="row">
-                <?php foreach ($result_un as $data) { ?>
+                <?php foreach ($unavailable as $data) { ?>
                   <?php if ($data['room_number'] < 499 && $data['room_number'] > 400) { ?>
                     <div class="col-lg-2 col-md-6 col-sm-6 float-left <?= $data['room_type_abbr'] ?>">
                       <div class="card card-stats border shadow-none room">

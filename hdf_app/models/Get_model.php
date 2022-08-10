@@ -56,11 +56,6 @@ class Get_model extends CI_Model {
     return $this->db->where('id', $id)->get('users')->result_array();
   }
 
-  function frontdeskRooms() {
-    return $this->db->order_by('label')->get('rooms_booking')->result_array();
-    // return $this->db->query('SELECT * FROM rooms order by id')->result_array();
-  }
-
   function frontdeskgetReservationDetails($id_if_reserve) {
     return $this->db->query('SELECT * FROM reserve_room_type WHERE form_id="' . $id_if_reserve . '"')->result_array();
   }
@@ -593,20 +588,5 @@ class Get_model extends CI_Model {
 
   function getRoomCountByRoomType($room_type_id) {
     return $this->db->where('room_type_id', $room_type_id)->count_all_results('rooms');
-  }
-
-  function frontdeskConnectBooking($id) {
-    return $this->db->select('*, bookings.booking_id AS book_id, rooms_booking.id AS rooms_id')
-      ->join('rooms_checked', 'rooms_checked.connect_check=bookings.booking_id')
-      ->join('rooms_booking', 'rooms_booking.id=bookings.room_id')
-      // ->join('booking_statuses', 'booking_statuses.id=bookings.status')
-      ->where('rooms_checked.check_id', $id)
-      ->get('bookings')->result_array();
-    // return $this->db->query('SELECT *, bookings.booking_id AS book_id ,rooms_booking.id AS rooms_id 
-    //                         FROM bookings 
-    //                         INNER JOIN rooms_checked ON bookings.booking_id = rooms_checked.connect_check 
-    //                         INNER JOIN rooms_booking ON rooms_booking.id = bookings.room_id 
-    //                         INNER JOIN booking_statuses ON bookings.status = booking_statuses.id 
-    //                         WHERE rooms_checked.check_id="' . $id . '" ')->result_array();
   }
 }
