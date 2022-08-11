@@ -39,38 +39,8 @@
                     <?php foreach ($reservations as $row) { ?>
                       <?php if ($row['reservation_status'] == 1) { ?>
                         <tr>
-                          <td>
-                            <?= $row['booking_number'] ?>
-                            <?php if ($row['remarks']) { ?>
-                              <span class="fa fa-info-circle ml-1 text-info" rel="tooltip" data-original-title="<?= $row['remarks'] ?>"></span>
-                            <?php } ?>
-                          </td>
-                          <td>
-                            <?= $row['last_name'] ?>, <?= $row['first_name'] ?> <?= $row['middle_name'] ?><br>
-                            <small><?= $row['address'] ?></small>
-                          </td>
-                          <td>
-                            <?= $row['contact'] ?><br>
-                            <small><?= $row['email'] ?></small>
-                          </td>
-                          <td>
-                            Room <?= $row['room_number'] ?> - <?= $row['room_type'] ?><br>
-                            <small>₱ <?= number_format($row['pricing_type'], 2) ?> / ₱ <?= number_format($row['pricing_type'] * 0.25, 2) ?> (25%)</small>
-                          </td>
-                          <td>
-                            ₱ <?= number_format($row['amount'], 2) ?><br>
-                            <?php if ($row['amount'] != 0) { ?>
-                              <?php if ($row['payment_option'] == 'Cash') { ?>
-                                <small><?= $row['payment_option'] ?></small>
-                              <?php } else { ?>
-                                <small>(<?= $row['payment_option'] ?>) <?= $row['card_number'] ?> / <?= $row['card_name'] ?></small>
-                              <?php } ?>
-                            <?php } ?>
-                          </td>
-                          <td>
-                            <?= $row['check_in'] ?> - <?= $row['check_out'] ?><br>
-                            <small>Number of night(s): <?= $row['nights'] ?></small>
-                          </td>
+                          <?php $data['row'] = $row ?>
+                          <?php $this->load->view('body/frontdesk/components/booking-table-data', $data) ?>
                           <td class="action">
                             <a href="javascript:" class="btn btn-sm btn-default">Check In</a>
                             <a href="<?= base_url('index.php/main/updateReservationStatus/4/' . $row['booking_id']) ?>" class="btn btn-sm btn-danger confirm">Cancel</a>
@@ -98,38 +68,8 @@
                     <?php foreach ($reservations as $row) { ?>
                       <?php if ($row['reservation_status'] == 4) { ?>
                         <tr>
-                          <td>
-                            <?= $row['booking_number'] ?>
-                            <?php if ($row['remarks']) { ?>
-                              <span class="fa fa-info-circle ml-1 text-info" rel="tooltip" data-original-title="<?= $row['remarks'] ?>"></span>
-                            <?php } ?>
-                          </td>
-                          <td>
-                            <?= $row['last_name'] ?>, <?= $row['first_name'] ?> <?= $row['middle_name'] ?><br>
-                            <small><?= $row['address'] ?></small>
-                          </td>
-                          <td>
-                            <?= $row['contact'] ?><br>
-                            <small><?= $row['email'] ?></small>
-                          </td>
-                          <td>
-                            Room <?= $row['room_number'] ?> - <?= $row['room_type'] ?><br>
-                            <small>₱ <?= number_format($row['pricing_type'], 2) ?> / ₱ <?= number_format($row['pricing_type'] * 0.25, 2) ?> (25%)</small>
-                          </td>
-                          <td>
-                            ₱ <?= number_format($row['amount'], 2) ?><br>
-                            <?php if ($row['amount'] != 0) { ?>
-                              <?php if ($row['payment_option'] == 'Cash') { ?>
-                                <small><?= $row['payment_option'] ?></small>
-                              <?php } else { ?>
-                                <small>(<?= $row['payment_option'] ?>) <?= $row['card_number'] ?> / <?= $row['card_name'] ?></small>
-                              <?php } ?>
-                            <?php } ?>
-                          </td>
-                          <td>
-                            <?= $row['check_in'] ?> - <?= $row['check_out'] ?><br>
-                            <small>Number of night(s): <?= $row['nights'] ?></small>
-                          </td>
+                          <?php $data['row'] = $row ?>
+                          <?php $this->load->view('body/frontdesk/components/booking-table-data', $data) ?>
                           <td></td>
                         </tr>
                     <?php }

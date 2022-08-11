@@ -513,15 +513,14 @@ class Get_model extends CI_Model {
   }
 
   function getBookings() {
-    return $this->db->join('rooms', 'rooms.id=bookings.room_id')
+    return $this->db->join('booked_rooms', 'booked_rooms.booking_id=bookings.booking_id')
+      ->join('rooms', 'rooms.id=booked_rooms.room_id')
       ->join('guests', 'guests.guest_id=bookings.guest_id')
       ->get('bookings')->result_array();
   }
 
   function getBookingByBookingNumber($booking_number) {
-    return $this->db->join('rooms', 'rooms.id=bookings.room_id')
-      ->join('room_type', 'room_type.id=rooms.room_type_id')
-      ->join('guests', 'guests.guest_id=bookings.guest_id')
+    return $this->db->join('guests', 'guests.guest_id=bookings.guest_id')
       ->where('booking_number', $booking_number)
       ->get('bookings')->row();
   }
@@ -560,7 +559,8 @@ class Get_model extends CI_Model {
 
   function getReservations($type) {
     return $this->db->join('guests', 'guests.guest_id=bookings.guest_id')
-      ->join('rooms', 'rooms.id=bookings.room_id')
+      ->join('booked_rooms', 'booked_rooms.booking_id=bookings.booking_id')
+      ->join('rooms', 'rooms.id=booked_rooms.room_id')
       ->join('room_type', 'room_type.id=rooms.room_type_id')
       ->where_in('reservation_type', $type)
       ->get('bookings')->result_array();
@@ -568,8 +568,9 @@ class Get_model extends CI_Model {
 
   function getBookingsByStatus($status = 0) {
     return $this->db->join('guests', 'guests.guest_id=bookings.guest_id')
-      ->join('rooms', 'rooms.id=bookings.room_id')
-      ->join('room_type', 'room_type.id=rooms.room_type_id')
+      // ->join('booked_rooms', 'booked_rooms.booking_id=bookings.booking_id')
+      // ->join('rooms', 'rooms.id=booked_rooms.room_id')
+      // ->join('room_type', 'room_type.id=rooms.room_type_id')
       ->where('reservation_status', $status)
       ->get('bookings')->result_array();
   }
@@ -580,13 +581,29 @@ class Get_model extends CI_Model {
 
   function getBookingsByRoomType($room_type_id) {
     return $this->db->select('check_in, check_out, room_number, room_type, rooms.id AS room_id')
-      ->join('rooms', 'rooms.id=bookings.room_id')
+      ->join('rooms', 'rooms.id=booked_rooms.room_id')
       ->join('room_type', 'room_type.id=rooms.room_type_id')
       ->where('room_type_id', $room_type_id)
-      ->get('bookings')->result_array();
+      ->get('booked_rooms')->result_array();
   }
 
   function getRoomCountByRoomType($room_type_id) {
     return $this->db->where('room_type_id', $room_type_id)->count_all_results('rooms');
+  }
+
+  function getBookedRooms($booking_id) {
+    return $this->db->where('booking_id', $booking_id)
+      ->join('rooms', 'rooms.id=booked_rooms.room_id')
+      ->join('room_type', 'room_type.id=rooms.room_type_id')
+      ->join('discounts', 'discounts.discount_id=booked_rooms.discount_id')
+      ->get('booked_rooms')->result_array();
+  }
+
+  function getPrice($description) {
+    return $this->db->where('description', $description)->get('prices')->row();
+  }
+
+  function getDiscounts() {
+    return $this->db->get('discounts')->result_array();
   }
 }

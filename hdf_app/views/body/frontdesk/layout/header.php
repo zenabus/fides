@@ -80,8 +80,20 @@ if (!$this->session->userdata('connect')) {
       white-space: pre;
     }
 
+    td {
+      vertical-align: baseline !important;
+    }
+
+    .table-sm>td {
+      padding: 4px !important;
+    }
+
     .arrow {
       display: none !important
+    }
+
+    summary {
+      user-select: none;
     }
   </style>
 

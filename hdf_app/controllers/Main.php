@@ -170,7 +170,7 @@ class Main extends MY_Controller {
     $this->load->view('body/frontdesk/layout/header', $data);
     $this->load->view('body/frontdesk/walkin_check_in_form');
     $this->load->view('body/frontdesk/layout/footer');
-  }  
+  }
 
   function refresh($id) {
     if ($this->session->userdata('connect') == true);
@@ -4799,22 +4799,22 @@ class Main extends MY_Controller {
   }
 
   function profile() {
-    $data = array(
+    $data = [
       'active' => 'account',
       'profile' => $this->get_model->getProfile()
-    );
+    ];
     $this->load->view('body/frontdesk/layout/header', $data);
     $this->load->view('body/frontdesk/profile');
     $this->load->view('body/frontdesk/layout/footer');
   }
 
   function reservations($reservation_type) {
-    $data = array(
+    $data = [
       'active' => $reservation_type,
       'getRoomType' => $this->get_model->getRoomTypes(),
       'getRoom' => $this->get_model->getRoom(),
       'guests' => $this->get_model->getGuests(),
-    );
+    ];
     $data['reservations'] = $this->get_model->getReservations($reservation_type == 'walkin' ? ['Arrival/Tentative', 'Confirmed'] : ['Online']);
     $this->load->view('body/frontdesk/layout/header', $data);
     $this->load->view('body/frontdesk/reservations-' . $reservation_type, $data);
@@ -4823,10 +4823,13 @@ class Main extends MY_Controller {
   }
 
   function bookings() {
-    $data = [
-      'active' => 'bookings',
-      'bookings' => $this->get_model->getBookingsByStatus(),
-    ];
+    $data['active'] = 'bookings';
+    $data['bookings'] = $this->get_model->getBookingsByStatus();
+
+    $i = 0;
+    foreach ($data['bookings'] as $booking) {
+      $data['bookings'][$i++]['rooms'] = $this->get_model->getBookedRooms($booking['booking_id']);
+    }
 
     $this->load->view('body/frontdesk/layout/header', $data);
     $this->load->view('body/frontdesk/bookings');
@@ -4834,10 +4837,12 @@ class Main extends MY_Controller {
   }
 
   function booking($booking_number) {
-    $data = [
-      'active' => 'bookings',
-      'booking' =>  $this->get_model->getBookingByBookingNumber($booking_number)
-    ];
+    $data['active'] = 'bookings';
+    $data['booking'] = $this->get_model->getBookingByBookingNumber($booking_number);
+    $data['booked_rooms'] = $this->get_model->getBookedRooms($data['booking']->booking_id);
+    $data['bed'] = $this->get_model->getPrice('Bed');
+    $data['person'] = $this->get_model->getPrice('Person');
+    $data['discounts'] = $this->get_model->getDiscounts();
 
     $this->load->view('body/frontdesk/layout/header', $data);
     $this->load->view('body/frontdesk/booking');
@@ -4854,8 +4859,9 @@ class Main extends MY_Controller {
     }
     $room = $this->get_model->getRoomById($_POST['room_id']);
     $name = $_POST['first_name'] . ' ' . $_POST['last_name'];
+    $type = $_POST['booking_type'] == 'Check In' ? 'booked' : 'reserved';
     $this->insert_model->book();
-    $this->session->set_flashdata('success', 'Successfully booked ' . $name . ' in room ' . $room->room_number);
+    $this->session->set_flashdata('success', 'Successfully ' . $type . ' ' . $name . ' in room ' . $room->room_number);
     $this->redirect();
   }
 
@@ -4920,6 +4926,18 @@ class Main extends MY_Controller {
     $this->update_model->updateReservationStatus(5, $_POST['booking_id']);
     $this->update_model->confirm();
     $this->session->set_flashdata('success', 'Reservation successfully verified!');
+    $this->redirect();
+  }
+
+  function updateExtras() {
+    $this->update_model->updateExtras();
+    $this->session->set_flashdata('success', 'Extra bed/person successfully updated!');
+    $this->redirect();
+  }
+
+  function updateDiscount() {
+    $this->update_model->updateDiscount();
+    $this->session->set_flashdata('success', 'Discount successfully updated!');
     $this->redirect();
   }
 }

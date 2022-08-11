@@ -102,28 +102,46 @@ class Insert_model extends CI_Model {
   // ------------------------------------------------ FRANZ ------------------------------------------------ //
   // ------------------------------------------------------------------------------------------------------- //
 
-  function unsetGuestPost() {
-    unset($_POST['first_name']);
-    unset($_POST['middle_name']);
-    unset($_POST['last_name']);
-    unset($_POST['contact']);
-    unset($_POST['email']);
-    unset($_POST['company_name']);
-  }
-
-  function book() {
+  function getBookingData() {
     if ($_POST['booking_type'] == 'Check In') {
       $_POST['reservation_type'] = NULL;
+      $_POST['reservation_status'] = 0;
       if ($_POST['check_in'] == date('m/d/Y')) {
         $this->db->where('id', $_POST['room_id'])->update('rooms', ['room_status_id' => 8]);
       }
     } else {
       $_POST['reservation_status'] = $_POST['reservation_type'] == 'Online' ? 2 : 1;
     }
-    $_POST['booking_number'] = '';
-    $this->unsetGuestPost();
-    $this->db->insert('bookings', $_POST);
+
+    return [
+      'guest_id' => $_POST['guest_id'],
+      'booking_type' => $_POST['booking_type'],
+      'arrival' => $_POST['check_in'],
+      'departure' => $_POST['check_out'],
+      'amount' => $_POST['amount'] ?? 0,
+      'payment_option' => $_POST['payment_option'],
+      'card_number' => $_POST['card_number'] ?? '',
+      'card_name' => $_POST['card_name'] ?? '',
+      'remarks' => $_POST['remarks'],
+      'reservation_type' => $_POST['reservation_type'],
+      'reservation_status' => $_POST['reservation_status']
+    ];
+  }
+
+  function getBookedRoomData($booking_id) {
+    return [
+      'booking_id' => $booking_id,
+      'room_id' => $_POST['room_id'],
+      'check_in' => $_POST['check_in'],
+      'check_out' => $_POST['check_out'],
+      'nights' => $_POST['nights'],
+    ];
+  }
+
+  function book() {
+    $this->db->insert('bookings', $this->getBookingData());
     $booking_id = $this->db->insert_id();
+    $this->db->insert('booked_rooms', $this->getBookedRoomData($booking_id));
     $booking_number = 'HDF' . str_pad($booking_id, 5, '0', STR_PAD_LEFT);
     $this->db->where('booking_id', $booking_id)->update('bookings', ['booking_number' => $booking_number]);
     return $booking_number;

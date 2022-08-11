@@ -90,7 +90,7 @@ defined('EXIT__AUTO_MAX')      or define('EXIT__AUTO_MAX', 125); // highest auto
 |--------------------------------------------------------------------------
 */
 
-$status = [
+$reservation_status = [
   -1 => 'Locked',
   0 => 'Checked In',
   1 => 'Walk In',
@@ -100,4 +100,4 @@ $status = [
   5 => 'Confirmed',
 ];
 
-define('STATUS', $status);
+define('RESERVATION_STATUS', $reservation_status);

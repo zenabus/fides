@@ -202,4 +202,14 @@ class Update_model extends CI_Model {
     unset($_POST['booking_id']);
     $this->db->where('booking_id', $booking_id)->update('bookings', $_POST);
   }
+
+  function updateExtras() {
+    $booked_room_id = $_POST['booked_room_id'];
+    unset($_POST['booked_room_id']);
+    $this->db->where('booked_room_id', $booked_room_id)->update('booked_rooms', $_POST);
+  }
+
+  function updateDiscount() {
+    $this->db->where('booked_room_id', $_POST['booked_room_id'])->update('booked_rooms', ['discount_id' => $_POST['discount_id']]);
+  }
 }
