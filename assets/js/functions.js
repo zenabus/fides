@@ -52,6 +52,9 @@ $(document).on('click', '.update', function(e){
 });
 
 $(document).ready(function(){
+  if($(".datatables")[0]) {
+
+  
   $('.datatables').DataTable({
     "pagingType": "full_numbers",
     "order": [[ 3, "desc" ]],
@@ -65,6 +68,13 @@ $(document).ready(function(){
       searchPlaceholder: "Search records",
     }
   });  
+  }
 });
 
 const formatNumber = num => num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,');
+
+function getMonth() {
+  const month = new Date()
+  const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+  return months[month.getMonth()];
+}

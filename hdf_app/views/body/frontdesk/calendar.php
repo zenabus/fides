@@ -371,4 +371,8 @@
     const month = $('#month').val();
     $('#selectMonth').attr('href', `${base_url}index.php/main/calendar/${year}/${month}`)
   });
+
+  $('#test').click(function() {
+    localStorage.setItem('test', 'test132');
+  });
 </script>

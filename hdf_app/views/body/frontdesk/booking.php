@@ -5,7 +5,7 @@
       <div class="card">
         <div class="card-header px-4 pt-4 d-flex justify-content-between align-items-center">
           <h6>Room Details</h6>
-          <button class="btn btn-sm btn-default mb-2 mt-0">Add Room</button>
+          <button class="btn btn-sm btn-default mb-2 mt-0" id="addRoom" data-target="#modalRoom" data-toggle="modal">Add Room</button>
         </div>
         <div class="card-body px-0 py-2">
           <table class="table table-bordered border-right-0 border-left-0">
@@ -26,19 +26,19 @@
                     <small><?= $row['check_in'] ?> - <?= $row['check_out'] ?> (<?= $row['nights'] ?> night<?= $row['nights'] == 1 ? '' : 's' ?>)</small>
                   </td>
                   <td>
-                    ₱ <?= number_format($row['pricing_type'], 2) ?><br>
+                    ₱ <?= number_format($row['pricing_type'], 2) ?> x <?= $row['nights'] ?><br>
                     <small>Per night</small>
                   </td>
                   <td>
-                    ₱ -<?= number_format($row['pricing_type'] * ($row['percentage'] / 100), 2) ?><br>
+                    ₱ -<?= number_format($row['pricing_type'] * $row['nights'] * ($row['percentage'] / 100), 2) ?><br>
                     <small><?= $row['discount_type'] ?> (<?= $row['percentage'] ?>%)</small>
                   </td>
                   <td>
-                    ₱ <?= number_format($row['pricing_type'] - ($row['pricing_type'] * $row['nights'] * ($row['percentage'] / 100)), 2) ?><br>
+                    ₱ <?= number_format($row['pricing_type'] * $row['nights']  - ($row['pricing_type'] * $row['nights'] * ($row['percentage'] / 100)), 2) ?><br>
                     <small><?= $row['discount_type'] ?> (<?= $row['percentage'] ?>%)</small>
                   </td>
                   <td class="border-right-0 action">
-                    <button class="btn btn-info btn-sm extra" id='<?= json_encode($row) ?>' data-placement="top" title="Change Room" rel="tooltip" data-target="#modalExtra" data-toggle="modal">
+                    <button class="btn btn-info btn-sm extra" id='<?= json_encode($row) ?>' data-placement="top" title="Change Room" rel="tooltip" data-target="#modalRoom" data-toggle="modal">
                       <span class=" fa fa-refresh"></span>
                     </button>
                     <button class="btn btn-primary btn-sm extra" id='<?= json_encode($row) ?>' data-placement="top" title="Update Extras" rel="tooltip" data-target="#modalExtra" data-toggle="modal">
@@ -397,9 +397,60 @@
   </div>
 </div>
 
+<div class="modal fade" id="modalRoom" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-sm pt-0" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="title title-up">Add Room</h4>
+      </div>
+      <div class="modal-body px-4">
+        <?= form_open('main/addRoom', ['id' => 'frmRoom']) ?>
+        <input type="hidden" name="booked_room" value="<?= $booking->booking_id ?>">
+        <a href="javascript:" class="btn btn-default btn-block" id="calendar">Open Express Calendar <span class="fa fa-window-restore"></span></a>
+        <div class="form-group">
+          <label>Room Type</label>
+          <input type="text" class="form-control room_type" readonly>
+        </div>
+        <div class="form-row">
+          <div class="form-group col-md-6">
+            <label>Room No.</label>
+            <input type="text" class="form-control room_number" readonly>
+          </div>
+          <div class="form-group col-md-6">
+            <label>Nights</label>
+            <input type="text" class="form-control nights" readonly>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group col-md-6">
+            <label>Check In Date</label>
+            <input type="text" class="form-control check_in">
+          </div>
+          <div class="form-group col-md-6">
+            <label>Check Out Date</label>
+            <input type="text" class="form-control check_out">
+          </div>
+        </div>
+        <?= form_close() ?>
+      </div>
+      <div class="modal-footer">
+        <div class="left-side">
+          <input type="submit" value="Add Room" class="btn btn-link" form="frmRoom">
+        </div>
+        <div class="divider"></div>
+        <div class="right-side">
+          <button type="button" class="btn btn-link" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
 <script src="<?= base_url() ?>assets/demo/demo.js"></script>
 
 <script type="text/javascript">
+  const base_url = '<?= base_url() ?>'
   const price_bed = '<?= $bed->price ?>';
   const price_person = '<?= $person->price ?>';
   let subtotal_bed = 0;
@@ -495,5 +546,17 @@
     const percentage = $(this).find(':selected').attr('percentage') / 100;
     const subtotal = room_rate * nights;
     $('#discount_subtotal').val('₱ ' + formatNumber(subtotal - subtotal * percentage) + '.00');
+  });
+
+  $('#calendar').click(function() {
+    const size = [
+      'height=' + screen.height / 2,
+      'width=' + screen.width / 2
+    ].join(',');
+    const calendar = window.open(`${base_url}index.php/main/calendarWindow/2022/08`, "Calendar", size);
+    calendar.onbeforeunload = function() {
+      console.log('close');
+      console.log(localStorage.getItem('test'));
+    }
   });
 </script>

@@ -4772,6 +4772,22 @@ class Main extends MY_Controller {
     $this->load->view('body/frontdesk/layout/footer');
   }
 
+  function calendarWindow($year, $month) {
+    $this->load->library('calendar');
+
+    $data = [
+      'active' => 'calendar',
+      'rooms' => $this->get_model->getRoomsWithRoomType(),
+      'bookings' => $this->get_model->getBookings(),
+      'days' => $this->calendar->get_total_days($month, $year),
+      'month' => $this->calendar->get_month_name($month),
+      'm' => str_pad($month, 2, '0', STR_PAD_LEFT),
+      'y' => $year,
+    ];
+
+    $this->load->view('body/frontdesk/calendar-window', $data);
+  }
+
   function rooms() {
     $data = [
       'active' => 'rooms',
