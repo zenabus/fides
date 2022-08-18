@@ -26,14 +26,22 @@
   <?php } ?>
 </td>
 <td>
-  ₱ <?= number_format($row['amount'], 2) ?><br>
-  <?php if ($row['amount'] != 0) { ?>
-    <?php if ($row['payment_option'] == 'Cash') { ?>
-      <small><?= $row['payment_option'] ?></small>
-    <?php } else { ?>
-      <small><?= $row['card_number'] ?> / <?= $row['card_name'] ?></small>
+  <details>
+    <summary>₱ <?= number_format($row['payment']->amount, 2) ?></summary>
+    <?php foreach ($row['payments'] as $payment) { ?>
+      <?php if ($payment['payment_option'] == 'Card') {
+        $icon = 'credit-card';
+        $tooltip = $payment['payment_option'] . '<br>' . $payment['card_number'] . '<br>' . $payment['card_name'];
+      } else {
+        $icon = 'money-bills';
+        $tooltip =  $payment['payment_option'] . '<br>' . $payment['card_number'];
+      } ?>
+      <small class="mb-0">
+        <span class="fa fa-<?= $icon ?> text-info mr-1" data-placement="top" title="<?= $tooltip ?>" rel="tooltip" data-html="true"></span>
+        ₱ <?= number_format($payment['amount'], 2) ?> - <?= date_format(date_create($payment['booking_payment_added']), 'm/d/y g:ia') ?>
+      </small><br>
     <?php } ?>
-  <?php } ?>
+  </details>
 </td>
 <td>
   <?= $row['arrival'] ?> - <?= $row['departure'] ?><br>

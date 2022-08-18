@@ -164,4 +164,31 @@ class Insert_model extends CI_Model {
     $this->db->insert('guests', $data);
     return $this->db->insert_id();
   }
+
+  function bookRoom() {
+    unset($_POST['booked_room_id']);
+    $this->db->insert('booked_rooms', $_POST);
+  }
+
+  function addCharges() {
+    $this->db->insert('charges_food', $_POST);
+  }
+
+  function addCategory() {
+    unset($_POST['category_id']);
+    $this->db->insert('categories', $_POST);
+  }
+
+  function addCharge() {
+    unset($_POST['charge_id']);
+    $this->db->insert('charges', $_POST);
+  }
+
+  function addOtherCharges() {
+    $this->db->insert('charges_other', $_POST);
+  }
+
+  function addPayment() {
+    $this->db->insert('booking_payment', $_POST);
+  }
 }

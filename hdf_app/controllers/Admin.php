@@ -15,7 +15,6 @@ class Admin extends CI_Controller {
       // 'count_room_types' => $this->get_model->countRoomTypes(),
       'rooms' => $this->get_model->countRoom(),
       'guests' => $this->get_model->getGuests(),
-
       'active' => 'dashboard'
     );
     $this->load->view('body/admin/layout/header', $data);

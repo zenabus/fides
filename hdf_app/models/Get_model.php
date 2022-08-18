@@ -596,6 +596,7 @@ class Get_model extends CI_Model {
       ->join('rooms', 'rooms.id=booked_rooms.room_id')
       ->join('room_type', 'room_type.id=rooms.room_type_id')
       ->join('discounts', 'discounts.discount_id=booked_rooms.discount_id')
+      ->where('booked_room_archived', 0)
       ->get('booked_rooms')->result_array();
   }
 
@@ -605,5 +606,29 @@ class Get_model extends CI_Model {
 
   function getDiscounts() {
     return $this->db->get('discounts')->result_array();
+  }
+
+  function getCategories() {
+    return $this->db->get('categories')->result_array();
+  }
+
+  function getCharges() {
+    return $this->db->join('categories', 'categories.category_id=charges.category_id')->get('charges')->result_array();
+  }
+
+  function getPayment($booking_id) {
+    return $this->db->where('booking_id', $booking_id)->get('booking_payment')->result_array();
+  }
+
+  function getPaymentTotal($booking_id) {
+    return $this->db->select_sum('amount')->where('booking_id', $booking_id)->get('booking_payment')->row();
+  }
+
+  function getRoomCharges($booked_room_id) {
+    return $this->db->where('booked_room_id', $booked_room_id)->get('charges_food')->result_array();
+  }
+
+  function getRoomAmenities($booked_room_id) {
+    return $this->db->where('booked_room_id', $booked_room_id)->get('charges_other')->result_array();
   }
 }

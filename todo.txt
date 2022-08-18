@@ -28,7 +28,7 @@ Franz
 // Merge active bookings and locked bookings to dropdown
 // Disable button unless terms and conditions checkbox is checked
 // Add reservation amount validation 25% of total room cost
-Adjust payment method on booking modal
+// Adjust payment method on booking modal
 // Send email
 // Add confirmation message
 // Add code confirmation after reservation
@@ -40,3 +40,7 @@ Adjust payment method on booking modal
 // Add "All" checkbox on Dashboard
 Div to image not working
 // Pad booking number to 5 digits
+Calendar following month
+Delete charges, extras, discount when deleting booked room
+Change booked_room_id when change room
+Ask if extras are per day

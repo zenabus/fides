@@ -1,7 +1,7 @@
 <div class="content pb-0">
   <div class="row">
     <div class="col-md-12">
-      <h5>BOOKINGS</h5>
+      <h5>Bookings</h5>
       <div class="wizard-container">
         <div class="card card-wizard active" data-color="primary" id="wizardProfile">
           <div class="card-header text-center">

@@ -212,4 +212,30 @@ class Update_model extends CI_Model {
   function updateDiscount() {
     $this->db->where('booked_room_id', $_POST['booked_room_id'])->update('booked_rooms', ['discount_id' => $_POST['discount_id']]);
   }
+
+  function archiveBookedRoom($booked_room_id) {
+    $this->db->where('booked_room_id', $booked_room_id)->update('booked_rooms', ['booked_room_archived' => 1]);
+  }
+
+  function changeRoom() {
+    $booked_room_id = $_POST['booked_room_id'];
+    unset($_POST['booked_room_id']);
+    $this->db->where('booked_room_id', $booked_room_id)->update('booked_rooms', $_POST);
+  }
+
+  function updateCategory() {
+    $category_id = $_POST['category_id'];
+    unset($_POST['category_id']);
+    $this->db->where('category_id', $category_id)->update('categories', $_POST);
+  }
+
+  function updateCharge() {
+    $charge_id = $_POST['charge_id'];
+    unset($_POST['charge_id']);
+    $this->db->where('charge_id', $charge_id)->update('charges', $_POST);
+  }
+
+  function updateRefund() {
+    $this->db->where('booking_id', $_POST['booking_id'])->update('bookings', $_POST);
+  }
 }

@@ -45,7 +45,7 @@ class Delete_model extends CI_Model {
   function deleteUsers($id) {
     $this->db->where('id', $id)->delete('users');
   }
-  
+
   function deletecart($id) {
     $this->db->where('id_cart', $id)->delete('restaurant_cart');
   }
@@ -74,4 +74,11 @@ class Delete_model extends CI_Model {
     $this->db->where('id_table', $id)->delete('coffee_tables');
   }
 
+  function deleteCategory($category_id) {
+    $this->db->where('category_id', $category_id)->delete('categories');
+  }
+
+  function deleteCharge($charge_id) {
+    $this->db->where('charge_id', $charge_id)->delete('charges');
+  }
 }

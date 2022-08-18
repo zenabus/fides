@@ -122,7 +122,7 @@
     </div>
   </div>
   <div>
-    <button class="btn btn-sm btn-default mt-1" id="proceed">Proceed</button>
+    <button class="btn btn-sm btn-default mt-1" id="proceed" disabled>Proceed</button>
   </div>
 </div>
 
@@ -134,6 +134,9 @@
           <th class="white sticky-top border-shadow-1 text-center"><?= $y ?></th>
           <?php for ($i = 1; $i <= $days; $i++) { ?>
             <th class="text-center mw sticky-top border-shadow<?= $i % 2 ? ' bg-light' : '' ?>" id="<?= date('Y-m-d') == $y . '-' . $m . '-' . str_pad($i, 2, '0', STR_PAD_LEFT) ? 'today' : '' ?>"><?= $i ?>-<?= substr($month, 0, 3) ?></th>
+          <?php } ?>
+          <?php for ($j = 1; $j <= 10; $j++) { ?>
+            <th class="text-center mw sticky-top border-shadow"><?= $j ?>-<?= substr($next_month, 0, 3) ?></th>
           <?php } ?>
         </tr>
         <tr>
@@ -174,9 +177,12 @@
                 ?>
                 <td class="with-data bg-<?= $color ?>" date="<?= $m . '/' . str_pad($i, 2, '0', STR_PAD_LEFT) . '/' . $y ?>" data='<?= json_encode($row) ?>'></td>
               <?php } else { ?>
-                <td class="no-data first room" room="<?= $row['room_number'] ?>" day="<?= $i ?>" date=" <?= $m . '/' . str_pad($i, 2, '0', STR_PAD_LEFT) . '/' . $y ?>" data='<?= json_encode($row) ?>'></td>
+                <td class="no-data first room room<?= $row['room_number'] ?>" day="<?= $i ?>" date=" <?= $m . '/' . str_pad($i, 2, '0', STR_PAD_LEFT) . '/' . $y ?>" data='<?= json_encode($row) ?>'></td>
             <?php }
             } ?>
+            <?php for ($j = 1; $j <= 10; $j++) { ?>
+              <td class="no-data first room room<?= $row['room_number'] ?>" day="<?= $j ?>" date=" <?= $m + 1 . '/' . str_pad($j, 2, '0', STR_PAD_LEFT) . '/' . $y ?>" data='<?= json_encode($row) ?>'>s</td>
+            <?php } ?>
           </tr>
           <?php $prev = $row['room_number']; ?>
         <?php } ?>
@@ -193,6 +199,7 @@
   let room_number = null;
   let start = 0;
   let end = 0;
+  let data = null;
 
   $('#current').click(function() {
     const today = document.getElementById("today");
@@ -231,14 +238,16 @@
   function clearAll() {
     $('.no-data').removeClass('bg-default');
     $('#end').text('');
+    $('#proceed').attr('disabled', true);
     room_number = null;
     start = 0;
     end = 0;
   }
 
-  function setStart(that, this_room_number, this_day, data) {
+  function setStart(that, this_day, data) {
     $(that).addClass('bg-default');
-    room_number = this_room_number;
+    room_number = data.room_number;
+    console.log(data.room_number)
     start = this_day;
     $('#room_number').text(room_number);
     $('#room_type').text(data.room_type);
@@ -246,36 +255,52 @@
   }
 
   $('.room').click(function() {
-    const this_room_number = parseInt($(this).attr('room'));
     const this_day = parseInt($(this).attr('day'));
-    const data = JSON.parse($(this).attr('data'));
     const date = $(this).attr('date');
+    data = JSON.parse($(this).attr('data'));
 
-    if (this_room_number != room_number) {
+    if (data.room_number != room_number) {
       clearAll();
     }
 
     if (start != 0) {
       end = this_day;
       let nights = end - start;
-      nights = nights <= 0 ? 0 : end
+      console.log(end, start, nights)
+      nights = nights <= 0 ? 0 : nights;
+      $('#proceed').attr('disabled', nights <= 0);
       $('#end').text();
       $('#nights').text(`${nights} night${nights==1?'':'s'}`);
     }
 
     if (!room_number) {
-      setStart(this, this_room_number, this_day, data);
+      setStart(this, this_day, data);
     }
 
-    if (this_room_number == room_number && this_day > start) {
+    if (data.room_number == room_number && this_day > start) {
       $('.no-data').removeClass('bg-default');
       $(this).addClass('bg-default');
       for (let i = start; i <= this_day; i++) {
-        $(`[day=${i}][room=${room_number}]`).addClass('bg-default');
+        $(`[day=${i}].room${room_number}`).addClass('bg-default');
       }
-    } else if (this_room_number == room_number && this_day < start) {
+    } else if (data.room_number == room_number && this_day < start) {
       clearAll();
-      setStart(this, this_room_number, this_day, data);
+      setStart(this, this_day, data);
     }
+  });
+
+  $('#proceed').click(function() {
+    const today = new Date();
+    const month = pad(today.getMonth() + 1);
+    const year = today.getFullYear();
+    const check_in = `${month}/${pad(start)}/${year}`;
+    const check_out = `${month}/${pad(end)}/${year}`;
+    localStorage.setItem('check_in', check_in);
+    localStorage.setItem('check_out', check_out);
+    localStorage.setItem('room_id', data.room_id);
+    localStorage.setItem('room_type', data.room_type);
+    localStorage.setItem('room_number', data.room_number);
+    localStorage.setItem('nights', end - start);
+    self.close();
   });
 </script>

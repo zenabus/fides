@@ -8,20 +8,35 @@
           </div>
         </div>
       </footer>
-    </div>
-  </div>
+      </div>
+      </div>
 
-  <script src="<?= base_url() ?>assets/js/plugins/perfect-scrollbar.jquery.min.js"></script>
-  <script src="<?= base_url() ?>assets/js/plugins/bootstrap-switch.js"></script>
-  <script src="<?= base_url() ?>assets/js/plugins/sweetalert2.min.js"></script>
-  <script src="<?= base_url() ?>assets/js/plugins/jquery.validate.min.js"></script>
-  <script src="<?= base_url() ?>assets/js/plugins/jquery.bootstrap-wizard.js"></script>
-  <script src="<?= base_url() ?>assets/js/plugins/jquery.dataTables.min.js"></script>
-  <script src="<?= base_url() ?>assets/js/plugins/bootstrap-selectpicker.js"></script>
-  <script src="<?= base_url() ?>assets/js/plugins/bootstrap-tagsinput.js"></script>
-  <script src="<?= base_url() ?>assets/js/plugins/bootstrap-notify.js"></script>
-  <script src="<?= base_url() ?>assets/js/plugins/jasny-bootstrap.min.js"></script>
-  <script src="<?= base_url() ?>assets/js/paper-dashboard.min.js?v=2.0.1"></script>
-  <script src="<?= base_url() ?>assets/js/demo.js"></script>
-</body>
-</html>
+      <script>
+        $(document).ready(function() {
+          $('[rel="tooltip"]').click(function() {
+            $('[rel="tooltip"]').tooltip("hide");
+            $('[rel="tooltip"]').tooltip({
+              trigger: 'hover'
+            });
+          });
+          $('[rel="tooltip"]').focusout(function() {
+            $('[rel="tooltip"]').tooltip("hide");
+            $('.tooltip').remove();
+          });
+        });
+      </script>
+      <script src="<?= base_url() ?>assets/js/plugins/perfect-scrollbar.jquery.min.js"></script>
+      <script src="<?= base_url() ?>assets/js/plugins/bootstrap-switch.js"></script>
+      <script src="<?= base_url() ?>assets/js/plugins/sweetalert2.min.js"></script>
+      <script src="<?= base_url() ?>assets/js/plugins/jquery.validate.min.js"></script>
+      <script src="<?= base_url() ?>assets/js/plugins/jquery.bootstrap-wizard.js"></script>
+      <script src="<?= base_url() ?>assets/js/plugins/jquery.dataTables.min.js"></script>
+      <script src="<?= base_url() ?>assets/js/plugins/bootstrap-selectpicker.js"></script>
+      <script src="<?= base_url() ?>assets/js/plugins/bootstrap-tagsinput.js"></script>
+      <script src="<?= base_url() ?>assets/js/plugins/bootstrap-notify.js"></script>
+      <script src="<?= base_url() ?>assets/js/plugins/jasny-bootstrap.min.js"></script>
+      <script src="<?= base_url() ?>assets/js/paper-dashboard.min.js?v=2.0.1"></script>
+      <script src="<?= base_url() ?>assets/js/demo.js"></script>
+      </body>
+
+      </html>

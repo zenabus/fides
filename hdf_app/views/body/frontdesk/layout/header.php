@@ -14,13 +14,13 @@ if (!$this->session->userdata('connect')) {
   <meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, shrink-to-fit=no' name='viewport' />
   <!--  Fonts and icons -->
   <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700,200" rel="stylesheet" />
-  <link href="https://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css" rel="stylesheet">
   <!-- CSS Files -->
   <link href="<?= base_url() ?>assets/css/bootstrap.min.css" rel="stylesheet" />
   <link href="<?= base_url() ?>assets/css/paper-dashboard.css?v=2.0.1" rel="stylesheet" />
   <!-- CSS Just for demo purpose, don't include it in your project -->
   <link href="<?= base_url() ?>assets/demo/demo.css" rel="stylesheet" />
   <!-- Scripts -->
+  <script src="https://kit.fontawesome.com/3abc918931.js" crossorigin="anonymous"></script>
   <script src="<?= base_url() ?>assets/js/core/jquery.min.js"></script>
   <script src="<?= base_url() ?>assets/js/core/popper.min.js"></script>
   <script src="<?= base_url() ?>assets/js/core/bootstrap.min.js"></script>
@@ -84,8 +84,10 @@ if (!$this->session->userdata('connect')) {
       vertical-align: baseline !important;
     }
 
-    .table-sm>td {
-      padding: 4px !important;
+    .table-sm td {
+      padding-top: 8px !important;
+      padding-bottom: 8px !important;
+
     }
 
     .arrow {
@@ -94,6 +96,10 @@ if (!$this->session->userdata('connect')) {
 
     summary {
       user-select: none;
+    }
+
+    .modal {
+      z-index: 99999;
     }
   </style>
 
@@ -142,13 +148,13 @@ if (!$this->session->userdata('connect')) {
             <div class="collapse <?= $active == 'account' ? 'show' : '' ?>" id="collapseExample">
               <ul class="nav">
                 <li class="<?= $active == 'account' ? 'active' : '' ?>">
-                  <a href="<?= base_url() ?>index.php/main/profile">
+                  <a href="<?= base_url('index.php/main/profile') ?>">
                     <span class="sidebar-mini-icon">AD</span>
                     <span class="sidebar-normal">Account Details</span>
                   </a>
                 </li>
                 <li>
-                  <a href="<?= base_url() ?>index.php/user/destroy">
+                  <a href="<?= base_url('index.php/user/destroy') ?>">
                     <span class="sidebar-mini-icon">SO</span>
                     <span class="sidebar-normal">Sign out</span>
                   </a>
@@ -160,7 +166,7 @@ if (!$this->session->userdata('connect')) {
 
         <ul class="nav">
           <li class="<?= $active == 'dashboard' ? 'active' : '' ?>">
-            <a href="<?= base_url() ?>index.php/main/">
+            <a href="<?= base_url('index.php/main') ?>">
               <i class="fa fa-home"></i>
               <p>Dashboard</p>
             </a>
@@ -174,14 +180,14 @@ if (!$this->session->userdata('connect')) {
           </li>
 
           <li class="<?= $active == 'rooms' ? 'active' : '' ?>">
-            <a href="<?= base_url() ?>index.php/main/rooms">
+            <a href="<?= base_url('index.php/main/rooms') ?>">
               <i class="fa fa-bed "></i>
               <p>Rooms</p>
             </a>
           </li>
 
           <li class="<?= $active == 'bookings' ? 'active' : '' ?>">
-            <a href="<?= base_url() ?>index.php/main/bookings">
+            <a href="<?= base_url('index.php/main/bookings') ?>">
               <i class="fa fa-bookmark"></i>
               <p>Bookings</p>
             </a>
@@ -197,13 +203,13 @@ if (!$this->session->userdata('connect')) {
             <div class="collapse  <?= $active == 'online' || $active == 'walkin' ? 'show' : '' ?>" id="collapseReservation">
               <ul class="nav">
                 <li class="<?= $active == 'online' ? 'active' : '' ?>">
-                  <a href="<?= base_url() ?>index.php/main/reservations/online">
+                  <a href="<?= base_url('index.php/main/reservations/online') ?>">
                     <span class="sidebar-mini-icon">O</span>
                     <span class="sidebar-normal">Online</span>
                   </a>
                 </li>
                 <li class="<?= $active == 'walkin' ? 'active' : '' ?>">
-                  <a href="<?= base_url() ?>index.php/main/reservations/walkin">
+                  <a href="<?= base_url('index.php/main/reservations/walkin') ?>">
                     <span class="sidebar-mini-icon">WI</span>
                     <span class="sidebar-normal">Walk-In</span>
                   </a>
@@ -213,33 +219,32 @@ if (!$this->session->userdata('connect')) {
           </li>
 
           <li class="<?= $active == 'guests' ? 'active' : '' ?>">
-            <a href="<?= base_url() ?>index.php/main/guests">
+            <a href="<?= base_url('index.php/main/guests') ?>">
               <i class="fa fa-users"></i>
               <p>Guest List</p>
             </a>
           </li>
 
           <li class="<?= $active == 'transactions' ? 'active' : '' ?>">
-            <a href="<?= base_url() ?>index.php/main/frontdeskTransactions">
+            <a href="<?= base_url('index.php/main/frontdeskTransactions') ?>">
               <i class="fa fa-tasks"></i>
               <p>Transactions</p>
             </a>
           </li>
 
           <li class="<?= $active == 'reports' ? 'active' : '' ?>">
-            <a href="<?= base_url() ?>index.php/main/FrontdeskReports">
+            <a href="<?= base_url('index.php/main/FrontdeskReports') ?>">
               <i class="fa fa-list-alt"></i>
               <p>Reports</p>
             </a>
           </li>
 
-          <script>
-            function popupCenter(url, title, w, h) {
-              var left = (screen.width / 2) - (w / 2);
-              var top = (screen.height / 2) - (h / 2);
-              return window.open(url, title, 'toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=no, resizable=no, copyhistory=no, width=' + w + ', height=' + h + ', top=' + top + ', left=' + left);
-            }
-          </script>
+          <li class="<?= $active == 'charges' ? 'active' : '' ?>">
+            <a href="<?= base_url('index.php/main/charges') ?>">
+              <i class="fa fa-receipt"></i>
+              <p>Extra Charges</p>
+            </a>
+          </li>
           </li>
         </ul>
       </div>
@@ -288,9 +293,9 @@ if (!$this->session->userdata('connect')) {
                   </div>
                 </a>
                 <ul class="dropdown-menu dropdown-menu-right dropdown-default">
-                  <a class="dropdown-item" href="<?= base_url() ?>index.php/main/profile">Account Details</a>
+                  <a class="dropdown-item" href="<?= base_url('index.php/main/profile') ?>">Account Details</a>
                   <li class="divider"></li>
-                  <a class="dropdown-item" href="<?= base_url() ?>index.php/user/destroy">Sign out</a>
+                  <a class="dropdown-item" href="<?= base_url('index.php/user/destroy') ?>">Sign out</a>
                 </ul>
               </li>
             </ul>

@@ -4781,6 +4781,7 @@ class Main extends MY_Controller {
       'bookings' => $this->get_model->getBookings(),
       'days' => $this->calendar->get_total_days($month, $year),
       'month' => $this->calendar->get_month_name($month),
+      'next_month' => $this->calendar->get_month_name(str_pad($month + 1, 2, '0', STR_PAD_LEFT)),
       'm' => str_pad($month, 2, '0', STR_PAD_LEFT),
       'y' => $year,
     ];
@@ -4844,7 +4845,9 @@ class Main extends MY_Controller {
 
     $i = 0;
     foreach ($data['bookings'] as $booking) {
-      $data['bookings'][$i++]['rooms'] = $this->get_model->getBookedRooms($booking['booking_id']);
+      $data['bookings'][$i]['rooms'] = $this->get_model->getBookedRooms($booking['booking_id']);
+      $data['bookings'][$i]['payment'] = $this->get_model->getPaymentTotal($booking['booking_id']);
+      $data['bookings'][$i++]['payments'] = $this->get_model->getPayment($booking['booking_id']);
     }
 
     $this->load->view('body/frontdesk/layout/header', $data);
@@ -4859,9 +4862,26 @@ class Main extends MY_Controller {
     $data['bed'] = $this->get_model->getPrice('Bed');
     $data['person'] = $this->get_model->getPrice('Person');
     $data['discounts'] = $this->get_model->getDiscounts();
+    $data['categories'] = $this->get_model->getCategories();
+    $data['charges'] = $this->get_model->getCharges();
+
+    $i = 0;
+    foreach ($data['booked_rooms'] as $room) {
+      $data['booked_rooms'][$i]['room_charges'] = $this->get_model->getRoomCharges($room['booked_room_id']);
+      $data['booked_rooms'][$i++]['room_amenities'] = $this->get_model->getRoomAmenities($room['booked_room_id']);
+    }
 
     $this->load->view('body/frontdesk/layout/header', $data);
     $this->load->view('body/frontdesk/booking');
+    $this->load->view('body/frontdesk/layout/footer');
+  }
+
+  function charges() {
+    $data['active'] = 'charges';
+    $data['categories'] = $this->get_model->getCategories();
+    $data['charges'] = $this->get_model->getCharges();
+    $this->load->view('body/frontdesk/layout/header', $data);
+    $this->load->view('body/frontdesk/charges');
     $this->load->view('body/frontdesk/layout/footer');
   }
 
@@ -4954,6 +4974,84 @@ class Main extends MY_Controller {
   function updateDiscount() {
     $this->update_model->updateDiscount();
     $this->session->set_flashdata('success', 'Discount successfully updated!');
+    $this->redirect();
+  }
+
+  function bookRoom() {
+    $this->insert_model->bookRoom();
+    $this->session->set_flashdata('success', 'Room successfully added!');
+    $this->redirect();
+  }
+
+  function archiveBookedRoom($booked_room_id) {
+    $this->update_model->archiveBookedRoom($booked_room_id);
+    $this->session->set_flashdata('success', 'Room successfully removed!');
+    $this->redirect();
+  }
+
+  function changeRoom() {
+    $this->update_model->changeRoom();
+    $this->session->set_flashdata('success', 'Room successfully changed!');
+    $this->redirect();
+  }
+
+  function addCharges() {
+    $this->insert_model->addCharges();
+    $this->session->set_flashdata('success', 'Charges successfully added!');
+    $this->redirect();
+  }
+
+  function addCategory() {
+    $this->insert_model->addCategory();
+    $this->session->set_flashdata('success', 'Category successfully added!');
+    $this->redirect();
+  }
+
+  function deleteCategory($category_id) {
+    $this->delete_model->deleteCategory($category_id);
+    $this->session->set_flashdata('success', 'Category successfully deleted!');
+    $this->redirect();
+  }
+
+  function updateCategory() {
+    $this->update_model->updateCategory();
+    $this->session->set_flashdata('success', 'Category successfully updated!');
+    $this->redirect();
+  }
+
+  function addCharge() {
+    $this->insert_model->addCharge();
+    $this->session->set_flashdata('success', 'Charge successfully added!');
+    $this->redirect();
+  }
+
+  function deleteCharge($charge_id) {
+    $this->delete_model->deleteCharge($charge_id);
+    $this->session->set_flashdata('success', 'Charge successfully deleted!');
+    $this->redirect();
+  }
+
+  function updateCharge() {
+    $this->update_model->updateCharge();
+    $this->session->set_flashdata('success', 'Charge successfully updated!');
+    $this->redirect();
+  }
+
+  function addOtherCharges() {
+    $this->insert_model->addOtherCharges();
+    $this->session->set_flashdata('success', 'Charges successfully added!');
+    $this->redirect();
+  }
+
+  function addPayment() {
+    $this->insert_model->addPayment();
+    $this->session->set_flashdata('success', 'Payment successfully added!');
+    $this->redirect();
+  }
+
+  function updateRefund() {
+    $this->update_model->updateRefund();
+    $this->session->set_flashdata('success', 'Refund successfully updated!');
     $this->redirect();
   }
 }

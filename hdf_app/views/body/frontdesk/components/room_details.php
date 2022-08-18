@@ -1,0 +1,469 @@
+<div class="card">
+  <div class="card-header px-4 pt-4 d-flex justify-content-between align-items-center">
+    <h6>Room Details</h6>
+    <button class="btn btn-sm btn-default mb-2 mt-0" id="addRoom">Add Room</button>
+  </div>
+  <div class="card-body px-0 py-2">
+    <table class="table table-bordered border-right-0 border-left-0">
+      <thead>
+        <tr>
+          <th class="pl-4">Room</th>
+          <th>Room Rate</th>
+          <th>Discount</th>
+          <th>Subtotal</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <?php foreach ($booked_rooms as $row) { ?>
+          <tr>
+            <td class="border-left-0 pl-4">
+              Room <?= $row['room_number'] ?> - <?= $row['room_type'] ?><br>
+              <small><?= $row['check_in'] ?> - <?= $row['check_out'] ?></small>
+            </td>
+            <td>
+              ₱ <?= number_format($row['pricing_type']) ?> x <?= $row['nights'] ?><br>
+              <small>= ₱ <?= number_format($row['pricing_type'] * $row['nights']) ?></small>
+            </td>
+            <td>
+              ₱ -<?= number_format($row['pricing_type'] * $row['nights'] * ($row['percentage'] / 100)) ?><br>
+              <small><?= $row['discount_type'] ?> (<?= $row['percentage'] ?>%)</small>
+            </td>
+            <td>
+              ₱ <?= number_format($row['pricing_type'] * $row['nights']  - ($row['pricing_type'] * $row['nights'] * ($row['percentage'] / 100))) ?><br>
+              <small>For <?= $row['nights'] ?> night<?= $row['nights'] == 1 ? '' : 's' ?></small>
+            </td>
+            <td class="border-right-0 action">
+              <button class="btn btn-success btn-sm change" id='<?= json_encode($row) ?>' data-placement="top" title="Change Room" rel="tooltip">
+                <span class=" fa fa-refresh"></span>
+              </button>
+              <button class="btn btn-info btn-sm extra" id='<?= json_encode($row) ?>' data-placement="top" title="Extra Bed & Person" rel="tooltip">
+                <i class="fa-solid fa-bed"></i>
+              </button>
+              <button class="btn btn-warning btn-sm discount" id='<?= json_encode($row) ?>' data-placement="top" title="Update Discount" rel="tooltip">
+                <span class="fa fa-percent"></span>
+              </button>
+              <a href="<?= base_url('index.php/main/archiveBookedRoom/' . $row['booked_room_id']) ?>" class="btn btn-danger btn-sm confirm" data-placement="top" title="Remove Room" rel="tooltip">
+                <span class="fa fa-trash"></span>
+              </a><br>
+              <button class="btn mt-0 btn-primary btn-sm mt-1 charges" id='<?= $row['booked_room_id'] ?>' data-placement="top" title="Restaurant & Coffeeshop Charges" rel="tooltip">
+                <i class="fa-solid fa-utensils"></i>
+                <i class="fa-solid fa-mug-saucer"></i>
+              </button>
+              <button class="btn mt-0 btn-primary btn-sm mt-1 amenities" id='<?= $row['booked_room_id'] ?>' data-placement="top" title="Amenities & Other Charges" rel="tooltip">
+                <i class="fa-solid fa-tv"></i>
+                <i class="fa-solid fa-person-circle-exclamation"></i>
+              </button>
+            </td>
+          </tr>
+        <?php }  ?>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="modal fade" id="modalExtra" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-sm pt-0" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="title title-up">Update Extras</h4>
+      </div>
+      <div class="modal-body px-4">
+        <?= form_open('main/updateExtras', ['id' => 'frmExtra']) ?>
+        <input type="hidden" name="booked_room_id">
+        <div class="form-row">
+          <div class="form-group col-md-6">
+            <label>Extra Bed</label>
+            <input type="number" class="form-control" value="0" min="0" required name="extra_bed">
+          </div>
+          <div class="form-group col-md-6">
+            <label>Subtotal</label>
+            <input type="text" class="form-control" readonly value="₱ <?= number_format($bed->price) ?>" tabindex="-1" id="subtotal_bed">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group col-md-6">
+            <label>Extra Person</label>
+            <input type="number" class="form-control" value="0" min="0" required name="extra_person">
+          </div>
+          <div class="form-group col-md-6">
+            <label>Subtotal</label>
+            <input type="text" class="form-control" readonly value="₱ <?= number_format($person->price) ?>" tabindex="-1" id="subtotal_person">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group col-md-6 offset-md-6">
+            <label>Total</label>
+            <input type="text" class="form-control" readonly value="₱ 0.00" tabindex="-1" id="total">
+          </div>
+        </div>
+        <?= form_close() ?>
+      </div>
+      <div class="modal-footer">
+        <div class="left-side">
+          <input type="submit" value="Update Extras" class="btn btn-link" form="frmExtra">
+        </div>
+        <div class="divider"></div>
+        <div class="right-side">
+          <button type="button" class="btn btn-link" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="modalDiscount" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-sm pt-0" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="title title-up">Discount</h4>
+      </div>
+      <div class="modal-body px-4">
+        <?= form_open('main/updateDiscount', ['id' => 'frmDiscount']) ?>
+        <input type="hidden" name="booked_room_id">
+        <div class="form-group">
+          <label>Discount Type</label>
+          <select name="discount_id" class="form-control" required>
+            <?php foreach ($discounts as $row) { ?>
+              <option value="<?= $row['discount_id'] ?>" percentage="<?= $row['percentage'] ?>"><?= $row['discount_type'] ?> (<?= $row['percentage'] ?>%)</option>
+            <?php } ?>
+          </select>
+        </div>
+        <div class=" form-row">
+          <div class="form-group col-md-6">
+            <label>Room Rate</label>
+            <input type="text" class="form-control" id="room_rate" readonly tabindex="-1">
+          </div>
+          <div class="form-group col-md-6">
+            <label>Nights</label>
+            <input type="text" class="form-control" id="nights" readonly tabindex="-1">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Subtotal</label>
+          <input type="text" class="form-control" id="discount_subtotal" readonly tabindex="-1">
+        </div>
+        <?= form_close() ?>
+      </div>
+      <div class="modal-footer">
+        <div class="left-side">
+          <input type="submit" value="Discount" class="btn btn-link" form="frmDiscount">
+        </div>
+        <div class="divider"></div>
+        <div class="right-side">
+          <button type="button" class="btn btn-link" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="modalRoom" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-sm pt-0" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="title title-up room-title">Add Room</h4>
+      </div>
+      <div class="modal-body px-4">
+        <?= form_open('main/bookRoom', ['id' => 'frmRoom']) ?>
+        <input type="hidden" name="booked_room_id">
+        <input type="hidden" name="booking_id" value="<?= $booking->booking_id ?>">
+        <input type="hidden" name="room_id">
+        <a href="javascript:" class="btn btn-default btn-block" id="calendar">Open Express Calendar <span class="fa fa-window-restore"></span></a>
+        <div class="form-group">
+          <label>Room Type</label>
+          <input type="text" class="form-control room_type" readonly>
+        </div>
+        <div class="form-row">
+          <div class="form-group col-md-6">
+            <label>Room No.</label>
+            <input type="text" class="form-control room_number" readonly>
+          </div>
+          <div class="form-group col-md-6">
+            <label>Nights</label>
+            <input type="text" class="form-control" name="nights" readonly>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group col-md-6">
+            <label>Check In</label>
+            <input type="text" class="form-control" name="check_in" readonly>
+          </div>
+          <div class="form-group col-md-6">
+            <label>Check Out</label>
+            <input type="text" class="form-control" name="check_out" readonly>
+          </div>
+        </div>
+        <?= form_close() ?>
+      </div>
+      <div class="modal-footer">
+        <div class="left-side">
+          <input type="submit" value="Add Room" class="btn btn-link btn-room" form="frmRoom" disabled>
+        </div>
+        <div class="divider"></div>
+        <div class="right-side">
+          <button type="button" class="btn btn-link" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="modalCharges" tabindex="-1" role="dialog">
+  <div class="modal-dialog pt-0" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="title title-up mb-0">Charges</h4>
+        <h6 class="mt-0 text-muted">Restaurant & Coffeeshop</h6>
+      </div>
+      <div class="modal-body px-4">
+        <?= form_open('main/addCharges', ['id' => 'frmCharges']) ?>
+        <input type="hidden" name="booked_room_id">
+        <div class="form-row d-flex justify-content-around mb-3">
+          <div class="form-check-radio mb-0">
+            <label class="form-check-label">
+              <input class="form-check-input" type="radio" name="charge_type" value="Restaurant" checked>
+              Restaurant
+              <span class="form-check-sign"></span>
+            </label>
+          </div>
+          <div class="form-check-radio mb-0">
+            <label class="form-check-label">
+              <input class="form-check-input" type="radio" name="charge_type" value="Coffeeshop">
+              Coffeeshop
+              <span class="form-check-sign"></span>
+            </label>
+          </div>
+        </div>
+        <div class="row">
+          <div class="form-group col-md-6">
+            <label>Particulars</label>
+            <input type="text" class="form-control" name="particulars" required>
+          </div>
+          <div class="form-group col-md-6">
+            <label>Reference</label>
+            <input type="text" class="form-control" name="reference" required>
+          </div>
+        </div>
+        <div class="row">
+          <div class="form-group col-md-4">
+            <label>Quantity</label>
+            <input type="number" class="form-control" name="charges_food_quantity" min="1" value="1" required>
+          </div>
+          <div class="form-group col-md-4">
+            <label>Unit Cost</label>
+            <input type="number" class="form-control" name="charges_food_amount" min="1" value="1">
+          </div>
+          <div class="form-group col-md-4">
+            <label>Subtotal</label>
+            <input type="text" class="form-control" id="charges_food_total" readonly>
+          </div>
+        </div>
+        <?= form_close() ?>
+      </div>
+      <div class="modal-footer">
+        <div class="left-side">
+          <input type="submit" value="Add Charges" class="btn btn-link" form="frmCharges">
+        </div>
+        <div class="divider"></div>
+        <div class="right-side">
+          <button type="button" class="btn btn-link" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="modalAmenities" tabindex="-1" role="dialog">
+  <div class="modal-dialog pt-0" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="title title-up mb-0">Amenities</h4>
+        <h6 class="mt-0 text-muted">And Other Charges</h6>
+      </div>
+      <div class="modal-body px-4">
+        <?= form_open('main/addOtherCharges', ['id' => 'frmAmenities']) ?>
+        <input type="hidden" name="booked_room_id">
+        <div class="form-group">
+          <label>Category</label>
+          <select id="category" class="form-control" required>
+            <option value="">- select category -</option>
+            <?php foreach ($categories as $row) { ?>
+              <option value="<?= $row['category_id'] ?>"><?= $row['category'] ?></option>
+            <?php } ?>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Charge Type</label>
+          <select name="charge_id" id="charge_type" class="form-control" required>
+            <option value="">- select charge type -</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <div class="form-group col-md-4">
+            <label>Quantity</label>
+            <input type="number" class="form-control" name="charge_quantity" min="1" value="1" required>
+          </div>
+          <div class="form-group col-md-4">
+            <label>Unit Cost</label>
+            <input type="text" class="form-control" name="charge_amount" readonly>
+          </div>
+          <div class="form-group col-md-4">
+            <label>Subtotal</label>
+            <input type="text" class="form-control" id="charge_total_amount" readonly>
+          </div>
+        </div>
+        <?= form_close() ?>
+      </div>
+      <div class="modal-footer">
+        <div class="left-side">
+          <input type="submit" value="Add Charges" class="btn btn-link" form="frmAmenities">
+        </div>
+        <div class="divider"></div>
+        <div class="right-side">
+          <button type="button" class="btn btn-link" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const base_url = '<?= base_url() ?>';
+  const price_bed = '<?= $bed->price ?>';
+  const price_person = '<?= $person->price ?>';
+  const charges = JSON.parse('<?= json_encode($charges) ?>');
+  let charge_amount = 0;
+  let quantity = 1;
+  let subtotal_bed = 0;
+  let subtotal_person = 0;
+  let room_rate = 0;
+  let nights = 0;
+
+  $('[name=check_in], [name=check_out]').on('dp.change', function(e) {
+    const checkin = moment($('[name=check_in]').val());
+    const checkout = moment($('[name=check_out]').val());
+    const nights = checkout.diff(checkin, 'days');
+    $('[name=nights]').val(nights)
+  });
+
+  $('.extra').click(function() {
+    const data = JSON.parse(this.id);
+    subtotal_bed = data.extra_bed * price_bed;
+    subtotal_person = data.extra_person * price_person;
+    $('[name=booked_room_id]').val(data.booked_room_id);
+    $('[name=extra_bed]').val(data.extra_bed);
+    $('[name=extra_person]').val(data.extra_person);
+    extraPrices();
+    $('#modalExtra').modal('show');
+  });
+
+  $('.discount').click(function() {
+    const data = JSON.parse(this.id);
+    const percentage = data.percentage / 100;
+    room_rate = data.pricing_type;
+    nights = data.nights;
+    subtotal = room_rate * nights;
+    $('[name=booked_room_id]').val(data.booked_room_id);
+    $('[name=discount_id').val(data.discount_id);
+    $('#room_rate').val('₱ ' + formatNumber(room_rate) + '.00');
+    $('#nights').val(nights);
+    $('#discount_subtotal').val('₱ ' + formatNumber(subtotal - subtotal * percentage) + '.00');
+    $('#modalDiscount').modal('show');
+  });
+
+  $('[name=extra_bed]').on('input', function() {
+    subtotal_bed = $(this).val() * price_bed;
+    extraPrices();
+  });
+
+  $('[name=extra_person]').on('input', function() {
+    subtotal_person = $(this).val() * price_person;
+    extraPrices();
+  });
+
+  function extraPrices() {
+    $('#subtotal_bed').val('₱ ' + formatNumber(subtotal_bed) + '.00');
+    $('#subtotal_person').val('₱ ' + formatNumber(subtotal_person) + '.00');
+    $('#total').val('₱ ' + formatNumber(subtotal_bed + subtotal_person) + '.00');
+  }
+
+  $('[name=discount_id').change(function() {
+    const percentage = $(this).find(':selected').attr('percentage') / 100;
+    const subtotal = room_rate * nights;
+    $('#discount_subtotal').val('₱ ' + formatNumber(subtotal - subtotal * percentage) + '.00');
+  });
+
+  $('#calendar').click(function() {
+    const size = ['height=' + screen.height / 2, 'width=' + screen.width / 2].join(',');
+    const calendar = window.open(`${base_url}index.php/main/calendarWindow/2022/08`, "Calendar", size);
+    calendar.onbeforeunload = function() {
+      $('.btn-room').attr('disabled', false)
+      $('[name=check_in]').val(localStorage.getItem('check_in'));
+      $('[name=check_out]').val(localStorage.getItem('check_out'));
+      $('[name=room_id]').val(localStorage.getItem('room_id'));
+      $('.room_type').val(localStorage.getItem('room_type'));
+      $('.room_number').val(localStorage.getItem('room_number'));
+      $('[name=nights]').val(localStorage.getItem('nights'));
+    }
+  });
+
+  $('#addRoom').click(function() {
+    $('#frmRoom').attr('action', `${base_url}index.php/main/bookRoom`).trigger('reset');
+    $('.room-title').text('Add Room');
+    $('.btn-room').val('Add Room')
+    $('#modalRoom').modal('show');
+  });
+
+  $('.change').click(function() {
+    const data = JSON.parse(this.id);
+    $('[name=booked_room_id]').val(data.booked_room_id);
+
+    $('[name=check_in]').val(data.check_in);
+    $('[name=check_out]').val(data.check_out);
+    $('.room_type').val(data.room_type);
+    $('.room_number').val(data.room_number);
+    $('[name=nights]').val(data.nights);
+
+    $('#frmRoom').attr('action', `${base_url}index.php/main/changeRoom`);
+    $('.room-title').text('Change Room');
+    $('.btn-room').val('Change Room');
+    $('#modalRoom').modal('show');
+  });
+
+  $('.charges').click(function() {
+    const booked_room_id = this.id;
+    $('[name=booked_room_id]').val(booked_room_id);
+    $('#modalCharges').modal('show');
+  });
+
+  $('.amenities').click(function() {
+    const booked_room_id = this.id;
+    $('[name=booked_room_id]').val(booked_room_id);
+    $('#modalAmenities').modal('show');
+  });
+
+  $('#category').change(function() {
+    const charge = charges.filter(charge => charge.category_id == this.value);
+    $("#charge_type").empty().trigger('change');
+    $("#charge_type").append('<option>- select charge type -</option>');
+    charge.map((c) => {
+      const option = $('<option></option>')
+        .attr("value", c.charge_id)
+        .attr("amount", c.charge_amount)
+        .text(`₱ ${formatNumber(c.charge_amount)} - ${c.charge}`);
+      $("#charge_type").append(option);
+    });
+  });
+
+  $('#charge_type').change(function() {
+    charge_amount = $(this).find(':selected').attr('amount') || 0;
+    $('[name=charge_amount]').val(`₱ ${formatNumber(charge_amount)}`);
+    $('#charge_total_amount').val(`₱ ${formatNumber(charge_amount * quantity)}.00`);
+  });
+
+  $('[name=charge_quantity]').on('input', function() {
+    quantity = $(this).val();
+    $('#charge_total_amount').val(`₱ ${formatNumber(charge_amount * quantity)}.00`);
+  });
+</script>

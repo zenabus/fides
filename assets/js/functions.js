@@ -72,6 +72,7 @@ $(document).ready(function(){
 });
 
 const formatNumber = num => num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,');
+const pad = (num, places=2) => String(num).padStart(places, '0')
 
 function getMonth() {
   const month = new Date()
