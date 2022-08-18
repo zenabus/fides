@@ -14,13 +14,11 @@
       <script>
         $(document).ready(function() {
           $('[rel="tooltip"]').click(function() {
-            $('[rel="tooltip"]').tooltip("hide");
-            $('[rel="tooltip"]').tooltip({
-              trigger: 'hover'
-            });
+            $(this).tooltip('hide')
+            $('.tooltip').remove();
           });
-          $('[rel="tooltip"]').focusout(function() {
-            $('[rel="tooltip"]').tooltip("hide");
+          $('[rel="tooltip"]').hover(()=>{}, function() {
+            $(this).tooltip('hide')
             $('.tooltip').remove();
           });
         });

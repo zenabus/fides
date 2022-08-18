@@ -71,7 +71,8 @@
                           <?php $data['row'] = $row ?>
                           <?php $this->load->view('body/frontdesk/components/booking-table-data', $data) ?>
                           <td class="action">
-                            <a href="<?= base_url('index.php/main/updateReservationStatus/4/' . $row['booking_id']) ?>" class="btn btn-sm btn-danger confirm">Cancel</a>
+                            <a href="<?= base_url('index.php/main/booking/' . $row['booking_number']) ?>" class="btn btn-sm btn-default">View</a>
+                            <a href="<?= base_url('index.php/main/updateReservationStatus/0/' . $row['booking_id']) ?>" class="btn btn-sm btn-danger confirm">Cancel</a>
                           </td>
                         </tr>
                     <?php }

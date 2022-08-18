@@ -4864,12 +4864,19 @@ class Main extends MY_Controller {
     $data['discounts'] = $this->get_model->getDiscounts();
     $data['categories'] = $this->get_model->getCategories();
     $data['charges'] = $this->get_model->getCharges();
+    $data['payment'] = $this->get_model->getPaymentTotal($data['booking']->booking_id);
 
     $i = 0;
     foreach ($data['booked_rooms'] as $room) {
-      $data['booked_rooms'][$i]['room_charges'] = $this->get_model->getRoomCharges($room['booked_room_id']);
-      $data['booked_rooms'][$i++]['room_amenities'] = $this->get_model->getRoomAmenities($room['booked_room_id']);
+      $data['booked_rooms'][$i]['restaurant'] = $this->get_model->getRoomCharges($room['booked_room_id'], 'Restaurant');
+      $data['booked_rooms'][$i]['coffeeshop'] = $this->get_model->getRoomCharges($room['booked_room_id'], 'Coffeeshop');
+      $data['booked_rooms'][$i++]['amenities'] = $this->get_model->getRoomAmenities($room['booked_room_id']);
     }
+
+    $room_charges = $this->get_model->getRoomChargesTotal($data['booking']->booking_id);
+    $amenities = $this->get_model->getRoomAmenitiesTotal($data['booking']->booking_id);
+    // $this->dd($room_charges);
+    $data['charges_total'] = $room_charges->total + $amenities->total;
 
     $this->load->view('body/frontdesk/layout/header', $data);
     $this->load->view('body/frontdesk/booking');
@@ -5052,6 +5059,12 @@ class Main extends MY_Controller {
   function updateRefund() {
     $this->update_model->updateRefund();
     $this->session->set_flashdata('success', 'Refund successfully updated!');
+    $this->redirect();
+  }
+
+  function completeOrder($booking_id) {
+    $this->update_model->updateReservationStatus(-1, $booking_id);
+    $this->session->set_flashdata('success', 'Order successfully completed!');
     $this->redirect();
   }
 }

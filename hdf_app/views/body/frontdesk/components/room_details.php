@@ -11,7 +11,7 @@
           <th>Room Rate</th>
           <th>Discount</th>
           <th>Subtotal</th>
-          <th>Action</th>
+          <th class="hidable">Action</th>
         </tr>
       </thead>
       <tbody>
@@ -33,7 +33,7 @@
               ₱ <?= number_format($row['pricing_type'] * $row['nights']  - ($row['pricing_type'] * $row['nights'] * ($row['percentage'] / 100))) ?><br>
               <small>For <?= $row['nights'] ?> night<?= $row['nights'] == 1 ? '' : 's' ?></small>
             </td>
-            <td class="border-right-0 action">
+            <td class="border-right-0 action hidable">
               <button class="btn btn-success btn-sm change" id='<?= json_encode($row) ?>' data-placement="top" title="Change Room" rel="tooltip">
                 <span class=" fa fa-refresh"></span>
               </button>
@@ -116,7 +116,7 @@
   <div class="modal-dialog modal-sm pt-0" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h4 class="title title-up">Discount</h4>
+        <h4 class="title title-up">Update Discount</h4>
       </div>
       <div class="modal-body px-4">
         <?= form_open('main/updateDiscount', ['id' => 'frmDiscount']) ?>
@@ -247,16 +247,16 @@
         </div>
         <div class="row">
           <div class="form-group col-md-4">
-            <label>Quantity</label>
-            <input type="number" class="form-control" name="charges_food_quantity" min="1" value="1" required>
-          </div>
-          <div class="form-group col-md-4">
             <label>Unit Cost</label>
             <input type="number" class="form-control" name="charges_food_amount" min="1" value="1">
           </div>
           <div class="form-group col-md-4">
+            <label>Quantity</label>
+            <input type="number" class="form-control" name="charges_food_quantity" min="1" value="1" required>
+          </div>
+          <div class="form-group col-md-4">
             <label>Subtotal</label>
-            <input type="text" class="form-control" id="charges_food_total" readonly>
+            <input type="text" class="form-control" id="charges_food_total" value="₱ 1.00" readonly>
           </div>
         </div>
         <?= form_close() ?>
@@ -306,7 +306,7 @@
           </div>
           <div class="form-group col-md-4">
             <label>Unit Cost</label>
-            <input type="text" class="form-control" name="charge_amount" readonly>
+            <input type="text" class="form-control" id="charge_amount" readonly>
           </div>
           <div class="form-group col-md-4">
             <label>Subtotal</label>
@@ -333,12 +333,15 @@
   const price_bed = '<?= $bed->price ?>';
   const price_person = '<?= $person->price ?>';
   const charges = JSON.parse('<?= json_encode($charges) ?>');
+  const reservation_status = '<?=$booking->reservation_status?>';
   let charge_amount = 0;
   let quantity = 1;
   let subtotal_bed = 0;
   let subtotal_person = 0;
   let room_rate = 0;
   let nights = 0;
+  let food_quantity = 1;
+  let food_cost = 1;
 
   $('[name=check_in], [name=check_out]').on('dp.change', function(e) {
     const checkin = moment($('[name=check_in]').val());
@@ -458,12 +461,22 @@
 
   $('#charge_type').change(function() {
     charge_amount = $(this).find(':selected').attr('amount') || 0;
-    $('[name=charge_amount]').val(`₱ ${formatNumber(charge_amount)}`);
+    $('#charge_amount').val(`₱ ${formatNumber(charge_amount)}`);
     $('#charge_total_amount').val(`₱ ${formatNumber(charge_amount * quantity)}.00`);
   });
 
   $('[name=charge_quantity]').on('input', function() {
     quantity = $(this).val();
     $('#charge_total_amount').val(`₱ ${formatNumber(charge_amount * quantity)}.00`);
+  });
+
+  $('[name=charges_food_quantity]').on('input', function() {
+    food_quantity = $(this).val();
+    $('#charges_food_total').val(`₱ ${formatNumber(food_cost * food_quantity)}.00`);
+  });
+
+  $('[name=charges_food_amount]').on('input', function() {
+    food_cost = $(this).val();
+    $('#charges_food_total').val(`₱ ${formatNumber(food_cost * food_quantity)}.00`);
   });
 </script>

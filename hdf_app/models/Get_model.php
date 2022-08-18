@@ -566,12 +566,9 @@ class Get_model extends CI_Model {
       ->get('bookings')->result_array();
   }
 
-  function getBookingsByStatus($status = 0) {
+  function getBookingsByStatus($status = [0,-1]) {
     return $this->db->join('guests', 'guests.guest_id=bookings.guest_id')
-      // ->join('booked_rooms', 'booked_rooms.booking_id=bookings.booking_id')
-      // ->join('rooms', 'rooms.id=booked_rooms.room_id')
-      // ->join('room_type', 'room_type.id=rooms.room_type_id')
-      ->where('reservation_status', $status)
+      ->where_in('reservation_status', $status)
       ->get('bookings')->result_array();
   }
 
@@ -624,11 +621,32 @@ class Get_model extends CI_Model {
     return $this->db->select_sum('amount')->where('booking_id', $booking_id)->get('booking_payment')->row();
   }
 
-  function getRoomCharges($booked_room_id) {
-    return $this->db->where('booked_room_id', $booked_room_id)->get('charges_food')->result_array();
+  function getRoomCharges($booked_room_id, $charge_type) {
+    return $this->db->where('booked_room_id', $booked_room_id)->where('charge_type', $charge_type)->get('charges_food')->result_array();
   }
 
   function getRoomAmenities($booked_room_id) {
-    return $this->db->where('booked_room_id', $booked_room_id)->get('charges_other')->result_array();
+    return $this->db->join('charges', 'charges.charge_id=charges_other.charge_id')
+                    ->join('categories', 'categories.category_id=charges.category_id')
+                    ->where('booked_room_id', $booked_room_id)
+                    ->order_by('category')
+                    ->get('charges_other')->result_array();
+  }
+
+  function getRoomChargesTotal($booking_id) {
+    return $this->db->select_sum('(charges_food_quantity * charges_food_amount)', 'total')
+                    ->join('booked_rooms', 'booked_rooms.booked_room_id=charges_food.booked_room_id')
+                    ->join('bookings', 'bookings.booking_id=booked_rooms.booking_id')
+                    ->where('bookings.booking_id', $booking_id)
+                    ->get('charges_food')->row();
+  }
+
+  function getRoomAmenitiesTotal($booking_id) {
+    return $this->db->select_sum('(charge_quantity * charge_amount)', 'total')
+                    ->join('charges', 'charges.charge_id=charges_other.charge_id')
+                    ->join('booked_rooms', 'booked_rooms.booked_room_id=charges_other.booked_room_id')
+                    ->join('bookings', 'bookings.booking_id=booked_rooms.booking_id')
+                    ->where('bookings.booking_id', $booking_id)
+                    ->get('charges_other')->row();
   }
 }
