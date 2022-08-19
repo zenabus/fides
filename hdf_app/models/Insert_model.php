@@ -118,10 +118,6 @@ class Insert_model extends CI_Model {
       'booking_type' => $_POST['booking_type'],
       'arrival' => $_POST['check_in'],
       'departure' => $_POST['check_out'],
-      'amount' => $_POST['amount'] ?? 0,
-      'payment_option' => $_POST['payment_option'],
-      'card_number' => $_POST['card_number'] ?? '',
-      'card_name' => $_POST['card_name'] ?? '',
       'remarks' => $_POST['remarks'],
       'reservation_type' => $_POST['reservation_type'],
       'reservation_status' => $_POST['reservation_status']
@@ -189,6 +185,14 @@ class Insert_model extends CI_Model {
   }
 
   function addPayment() {
-    $this->db->insert('booking_payment', $_POST);
+    $data = [
+      'booking_id' => $_POST['booking_id'],
+      'payment_option' => $_POST['payment_option'],
+      'amount' => $_POST['amount'],
+      'card_number' => $_POST['card_number'],
+      'card_name' => $_POST['card_name'],
+    ];
+
+    $this->db->insert('booking_payment', $data);
   }
 }

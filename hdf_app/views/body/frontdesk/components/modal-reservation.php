@@ -124,7 +124,7 @@
         </div>
         <div class="form-group">
           <label>Notes / Remarks</label>
-          <textarea name="remarks" rows="10" class="form-control"></textarea>
+          <textarea name="remarks" rows="3" class="form-control"></textarea>
         </div>
         <?= form_close() ?>
       </div>

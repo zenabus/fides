@@ -14,27 +14,25 @@
           <h6>Guest Details</h6>
         </div>
         <div class="card-body p-0">
+          <?= form_open('main/updateGuest', ['id' => 'frmGuest']) ?>
+          <input type="hidden" name="guest_id" value="<?= $booking->guest_id ?>">
           <div class="form-row px-4 py-3">
-            <div class="form-group col-md-4">
+            <div class="form-group col-md-4 mb-0">
               <label>Arrival</label>
-              <input type="text" class="form-control datepicker" name="arrival" value="<?= $booking->arrival ?>">
+              <input type="text" class="form-control-plaintext" tabindex="-1" value="<?= $booking->arrival ?>" readonly>
             </div>
-            <div class="form-group col-md-4">
+            <div class="form-group col-md-4 mb-0">
               <label>Departure</label>
-              <input type="text" class="form-control datepicker" name="departure" value="<?= $booking->departure ?>">
+              <input type="text" class="form-control-plaintext" tabindex="-1" value="<?= $booking->departure ?>" readonly>
             </div>
             <?php
             $arrival = new DateTime($booking->arrival);
             $departure = new DateTime($booking->departure);
             $nights = $arrival->diff($departure);
             ?>
-            <div class="form-group col-md-1">
+            <div class="form-group col-md-4 mb-0">
               <label>Nights</label>
-              <input type="text" class="form-control text-center" value="<?= $nights->d ?>" readonly>
-            </div>
-            <div class="form-group col-md-3">
-              <label>&nbsp;</label>
-              <input type="button" class="btn btn-default btn-block mt-0" value="Change Dates">
+              <input type="text" class="form-control-plaintext" tabindex="-1" value="<?= $nights->d ?>" readonly>
             </div>
           </div>
 
@@ -42,64 +40,49 @@
             <div class="form-row">
               <div class="form-group col-md-4">
                 <label>First Name</label>
-                <input type="text" class="form-control" value="<?= $booking->first_name ?>">
+                <input type="text" class="form-control-plaintext editable" name="first_name" value="<?= $booking->first_name ?>" tabindex="-1" readonly>
               </div>
               <div class="form-group col-md-4">
                 <label>Middle Name</label>
-                <input type="text" class="form-control" value="<?= $booking->middle_name ?>">
+                <input type="text" class="form-control-plaintext editable" name="middle_name" value="<?= $booking->middle_name ?>" tabindex="-1" readonly>
               </div>
               <div class="form-group col-md-4">
                 <label>Last Name</label>
-                <input type="text" class="form-control" value="<?= $booking->last_name ?>">
+                <input type="text" class="form-control-plaintext editable" name="last_name" value="<?= $booking->last_name ?>" tabindex="-1" readonly>
               </div>
             </div>
             <div class="form-row">
               <div class="form-group col-md-4">
                 <label>Contact Number</label>
-                <input type="text" class="form-control" value="<?= $booking->contact ?>">
+                <input type="text" class="form-control-plaintext editable" name="contact" value="<?= $booking->contact ?>" tabindex="-1" readonly>
               </div>
               <div class="form-group col-md-4">
                 <label>Email</label>
-                <input type="text" class="form-control" value="<?= $booking->email ?>">
+                <input type="text" class="form-control-plaintext editable" name="email" value="<?= $booking->email ?>" tabindex="-1" readonly>
               </div>
               <div class="form-group col-md-4">
                 <label>Address</label>
-                <input type="text" class="form-control" value="<?= $booking->address ?>">
+                <input type="text" class="form-control-plaintext editable" name="address" value="<?= $booking->address ?>" tabindex="-1" readonly>
               </div>
             </div>
             <div class="form-row">
-              <div class="form-group col-md-6">
+              <div class="form-group col-md-6 mb-0">
                 <label>Company Name</label>
-                <input type="text" class="form-control" value="<?= $booking->company_name ?>">
+                <input type="text" class="form-control-plaintext editable" name="company_name" value="<?= $booking->company_name ?>" tabindex="-1" readonly>
               </div>
-              <div class="form-group col-md-6">
+              <div class="form-group col-md-6 mb-0">
                 <label>Company Address</label>
-                <input type="text" class="form-control" value="<?= $booking->company_address ?>">
+                <input type="text" class="form-control-plaintext editable" name="company_address" value="<?= $booking->company_address ?>" tabindex="-1" readonly>
               </div>
             </div>
           </div>
         </div>
         <div class="card-footer my-2">
-          <button class="btn btn-default">Update Details</button>
-          <button class="btn btn-success text-light" onclick="popupCenter('<?= base_url('index.php/main/printForm/') ?>',  'myPop1', 600,600); return false;">Print Form </button>
+          <button class="btn btn-default updateDetails" type="button">Update Details</button>
+          <button class="btn btn-default saveChanges" form="frmGuest">Save Changes</button>
+          <button class="btn btn-primary cancelUpdate" type="button">Cancel Update</button>
         </div>
       </div>
-
-      <div class="card">
-        <div class="card-header border-bottom px-4 pt-4 pb-2">
-          <h6>Notes</h6>
-        </div>
-        <div class="card-body px-4">
-          <textarea class="form-control px-2 pt-1" name="notes"></textarea>
-        </div>
-        <div class="card-footer my-2 border-top px-4">
-          <input type="submit" value="Save Notes" class="btn btn-default">
-        </div>
-      </div>
-    </div>
-
-    <div class="col-md-6">
-      <?php $this->load->view('body/frontdesk/components/collection_details') ?>
 
       <div class="card">
         <div class="card-header border-bottom px-4 pt-4 pb-2">
@@ -132,12 +115,37 @@
           </table>
         </div>
       </div>
+
+    </div>
+
+    <div class="col-md-6">
+      <?php $this->load->view('body/frontdesk/components/collection_details') ?>
+
+      <div class="card">
+        <div class="card-header border-bottom px-4 pt-4 pb-2">
+          <h6>Notes</h6>
+        </div>
+        <?= form_open('main/updateNotes', ['id' => 'frmNotes']) ?>
+        <input type="hidden" name="booking_id" value="<?= $booking->booking_id ?>">
+        <div class="card-body px-4">
+          <textarea class="form-control-plaintext px-2 pt-1" tabindex="-1" name="remarks" rows="5" readonly><?= $booking->remarks ?></textarea>
+        </div>
+        <div class="card-footer my-2 border-top px-4">
+          <input type="button" value="Update Notes" class="btn btn-default updateNotes">
+          <input type="submit" value="Save Notes" class="btn btn-default saveNotes" form="frmNotes">
+          <input type="button" value="Cancel Update" class="btn btn-primary cancelNotes">
+        </div>
+      </div>
     </div>
   </div>
 </div>
 
 <script type="text/javascript">
   $(document).ready(function() {
+    $('.cancelUpdate').hide();
+    $('.saveChanges').hide();
+    $('.saveNotes').hide();
+    $('.cancelNotes').hide();
     $('.datepicker').datetimepicker({
       icons: {
         time: "fa fa-clock-o",
@@ -153,7 +161,7 @@
       format: 'L',
     });
 
-    if(reservation_status == -1) {
+    if (reservation_status == -1) {
       $('.btn').attr('disabled', true);
       $('.btn').hide();
       $('.hidable').hide();
@@ -163,10 +171,35 @@
     }
   });
 
+  $('.updateDetails').click(function() {
+    $('.editable').removeClass('form-control-plaintext').addClass('form-control').removeAttr('readonly').removeAttr('tabindex');
+    $('.updateDetails').hide();
+    $('.cancelUpdate').show();
+    $('.saveChanges').show();
+    $('[name=first_name]').focus();
+  });
 
-  $('[name=card_number]').on('input', function() {
-    const value = $(this).val();
-    const newValue = value.replace(/[^\dA-Z]/g, '').replace(/(.{4})/g, '$1 ').trim();
-    $(this).val(newValue);
+  $('.cancelUpdate').click(function() {
+    $('.editable').addClass('form-control-plaintext').removeClass('form-control').attr('readonly', true).attr('tabindex', -1);
+    $('.updateDetails').show();
+    $('.cancelUpdate').hide();
+    $('.saveChanges').hide();
+    $('#frmGuest').trigger('reset');
+  });
+
+  $('.updateNotes').click(function() {
+    $('textarea').removeClass('form-control-plaintext').addClass('form-control').removeAttr('readonly').removeAttr('tabindex');
+    $('.updateNotes').hide();
+    $('.cancelNotes').show();
+    $('.saveNotes').show();
+    $('[name=first_name]').focus();
+  });
+
+  $('.cancelNotes').click(function() {
+    $('textarea').addClass('form-control-plaintext').removeClass('form-control').attr('readonly', true).attr('tabindex', -1);
+    $('.updateNotes').show();
+    $('.cancelNotes').hide();
+    $('.saveNotes').hide();
+    $('#frmNotes').trigger('reset');
   });
 </script>

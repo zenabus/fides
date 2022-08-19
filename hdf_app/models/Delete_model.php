@@ -81,4 +81,14 @@ class Delete_model extends CI_Model {
   function deleteCharge($charge_id) {
     $this->db->where('charge_id', $charge_id)->delete('charges');
   }
+
+  function removeCharge($table, $booked_room_id) {
+    $this->db->where($table . '_id', $booked_room_id)->delete($table);
+  }
+
+  function removeRoom($booked_room_id) {
+    $this->db->where('booked_room_id', $booked_room_id)->delete('booked_rooms');
+    $this->db->where('booked_room_id', $booked_room_id)->delete('charges_food');
+    $this->db->where('booked_room_id', $booked_room_id)->delete('charges_other');
+  }
 }

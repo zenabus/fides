@@ -193,7 +193,7 @@ class Update_model extends CI_Model {
     $this->db->where('booking_id', $booking_id)->update('bookings', ['reservation_status' => $reservation_status]);
   }
 
-  function confirm() {
+  function updateBooking() {
     $booking_id = $_POST['booking_id'];
     unset($_POST['booking_id']);
     $this->db->where('booking_id', $booking_id)->update('bookings', $_POST);
@@ -207,10 +207,6 @@ class Update_model extends CI_Model {
 
   function updateDiscount() {
     $this->db->where('booked_room_id', $_POST['booked_room_id'])->update('booked_rooms', ['discount_id' => $_POST['discount_id']]);
-  }
-
-  function archiveBookedRoom($booked_room_id) {
-    $this->db->where('booked_room_id', $booked_room_id)->update('booked_rooms', ['booked_room_archived' => 1]);
   }
 
   function changeRoom() {
@@ -233,5 +229,13 @@ class Update_model extends CI_Model {
 
   function updateRefund() {
     $this->db->where('booking_id', $_POST['booking_id'])->update('bookings', $_POST);
+  }
+
+  function removeExtra($column, $booked_room_id) {
+    $this->db->where('booked_room_id', $booked_room_id)->update('booked_rooms', [$column => 0]);
+  }
+
+  function updateOccupant($occupant) {
+    $this->db->where('booked_room_id', $_POST['booked_room_id'])->update('booked_rooms', ['occupant' => $occupant]);
   }
 }

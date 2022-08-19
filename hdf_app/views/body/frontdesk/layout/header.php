@@ -33,7 +33,8 @@ if (!$this->session->userdata('connect')) {
       float: right;
     }
 
-    .form-check-label {
+    .form-check-label,
+    .pointer {
       cursor: pointer;
     }
 
@@ -100,6 +101,11 @@ if (!$this->session->userdata('connect')) {
 
     .modal {
       z-index: 99999;
+    }
+
+    textarea {
+      resize: none;
+      max-height: unset !important;
     }
   </style>
 
@@ -239,13 +245,12 @@ if (!$this->session->userdata('connect')) {
             </a>
           </li>
 
-          <li class="<?= $active == 'charges' ? 'active' : '' ?>">
+          <!-- <li class="<?= $active == 'charges' ? 'active' : '' ?>">
             <a href="<?= base_url('index.php/main/charges') ?>">
               <i class="fa fa-receipt"></i>
               <p>Extra Charges</p>
             </a>
-          </li>
-          </li>
+          </li> -->
         </ul>
       </div>
     </div>

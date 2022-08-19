@@ -41,10 +41,11 @@ Franz
 Div to image not working
 // Pad booking number to 5 digits
 Calendar following month
-Delete charges, extras, discount when deleting booked room
-Change booked_room_id when change room
+// Delete charges, extras, discount when deleting booked room
+// Change booked_room_id when change room
 Ask if extras are per day
 Test online booking
 Test reservation and booking
-Complete order
-Add remove button on collection details
+// Complete order
+// Add remove button on collection details
+// Remove extra if zero on update

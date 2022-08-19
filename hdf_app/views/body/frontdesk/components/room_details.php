@@ -8,32 +8,35 @@
       <thead>
         <tr>
           <th class="pl-4">Room</th>
-          <th>Room Rate</th>
-          <th>Discount</th>
-          <th>Subtotal</th>
+          <th>Duration</th>
+          <th>Occupant</th>
           <th class="hidable">Action</th>
         </tr>
       </thead>
       <tbody>
-        <?php foreach ($booked_rooms as $row) { ?>
+        <?php foreach ($booked_rooms as $i => $row) { ?>
           <tr>
             <td class="border-left-0 pl-4">
-              Room <?= $row['room_number'] ?> - <?= $row['room_type'] ?><br>
-              <small><?= $row['check_in'] ?> - <?= $row['check_out'] ?></small>
+              Room <?= $row['room_number'] ?><br>
+              <small><?= $row['room_type'] ?></small><br>
+              <small>₱ <?= number_format($row['pricing_type']) ?> per night</small>
             </td>
             <td>
-              ₱ <?= number_format($row['pricing_type']) ?> x <?= $row['nights'] ?><br>
-              <small>= ₱ <?= number_format($row['pricing_type'] * $row['nights']) ?></small>
+              <?= $row['nights'] ?> night<?= $row['nights'] == 1 ? '' : 's' ?><br>
+              <?php $total = $row['pricing_type'] * $row['nights'] ?>
+              <?php $discount = $total * ($row['percentage'] / 100) ?>
+              <?php $subtotal = $total - $discount ?>
+              <small><?= $row['check_in'] ?> - <?= $row['check_out'] ?></small><br>
+              <small>₱ <?= number_format($subtotal) ?> (<?= $row['discount_type'] ?> <?= $row['percentage'] ?>%)</small>
             </td>
             <td>
-              ₱ -<?= number_format($row['pricing_type'] * $row['nights'] * ($row['percentage'] / 100)) ?><br>
-              <small><?= $row['discount_type'] ?> (<?= $row['percentage'] ?>%)</small>
-            </td>
-            <td>
-              ₱ <?= number_format($row['pricing_type'] * $row['nights']  - ($row['pricing_type'] * $row['nights'] * ($row['percentage'] / 100))) ?><br>
-              <small>For <?= $row['nights'] ?> night<?= $row['nights'] == 1 ? '' : 's' ?></small>
+              <?php [$name, $contact, $email] = explode(' / ', $row['occupant']) ?>
+              <?= $name ?><br><small><?= $email ?><br><?= $contact ?></small>
             </td>
             <td class="border-right-0 action hidable">
+              <button class="btn btn-secondary btn-sm occupant" id='<?= json_encode($row) ?>' data-placement="top" title="Room Occupant" rel="tooltip">
+                <span class=" fa fa-user"></span>
+              </button>
               <button class="btn btn-success btn-sm change" id='<?= json_encode($row) ?>' data-placement="top" title="Change Room" rel="tooltip">
                 <span class=" fa fa-refresh"></span>
               </button>
@@ -43,9 +46,7 @@
               <button class="btn btn-warning btn-sm discount" id='<?= json_encode($row) ?>' data-placement="top" title="Update Discount" rel="tooltip">
                 <span class="fa fa-percent"></span>
               </button>
-              <a href="<?= base_url('index.php/main/archiveBookedRoom/' . $row['booked_room_id']) ?>" class="btn btn-danger btn-sm confirm" data-placement="top" title="Remove Room" rel="tooltip">
-                <span class="fa fa-trash"></span>
-              </a><br>
+              <br>
               <button class="btn mt-0 btn-primary btn-sm mt-1 charges" id='<?= $row['booked_room_id'] ?>' data-placement="top" title="Restaurant & Coffeeshop Charges" rel="tooltip">
                 <i class="fa-solid fa-utensils"></i>
                 <i class="fa-solid fa-mug-saucer"></i>
@@ -54,6 +55,11 @@
                 <i class="fa-solid fa-tv"></i>
                 <i class="fa-solid fa-person-circle-exclamation"></i>
               </button>
+              <?php if ($i) { ?>
+                <a href="<?= base_url('index.php/main/removeRoom/' . $row['booked_room_id']) ?>" class="btn btn-danger btn-sm confirm mt-1" data-placement="top" title="Remove Room" rel="tooltip">
+                  <span class="fa fa-trash"></span>
+                </a>
+              <?php } ?>
             </td>
           </tr>
         <?php }  ?>
@@ -328,12 +334,48 @@
   </div>
 </div>
 
+<div class="modal fade" id="modalOccupant" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-sm pt-0" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="title title-up mb-0">Occupant</h4>
+      </div>
+      <div class="modal-body px-4">
+        <?= form_open('main/updateOccupant', ['id' => 'frmOccupant']) ?>
+        <input type="hidden" name="booked_room_id">
+        <div class="form-group">
+          <label>Guest Name</label>
+          <input type="text" class="form-control" name="guest" required>
+        </div>
+        <div class="form-group">
+          <label>Contact Number</label>
+          <input type="text" class="form-control" name="contact">
+        </div>
+        <div class="form-group">
+          <label>Email Address</label>
+          <input type="email" class="form-control" name="email">
+        </div>
+        <?= form_close() ?>
+      </div>
+      <div class="modal-footer">
+        <div class="left-side">
+          <input type="submit" value="Update" class="btn btn-link" form="frmOccupant">
+        </div>
+        <div class="divider"></div>
+        <div class="right-side">
+          <button type="button" class="btn btn-link" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
   const base_url = '<?= base_url() ?>';
   const price_bed = '<?= $bed->price ?>';
   const price_person = '<?= $person->price ?>';
   const charges = JSON.parse('<?= json_encode($charges) ?>');
-  const reservation_status = '<?=$booking->reservation_status?>';
+  const reservation_status = '<?= $booking->reservation_status ?>';
   let charge_amount = 0;
   let quantity = 1;
   let subtotal_bed = 0;
@@ -408,6 +450,12 @@
       $('.room_type').val(localStorage.getItem('room_type'));
       $('.room_number').val(localStorage.getItem('room_number'));
       $('[name=nights]').val(localStorage.getItem('nights'));
+      localStorage.removeItem('check_in');
+      localStorage.removeItem('check_out');
+      localStorage.removeItem('room_id');
+      localStorage.removeItem('room_type');
+      localStorage.removeItem('room_number');
+      localStorage.removeItem('nights');
     }
   });
 
@@ -435,15 +483,23 @@
   });
 
   $('.charges').click(function() {
-    const booked_room_id = this.id;
-    $('[name=booked_room_id]').val(booked_room_id);
+    $('[name=booked_room_id]').val(this.id);
     $('#modalCharges').modal('show');
   });
 
   $('.amenities').click(function() {
-    const booked_room_id = this.id;
-    $('[name=booked_room_id]').val(booked_room_id);
+    $('[name=booked_room_id]').val(this.id);
     $('#modalAmenities').modal('show');
+  });
+
+  $('.occupant').click(function() {
+    const data = JSON.parse(this.id)
+    const [guest, contact, email] = data.occupant.split(' / ');
+    $('[name=booked_room_id]').val(data.booked_room_id);
+    $('[name=guest]').val(guest);
+    $('[name=contact]').val(contact);
+    $('[name=email]').val(email);
+    $('#modalOccupant').modal('show');
   });
 
   $('#category').change(function() {
