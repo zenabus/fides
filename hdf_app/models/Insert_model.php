@@ -17,10 +17,6 @@ class Insert_model extends CI_Model {
     $this->db->insert('events', $data);
   }
 
-  function addRoomType($data) {
-    $this->db->insert('room_type', $data);
-  }
-
   function addRoomBooking($data) {
     $this->db->insert('rooms_booking', $data);
   }
@@ -45,9 +41,6 @@ class Insert_model extends CI_Model {
     $this->db->insert('restaurant_cart', $data);
   }
 
-  function addRoom($data) {
-    $this->db->insert('rooms', $data);
-  }
 
   function createUsers($data) {
     $this->db->insert('users', $data);
@@ -140,6 +133,7 @@ class Insert_model extends CI_Model {
     $this->db->insert('booked_rooms', $this->getBookedRoomData($booking_id));
     $booking_number = 'HDF' . str_pad($booking_id, 5, '0', STR_PAD_LEFT);
     $this->db->where('booking_id', $booking_id)->update('bookings', ['booking_number' => $booking_number]);
+    $_POST['booking_id'] = $booking_id;
     return $booking_number;
   }
 
@@ -164,9 +158,11 @@ class Insert_model extends CI_Model {
   function bookRoom() {
     unset($_POST['booked_room_id']);
     $this->db->insert('booked_rooms', $_POST);
+    return $this->db->insert_id();
   }
 
   function addCharges() {
+    unset($_POST['booking_id']);
     $this->db->insert('charges_food', $_POST);
   }
 
@@ -181,6 +177,7 @@ class Insert_model extends CI_Model {
   }
 
   function addOtherCharges() {
+    unset($_POST['booking_id']);
     $this->db->insert('charges_other', $_POST);
   }
 
@@ -191,8 +188,28 @@ class Insert_model extends CI_Model {
       'amount' => $_POST['amount'],
       'card_number' => $_POST['card_number'],
       'card_name' => $_POST['card_name'],
+      'card_type' => $_POST['card_type'],
     ];
 
     $this->db->insert('booking_payment', $data);
+  }
+
+  function addBookingLog($log) {
+    $data = [
+      'booking_id' => $_POST['booking_id'],
+      'user_id' => $_SESSION['user_id'],
+      'activity' => $log
+    ];
+    $this->db->insert('booking_logs', $data);
+  }
+
+  function addRoom() {
+    unset($_POST['room_id']);
+    $this->db->insert('rooms', $_POST);
+  }
+
+  function addRoomType() {
+    unset($_POST['room_type_id']);
+    $this->db->insert('room_type', $_POST);
   }
 }

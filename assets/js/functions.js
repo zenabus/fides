@@ -6,7 +6,7 @@ $(document).on('click', '.confirm', function(e){
     type: "warning", 
     buttonsStyling: false,
     showCancelButton: true,
-    cancelButtonClass: 'btn btn-default',
+    cancelButtonClass: 'btn',
     confirmButtonClass: "btn btn-primary mr-2"
   }).then((result) => {
     if (result) {
@@ -52,22 +52,20 @@ $(document).on('click', '.update', function(e){
 });
 
 $(document).ready(function(){
-  if($(".datatables")[0]) {
-
-  
-  $('.datatables').DataTable({
-    "pagingType": "full_numbers",
-    "order": [[ 3, "desc" ]],
-    "lengthMenu": [
-      [10, 25, 50, -1],
-      [10, 25, 50, "All"]
-    ],
-    responsive: true,
-    language: {
-      search: "_INPUT_",
-      searchPlaceholder: "Search records",
-    }
-  });  
+  if($(".datatables")[0]) {  
+    $('.datatables').DataTable({
+      "pagingType": "full_numbers",
+      "order": [[ 3, "desc" ]],
+      "lengthMenu": [
+        [10, 25, 50, -1],
+        [10, 25, 50, "All"]
+      ],
+      responsive: true,
+      language: {
+        search: "_INPUT_",
+        searchPlaceholder: "Search records",
+      }
+    });  
   }
 });
 

@@ -45,9 +45,11 @@ $('[name=payment_option]').change(function() {
     $('[name=card_name]').val('');
     $('[name=card_number]').removeAttr('required');
     $('[name=card_name]').removeAttr('required');
+    $('[name=card_type]').removeAttr('required');
   } else {
     $('[name=card_number]').attr('required', true);
     $('[name=card_name]').attr('required', true);
+    $('[name=card_type]').attr('required', true);
     $('.card-div').show();
   }
 });

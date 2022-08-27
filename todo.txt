@@ -38,14 +38,20 @@ Franz
 // Change booking status after verifying
 // Insert number of nights to database in online booking
 // Add "All" checkbox on Dashboard
-Div to image not working
 // Pad booking number to 5 digits
-Calendar following month
 // Delete charges, extras, discount when deleting booked room
 // Change booked_room_id when change room
-Ask if extras are per day
-Test online booking
-Test reservation and booking
+// Test online booking
+// Test reservation and booking
 // Complete order
 // Add remove button on collection details
 // Remove extra if zero on update
+Div to image not working
+Calendar following month
+Ask if extras are per day
+Adjust arrival and departure dates depending on the booked rooms
+Add checkin function on reservations
+// Fix locked bookings datatable width
+// Change worded buttons to icons on tables
+Fix checkin dates cannot be 1 night
+// Delete images when updating image or deleting data

@@ -1,315 +1,300 @@
-
-<!--
-=========================================================
-Paper Dashboard 2 PRO - v2.0.1
-=========================================================
-
-Product Page: https://www.creative-tim.com/product/paper-dashboard-2-pro
-Copyright 2019 Creative Tim (https://www.creative-tim.com)
-
-Coded by Creative Tim
-
-=========================================================
-
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software. -->
-
-
+<?php
+if (!$this->session->userdata('connect')) {
+  redirect('user');
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
   <meta charset="utf-8" />
-  <link rel="apple-touch-icon" sizes="76x76" href="../assets/img/apple-icon.png">
-  <link rel="icon" type="image/png" href="../assets/img/favicon.png">
+  <link rel="icon" type="jpeg" href="<?= base_url('assets/img/logo.jpg') ?>">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
-  <title>
-    Paper Dashboard 2 PRO by Creative Tim
-  </title>
+  <title>Hotel de Fides | iHotelier by WSM IT Services</title>
   <meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, shrink-to-fit=no' name='viewport' />
-  <!--     Fonts and icons     -->
+  <!--  Fonts and icons -->
   <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700,200" rel="stylesheet" />
-  <link href="https://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css" rel="stylesheet">
   <!-- CSS Files -->
-  <link href="<?php echo base_url() ?>assets/css/bootstrap.min.css" rel="stylesheet" />
-  <link href="<?php echo base_url() ?>assets/css/paper-dashboard.css?v=2.0.1" rel="stylesheet" />
+  <link href="<?= base_url() ?>assets/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="<?= base_url() ?>assets/css/paper-dashboard.css?v=2.0.1" rel="stylesheet" />
   <!-- CSS Just for demo purpose, don't include it in your project -->
-  <link href="<?php echo base_url() ?>assets/demo/demo.css" rel="stylesheet" />
+  <link href="<?= base_url() ?>assets/demo/demo.css" rel="stylesheet" />
+  <!-- Scripts -->
+  <script src="https://kit.fontawesome.com/3abc918931.js" crossorigin="anonymous"></script>
+  <script src="<?= base_url() ?>assets/js/core/jquery.min.js"></script>
+  <script src="<?= base_url() ?>assets/js/core/popper.min.js"></script>
+  <script src="<?= base_url() ?>assets/js/core/bootstrap.min.js"></script>
+  <script src="<?= base_url() ?>assets/js/plugins/moment.min.js"></script>
+  <script src="<?= base_url() ?>assets/js/plugins/bootstrap-datetimepicker.js"></script>
+  <script src="<?= base_url() ?>assets/js/functions.js"></script>
 
-  <script src='<?=base_url('assets/jquery-3.0.0.js') ?>' type='text/javascript'></script>
-  <script src='<?=base_url('assets/daboy_script.js') ?>' type='text/javascript'></script>
+  <style type="text/css">
+    .dataTables_paginate {
+      float: right;
+    }
+
+    .form-check-label,
+    .pointer {
+      cursor: pointer;
+    }
+
+    .action>* {
+      padding-left: 8px;
+      padding-right: 8px;
+    }
+
+    .separator {
+      display: flex;
+      align-items: center;
+      text-align: center;
+      color: #9A9A9A;
+    }
+
+    .separator::before,
+    .separator::after {
+      content: '';
+      flex: 1;
+      border-bottom: 1px solid #dee2e6;
+    }
+
+    .separator:not(:empty)::before {
+      margin-right: .25em;
+    }
+
+    .separator:not(:empty)::after {
+      margin-left: .25em;
+    }
+
+    .alert {
+      z-index: 9999;
+      bottom: 16px;
+      right: 16px;
+      min-width: 400px;
+    }
+
+    small {
+      color: #6c757d;
+      font-weight: normal !important;
+    }
+
+    th {
+      white-space: pre;
+    }
+
+    td {
+      vertical-align: baseline !important;
+    }
+
+    .table-sm td {
+      padding-top: 8px !important;
+      padding-bottom: 8px !important;
+
+    }
+
+    .arrow {
+      display: none !important
+    }
+
+    summary {
+      user-select: none;
+    }
+
+    .modal {
+      z-index: 99999;
+    }
+
+    textarea {
+      resize: none;
+      max-height: unset !important;
+    }
+
+    .wsp {
+      white-space: pre;
+    }
+  </style>
+
+  <script>
+    $(document).ready(function() {
+      setTimeout(() => {
+        $('.alert').fadeOut();
+      }, 8000);
+
+      $('.close').click(function() {
+        $('.alert').fadeOut();
+      });
+    });
+  </script>
 </head>
+
+<?php if ($this->session->flashdata('success') || $this->session->flashdata('error')) : ?>
+  <?php $alert = $this->session->flashdata('success') ? 'success' : 'danger'; ?>
+  <div class="alert alert-<?= $alert ?> alert-dismissible fade show position-absolute">
+    <button type="button" class="close">
+      <i class="nc-icon nc-simple-remove"></i>
+    </button>
+    <div class="d-flex align-items-center">
+      <span class="nc-icon nc-bell-55 mr-2"></span>
+      <span><?= $this->session->flashdata($alert == 'success' ? 'success' : 'error') ?></span>
+    </div>
+  </div>
+<?php endif; ?>
 
 <body class="">
   <div class="wrapper ">
     <div class="sidebar" data-color="brown" data-active-color="danger">
-      <!--
-        Tip 1: You can change the color of the sidebar using: data-color="blue | green | orange | red | yellow"
-    -->
-      
       <div class="sidebar-wrapper">
         <div class="user">
           <div class="photo">
-            <img src="../assets/img/faces/ayo-ogunseinde-2.jpg" />
+            <img src="<?= base_url('assets/img/users/' . $_SESSION['image']) ?>" alt="profile pic" />
           </div>
           <div class="info">
-            <a data-toggle="collapse" href="#collapseExample" class="collapsed">
+            <a data-toggle="collapse" href="#collapseExample" class="collapsed" aria-expanded="<?= $active == 'account' ? 'true' : 'false' ?>">
               <span>
-                Chet Faker
+                <?= $this->session->userdata('name') ?>
                 <b class="caret"></b>
               </span>
             </a>
             <div class="clearfix"></div>
-            <div class="collapse" id="collapseExample">
+            <div class="collapse <?= $active == 'account' ? 'show' : '' ?>" id="collapseExample">
               <ul class="nav">
-                <li>
-                  <a href="#">
-                    <span class="sidebar-mini-icon">MP</span>
-                    <span class="sidebar-normal">My Profile</span>
+                <li class="<?= $active == 'account' ? 'active' : '' ?>">
+                  <a href="<?= base_url('index.php/main/profile') ?>">
+                    <span class="sidebar-mini-icon">AD</span>
+                    <span class="sidebar-normal">Account Details</span>
                   </a>
                 </li>
                 <li>
-                  <a href="#">
-                    <span class="sidebar-mini-icon">EP</span>
-                    <span class="sidebar-normal">Edit Profile</span>
-                  </a>
-                </li>
-                <li>
-                  <a href="#">
-                    <span class="sidebar-mini-icon">S</span>
-                    <span class="sidebar-normal">Settings</span>
+                  <a href="<?= base_url('index.php/user/destroy') ?>">
+                    <span class="sidebar-mini-icon">SO</span>
+                    <span class="sidebar-normal">Sign out</span>
                   </a>
                 </li>
               </ul>
             </div>
           </div>
         </div>
+
         <ul class="nav">
-          <li class="active">
-            <a href="../examples/dashboard.html">
-              <i class="nc-icon nc-bank"></i>
+          <li class="<?= $active == 'dashboard' ? 'active' : '' ?>">
+            <a href="<?= base_url('index.php/main') ?>">
+              <i class="fa fa-home"></i>
               <p>Dashboard</p>
             </a>
           </li>
+
+          <li class="<?= $active == 'calendar' ? 'active' : '' ?>">
+            <a href="<?= base_url('index.php/main/calendar/' . date('Y') . '/' . date('m')) ?>">
+              <i class="fa fa-calendar"></i>
+              <p>Express Calendar</p>
+            </a>
+          </li>
+
+          <li class="<?= $active == 'rooms' ? 'active' : '' ?>">
+            <a href="<?= base_url('index.php/main/rooms') ?>">
+              <i class="fa fa-bed "></i>
+              <p>Rooms</p>
+            </a>
+          </li>
+
+          <li class="<?= $active == 'bookings' ? 'active' : '' ?>">
+            <a href="<?= base_url('index.php/main/bookings') ?>">
+              <i class="fa fa-bookmark"></i>
+              <p>Bookings</p>
+            </a>
+          </li>
+
           <li>
-            <a data-toggle="collapse" href="#pagesExamples">
-              <i class="nc-icon nc-book-bookmark"></i>
-              <p>
-                Pages
+            <a data-toggle="collapse" href="#collapseReservation" aria-expanded="<?= $active == 'online' || $active == 'walkin' ? 'true' : 'false' ?>">
+              <i class="fa fa-check-square-o"></i>
+              <p>Reservations
                 <b class="caret"></b>
               </p>
             </a>
-            <div class="collapse " id="pagesExamples">
+            <div class="collapse  <?= $active == 'online' || $active == 'walkin' ? 'show' : '' ?>" id="collapseReservation">
               <ul class="nav">
-                <li>
-                  <a href="../examples/pages/timeline.html">
-                    <span class="sidebar-mini-icon">T</span>
-                    <span class="sidebar-normal"> Timeline </span>
+                <li class="<?= $active == 'online' ? 'active' : '' ?>">
+                  <a href="<?= base_url('index.php/main/reservations/online') ?>">
+                    <span class="sidebar-mini-icon">O</span>
+                    <span class="sidebar-normal">Online</span>
                   </a>
                 </li>
-                <li>
-                  <a href="../examples/pages/login.html">
-                    <span class="sidebar-mini-icon">L</span>
-                    <span class="sidebar-normal"> Login </span>
-                  </a>
-                </li>
-                <li>
-                  <a href="../examples/pages/register.html">
-                    <span class="sidebar-mini-icon">R</span>
-                    <span class="sidebar-normal"> Register </span>
-                  </a>
-                </li>
-                <li>
-                  <a href="../examples/pages/lock.html">
-                    <span class="sidebar-mini-icon">LS</span>
-                    <span class="sidebar-normal"> Lock Screen </span>
-                  </a>
-                </li>
-                <li>
-                  <a href="../examples/pages/user.html">
-                    <span class="sidebar-mini-icon">UP</span>
-                    <span class="sidebar-normal"> User Profile </span>
+                <li class="<?= $active == 'walkin' ? 'active' : '' ?>">
+                  <a href="<?= base_url('index.php/main/reservations/walkin') ?>">
+                    <span class="sidebar-mini-icon">WI</span>
+                    <span class="sidebar-normal">Walk-In</span>
                   </a>
                 </li>
               </ul>
             </div>
           </li>
-          <li>
-            <a data-toggle="collapse" href="#componentsExamples">
-              <i class="nc-icon nc-layout-11"></i>
-              <p>
-                Components
-                <b class="caret"></b>
-              </p>
-            </a>
-            <div class="collapse " id="componentsExamples">
-              <ul class="nav">
-                <li>
-                  <a href="../examples/components/buttons.html">
-                    <span class="sidebar-mini-icon">B</span>
-                    <span class="sidebar-normal"> Buttons </span>
-                  </a>
-                </li>
-                <li>
-                  <a href="../examples/components/grid.html">
-                    <span class="sidebar-mini-icon">G</span>
-                    <span class="sidebar-normal"> Grid System </span>
-                  </a>
-                </li>
-                <li>
-                  <a href="../examples/components/panels.html">
-                    <span class="sidebar-mini-icon">P</span>
-                    <span class="sidebar-normal"> Panels </span>
-                  </a>
-                </li>
-                <li>
-                  <a href="../examples/components/sweet-alert.html">
-                    <span class="sidebar-mini-icon">SA</span>
-                    <span class="sidebar-normal"> Sweet Alert </span>
-                  </a>
-                </li>
-                <li>
-                  <a href="../examples/components/notifications.html">
-                    <span class="sidebar-mini-icon">N</span>
-                    <span class="sidebar-normal"> Notifications </span>
-                  </a>
-                </li>
-                <li>
-                  <a href="../examples/components/icons.html">
-                    <span class="sidebar-mini-icon">I</span>
-                    <span class="sidebar-normal"> Icons </span>
-                  </a>
-                </li>
-                <li>
-                  <a href="../examples/components/typography.html">
-                    <span class="sidebar-mini-icon">T</span>
-                    <span class="sidebar-normal"> Typography </span>
-                  </a>
-                </li>
-              </ul>
-            </div>
-          </li>
-          <li>
-            <a data-toggle="collapse" href="#formsExamples">
-              <i class="nc-icon nc-ruler-pencil"></i>
-              <p>
-                Forms
-                <b class="caret"></b>
-              </p>
-            </a>
-            <div class="collapse " id="formsExamples">
-              <ul class="nav">
-                <li>
-                  <a href="../examples/forms/regular.html">
-                    <span class="sidebar-mini-icon">RF</span>
-                    <span class="sidebar-normal"> Regular Forms </span>
-                  </a>
-                </li>
-                <li>
-                  <a href="../examples/forms/extended.html">
-                    <span class="sidebar-mini-icon">EF</span>
-                    <span class="sidebar-normal"> Extended Forms </span>
-                  </a>
-                </li>
-                <li>
-                  <a href="../examples/forms/validation.html">
-                    <span class="sidebar-mini-icon">V</span>
-                    <span class="sidebar-normal"> Validation Forms </span>
-                  </a>
-                </li>
-                <li>
-                  <a href="../examples/forms/wizard.html">
-                    <span class="sidebar-mini-icon">W</span>
-                    <span class="sidebar-normal"> Wizard </span>
-                  </a>
-                </li>
-              </ul>
-            </div>
-          </li>
-          <li>
-            <a data-toggle="collapse" href="#tablesExamples">
-              <i class="nc-icon nc-single-copy-04"></i>
-              <p>
-                Tables
-                <b class="caret"></b>
-              </p>
-            </a>
-            <div class="collapse " id="tablesExamples">
-              <ul class="nav">
-                <li>
-                  <a href="../examples/tables/regular.html">
-                    <span class="sidebar-mini-icon">RT</span>
-                    <span class="sidebar-normal"> Regular Tables </span>
-                  </a>
-                </li>
-                <li>
-                  <a href="../examples/tables/extended.html">
-                    <span class="sidebar-mini-icon">ET</span>
-                    <span class="sidebar-normal"> Extended Tables </span>
-                  </a>
-                </li>
-                <li>
-                  <a href="../examples/tables/datatables.net.html">
-                    <span class="sidebar-mini-icon">DT</span>
-                    <span class="sidebar-normal"> DataTables.net </span>
-                  </a>
-                </li>
-              </ul>
-            </div>
-          </li>
-          <li>
-            <a data-toggle="collapse" href="#mapsExamples">
-              <i class="nc-icon nc-pin-3"></i>
-              <p>
-                Maps
-                <b class="caret"></b>
-              </p>
-            </a>
-            <div class="collapse " id="mapsExamples">
-              <ul class="nav">
-                <li>
-                  <a href="../examples/maps/google.html">
-                    <span class="sidebar-mini-icon">GM</span>
-                    <span class="sidebar-normal"> Google Maps </span>
-                  </a>
-                </li>
-                <li>
-                  <a href="../examples/maps/fullscreen.html">
-                    <span class="sidebar-mini-icon">FSM</span>
-                    <span class="sidebar-normal"> Full Screen Map </span>
-                  </a>
-                </li>
-                <li>
-                  <a href="../examples/maps/vector.html">
-                    <span class="sidebar-mini-icon">VM</span>
-                    <span class="sidebar-normal"> Vector Map </span>
-                  </a>
-                </li>
-              </ul>
-            </div>
-          </li>
-          <li>
-            <a href="../examples/widgets.html">
-              <i class="nc-icon nc-box"></i>
-              <p>Widgets</p>
+
+          <li class="<?= $active == 'guests' ? 'active' : '' ?>">
+            <a href="<?= base_url('index.php/main/guests') ?>">
+              <i class="fa fa-users"></i>
+              <p>Guest List</p>
             </a>
           </li>
-          <li>
-            <a href="../examples/charts.html">
-              <i class="nc-icon nc-chart-bar-32"></i>
-              <p>Charts</p>
+
+          <li class="<?= $active == 'transactions' ? 'active' : '' ?>">
+            <a href="#">
+              <i class="fa fa-tasks"></i>
+              <p>Transactions</p>
             </a>
           </li>
-          <li>
-            <a href="../examples/calendar.html">
-              <i class="nc-icon nc-calendar-60"></i>
-              <p>Calendar</p>
+
+          <li class="<?= $active == 'reports' ? 'active' : '' ?>">
+            <a href="#">
+              <i class="fa fa-list-alt"></i>
+              <p>Reports</p>
             </a>
           </li>
+
+          <?php if ($_SESSION['user_type'] == 'Admin') { ?>
+
+            <li class="text-center">
+              <small class="text-white">Administrator</small>
+            </li>
+
+            <li>
+              <a data-toggle="collapse" href="#rates">
+                <i class="fa fa-dollar"></i>
+                <p>Rates<b class="caret"></b></p>
+              </a>
+              <div class="collapse " id="rates">
+                <ul class="nav">
+                  <li>
+                    <a href="<?php echo base_url() ?>index.php/admin/pricing">
+                      <span class="sidebar-mini-icon">R</span>
+                      <span class="sidebar-normal"> Rooms </span>
+                    </a>
+                    <a href="<?= base_url('index.php/main/charges') ?>">
+                      <span class="sidebar-mini-icon">EC</span>
+                      <span class="sidebar-normal"> Extra Charges </span>
+                    </a>
+                  </li>
+                </ul>
+              </div>
+            </li>
+
+            <li class="<?= $active == 'logs' ? 'active' : '' ?>">
+              <a href="#">
+                <i class="fa fa-calendar-check-o"></i>
+                <p>Logs</p>
+              </a>
+            </li>
+
+            <li class="<?= $active == 'users' ? 'active' : '' ?>">
+              <a href="#">
+                <i class="fa-solid fa-user-group"></i>
+                <p>Users</p>
+              </a>
+            </li>
+
+          <?php } ?>
         </ul>
       </div>
     </div>
     <div class="main-panel">
-      <!-- Navbar -->
       <nav class="navbar navbar-expand-lg navbar-absolute fixed-top navbar-transparent">
         <div class="container-fluid">
           <div class="navbar-wrapper">
@@ -333,46 +318,32 @@ The above copyright notice and this permission notice shall be included in all c
             <span class="navbar-toggler-bar navbar-kebab"></span>
           </button>
           <div class="collapse navbar-collapse justify-content-end" id="navigation">
-            
             <ul class="navbar-nav">
-              <li class="nav-item">
-                <a class="nav-link btn-magnify" href="#pablo">
-                  <i class="nc-icon nc-layout-11"></i>
-                  <p>
-                    <span class="d-lg-none d-md-block">Stats</span>
-                  </p>
-                </a>
-              </li>
               <li class="nav-item btn-rotate dropdown">
-                <a class="nav-link dropdown-toggle" href="http://example.com" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <a class="nav-link dropdown-toggle" href="" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                   <i class="nc-icon nc-bell-55"></i>
-                  <p>
-                    <span class="d-lg-none d-md-block">Some Actions</span>
-                  </p>
                 </a>
                 <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdownMenuLink">
-                  <a class="dropdown-item" href="#">Action</a>
-                  <a class="dropdown-item" href="#">Another action</a>
-                  <a class="dropdown-item" href="#">Something else here</a>
+                  <?php foreach ($notif as $data) { ?>
+                    <a class="dropdown-item" href="<?= base_url() ?><?= $data['redirection'] ?>"><?= $data['content'] ?></a>
+                  <?php } ?>
+                  <a class="dropdown-item" href="#">View all</a>
                 </div>
               </li>
-              <li class="nav-item">
-                <a class="nav-link btn-rotate" href="#pablo">
-                  <i class="nc-icon nc-settings-gear-65"></i>
-                  <p>
-                    <span class="d-lg-none d-md-block">Account</span>
-                  </p>
+
+              <li class="nav-item dropdown">
+                <a href="#paper-kit" class="nav-link" data-toggle="dropdown" width="30" height="30" aria-expanded="false">
+                  <div class="profile-photo-small btn-rotate">
+                    <i class="nc-icon nc-settings-gear-65"></i>
+                  </div>
                 </a>
+                <ul class="dropdown-menu dropdown-menu-right dropdown-default">
+                  <a class="dropdown-item" href="<?= base_url('index.php/main/profile') ?>">Account Details</a>
+                  <li class="divider"></li>
+                  <a class="dropdown-item" href="<?= base_url('index.php/user/destroy') ?>">Sign out</a>
+                </ul>
               </li>
             </ul>
           </div>
         </div>
       </nav>
-      <!-- End Navbar -->
-      <!-- <div class="panel-header">
-
-  <canvas id="bigDashboardChart"></canvas>
-
-
-</div> -->
-      

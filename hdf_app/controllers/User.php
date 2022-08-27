@@ -35,7 +35,7 @@ class User extends MY_Controller {
     $this->insert_model->log('User logged in');
 
     if ($user->user_type == 'Admin') {
-      redirect('admin');
+      redirect('main');
     } elseif ($user->user_type == 'Front Desk') {
       redirect('main');
     } elseif ($user->user_type == 'Superadmin') {

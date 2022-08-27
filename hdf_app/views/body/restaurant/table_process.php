@@ -390,7 +390,7 @@
 
       <div class="card-body ">
 
-        <table id="datatable" class="table table-striped table-bordered" cellspacing="0" width="100%">
+        <table id="datatable" class="table table-striped table-bordered">
 
           <thead>
 
@@ -540,7 +540,7 @@
 
 
 
-              <button type="button" class="btn btn-default btn-link" data-dismiss="modal">Cancel</button>
+              <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
 
             </div>
 
@@ -658,7 +658,7 @@
 
 
 
-              <button type="button" class="btn btn-default btn-link" data-dismiss="modal">Cancel</button>
+              <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
 
             </div>
 
@@ -787,7 +787,7 @@
 
 
 
-                <button type="button" class="btn btn-default btn-link" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
 
               </div>
 
@@ -1024,7 +1024,7 @@
 
 
 
-                <button type="button" class="btn btn-default btn-link" data-dismiss="modal">CLOSE</button>
+                <button type="button" class="btn btn-link" data-dismiss="modal">CLOSE</button>
 
               </div>
 
@@ -1084,7 +1084,7 @@
 
               <div class="modal-body">
 
-                <table id="datatable2" class="table table-striped table-bordered" cellspacing="0" width="100%">
+                <table id="datatable2" class="table table-striped table-bordered">
 
                   <thead>
 
@@ -1142,7 +1142,7 @@
 
 
 
-                  <button type="button" class="btn btn-default btn-link" data-dismiss="modal">Cancel</button>
+                  <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
 
                 </div>
 
@@ -1365,7 +1365,7 @@
 
 
 
-                <button type="button" class="btn btn-default btn-link" data-dismiss="modal">CLOSE</button>
+                <button type="button" class="btn btn-link" data-dismiss="modal">CLOSE</button>
 
               </div>
 
@@ -1557,7 +1557,7 @@
 
 
 
-              <button type="button" class="btn btn-default btn-link" data-dismiss="modal">Cancel</button>
+              <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
 
             </div>
 

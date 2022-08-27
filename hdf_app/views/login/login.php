@@ -105,7 +105,7 @@
                 </div>
               </div>
               <div class="card-footer px-3 py-1">
-                <input type="submit" class="btn btn-default btn-block mb-0" value="Login">
+                <input type="submit" class="btn btn-block mb-0" value="Login">
               </div>
             </div>
             <div class="row">

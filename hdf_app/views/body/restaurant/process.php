@@ -189,7 +189,7 @@ $res = $this->session->userdata('restaurant'); ?>
           <div class="timeline-heading"> <span class="badge badge-pill badge-danger">Order Status</span> </div>
         </div>
         <div class="card-body ">
-          <table id="datatable" class="table table-striped table-bordered" cellspacing="0" width="100%">
+          <table id="datatable" class="table table-striped table-bordered">
             <thead>
               <tr>
                 <th class="disabled-sorting">Ref. #</th>
@@ -231,7 +231,7 @@ $res = $this->session->userdata('restaurant'); ?>
             <div class="left-side"> <input type="submit" value="Save" class="btn btn-danger btn-link"> </div>
             <div class="divider">
             </div>
-            <div class="right-side"> <button type="button" class="btn btn-default btn-link" data-dismiss="modal">Cancel</button> </div>
+            <div class="right-side"> <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button> </div>
           </div>
         </div> <?= form_close() ?>
       </div>
@@ -247,7 +247,7 @@ $res = $this->session->userdata('restaurant'); ?>
           <h4 class="title title-up" id="LabelRoom">Product Rates</h4>
         </div>
         <div class="modal-body">
-          <table id="datatable2" class="table table-striped table-bordered" cellspacing="0" width="100%">
+          <table id="datatable2" class="table table-striped table-bordered">
             <thead>
               <tr>
                 <th class="disabled-sorting">Product</th>
@@ -264,7 +264,7 @@ $res = $this->session->userdata('restaurant'); ?>
         <div class="modal-footer">
           <div class="divider">
           </div>
-          <div class="right-side"> <button type="button" class="btn btn-default btn-link" data-dismiss="modal">Cancel</button> </div>
+          <div class="right-side"> <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button> </div>
         </div>
       </div>
     </div>
@@ -290,7 +290,7 @@ $res = $this->session->userdata('restaurant'); ?>
           <div class="left-side"> <input type="submit" value="Proceed" class="btn btn-danger btn-link"> </div>
           <div class="divider">
           </div>
-          <div class="right-side"> <button type="button" class="btn btn-default btn-link" data-dismiss="modal">Cancel</button> </div>
+          <div class="right-side"> <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button> </div>
         </div>
       </div> <?= form_close() ?>
     </div>
@@ -376,7 +376,7 @@ $res = $this->session->userdata('restaurant'); ?>
           <div class="left-side"> <button class="btn btn-primary btn-link" onclick="popupCenter('<?php echo base_url('index.php/main/printRecieptRestaurant/' . $id_reports) ?>', 'myPop1', 600,600); return false;">Print</button> </div>
           <div class="divider">
           </div>
-          <div class="right-side"> <button type="button" class="btn btn-default btn-link" data-dismiss="modal">CLOSE</button> </div>
+          <div class="right-side"> <button type="button" class="btn btn-link" data-dismiss="modal">CLOSE</button> </div>
         </div>
       </div>
     </div>
@@ -405,7 +405,7 @@ $res = $this->session->userdata('restaurant'); ?>
           <div class="left-side"> <input type="submit" value="Save" class="btn btn-danger btn-link"> </div>
           <div class="divider">
           </div>
-          <div class="right-side"> <button type="button" class="btn btn-default btn-link" data-dismiss="modal">Cancel</button> </div>
+          <div class="right-side"> <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button> </div>
         </div>
       </div> <?= form_close() ?>
     </div>

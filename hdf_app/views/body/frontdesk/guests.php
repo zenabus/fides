@@ -1,7 +1,8 @@
 <div class="content pb-0">
   <div class="row">
     <div class="col-md-12">
-      <h5>GUEST LIST</h5>
+      <h5 class="mb-0">Guests</h5>
+      <button class="btn" id="addGuest">Add New Guest</button>
       <div class="wizard-container">
         <div class="card card-wizard active" data-color="primary" id="wizardProfile">
           <div class="card-header text-center">
@@ -22,11 +23,8 @@
           </div>
           <div class="card-body pt-0">
             <div class="tab-content pt-0">
-              <button class="btn btn-default ml-3 mb-3 mt-0" id="addGuest">
-                Add New Guest
-              </button>
               <div class="tab-pane show active" id="available">
-                <table class="table table-striped table-bordered tbl_guest" cellspacing="0" width="100%">
+                <table class="table table-striped table-bordered tbl_guest">
                   <thead>
                     <tr>
                       <th>Guest Name</th>
@@ -53,9 +51,15 @@
                         </td>
                         <td><?= $data['last_checkin'] ?></td>
                         <td class="action">
-                          <a href="javascript:" class="btn btn-default btn-sm">View</a>
-                          <button class="btn btn-success btn-sm updateGuest" data='<?= json_encode($data) ?>'>Update</button>
-                          <a href="<?= base_url('index.php/main/statusGuest/1/' . $data['guest_id']) ?>" class="btn btn-warning btn-sm confirm">Disable</a>
+                          <a href="javascript:" class="btn btn-sm" data-placement="top" title="View Guest" rel="tooltip">
+                            <span class="fa fa-eye"></span>
+                          </a>
+                          <button class="btn btn-success btn-sm updateGuest" data='<?= json_encode($data) ?>' data-placement="top" title="Update Guest" rel="tooltip">
+                            <i class="fa-solid fa-user-pen"></i>
+                          </button>
+                          <a href="<?= base_url('index.php/main/statusGuest/1/' . $data['guest_id']) ?>" class="btn btn-warning btn-sm confirm" data-placement="top" title="Disable Guest" rel="tooltip">
+                            <i class="fa-solid fa-user-xmark"></i>
+                          </a>
                         </td>
                       </tr>
                     <?php } ?>
@@ -63,7 +67,7 @@
                 </table>
               </div>
               <div class="tab-pane" id="unavailable">
-                <table class="table table-striped table-bordered tbl_guest" cellspacing="0" width="100%">
+                <table class="table table-striped table-bordered tbl_guest">
                   <thead>
                     <tr>
                       <th>Guest Name</th>
@@ -89,10 +93,16 @@
                           <small><?= $data['company_address'] ?></small>
                         </td>
                         <td><?= $data['last_checkin'] ?></td>
-                        <td>
-                          <a href="javascript:" class="btn mb-1 btn-default btn-sm">View</a>
-                          <a href="javascript:" class="btn mb-1 btn-success btn-sm updateGuest" data='<?= json_encode($data) ?>'>Update</a>
-                          <a href="<?= base_url('index.php/main/statusGuest/0/' . $data['guest_id']) ?>" class="btn mb-1 btn-primary btn-sm confirm">Enable</a>
+                        <td class="action">
+                          <a href="javascript:" class="btn mb-1 btn-sm" data-placement="top" title="View Guest" rel="tooltip">
+                            <span class="fa fa-eye"></span>
+                          </a>
+                          <a href="javascript:" class="btn mb-1 btn-success btn-sm updateGuest" data='<?= json_encode($data) ?>' data-placement="top" title="Update Guest" rel="tooltip">
+                            <i class="fa-solid fa-user-pen"></i>
+                          </a>
+                          <a href="<?= base_url('index.php/main/statusGuest/0/' . $data['guest_id']) ?>" class="btn mb-1 btn-primary btn-sm confirm" data-placement="top" title="Enable Guest" rel="tooltip">
+                            <i class="fa-solid fa-user-check"></i>
+                          </a>
                         </td>
                       </tr>
                     <?php } ?>
@@ -175,7 +185,30 @@
 <script>
   $(document).ready(function() {
     demo.initWizard();
-    $('.tbl_guest').dataTable();
+    $('.tbl_guest').dataTable({
+      "autoWidth": false,
+      "columnDefs": [{
+          "width": "23%",
+          "targets": 0
+        },
+        {
+          "width": "23%",
+          "targets": 1
+        },
+        {
+          "width": "23%",
+          "targets": 2
+        },
+        {
+          "width": "23%",
+          "targets": 3
+        },
+        {
+          "width": "80px",
+          "targets": 4
+        }
+      ]
+    });
   });
 
   $('.updateGuest').click(function() {

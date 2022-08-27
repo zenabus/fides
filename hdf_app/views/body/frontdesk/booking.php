@@ -16,6 +16,8 @@
         <div class="card-body p-0">
           <?= form_open('main/updateGuest', ['id' => 'frmGuest']) ?>
           <input type="hidden" name="guest_id" value="<?= $booking->guest_id ?>">
+          <input type="hidden" name="booking_number" value="<?= $booking->booking_number ?>">
+          <input type="hidden" name="booking_id" value="<?= $booking->booking_id ?>">
           <div class="form-row px-4 py-3">
             <div class="form-group col-md-4 mb-0">
               <label>Arrival</label>
@@ -76,10 +78,11 @@
               </div>
             </div>
           </div>
+          <?= form_close() ?>
         </div>
         <div class="card-footer my-2">
-          <button class="btn btn-default updateDetails" type="button">Update Details</button>
-          <button class="btn btn-default saveChanges" form="frmGuest">Save Changes</button>
+          <button class="btn updateDetails" type="button">Update Details</button>
+          <button class="btn saveChanges" form="frmGuest">Save Changes</button>
           <button class="btn btn-primary cancelUpdate" type="button">Cancel Update</button>
         </div>
       </div>
@@ -88,38 +91,94 @@
         <div class="card-header border-bottom px-4 pt-4 pb-2">
           <h6>Logs</h6>
         </div>
-        <div class="card-body p-4">
-          <table class="table table-striped table-bordered mb-0">
+        <div class="card-body">
+          <table class="table table-bordered table-sm mb-0" id="datatable">
             <thead>
               <tr>
                 <th>User</th>
                 <th>Activity</th>
-                <th>Date Modified</th>
+                <th>Date</th>
               </tr>
             </thead>
             <tbody>
-              <?php $logs = [] ?>
               <?php if (!count($logs)) { ?>
                 <tr>
                   <td class="text-center" colspan="3">No record found</td>
                 </tr>
               <?php } ?>
-              <?php foreach ($logs as $row1) { ?>
+              <?php foreach ($logs as $row) { ?>
                 <tr>
-                  <td><?= $row1['user'] ?></td>
-                  <td><?= str_replace("%20", " ", $row1['content']); ?></td>
-                  <td><?= $row1['date_entered'] ?></td>
+                  <td style="white-space: pre;"><?= $row['name'] ?><br><small><?= $row['user_type'] ?></small></td>
+                  <td><?= $row['activity'] ?></td>
+                  <?php
+                  $date_time = date_create($row['booking_log_added']);
+                  $date = date_format($date_time, "F d, Y");
+                  $time = date_format($date_time, "l, h:i a");
+                  ?>
+                  <td style="white-space: pre;"><?= $date ?><br><small><?= $time ?></small></td>
                 </tr>
               <?php } ?>
             </tbody>
           </table>
         </div>
       </div>
-
     </div>
 
     <div class="col-md-6">
       <?php $this->load->view('body/frontdesk/components/collection_details') ?>
+
+      <div class="card">
+        <div class="card-header border-bottom px-4 pt-4 pb-2">
+          <h6>Payment Details</h6>
+        </div>
+        <div class="card-body p-0">
+          <table class="table  mb-0">
+            <thead>
+              <tr>
+                <th class="pl-4">Amount Paid</th>
+                <th>Card Details</th>
+                <th>Date Paid</th>
+                <th class="hidable p-0" width="15px"></th>
+              </tr>
+            </thead>
+            <tbody>
+              <?php if (!count($payments)) { ?>
+                <tr>
+                  <td colspan="3" class="text-center">No record found</td>
+                </tr>
+              <?php } ?>
+
+              <?php foreach ($payments as $row) { ?>
+                <tr>
+                  <td class="pl-4">₱ <?= number_format($row['amount']) ?><br>
+                    <small>Paid with <?= strtolower($row['payment_option']) ?></small>
+                  </td>
+                  <td>
+                    <?= $row['card_number'] ?><br>
+                    <?php if ($row['payment_option'] == 'Card') { ?>
+                      <small><?= $row['card_type'] ?> / <?= $row['card_name'] ?></small>
+                    <?php } ?>
+                  </td>
+                  <td>
+                    <?php
+                    $date_time = date_create($row['booking_payment_added']);
+                    $date = date_format($date_time, "F d, Y");
+                    $time = date_format($date_time, "l, h:i a");
+                    ?>
+                    <?= $date ?><br>
+                    <small><?= $time ?></small>
+                  </td>
+                  <td class="action hidable p-0" width="15px">
+                    <a href="<?= base_url('index.php/main/deletePayment/' . $row['booking_payment_id']) ?>" class="float-right mt-1 text-danger confirm" data-placement="left" title="Remove Payment" rel="tooltip">
+                      <span class="fa fa-times"></span>
+                    </a>
+                  </td>
+                </tr>
+              <?php } ?>
+            </tbody>
+          </table>
+        </div>
+      </div>
 
       <div class="card">
         <div class="card-header border-bottom px-4 pt-4 pb-2">
@@ -131,8 +190,8 @@
           <textarea class="form-control-plaintext px-2 pt-1" tabindex="-1" name="remarks" rows="5" readonly><?= $booking->remarks ?></textarea>
         </div>
         <div class="card-footer my-2 border-top px-4">
-          <input type="button" value="Update Notes" class="btn btn-default updateNotes">
-          <input type="submit" value="Save Notes" class="btn btn-default saveNotes" form="frmNotes">
+          <input type="button" value="Update Notes" class="btn updateNotes">
+          <input type="submit" value="Save Notes" class="btn saveNotes" form="frmNotes">
           <input type="button" value="Cancel Update" class="btn btn-primary cancelNotes">
         </div>
       </div>
@@ -160,6 +219,9 @@
       },
       format: 'L',
     });
+    $('#datatable').dataTable({
+      "ordering": false
+    });
 
     if (reservation_status == -1) {
       $('.btn').attr('disabled', true);
@@ -168,6 +230,8 @@
       $('.form-control').attr('readonly', true);
       $('.back').attr('disabled', false);
       $('.back').show();
+      $('[type=search]').removeAttr('readonly');
+      $('[name=datatable_length]').removeAttr('readonly');
     }
   });
 

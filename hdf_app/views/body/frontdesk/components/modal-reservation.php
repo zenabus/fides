@@ -112,6 +112,14 @@
         </div>
         <div class="card-div">
           <div class="row">
+            <div class="form-group col-md-12">
+              <label>Card Type</label>
+              <select name="card_type" class="form-control">
+                <option value="">- select card type -</option>
+                <option value="BDO">Banco de Oro (BDO)</option>
+                <option value="Landbank">Land Bank of the Philippines</option>
+              </select>
+            </div>
             <div class="form-group col-md-6">
               <label>Account Number</label>
               <input type="text" name="card_number" class="form-control" placeholder="XXXX XXXX XXXX XXXX" maxlength="19">

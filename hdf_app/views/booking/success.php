@@ -149,7 +149,7 @@
         </div>
         <div class="modal-footer">
           <div class="left-side">
-            <button type="button" class="btn btn-default btn-link" data-dismiss="modal" id="btn-no">Never mind</button>
+            <button type="button" class="btn btn-link" data-dismiss="modal" id="btn-no">Never mind</button>
           </div>
           <div class="divider"></div>
           <div class="right-side">

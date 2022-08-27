@@ -1,7 +1,7 @@
 <div class="card">
   <div class="card-header px-4 pt-4 d-flex justify-content-between align-items-center">
     <h6>Room Details</h6>
-    <button class="btn btn-sm btn-default mb-2 mt-0" id="addRoom">Add Room</button>
+    <button class="btn btn-sm mb-2 mt-0" id="addRoom">Add Room</button>
   </div>
   <div class="card-body px-0 py-2">
     <table class="table table-bordered border-right-0 border-left-0">
@@ -14,7 +14,7 @@
         </tr>
       </thead>
       <tbody>
-        <?php foreach ($booked_rooms as $i => $row) { ?>
+        <?php foreach ($booked_rooms as $row) { ?>
           <tr>
             <td class="border-left-0 pl-4">
               Room <?= $row['room_number'] ?><br>
@@ -55,7 +55,7 @@
                 <i class="fa-solid fa-tv"></i>
                 <i class="fa-solid fa-person-circle-exclamation"></i>
               </button>
-              <?php if ($i) { ?>
+              <?php if (count($booked_rooms) != 1) { ?>
                 <a href="<?= base_url('index.php/main/removeRoom/' . $row['booked_room_id']) ?>" class="btn btn-danger btn-sm confirm mt-1" data-placement="top" title="Remove Room" rel="tooltip">
                   <span class="fa fa-trash"></span>
                 </a>
@@ -77,6 +77,7 @@
       <div class="modal-body px-4">
         <?= form_open('main/updateExtras', ['id' => 'frmExtra']) ?>
         <input type="hidden" name="booked_room_id">
+        <input type="hidden" name="booking_id" value="<?= $booking->booking_id ?>">
         <div class="form-row">
           <div class="form-group col-md-6">
             <label>Extra Bed</label>
@@ -127,6 +128,7 @@
       <div class="modal-body px-4">
         <?= form_open('main/updateDiscount', ['id' => 'frmDiscount']) ?>
         <input type="hidden" name="booked_room_id">
+        <input type="hidden" name="booking_id" value="<?= $booking->booking_id ?>">
         <div class="form-group">
           <label>Discount Type</label>
           <select name="discount_id" class="form-control" required>
@@ -175,7 +177,7 @@
         <input type="hidden" name="booked_room_id">
         <input type="hidden" name="booking_id" value="<?= $booking->booking_id ?>">
         <input type="hidden" name="room_id">
-        <a href="javascript:" class="btn btn-default btn-block" id="calendar">Open Express Calendar <span class="fa fa-window-restore"></span></a>
+        <a href="javascript:" class="btn btn-block" id="calendar">Open Express Calendar <span class="fa fa-window-restore"></span></a>
         <div class="form-group">
           <label>Room Type</label>
           <input type="text" class="form-control room_type" readonly>
@@ -224,6 +226,7 @@
       </div>
       <div class="modal-body px-4">
         <?= form_open('main/addCharges', ['id' => 'frmCharges']) ?>
+        <input type="hidden" name="booking_id" value="<?= $booking->booking_id ?>">
         <input type="hidden" name="booked_room_id">
         <div class="form-row d-flex justify-content-around mb-3">
           <div class="form-check-radio mb-0">
@@ -262,7 +265,7 @@
           </div>
           <div class="form-group col-md-4">
             <label>Subtotal</label>
-            <input type="text" class="form-control" id="charges_food_total" value="₱ 1.00" readonly>
+            <input type="text" class="form-control" id="charges_food_total" value="₱ 1" readonly>
           </div>
         </div>
         <?= form_close() ?>
@@ -290,6 +293,7 @@
       <div class="modal-body px-4">
         <?= form_open('main/addOtherCharges', ['id' => 'frmAmenities']) ?>
         <input type="hidden" name="booked_room_id">
+        <input type="hidden" name="booking_id" value="<?= $booking->booking_id ?>">
         <div class="form-group">
           <label>Category</label>
           <select id="category" class="form-control" required>
@@ -343,17 +347,18 @@
       <div class="modal-body px-4">
         <?= form_open('main/updateOccupant', ['id' => 'frmOccupant']) ?>
         <input type="hidden" name="booked_room_id">
+        <input type="hidden" name="booking_id" value="<?= $booking->booking_id ?>">
         <div class="form-group">
           <label>Guest Name</label>
-          <input type="text" class="form-control" name="guest" required>
+          <input type="text" class="form-control" id="guest" name="guest" required>
         </div>
         <div class="form-group">
           <label>Contact Number</label>
-          <input type="text" class="form-control" name="contact">
+          <input type="text" class="form-control" id="contact" name="contact">
         </div>
         <div class="form-group">
           <label>Email Address</label>
-          <input type="email" class="form-control" name="email">
+          <input type="email" class="form-control" id="email" name="email">
         </div>
         <?= form_close() ?>
       </div>
@@ -496,9 +501,9 @@
     const data = JSON.parse(this.id)
     const [guest, contact, email] = data.occupant.split(' / ');
     $('[name=booked_room_id]').val(data.booked_room_id);
-    $('[name=guest]').val(guest);
-    $('[name=contact]').val(contact);
-    $('[name=email]').val(email);
+    $('#guest').val(guest);
+    $('#contact').val(contact);
+    $('#email').val(email);
     $('#modalOccupant').modal('show');
   });
 
@@ -510,29 +515,29 @@
       const option = $('<option></option>')
         .attr("value", c.charge_id)
         .attr("amount", c.charge_amount)
-        .text(`₱ ${formatNumber(c.charge_amount)} - ${c.charge}`);
+        .text(`₱ ${formatNumber(Math.round(c.charge_amount))} - ${c.charge}`);
       $("#charge_type").append(option);
     });
   });
 
   $('#charge_type').change(function() {
     charge_amount = $(this).find(':selected').attr('amount') || 0;
-    $('#charge_amount').val(`₱ ${formatNumber(charge_amount)}`);
-    $('#charge_total_amount').val(`₱ ${formatNumber(charge_amount * quantity)}.00`);
+    $('#charge_amount').val(`₱ ${formatNumber(Math.round(charge_amount))}`);
+    $('#charge_total_amount').val(`₱ ${formatNumber(Math.round(charge_amount * quantity))}`);
   });
 
   $('[name=charge_quantity]').on('input', function() {
     quantity = $(this).val();
-    $('#charge_total_amount').val(`₱ ${formatNumber(charge_amount * quantity)}.00`);
+    $('#charge_total_amount').val(`₱ ${formatNumber(Math.round(charge_amount * quantity))}`);
   });
 
   $('[name=charges_food_quantity]').on('input', function() {
     food_quantity = $(this).val();
-    $('#charges_food_total').val(`₱ ${formatNumber(food_cost * food_quantity)}.00`);
+    $('#charges_food_total').val(`₱ ${formatNumber(Math.round(food_cost * food_quantity))}`);
   });
 
   $('[name=charges_food_amount]').on('input', function() {
     food_cost = $(this).val();
-    $('#charges_food_total').val(`₱ ${formatNumber(food_cost * food_quantity)}.00`);
+    $('#charges_food_total').val(`₱ ${formatNumber(Math.round(food_cost * food_quantity))}`);
   });
 </script>

@@ -34,7 +34,7 @@
               <td>₱ <?= number_format($bed->price) ?></td>
               <td>
                 ₱ <?= number_format($bed->price * $row['extra_bed']) ?>
-                <a href="<?= base_url('index.php/main/removeExtra/extra_bed/' . $row['booked_room_id']) ?>" class="float-right mt-1 text-danger confirm" data-placement="left" title="Remove Extra Bed" rel="tooltip">
+                <a href="<?= base_url('index.php/main/removeExtra/extra_bed/' . $row['booked_room_id']) ?>" class="float-right mt-1 text-danger confirm hidable" data-placement="left" title="Remove Extra Bed" rel="tooltip">
                   <span class="fa fa-times"></span>
                 </a>
               </td>
@@ -50,7 +50,7 @@
               <td>₱ <?= number_format($person->price) ?></td>
               <td>
                 ₱ <?= number_format($person_total) ?>
-                <a href="<?= base_url('index.php/main/removeExtra/extra_person/' . $row['booked_room_id']) ?>" class="float-right mt-1 text-danger confirm" data-placement="left" title="Remove Extra Person" rel="tooltip">
+                <a href="<?= base_url('index.php/main/removeExtra/extra_person/' . $row['booked_room_id']) ?>" class="float-right mt-1 text-danger confirm hidable" data-placement="left" title="Remove Extra Person" rel="tooltip">
                   <span class="fa fa-times"></span>
                 </a>
               </td>
@@ -60,12 +60,12 @@
 
           <?php foreach ($row['restaurant'] as $charges) { ?>
             <tr>
-              <td class="pl-4"><i class="fa-solid fa-utensils text-success"></i></td>
+              <td class="pl-4"><i class="fa-solid fa-utensils text-success mr-1"></i> <?= $charges['reference'] ?></td>
               <td>(<?= $charges['charges_food_quantity'] ?>) <?= $charges['particulars'] ?></td>
               <td>₱ <?= number_format($charges['charges_food_amount']) ?></td>
               <td>
                 ₱ <?= number_format($charges['charges_food_amount'] * $charges['charges_food_quantity']) ?>
-                <a href="<?= base_url('index.php/main/removeCharge/charges_food/' . $charges['charges_food_id']) ?>" class="float-right mt-1 text-danger confirm" data-placement="left" title="Remove Restaurant Charge" rel="tooltip">
+                <a href="<?= base_url('index.php/main/removeCharge/charges_food/' . $charges['charges_food_id']) ?>" class="float-right mt-1 text-danger confirm hidable" data-placement="left" title="Remove Restaurant Charge" rel="tooltip">
                   <span class="fa fa-times"></span>
                 </a>
               </td>
@@ -74,12 +74,12 @@
 
           <?php foreach ($row['coffeeshop'] as $charges) { ?>
             <tr>
-              <td class="pl-4"><i class="fa-solid fa-mug-saucer text-primary"></i></td>
+              <td class="pl-4"><i class="fa-solid fa-mug-saucer text-primary mr-1"></i> <?= $charges['reference'] ?></td>
               <td>(<?= $charges['charges_food_quantity'] ?>) <?= $charges['particulars'] ?></td>
               <td>₱ <?= number_format($charges['charges_food_amount']) ?></td>
               <td>
                 ₱ <?= number_format($charges['charges_food_amount'] * $charges['charges_food_quantity']) ?>
-                <a href="<?= base_url('index.php/main/removeCharge/charges_food/' . $charges['charges_food_id']) ?>" class="float-right mt-1 text-danger confirm" data-placement="left" title="Remove Coffeeshop Charge" rel="tooltip">
+                <a href="<?= base_url('index.php/main/removeCharge/charges_food/' . $charges['charges_food_id']) ?>" class="float-right mt-1 text-danger confirm hidable" data-placement="left" title="Remove Coffeeshop Charge" rel="tooltip">
                   <span class="fa fa-times"></span>
                 </a>
               </td>
@@ -94,7 +94,7 @@
               <td>₱ <?= number_format($charges['charge_amount']) ?></td>
               <td>
                 ₱ <?= number_format($charges['charge_amount'] * $charges['charge_quantity']) ?>
-                <a href="<?= base_url('index.php/main/removeCharge/charges_other/' . $charges['charges_other_id']) ?>" class="float-right mt-1 text-danger confirm" data-placement="left" title="Remove Amenity / Charge" rel="tooltip">
+                <a href="<?= base_url('index.php/main/removeCharge/charges_other/' . $charges['charges_other_id']) ?>" class="float-right mt-1 text-danger confirm hidable" data-placement="left" title="Remove Amenity / Charge" rel="tooltip">
                   <span class="fa fa-times"></span>
                 </a>
               </td>
@@ -143,10 +143,40 @@
       </tbody>
     </table>
   </div>
-  <div class="card-footer my-2 border-top px-4">
-    <a href="<?= base_url('index.php/main/completeOrder/' . $booking->booking_id) ?>" class="btn btn-default confirm ">Complete Order</a>
+  <div class="card-footer mb-2 mt-0 border-top px-4">
+    <a href="<?= base_url('index.php/main/completeOrder/' . $booking->booking_id . '/' . $booking->booking_number) ?>" class="btn confirm ">Complete Order</a>
     <button type="button" class="btn mt-0 btn-success" data-toggle="modal" data-target="#modalPayment">Payment</button>
     <button type="button" class="btn mt-0 btn-danger" data-toggle="modal" data-target="#modalRefund">Refund</button>
+  </div>
+</div>
+
+<div class="modal fade" id="modalRefund" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-sm pt-0" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="title title-up">Update Refund</h4>
+      </div>
+      <div class="modal-body px-4">
+        <?= form_open('main/updateRefund', ['id' => 'frmRefund']) ?>
+        <input type="hidden" name="booking_id" value="<?= $booking->booking_id ?>">
+        <input type="hidden" name="booking_number" value="<?= $booking->booking_number ?>">
+        <div class="form-group">
+          <label>Refund Amount</label>
+          <input type="number" class="form-control" name="refund" required min="0" value="<?= round($booking->refund) ?>">
+          <small>Refund amount will be changed.</small>
+        </div>
+        <?= form_close() ?>
+      </div>
+      <div class="modal-footer">
+        <div class="left-side">
+          <input type="submit" value="Update" class="btn btn-link" form="frmRefund">
+        </div>
+        <div class="divider"></div>
+        <div class="right-side">
+          <button type="button" class="btn btn-link" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -159,6 +189,7 @@
       <div class="modal-body px-4">
         <?= form_open('main/addPayment', ['id' => 'frmPayment']) ?>
         <input type="hidden" name="booking_id" value="<?= $booking->booking_id ?>">
+        <input type="hidden" name="booking_number" value="<?= $booking->booking_number ?>">
         <div class="form-row">
           <div class="form-group col-md-12">
             <label>Payment Option</label>
@@ -193,41 +224,19 @@
           <label>Account Name</label>
           <input type="text" class="form-control" name="card_name">
         </div>
+        <div class="form-group card-div d-none">
+          <label>Account Card</label>
+          <select name="card_type" class="form-control">
+            <option value="">- select card type -</option>
+            <option value="BDO">Banco de Oro (BDO)</option>
+            <option value="Landbank">Land Bank of the Philippines</option>
+          </select>
+        </div>
         <?= form_close() ?>
-
       </div>
       <div class="modal-footer">
         <div class="left-side">
           <button type="submit" class="btn btn-link" form="frmPayment">Add Payment</button>
-        </div>
-        <div class="divider"></div>
-        <div class="right-side">
-          <button type="button" class="btn btn-link" data-dismiss="modal">Close</button>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="modal fade" id="modalRefund" tabindex="-1" role="dialog">
-  <div class="modal-dialog modal-sm pt-0" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h4 class="title title-up">Update Refund</h4>
-      </div>
-      <div class="modal-body px-4">
-        <?= form_open('main/updateRefund', ['id' => 'frmRefund']) ?>
-        <input type="hidden" name="booking_id" value="<?= $booking->booking_id ?>">
-        <div class="form-group">
-          <label>Refund Amount</label>
-          <input type="number" class="form-control" name="refund" required min="0" value="<?= round($booking->refund) ?>">
-          <small>Refund amount will be changed.</small>
-        </div>
-        <?= form_close() ?>
-      </div>
-      <div class="modal-footer">
-        <div class="left-side">
-          <input type="submit" value="Update" class="btn btn-link" form="frmRefund">
         </div>
         <div class="divider"></div>
         <div class="right-side">
@@ -248,9 +257,11 @@
       $('[name=card_name]').val('');
       $('[name=card_number]').removeAttr('required');
       $('[name=card_name]').removeAttr('required');
+      $('[name=card_type]').removeAttr('required');
     } else {
       $('[name=card_number]').attr('required', true);
       $('[name=card_name]').attr('required', true);
+      $('[name=card_type]').attr('required', true);
       $('.card-div').removeClass('d-none');
     }
   });

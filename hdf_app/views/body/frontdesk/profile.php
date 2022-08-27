@@ -6,7 +6,7 @@
         <div class="card-header px-4 pt-4 pb-2 border-bottom">
           <h6>User Profile</h6>
         </div>
-        <?= form_open('main/FrontdeskUpdateProfileDetails', ['id' => 'frmProfile']) ?>
+        <?= form_open('main/updateProfile', ['id' => 'frmProfile']) ?>
         <div class="card-body px-4 py-2">
           <div class="form-group">
             <label class="form-label">User Role</label>
@@ -30,7 +30,7 @@
           </div>
         </div>
         <div class="card-footer p-4 border-top">
-          <input type="submit" class="btn btn-default" value="Save Profile">
+          <input type="submit" class="btn" value="Save Profile">
           <input type="reset" class="btn btn-primary" value="Reset">
         </div>
         <?= form_close() ?>
@@ -42,10 +42,10 @@
           <h6>Profile Picture</h6>
         </div>
         <div class="card-body px-4 py-2 pt-5">
-          <?= form_open_multipart('main/frontdeskUploadImage') ?>
+          <?= form_open_multipart('main/uploadprofileImage', ['id' => 'frmImage']) ?>
           <div class="fileinput fileinput-new text-center mb-0 w-100" data-provides="fileinput">
             <div class="fileinput-new thumbnail">
-              <img src="<?= base_url() ?>uploaded_files/<?= $profile->image_source ?>" alt="files">
+              <img src="<?= base_url('assets/img/users/' . $profile->image_source) ?>" alt="files">
             </div>
             <div class="fileinput-preview fileinput-exists thumbnail"></div>
             <div>
@@ -54,13 +54,13 @@
                 <span class="fileinput-exists">Change</span>
                 <input type="file" name="files" />
               </span>
-              <a href="#pablo" class="btn btn-danger btn-round fileinput-exists" data-dismiss="fileinput"><i class="fa fa-times"></i> Remove</a>
+              <a href="#pablo" class="btn btn-danger btn-round fileinput-exists" data-dismiss="fileinput" id="removeImage"><i class="fa fa-times"></i> Remove</a>
             </div>
           </div>
           <?= form_close() ?>
         </div>
         <div class="card-footer p-4 border-top">
-          <input type="submit" class="btn btn-default" value="Save Image">
+          <input type="submit" class="btn disabled" value="Save Image" id="saveImage" form="frmImage">
         </div>
       </div>
     </div>
@@ -86,9 +86,19 @@
           <?= form_close() ?>
         </div>
         <div class="card-footer p-4 border-top">
-          <input type="submit" class="btn btn-default" value="Change Password" form="frmChangePassword">
+          <input type="submit" class="btn" value="Change Password" form="frmChangePassword">
           <input type="reset" class="btn btn-primary " value="Clear" form="frmChangePassword">
         </div>
       </div>
     </div>
   </div>
+
+  <script>
+    $('[name=files]').on('change', function() {
+      $('#saveImage').removeClass('disabled');
+    });
+
+    $(document).on('click', '#removeImage', function() {
+      $('#saveImage').addClass('disabled');
+    });
+  </script>

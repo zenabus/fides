@@ -5,7 +5,7 @@
       <div class="card">
         <div class="card-header px-4 pt-4 d-flex justify-content-between align-items-center">
           <h6>Categories</h6>
-          <button class="btn btn-sm btn-default mb-2 mt-0 addCategory">Add Category</button>
+          <button class="btn btn-sm mb-2 mt-0 addCategory">Add Category</button>
         </div>
         <div class="card-body px-0 py-2">
           <table class="table table-bordered border-right-0 border-left-0">
@@ -39,7 +39,7 @@
       <div class="card">
         <div class="card-header px-4 pt-4 d-flex justify-content-between align-items-center">
           <h6>Charges</h6>
-          <button class="btn btn-sm btn-default mb-2 mt-0 addCharge">Add Charge</button>
+          <button class="btn btn-sm mb-2 mt-0 addCharge">Add Charge</button>
         </div>
         <div class="card-body px-0 py-2">
           <table class="table table-bordered border-right-0 border-left-0">

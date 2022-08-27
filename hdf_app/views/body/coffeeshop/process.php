@@ -187,7 +187,7 @@
 
         </div>
         <div class="card-body ">
-          <table id="datatable" class="table table-striped table-bordered" cellspacing="0" width="100%">
+          <table id="datatable" class="table table-striped table-bordered">
             <thead>
               <tr>
                 <th class="disabled-sorting">Ref No.</th>
@@ -266,7 +266,7 @@
             <div class="divider"></div>
             <div class="right-side">
 
-              <button type="button" class="btn btn-default btn-link" data-dismiss="modal">Cancel</button>
+              <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
             </div>
 
           </div>
@@ -290,7 +290,7 @@
           <h4 class="title title-up" id="LabelRoom">Product Prices</h4>
         </div>
         <div class="modal-body">
-          <table id="datatable2" class="table table-striped table-bordered" cellspacing="0" width="100%">
+          <table id="datatable2" class="table table-striped table-bordered">
             <thead>
               <tr>
                 <th class="disabled-sorting">Product Name</th>
@@ -319,7 +319,7 @@
           <div class="divider"></div>
           <div class="right-side">
 
-            <button type="button" class="btn btn-default btn-link" data-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
           </div>
 
         </div>
@@ -405,7 +405,7 @@
         <div class="divider"></div>
         <div class="right-side">
 
-          <button type="button" class="btn btn-default btn-link" data-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
         </div>
 
       </div>

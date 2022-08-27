@@ -34,7 +34,7 @@
           <div class="card-body">
             <div class="tab-content">
               <div class="tab-pane show active" id="confirmed">
-                <table class="table table-striped table-bordered tbl_reservations" cellspacing="0" width="100%">
+                <table class="table table-striped table-bordered tbl_reservations">
                   <thead>
                     <tr>
                       <th>Booking No.</th>
@@ -51,9 +51,14 @@
                       <?php if ($row['reservation_status'] == 5) { ?>
                         <tr>
                           <?php $data['row'] = $row ?>
+                          <?php $this->load->view('body/frontdesk/components/booking-table-data', $data) ?>
                           <td class="action">
-                            <a href="<?= base_url('index.php/main/checked/') ?>" class="btn btn-sm btn-default mb-2">Check In</a>
-                            <a href="<?= base_url('index.php/main/updateReservationStatus/4/' . $row['booking_id']) ?>" class="btn btn-sm btn-danger confirm mb-2">Cancel</a>
+                            <a href="<?= base_url('index.php/main/checked/') ?>" class="btn btn-sm mb-1" data-placement="top" title="Book Reservation" rel="tooltip">
+                              <i class="fa-solid fa-calendar-check"></i>
+                            </a>
+                            <a href="<?= base_url('index.php/main/updateReservationStatus/4/' . $row['booking_id']) ?>" class="btn btn-sm btn-danger confirm mb-1" data-placement="top" title="Cancel Booking" rel="tooltip">
+                              <span class="fa fa-ban"></span>
+                            </a>
                           </td>
                         </tr>
                     <?php }
@@ -62,7 +67,7 @@
                 </table>
               </div>
               <div class="tab-pane" id="pending">
-                <table class="table table-striped table-bordered tbl_reservations" cellspacing="0" width="100%">
+                <table class="table table-striped table-bordered tbl_reservations">
                   <thead>
                     <tr>
                       <th>Booking No.</th>
@@ -78,45 +83,15 @@
                     <?php foreach ($reservations as $row) { ?>
                       <?php if ($row['reservation_status'] == 2 || $row['reservation_status'] == 3) { ?>
                         <tr>
-                          <td>
-                            <?= $row['booking_number'] ?>
-                            <?php if ($row['remarks']) { ?>
-                              <span class="fa fa-info-circle ml-1 text-info" rel="tooltip" data-original-title="<?= $row['remarks'] ?>"></span>
-                            <?php } ?><br>
-                            <small><?= date_format(date_create($row['booking_added']), "F d, Y h:i a") ?></small>
-                          </td>
-                          <td>
-                            <?= $row['last_name'] ?>, <?= $row['first_name'] ?> <?= $row['middle_name'] ?>
-                            <?php if ($row['reservation_status'] == 3) { ?>
-                              <span class="fa fa-check ml-1 text-info" rel="tooltip" data-original-title="Reservation Email Verified"></span>
-                            <?php } ?>
-                            <br><small><?= $row['address'] ?></small>
-                          </td>
-                          <td>
-                            <?= $row['contact'] ?><br>
-                            <small><?= $row['email'] ?></small>
-                          </td>
-                          <td>
-                            Room <?= $row['room_number'] ?> - <?= $row['room_type'] ?><br>
-                            <small>₱ <?= number_format($row['pricing_type'], 2) ?> / ₱ <?= number_format($row['pricing_type'] * 0.25, 2) ?> (25%)</small>
-                          </td>
-                          <td>
-                            ₱ <?= number_format($row['amount'], 2) ?><br>
-                            <?php if ($row['amount'] != 0) { ?>
-                              <?php if ($row['payment_option'] == 'Cash') { ?>
-                                <small><?= $row['payment_option'] ?></small>
-                              <?php } else { ?>
-                                <small>(<?= $row['payment_option'] ?>) <?= $row['card_number'] ?> / <?= $row['card_name'] ?></small>
-                              <?php } ?>
-                            <?php } ?>
-                          </td>
-                          <td>
-                            <?= $row['check_in'] ?> - <?= $row['check_out'] ?><br>
-                            <small>Number of night(s): <?= $row['nights'] ?></small>
-                          </td>
-                          <td>
-                            <a href="javascript:" class="btn btn-sm btn-default confirm-reservation" data='<?= json_encode($row) ?>'>Confirm</a>
-                            <a href="<?= base_url('index.php/main/updateReservationStatus/4/' . $row['booking_id']) ?>" class="btn btn-sm btn-danger confirm">Cancel</a>
+                          <?php $data['row'] = $row ?>
+                          <?php $this->load->view('body/frontdesk/components/booking-table-data', $data) ?>
+                          <td class="action">
+                            <a href="javascript:" class="btn btn-sm confirm-reservation mb-1" data='<?= json_encode($row) ?>' data-placement="top" title="Confirm Reservation" rel="tooltip">
+                              <span class="fa fa-check"></span>
+                            </a>
+                            <a href="<?= base_url('index.php/main/updateReservationStatus/4/' . $row['booking_id']) ?>" class="btn btn-sm btn-danger confirm mb-1" data-placement="top" title="Cancel Reservation" rel="tooltip">
+                              <span class="fa fa-ban"></span>
+                            </a>
                           </td>
                         </tr>
                     <?php }
@@ -125,7 +100,7 @@
                 </table>
               </div>
               <div class="tab-pane" id="cancelled">
-                <table class="table table-striped table-bordered tbl_reservations" cellspacing="0" width="100%">
+                <table class="table table-striped table-bordered tbl_reservations">
                   <thead>
                     <tr>
                       <th>Booking No.</th>
@@ -140,6 +115,7 @@
                     <?php foreach ($reservations as $row) { ?>
                       <?php if ($row['reservation_status'] == 4) { ?>
                         <tr>
+                          <?php $data['row'] = $row ?>
                           <?php $this->load->view('body/frontdesk/components/booking-table-data', $data) ?>
                         </tr>
                     <?php }
@@ -203,10 +179,18 @@
               <input type="text" name="card_name" class="form-control" required>
             </div>
           </div>
+          <div class="form-group">
+            <label>Card Type</label>
+            <select name="card_type" class="form-control" required>
+              <option value="">- select card type -</option>
+              <option value="BDO">Banco de Oro (BDO)</option>
+              <option value="Landbank">Land Bank of the Philippines</option>
+            </select>
+          </div>
         </div>
         <div class="form-group">
           <label>Notes / Remarks</label>
-          <textarea name="remarks" rows="10" class="form-control"></textarea>
+          <textarea name="remarks" rows="5" class="form-control"></textarea>
         </div>
         <?= form_close() ?>
       </div>
@@ -267,6 +251,7 @@
     $('[name=amount]').val(data.amount);
     $('[name=card_number]').val(data.card_number);
     $('[name=card_name]').val(data.card_name);
+    $('[name=card_type]').val(data.card_type);
     $('[name=remarks]').val(data.remarks);
     $('#modalConfirm').modal('show');
   });

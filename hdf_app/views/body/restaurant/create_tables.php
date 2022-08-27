@@ -185,7 +185,7 @@
           <div class="divider"></div>
           <div class="right-side">
 
-            <button type="button" class="btn btn-default btn-link" data-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
           </div>
 
         </div>

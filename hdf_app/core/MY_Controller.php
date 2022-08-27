@@ -76,4 +76,32 @@ class MY_Controller extends CI_Controller {
 
     return $unique;
   }
+
+  function uploadImage($file, $folder) {
+    if (isset($_FILES[$file]['name']) && $_FILES[$file]['name'] != "") {
+      $name = $_FILES[$file]['name'];
+      $exname = explode('.', $name);
+      $ext = end($exname);
+      $location = 'assets/img/' . $folder . '/' . $_FILES[$file]['name'];
+
+      if (file_exists($location)) {
+        $i = 0;
+        list($base, $exts) = explode('.', $name);
+        while (file_exists($location)) {
+          $i++;
+          $name = $base . $i . '.' . $exts;
+          $location = 'assets/img/' . $folder . '/' . $name;
+        }
+      }
+
+      move_uploaded_file($_FILES[$file]['tmp_name'], $location);
+      return $name;
+    }
+  }
+
+  function unlink($image) {
+    if (file_exists($image)) {
+      unlink($image);
+    }
+  }
 }

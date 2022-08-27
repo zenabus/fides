@@ -13,7 +13,7 @@
                   </a>
                 </li>
                 <li class="nav-item">
-                  <a class="nav-link" href="#cancelled" data-toggle="tab" role="tab" aria-controls="unavailable" aria-selected="true">
+                  <a class="nav-link" href="#cancelled" data-toggle="tab" role="tab" aria-controls="cancelled" aria-selected="true">
                     <i class="fa fa-ban" title="4"></i> Cancelled
                   </a>
                 </li>
@@ -23,7 +23,7 @@
           <div class="card-body">
             <div class="tab-content">
               <div class="tab-pane show active" id="active">
-                <table class="table table-striped table-bordered tbl_reservations" cellspacing="0" width="100%">
+                <table class="table table-striped table-bordered tbl_reservations">
                   <thead>
                     <tr>
                       <th>Booking No.</th>
@@ -51,8 +51,8 @@
                   </tbody>
                 </table>
               </div>
-              <div class="tab-pane" id="unavailable">
-                <table class="table table-striped table-bordered tbl_reservations" cellspacing="0" width="100%">
+              <div class="tab-pane" id="cancelled">
+                <table class="table table-striped table-bordered tbl_reservations">
                   <thead>
                     <tr>
                       <th>Booking No.</th>

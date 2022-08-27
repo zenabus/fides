@@ -9,10 +9,6 @@ class Update_model extends CI_Model {
     die;
   }
 
-  function updateRoomType($id, $data) {
-    $this->db->where('id', $id)->update('room_type', $data);
-  }
-
   function updatePricingRoomType($field, $value, $editid) {
     $this->db->query("update room_type set " . $field . "='" . $value . "' where id='" . $editid . "'");
   }
@@ -49,10 +45,6 @@ class Update_model extends CI_Model {
     $this->db->query("update product_restaurant set " . $field . "='" . $value . "' where id='" . $editid . "'");
   }
 
-  function updateRoom($id, $data) {
-    $this->db->where('id', $id)->update('rooms', $data);
-  }
-
   function updateRoomBooking($data, $id) {
     $this->db->where('room_number_id', $id)->update('rooms_booking', $data);
   }
@@ -68,6 +60,10 @@ class Update_model extends CI_Model {
     }
     $_SESSION['name'] = $_POST['name'];
     $this->db->where('id', $user_id)->update('users', $_POST);
+  }
+
+  function updateImage($image) {
+    $this->db->where('id', $_SESSION['user_id'])->update('users', ['image_source' => $image]);
   }
 
   function frontdeskUpdateCheckRoom($room_number, $data) {
@@ -181,6 +177,8 @@ class Update_model extends CI_Model {
   function updateGuest() {
     $guest_id = $_POST['guest_id'];
     unset($_POST['guest_id']);
+    unset($_POST['booking_number']);
+    unset($_POST['booking_id']);
     $this->db->where('guest_id', $guest_id)->update('guests', $_POST);
   }
 
@@ -194,9 +192,11 @@ class Update_model extends CI_Model {
   }
 
   function updateBooking() {
-    $booking_id = $_POST['booking_id'];
-    unset($_POST['booking_id']);
-    $this->db->where('booking_id', $booking_id)->update('bookings', $_POST);
+    $data = [
+      'reservation_status' => 5,
+      'remarks' => $_POST['remarks']
+    ];
+    $this->db->where('booking_id', $_POST['booking_id'])->update('bookings', $data);
   }
 
   function updateExtras() {
@@ -237,5 +237,17 @@ class Update_model extends CI_Model {
 
   function updateOccupant($occupant) {
     $this->db->where('booked_room_id', $_POST['booked_room_id'])->update('booked_rooms', ['occupant' => $occupant]);
+  }
+
+  function updateRoom() {
+    $room_id = $_POST['room_id'];
+    unset($_POST['room_id']);
+    $this->db->where('id', $room_id)->update('rooms', $_POST);
+  }
+
+  function updateRoomType() {
+    $room_type_id = $_POST['room_type_id'];
+    unset($_POST['room_type_id']);
+    $this->db->where('id', $room_type_id)->update('room_type', $_POST);
   }
 }

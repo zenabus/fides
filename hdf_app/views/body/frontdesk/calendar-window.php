@@ -122,7 +122,7 @@
     </div>
   </div>
   <div>
-    <button class="btn btn-sm btn-default mt-1" id="proceed" disabled>Proceed</button>
+    <button class="btn btn-sm mt-1" id="proceed" disabled>Proceed</button>
   </div>
 </div>
 
