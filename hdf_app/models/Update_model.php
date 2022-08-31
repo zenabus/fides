@@ -53,7 +53,7 @@ class Update_model extends CI_Model {
     $this->db->where('room_number', $room_number)->update('rooms', $data);
   }
 
-  function updateUser($user_id = NULL) {
+  function updateProfile($user_id = NULL) {
     if (!$user_id) {
       $user_id = $_SESSION['user_id'];
       $_SESSION['name'] = $_POST['name'];
@@ -249,5 +249,31 @@ class Update_model extends CI_Model {
     $room_type_id = $_POST['room_type_id'];
     unset($_POST['room_type_id']);
     $this->db->where('id', $room_type_id)->update('room_type', $_POST);
+  }
+
+  function updateExtra() {
+    $this->db->where('price_id', $_POST['price_id'])->update('prices', ['price' => $_POST['price']]);
+  }
+
+  function updateDiscounts() {
+    $discount_id = $_POST['discount_id'];
+    unset($_POST['discount_id']);
+    $this->db->where('discount_id', $discount_id)->update('discounts', $_POST);
+  }
+
+  function updateUser() {
+    $user_id = $_POST['user_id'];
+    unset($_POST['user_id']);
+    unset($_POST['password']);
+    $this->db->where('id', $user_id)->update('users', $_POST);
+  }
+
+  function changeStatus($user_id, $status) {
+    $this->db->where('id', $user_id)->update('users', ['status' => $status]);
+  }
+
+  function resetPassword($user_id) {
+    $password = password_hash('hdf2022', PASSWORD_BCRYPT);
+    $this->db->where('id', $user_id)->update('users', ['password' => $password]);
   }
 }

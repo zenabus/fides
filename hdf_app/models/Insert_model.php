@@ -41,7 +41,6 @@ class Insert_model extends CI_Model {
     $this->db->insert('restaurant_cart', $data);
   }
 
-
   function createUsers($data) {
     $this->db->insert('users', $data);
   }
@@ -60,7 +59,7 @@ class Insert_model extends CI_Model {
 
   function log($content, $log_type = 0) {
     $data = [
-      'user_id' => $this->session->userdata('user_id'),
+      'user_id' => $_SESSION['user_id'],
       'content' => $content,
       'log_type' => $log_type,
     ];
@@ -211,5 +210,16 @@ class Insert_model extends CI_Model {
   function addRoomType() {
     unset($_POST['room_type_id']);
     $this->db->insert('room_type', $_POST);
+  }
+
+  function addDiscount() {
+    unset($_POST['discount_id']);
+    $this->db->insert('discounts', $_POST);
+  }
+
+  function addUser() {
+    unset($_POST['user_id']);
+    $_POST['password'] = password_hash($_POST['password'], PASSWORD_BCRYPT);
+    $this->db->insert('users', $_POST);
   }
 }

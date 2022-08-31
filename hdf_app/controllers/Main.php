@@ -164,7 +164,6 @@ class Main extends MY_Controller {
 
     $room_charges = $this->get_model->getRoomChargesTotal($data['booking']->booking_id);
     $amenities = $this->get_model->getRoomAmenitiesTotal($data['booking']->booking_id);
-    // $this->dd($data['logs']);
     $data['charges_total'] = $room_charges->total + $amenities->total;
 
     $this->load->view('layout/header', $data);
@@ -172,12 +171,11 @@ class Main extends MY_Controller {
     $this->load->view('layout/footer');
   }
 
-  function charges() {
-    $data['active'] = 'charges';
-    $data['categories'] = $this->get_model->getCategories();
-    $data['charges'] = $this->get_model->getCharges();
+  function logs() {
+    $data['active'] = 'logs';
+    $data['logs'] = $this->get_model->getLogs();
     $this->load->view('layout/header', $data);
-    $this->load->view('body/frontdesk/charges');
+    $this->load->view('body/frontdesk/logs');
     $this->load->view('layout/footer');
   }
 
@@ -187,7 +185,8 @@ class Main extends MY_Controller {
 
   function updateProfile() {
     $_SESSION['name'] = $_POST['name'];
-    $this->update_model->updateUser();
+    $this->update_model->updateProfile();
+    $this->insert_model->log('Updated his/her profile', 1);
     $this->session->set_flashdata('success', 'Profile successfully updated');
     $this->redirect();
   }
@@ -199,6 +198,7 @@ class Main extends MY_Controller {
     $_SESSION['image'] = $name;
     $this->update_model->updateImage($name);
     $this->unlink($old_image);
+    $this->insert_model->log('Updated his/her profile picture', 1);
     $this->session->set_flashdata('success', 'Profile picture successfully updated');
     redirect('main/profile/');
   }
@@ -212,7 +212,8 @@ class Main extends MY_Controller {
     $type = $_POST['booking_type'] == 'Check In' ? 'booked' : 'reserved';
     $this->insert_model->book();
     $this->insert_model->addPayment();
-    $this->session->set_flashdata('success', 'Successfully ' . $type . ' ' . $name . ' in room ' . $room->room_number);
+    $this->insert_model->log(ucfirst("{$type} {$name} in room {$room->room_number}"));
+    $this->session->set_flashdata('success', "Successfully {$type} {$name} in room {$room->room_number}");
     $this->redirect();
   }
 
@@ -228,6 +229,7 @@ class Main extends MY_Controller {
 
     $name = $_POST['first_name'] . ' ' . $_POST['middle_name'] . ' ' . $_POST['last_name'];
     $this->insert_model->addGuest(NULL);
+    $this->insert_model->log('Added new guest, ' . $name, 2);
     $this->session->set_flashdata('success', 'Successfully added ' . $name . ' to the guest list.');
     $this->redirect();
   }
@@ -236,6 +238,7 @@ class Main extends MY_Controller {
     $name = $_POST['first_name'] . ' ' . $_POST['middle_name'] . ' ' . $_POST['last_name'];
     $log = "<b>{$_POST['booking_number']}</b> → Updated guest details";
     $this->insert_model->addBookingLog($log);
+    $this->insert_model->log($log);
     $this->update_model->updateGuest();
     $this->session->set_flashdata('success', 'Successfully updated ' . $name);
     $this->redirect();
@@ -245,6 +248,7 @@ class Main extends MY_Controller {
     $guest = $this->get_model->getGuest($guest_id);
     $name = $guest->first_name . ' ' . $guest->middle_name . ' ' . $guest->last_name;
     $this->update_model->statusGuest($disabled, $guest_id);
+    $this->insert_model->log('Updated status of ' . $name, 3);
     $this->session->set_flashdata('success', 'Successfully updated status of ' . $name);
     $this->redirect();
   }
@@ -264,6 +268,7 @@ class Main extends MY_Controller {
       die;
     }
 
+    $this->insert_model->log('Changed his/her password', 1);
     $this->session->set_flashdata('success', 'Password successfully changed.');
     $this->update_model->changePassword();
     $this->redirect();
@@ -271,6 +276,8 @@ class Main extends MY_Controller {
 
   function updateReservationStatus($reservation_status, $booking_id) {
     $this->update_model->updateReservationStatus($reservation_status, $booking_id);
+    $booking_number = 'HDF' . str_pad($booking_id, 5, '0', STR_PAD_LEFT);
+    $this->insert_model->log('Cancelled a reservation: #' . $booking_number, 3);
     $this->session->set_flashdata('success', 'Reservation status successfully cancelled.');
     $this->redirect();
   }
@@ -279,6 +286,8 @@ class Main extends MY_Controller {
     $this->update_model->updateReservationStatus(5, $_POST['booking_id']);
     $this->update_model->updateBooking();
     $this->insert_model->addPayment();
+    $booking_number = 'HDF' . str_pad($_POST['booking_id'], 5, '0', STR_PAD_LEFT);
+    $this->insert_model->log('Verified a reservation: #' . $booking_number, 3);
     $this->session->set_flashdata('success', 'Reservation successfully verified!');
     $this->redirect();
   }
@@ -288,6 +297,7 @@ class Main extends MY_Controller {
     $this->update_model->updateExtras();
     $log = "<b>{$room->room_number} {$room->room_type_abbr}</b> → Updated extras: <b>{$_POST['extra_bed']} extra bed(s)</b> and <b>{$_POST['extra_person']} extra person(s)</b>";
     $this->insert_model->addBookingLog($log);
+    $this->insert_model->log($log);
     $this->session->set_flashdata('success', 'Extra bed/person successfully updated!');
     $this->redirect();
   }
@@ -298,6 +308,7 @@ class Main extends MY_Controller {
     $discount = $this->get_model->getDiscount($_POST['discount_id']);
     $log = "<b>{$booked_room->room_number} {$booked_room->room_type_abbr}</b> → Set room discount of <b>{$discount->percentage}% ({$discount->discount_type})</b>";
     $this->insert_model->addBookingLog($log);
+    $this->insert_model->log($log);
     $this->session->set_flashdata('success', 'Discount successfully updated!');
     $this->redirect();
   }
@@ -307,6 +318,7 @@ class Main extends MY_Controller {
     $room = $this->get_model->getRoom($_POST['room_id']);
     $log = "<b>{$room->room_number} {$room->room_type_abbr}</b> → Booked room for <b>{$_POST['nights']} night(s)</b> from <b>{$_POST['check_in']}</b> to <b>{$_POST['check_out']}</b>";
     $this->insert_model->addBookingLog($log);
+    $this->insert_model->log($log);
     $this->session->set_flashdata('success', 'Room successfully added!');
     $this->redirect();
   }
@@ -317,6 +329,7 @@ class Main extends MY_Controller {
     $this->delete_model->removeRoom($booked_room_id);
     $log = "<b>{$booked_room->room_number} {$booked_room->room_type_abbr}</b> → Removed room <b>{$booked_room->nights} night(s)</b> from <b>{$booked_room->check_in}</b> to <b>{$booked_room->check_out}</b>";
     $this->insert_model->addBookingLog($log);
+    $this->insert_model->log($log);
     $this->session->set_flashdata('success', 'Room successfully removed!');
     $this->redirect();
   }
@@ -327,6 +340,7 @@ class Main extends MY_Controller {
     $room_to = $this->get_model->getRoom($_POST['room_id']);
     $log = "<b>{$room_to->room_number} {$room_to->room_type_abbr}</b> → Changed room from <b>{$room_from->room_type_abbr} {$room_from->room_number}</b> {$room_from->nights} night(s) {$room_from->check_in} - {$room_from->check_out} to <b>{$room_to->room_number} {$room_to->room_type_abbr}</b> {$_POST['nights']} night(s) {$_POST['check_in']} - {$_POST['check_out']}";
     $this->insert_model->addBookingLog($log);
+    $this->insert_model->log($log);
     $this->session->set_flashdata('success', 'Room successfully changed!');
     $this->redirect();
   }
@@ -336,44 +350,9 @@ class Main extends MY_Controller {
     $amount = number_format($_POST['charges_food_amount']);
     $log = "<b>{$booked_room->room_number} {$booked_room->room_type_abbr}</b> → Added <b>{$_POST['charge_type']}</b> charge: <b>Ref. {$_POST['reference']} {$_POST['particulars']} {$_POST['charges_food_quantity']}</b> pc(s) for ₱<b>{$amount}</b> each";
     $this->insert_model->addBookingLog($log);
+    $this->insert_model->log($log);
     $this->insert_model->addCharges();
     $this->session->set_flashdata('success', 'Charges successfully added!');
-    $this->redirect();
-  }
-
-  function addCategory() {
-    $this->insert_model->addCategory();
-    $this->session->set_flashdata('success', 'Category successfully added!');
-    $this->redirect();
-  }
-
-  function deleteCategory($category_id) {
-    $this->delete_model->deleteCategory($category_id);
-    $this->session->set_flashdata('success', 'Category successfully deleted!');
-    $this->redirect();
-  }
-
-  function updateCategory() {
-    $this->update_model->updateCategory();
-    $this->session->set_flashdata('success', 'Category successfully updated!');
-    $this->redirect();
-  }
-
-  function addCharge() {
-    $this->insert_model->addCharge();
-    $this->session->set_flashdata('success', 'Charge successfully added!');
-    $this->redirect();
-  }
-
-  function deleteCharge($charge_id) {
-    $this->delete_model->deleteCharge($charge_id);
-    $this->session->set_flashdata('success', 'Charge successfully deleted!');
-    $this->redirect();
-  }
-
-  function updateCharge() {
-    $this->update_model->updateCharge();
-    $this->session->set_flashdata('success', 'Charge successfully updated!');
     $this->redirect();
   }
 
@@ -383,6 +362,7 @@ class Main extends MY_Controller {
     $cost = number_format($charge->charge_amount);
     $log = "<b>{$booked_room->room_number} {$booked_room->room_type_abbr}</b> → Added {$_POST['charge_quantity']} {$charge->category} - {$charge->charge} amounting ₱{$cost} each";
     $this->insert_model->addBookingLog($log);
+    $this->insert_model->log($log);
     $this->insert_model->addOtherCharges();
     $this->session->set_flashdata('success', 'Charges successfully added!');
     $this->redirect();
@@ -393,6 +373,7 @@ class Main extends MY_Controller {
     $option = strtolower($_POST['payment_option']);
     $log = "<b>{$_POST['booking_number']}</b> → Added <b>{$option}</b> payment amounting ₱<b>{$amount}</b>";
     $this->insert_model->addBookingLog($log);
+    $this->insert_model->log($log);
     $this->insert_model->addPayment();
     $this->session->set_flashdata('success', 'Payment successfully added!');
     $this->redirect();
@@ -404,6 +385,7 @@ class Main extends MY_Controller {
     $current = number_format($_POST['refund']);
     $log = "<b>{$_POST['booking_number']}</b> → Update refund amount from ₱<b>{$previous}</b> to ₱<b>{$current}</b>";
     $this->insert_model->addBookingLog($log);
+    $this->insert_model->log($log);
     $this->update_model->updateRefund();
     $this->session->set_flashdata('success', 'Refund successfully updated!');
     $this->redirect();
@@ -413,6 +395,7 @@ class Main extends MY_Controller {
     $log = "<b>{$booking_number}</b> → Successfully completed order!";
     $_POST['booking_id'] = $booking_id;
     $this->insert_model->addBookingLog($log);
+    $this->insert_model->log($log);
     $this->update_model->updateReservationStatus(-1, $booking_id);
     $this->session->set_flashdata('success', 'Order successfully completed!');
     $this->redirect();
@@ -425,6 +408,7 @@ class Main extends MY_Controller {
     $log = "<b>{$booked_room->room_number} {$booked_room->room_type_abbr}</b> → Removed <b>{$extra} extra {$type}</b>";
     $_POST['booking_id'] = $booked_room->booking_id;
     $this->insert_model->addBookingLog($log);
+    $this->insert_model->log($log);
     $this->update_model->removeExtra($column, $booked_room_id);
     $this->session->set_flashdata('success', 'Extra ' . str_replace('extra_', '', $column) . ' successfully removed!');
     $this->redirect();
@@ -443,6 +427,7 @@ class Main extends MY_Controller {
     }
     $_POST['booking_id'] = $booked_room->booking_id;
     $this->insert_model->addBookingLog($log);
+    $this->insert_model->log($log);
     $this->delete_model->removeCharge($table, $charge_id);
     $this->session->set_flashdata('success', 'Charge successfully removed!');
     $this->redirect();
@@ -454,6 +439,7 @@ class Main extends MY_Controller {
     $booked_room = $this->get_model->getBookedRoom($_POST['booked_room_id']);
     $log = "<b>{$booked_room->room_number} {$booked_room->room_type_abbr}</b> → Set <b>{$_POST['guest']}</b> / {$_POST['contact']} / {$_POST['email']} as occupant";
     $this->insert_model->addBookingLog($log);
+    $this->insert_model->log($log);
     $this->session->set_flashdata('success', 'Occupant successfully updated!');
     $this->redirect();
   }
@@ -463,6 +449,7 @@ class Main extends MY_Controller {
     $booking_number = 'HDF' . str_pad($_POST['booking_id'], 5, '0', STR_PAD_LEFT);
     $log = "<b>{$booking_number}</b> → Updated notes";
     $this->insert_model->addBookingLog($log);
+    $this->insert_model->log($log);
     $this->session->set_flashdata('success', 'Notes successfully updated!');
     $this->redirect();
   }
@@ -475,6 +462,7 @@ class Main extends MY_Controller {
     $log = "<b>{$booking_number}</b> → Removed <b>{$option}</b> payment amounting ₱<b>{$amount}</b>";
     $_POST['booking_id'] = $payment->booking_id;
     $this->insert_model->addBookingLog($log);
+    $this->insert_model->log($log);
     $this->delete_model->deletePayment($booking_payment_id);
     $this->session->set_flashdata('success', 'Payment successfully removed!');
     $this->redirect();

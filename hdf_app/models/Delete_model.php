@@ -96,4 +96,8 @@ class Delete_model extends CI_Model {
   function deleteRoomType($room_type_id) {
     $this->db->where('id', $room_type_id)->delete('room_type');
   }
+
+  function deleteDiscount($discount_id) {
+    $this->db->where('discount_id', $discount_id)->delete('discounts');
+  }
 }

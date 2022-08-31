@@ -6,7 +6,7 @@ class Superadmin extends CI_Controller {
 
   public function index() {
     if ($this->session->userdata('connect') == true);
-    $id = $this->session->userdata('user_id');
+    $id = $_SESSION['user_id'];
 
     $data = array(
       'result_room' => $this->get_model->frontdeskRooms(),
@@ -32,7 +32,7 @@ class Superadmin extends CI_Controller {
 
   public function roomTypes() {
     if ($this->session->userdata('connect') == true);
-    $id = $this->session->userdata('user_id');
+    $id = $_SESSION['user_id'];
 
     $data['result_roomtype'] = $this->get_model->getRoomTypes();
     $data['get_user'] = $this->get_model->frontdeskGetUserDatails($id);
@@ -47,7 +47,7 @@ class Superadmin extends CI_Controller {
     if (isset($_FILES['files'])) {
       if ($this->session->userdata('connect') == true);
       # code...
-      $id = $this->session->userdata('user_id');
+      $id = $_SESSION['user_id'];
 
       $name = $_FILES['files']['name'];
       $type = explode('.', $name);
@@ -100,7 +100,7 @@ class Superadmin extends CI_Controller {
 
   public function updateRoomtype($id) {
     if ($this->session->userdata('connect') == true);
-    $ids = $this->session->userdata('user_id');
+    $ids = $_SESSION['user_id'];
     $data = array(
       'result_roomtype' => $this->get_model->getRoomTypes(),
       'notif' => $this->get_model->adminGetNotif(),
@@ -162,7 +162,7 @@ class Superadmin extends CI_Controller {
     if (isset($_FILES['files'])) {
       if ($this->session->userdata('connect') == true);
       # code...
-      $id = $this->session->userdata('user_id');
+      $id = $_SESSION['user_id'];
 
       $name = $_FILES['files']['name'];
       $type = explode('.', $name);
@@ -229,7 +229,7 @@ class Superadmin extends CI_Controller {
   ////////////////////////////////
   public function rooms() {
     if ($this->session->userdata('connect') == true);
-    $id = $this->session->userdata('user_id');
+    $id = $_SESSION['user_id'];
     $data = array(
       'result_roomtype' => $this->get_model->getRoomTypes(),
       'notif' => $this->get_model->adminGetNotif(),
@@ -341,7 +341,7 @@ class Superadmin extends CI_Controller {
 
   public function updateRoom($id) {
     if ($this->session->userdata('connect') == true);
-    $ids = $this->session->userdata('user_id');
+    $ids = $_SESSION['user_id'];
     $data = array(
       'result_roomtype' => $this->get_model->getRoomTypes(),
       'result_rooms' => $this->get_model->getRoom(),
@@ -425,7 +425,7 @@ class Superadmin extends CI_Controller {
 
   public function createUser() {
     if ($this->session->userdata('connect') == true);
-    $id = $this->session->userdata('user_id');
+    $id = $_SESSION['user_id'];
     $data = array(
       'result_users' => $this->get_model->getUsers(),
       'notif' => $this->get_model->adminGetNotif(),
@@ -497,7 +497,7 @@ class Superadmin extends CI_Controller {
 
   public function updateUser($id) {
     if ($this->session->userdata('connect') == true);
-    $ids = $this->session->userdata('user_id');
+    $ids = $_SESSION['user_id'];
     $data = array(
       'result_users' => $this->get_model->getUsers(),
       'result_users_id' => $this->get_model->updateUserId($id),
@@ -563,7 +563,7 @@ class Superadmin extends CI_Controller {
 
   public function pricing() {
     if ($this->session->userdata('connect') == true);
-    $ids = $this->session->userdata('user_id');
+    $ids = $_SESSION['user_id'];
     $data = array(
       'result_room' => $this->get_model->getRoomTypes(),
       'result_bed' => $this->get_model->getBed(),
@@ -632,7 +632,7 @@ class Superadmin extends CI_Controller {
 
   public function CoffeeProduct() {
     if ($this->session->userdata('connect') == true);
-    $id = $this->session->userdata('user_id');
+    $id = $_SESSION['user_id'];
     $data = array(
       'result_product_res' => $this->get_model->coffeegetProductRes(),
       'notif' => $this->get_model->adminGetNotif(),
@@ -749,7 +749,7 @@ class Superadmin extends CI_Controller {
 
   public function resProduct() {
     if ($this->session->userdata('connect') == true);
-    $id = $this->session->userdata('user_id');
+    $id = $_SESSION['user_id'];
     $data = array(
       'result_product_res' => $this->get_model->getProductRes('Restaurant'),
       'notif' => $this->get_model->adminGetNotif(),
@@ -870,7 +870,7 @@ class Superadmin extends CI_Controller {
   ////////////////////////////////////////	
   public function deduction() {
     if ($this->session->userdata('connect') == true);
-    $id = $this->session->userdata('user_id');
+    $id = $_SESSION['user_id'];
     $data = array(
       'result_deduction' => $this->get_model->getDeduction(),
       'notif' => $this->get_model->adminGetNotif(),
@@ -924,7 +924,7 @@ class Superadmin extends CI_Controller {
 
   public function Updatededuction($id) {
     if ($this->session->userdata('connect') == true);
-    $ids = $this->session->userdata('user_id');
+    $ids = $_SESSION['user_id'];
     $data = array(
       'result_deduction' => $this->get_model->getDeduction(),
       'result_deduction_id' => $this->get_model->getDeductionById($id),
@@ -963,7 +963,7 @@ class Superadmin extends CI_Controller {
 
   public function Profile() {
     if ($this->session->userdata('connect') == true);
-    $id = $this->session->userdata('user_id');
+    $id = $_SESSION['user_id'];
     $data = array(
       'get_user' => $this->get_model->frontdeskGetUserDatails($id),
       'notif' => $this->get_model->adminGetNotif(),
@@ -978,7 +978,7 @@ class Superadmin extends CI_Controller {
     if (isset($_FILES['files'])) {
       if ($this->session->userdata('connect') == true);
       # code...
-      $id = $this->session->userdata('user_id');
+      $id = $_SESSION['user_id'];
 
       $name = $_FILES['files']['name'];
       $type = explode('.', $name);
@@ -1022,7 +1022,7 @@ class Superadmin extends CI_Controller {
 
     if ($this->session->userdata('connect') == true);
     # code...
-    $id = $this->session->userdata('user_id');
+    $id = $_SESSION['user_id'];
     $full_name = $this->input->post('full_name');
     $contact = $this->input->post('contact');
     $email = $this->input->post('email');
@@ -1058,7 +1058,7 @@ class Superadmin extends CI_Controller {
 
   public function createTables() {
     if ($this->session->userdata('connect') == true);
-    $id = $this->session->userdata('user_id');
+    $id = $_SESSION['user_id'];
     $data = array(
       'result_table' => $this->get_model->getTables(),
       'notif' => $this->get_model->adminGetNotif(),
@@ -1071,7 +1071,7 @@ class Superadmin extends CI_Controller {
 
   public function UpdateTables($id) {
     if ($this->session->userdata('connect') == true);
-    $ids = $this->session->userdata('user_id');
+    $ids = $_SESSION['user_id'];
     $data = array(
       'result_table' => $this->get_model->getTables(),
       'notif' => $this->get_model->adminGetNotif(),
@@ -1183,7 +1183,7 @@ class Superadmin extends CI_Controller {
 
   public function coffeeshopcreateTables() {
     if ($this->session->userdata('connect') == true);
-    $id = $this->session->userdata('user_id');
+    $id = $_SESSION['user_id'];
     $data = array(
       'result_table' => $this->get_model->coffeeshopgetTables(),
       'notif' => $this->get_model->adminGetNotif(),
@@ -1196,7 +1196,7 @@ class Superadmin extends CI_Controller {
 
   public function coffeeshopUpdateTables($id) {
     if ($this->session->userdata('connect') == true);
-    $ids = $this->session->userdata('user_id');
+    $ids = $_SESSION['user_id'];
     $data = array(
       'result_table' => $this->get_model->coffeeshopgetTables(),
       'result_by_id' => $this->get_model->coffeeshopupdategetTables($id),
@@ -1270,7 +1270,7 @@ class Superadmin extends CI_Controller {
 
   public function activitylogs() {
     if ($this->session->userdata('connect') == true);
-    $id = $this->session->userdata('user_id');
+    $id = $_SESSION['user_id'];
     $data = array(
       'result_logs' => $this->get_model->logs_activity(),
       'notif' => $this->get_model->adminGetNotif(),
@@ -1283,7 +1283,7 @@ class Superadmin extends CI_Controller {
 
   public function userlogs() {
     if ($this->session->userdata('connect') == true);
-    $id = $this->session->userdata('user_id');
+    $id = $_SESSION['user_id'];
     $data = array(
       'result_logs' => $this->get_model->insertEvent(),
       'notif' => $this->get_model->adminGetNotif(),
@@ -1296,7 +1296,7 @@ class Superadmin extends CI_Controller {
 
   public function reports() {
     if ($this->session->userdata('connect') == true);
-    $id = $this->session->userdata('user_id');
+    $id = $_SESSION['user_id'];
     $data = array(
       'result_logs' => $this->get_model->insertEvent(),
       'notif' => $this->get_model->adminGetNotif(),
@@ -1309,7 +1309,7 @@ class Superadmin extends CI_Controller {
 
   public function viewReports() {
     if ($this->session->userdata('connect') == true);
-    $id = $this->session->userdata('user_id');
+    $id = $_SESSION['user_id'];
 
     $from = $this->input->post('from');
     $to = $this->input->post('to');
@@ -1346,7 +1346,7 @@ class Superadmin extends CI_Controller {
     # code...
     $sess = $this->session->userdata('username');
     if ($this->session->userdata('connect') == true);
-    $id = $this->session->userdata('user_id');
+    $id = $_SESSION['user_id'];
     $data = array(
 
       'get_user' => $this->get_model->frontdeskGetUserDatails($id),
@@ -1361,7 +1361,7 @@ class Superadmin extends CI_Controller {
   public function printRecieptRestaurant($id_reports) {
     if ($this->session->userdata('connect') == true);
     $sess = $this->session->userdata('username');
-    $id = $this->session->userdata('user_id');
+    $id = $_SESSION['user_id'];
     $reports = $this->db->query('select * from all_reports where id_reports="' . $id_reports . '" order by id_reports desc limit 1');
     $id_reports = "";
     $view = "";
@@ -1409,7 +1409,7 @@ class Superadmin extends CI_Controller {
     $id = $string[1];
     if ($this->session->userdata('connect') == true);
     $sess = $this->session->userdata('username');
-    // $id = $this->session->userdata('user_id');
+    // $id = $_SESSION['user_id'];
     $reports = $this->db->query('select * from all_reports where id_reports="' . $id_reports . '" order by id_reports desc limit 1');
     $id_reports = "";
     $view = "";
@@ -1453,7 +1453,7 @@ class Superadmin extends CI_Controller {
 
   public function cancelBooking() {
     if ($this->session->userdata('connect') == true);
-    $id = $this->session->userdata('user_id');
+    $id = $_SESSION['user_id'];
 
     ///$data['result_roomtype'] = $this->get_model->getRoomTypes(); 
     $data['get_user'] = $this->get_model->frontdeskGetUserDatails($id);

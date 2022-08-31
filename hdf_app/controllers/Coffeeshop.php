@@ -14,7 +14,7 @@ class coffeeshop extends CI_Controller {
     # code...
     $sess = $this->session->userdata('username');
     if ($this->session->userdata('connect') == true);
-    $id = $this->session->userdata('user_id');
+    $id = $_SESSION['user_id'];
     $data = array(
 
       'get_user' => $this->get_model->frontdeskGetUserDatails($id)
@@ -26,7 +26,7 @@ class coffeeshop extends CI_Controller {
   public function coffeeshopProfile() {
     if ($this->session->userdata('connect') == true);
     # code...
-    $id = $this->session->userdata('user_id');
+    $id = $_SESSION['user_id'];
     $data = array(
       'get_user' => $this->get_model->frontdeskGetUserDatails($id),
 
@@ -44,7 +44,7 @@ class coffeeshop extends CI_Controller {
     if (isset($_FILES['files'])) {
       if ($this->session->userdata('connect') == true);
       # code...
-      $id = $this->session->userdata('user_id');
+      $id = $_SESSION['user_id'];
 
       $name = $_FILES['files']['name'];
       $type = explode('.', $name);
@@ -88,7 +88,7 @@ class coffeeshop extends CI_Controller {
 
     if ($this->session->userdata('connect') == true);
     # code...
-    $id = $this->session->userdata('user_id');
+    $id = $_SESSION['user_id'];
     $full_name = $this->input->post('full_name');
     $contact = $this->input->post('contact');
     $email = $this->input->post('email');
@@ -122,7 +122,7 @@ class coffeeshop extends CI_Controller {
   public function PerTable() {
 
     if ($this->session->userdata('connect') == true);
-    $id = $this->session->userdata('user_id');
+    $id = $_SESSION['user_id'];
     $data = array(
       'result_table' => $this->get_model->getTables(),
 
@@ -135,7 +135,7 @@ class coffeeshop extends CI_Controller {
 
   public function PerTableProcess($id) {
     if ($this->session->userdata('connect') == true);
-    $ids = $this->session->userdata('user_id');
+    $ids = $_SESSION['user_id'];
     $data = array(
       'id' => $id,
       'result_name' => $this->get_model->getTablesbyId($id),
@@ -199,7 +199,7 @@ class coffeeshop extends CI_Controller {
   }
   public function process() {
     if ($this->session->userdata('connect') == true);
-    $id = $this->session->userdata('user_id');
+    $id = $_SESSION['user_id'];
     $data = array(
 
       'result_product_name' => $this->get_model->getProductRes(),
@@ -277,7 +277,7 @@ class coffeeshop extends CI_Controller {
     if ($this->session->userdata('connect') == true) {
       # code...
       $sess = $this->session->userdata('username');
-      $id_sess = $this->session->userdata('user_id');
+      $id_sess = $_SESSION['user_id'];
     }
     $get_id = $this->db->query('select * from coffeeshop_cart where account_process="' . $id_sess . '" and type_process ="Coffee Shop" order by id_cart desc limit 1');
     $result_id = "";
@@ -346,7 +346,7 @@ class coffeeshop extends CI_Controller {
     if ($this->session->userdata('connect') == true) {
       # code...
       $sess = $this->session->userdata('username');
-      $id_sess = $this->session->userdata('user_id');
+      $id_sess = $_SESSION['user_id'];
     }
 
 
@@ -531,7 +531,7 @@ class coffeeshop extends CI_Controller {
     if ($this->session->userdata('connect') == true) {
       # code...
       $sess = $this->session->userdata('username');
-      $id_sess = $this->session->userdata('user_id');
+      $id_sess = $_SESSION['user_id'];
     }
 
 
@@ -590,7 +590,7 @@ class coffeeshop extends CI_Controller {
     if ($this->session->userdata('connect') == true) {
       # code...
       $sess = $this->session->userdata('username');
-      $id_sess = $this->session->userdata('user_id');
+      $id_sess = $_SESSION['user_id'];
     }
 
 
@@ -632,7 +632,7 @@ class coffeeshop extends CI_Controller {
     # code...
     $sess = $this->session->userdata('username');
     if ($this->session->userdata('connect') == true);
-    $id = $this->session->userdata('user_id');
+    $id = $_SESSION['user_id'];
     $data = array(
 
       'get_user' => $this->get_model->frontdeskGetUserDatails($id)
@@ -643,7 +643,7 @@ class coffeeshop extends CI_Controller {
   }
   public function coffeeshopviewReports() {
     if ($this->session->userdata('connect') == true);
-    $id = $this->session->userdata('user_id');
+    $id = $_SESSION['user_id'];
 
     $from = $this->input->post('from');
     $to = $this->input->post('to');

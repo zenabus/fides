@@ -27,7 +27,7 @@
           <table class="table table-striped">
             <thead>
               <tr>
-                <th>Room #</th>
+                <th class="pl-4">Room #</th>
                 <th>Type</th>
                 <th>Price</th>
                 <th>Persons</th>
@@ -48,9 +48,9 @@
                   </tr>
                 <?php } ?>
                 <tr>
-                  <td><?= $row['room_number'] ?></td>
+                  <td class="pl-4"><?= $row['room_number'] ?></td>
                   <td><?= $row['room_type'] ?></td>
-                  <td>₱ <?= number_format($row['pricing_type'], 2) ?></td>
+                  <td>₱ <?= number_format($row['pricing_type']) ?></td>
                   <td><?= $row['max_persons'] == 2 ? 'Two' : 'Three' ?></td>
                   <td>
                     <span class="badge badge-<?= $badge ?>">
@@ -123,7 +123,6 @@
     </div>
   </div>
 </div>
-
 
 <script>
   const guests = JSON.parse('<?= json_encode($guests) ?>');

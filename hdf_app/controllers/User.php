@@ -10,6 +10,7 @@ class User extends MY_Controller {
   function destroy() {
     $this->insert_model->log('User logged out', 1);
     $this->session->sess_destroy();
+    unset($_SESSION);
     redirect(base_url('index.php/user'));
   }
 
@@ -32,7 +33,7 @@ class User extends MY_Controller {
 
     $this->session->set_userdata($user_session);
     $this->session->set_flashdata('success', 'Welcome, ' . $user->name . '!');
-    $this->insert_model->log('User logged in');
+    $this->insert_model->log('User logged in', 1);
 
     if ($user->user_type == 'Admin') {
       redirect('main');

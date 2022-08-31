@@ -23,7 +23,7 @@
     <div class="col-md-12">
       <h5 class="mb-0">Room Types</h5>
       <div class="d-flex justify-content-between">
-        <button class="btn btn-default" id="addRoomType">Add Room Type</button>
+        <button class="btn" id="addRoomType">Add Room Type</button>
         <button class="btn btn-primary" onclick="history.back()">Back</button>
       </div>
       <div class="card mb-0">

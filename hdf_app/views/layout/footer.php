@@ -35,6 +35,7 @@
 
           $('.datatable').DataTable();
         });
+        $("[rel='tooltip']").tooltip();
       </script>
       </body>
 

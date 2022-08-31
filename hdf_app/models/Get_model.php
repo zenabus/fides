@@ -49,7 +49,7 @@ class Get_model extends CI_Model {
   }
 
   function getUsers() {
-    return $this->db->get('users')->result_array();
+    return $this->db->order_by('status')->order_by('user_type')->order_by('name')->get('users')->result_array();
   }
 
   function getUser($user_id) {
@@ -259,13 +259,13 @@ class Get_model extends CI_Model {
 
   function restaurantTotalBalance() {
     if ($this->session->userdata('connect') == true);
-    $sess = $this->session->userdata('user_id');
+    $sess = $_SESSION['user_id'];
     return $this->db->query('SELECT *,sum(total_cart_amount) AS total FROM restaurant_cart WHERE table_num="walkin" and status_cart="Not Deleted" and account_process="' . $sess . '"')->result_array();
   }
 
   function restaurantTotalBalanceReciept($id_reports, $res) {
     if ($this->session->userdata('connect') == true);
-    $sess = $this->session->userdata('user_id');
+    $sess = $_SESSION['user_id'];
     return $this->db->query('SELECT *,sum(total_cart_amount) AS total FROM restaurant_cart WHERE type_process="' . $res . '" and status_cart="Deleted" and account_process="' . $sess . '" and id_for_reports="' . $id_reports . '"')->result_array();
   }
 
@@ -275,7 +275,7 @@ class Get_model extends CI_Model {
 
   function restaurantTotalBalanceRecieptpertable($id_reports, $id, $res) {
     if ($this->session->userdata('connect') == true);
-    $sess = $this->session->userdata('user_id');
+    $sess = $_SESSION['user_id'];
     return $this->db->query('SELECT *,sum(total_cart_amount) AS total FROM restaurant_cart WHERE type_process="' . $res . '" and table_num="' . $id . '" and status_cart="Deleted" and account_process="' . $sess . '" and id_for_reports="' . $id_reports . '"')->result_array();
   }
 
@@ -392,13 +392,13 @@ class Get_model extends CI_Model {
 
   function reportTransactionsRestaurant($res) {
     if ($this->session->userdata('connect') == true);
-    $sess = $this->session->userdata('user_id');
+    $sess = $_SESSION['user_id'];
     return $this->db->query('SELECT * FROM all_reports WHERE account_process="' . $sess . '" and type_process="' . $res . '"')->result_array();
   }
 
   function reportTransactionsfrontdesk() {
     if ($this->session->userdata('connect') == true);
-    $sess = $this->session->userdata('user_id');
+    $sess = $_SESSION['user_id'];
     //return $this->db->query('SELECT * FROM all_reports WHERE account_process="'.$sess.'" and type_process="Frontdesk"')->result_array();
     return $this->db->query('SELECT * FROM all_reports WHERE type_process="Frontdesk"')->result_array();
   }
@@ -538,7 +538,7 @@ class Get_model extends CI_Model {
   }
 
   function getProfile() {
-    return $this->db->where('id', $this->session->userdata('user_id'))->get('users')->row();
+    return $this->db->where('id', $_SESSION['user_id'])->get('users')->row();
   }
 
   function getRoomById($id) {
@@ -616,11 +616,15 @@ class Get_model extends CI_Model {
   }
 
   function getCategories() {
-    return $this->db->get('categories')->result_array();
+    return $this->db->order_by('category')->get('categories')->result_array();
+  }
+
+  function getCategory($category_id) {
+    return $this->db->where('category_id', $category_id)->get('categories')->result_array();
   }
 
   function getCharges() {
-    return $this->db->join('categories', 'categories.category_id=charges.category_id')->get('charges')->result_array();
+    return $this->db->join('categories', 'categories.category_id=charges.category_id')->order_by('category')->get('charges')->result_array();
   }
 
   function getCharge($charge_id) {
@@ -683,5 +687,14 @@ class Get_model extends CI_Model {
 
   function getRoomType($room_type_id) {
     return $this->db->where('id', $room_type_id)->get('room_type')->row();
+  }
+
+  function getLogs($user_id = null) {
+    $this->db->order_by('user_logs.id', 'DESC');
+    $this->db->join('users', 'users.id=user_logs.user_id');
+    if ($user_id) {
+      $this->db->where('user_id', $user_id);
+    }
+    return $this->db->get('user_logs')->result_array();
   }
 }

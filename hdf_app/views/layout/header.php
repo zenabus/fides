@@ -249,42 +249,48 @@ if (!$this->session->userdata('connect')) {
             </a>
           </li>
 
+          <li class="<?= $active == 'logs' ? 'active' : '' ?>">
+            <a href="<?= base_url('index.php/main/logs') ?>">
+              <i class="fa fa-calendar-check-o"></i>
+              <p>Logs</p>
+            </a>
+          </li>
+
           <?php if ($_SESSION['user_type'] == 'Admin') { ?>
 
-            <li class="text-center">
-              <small class="text-white">Administrator</small>
-            </li>
-
             <li>
-              <a data-toggle="collapse" href="#rates">
+              <a data-toggle="collapse" href="#collapseRates" aria-expanded="<?= $active == 'room_rates' || $active == 'discounts' ||  $active == 'charges' ? 'true' : 'false' ?>">
                 <i class="fa fa-dollar"></i>
                 <p>Rates<b class="caret"></b></p>
               </a>
-              <div class="collapse " id="rates">
+              <div class="collapse  <?= $active == 'room_rates' || $active == 'discounts' ||  $active == 'charges' ? 'show' : '' ?>" id="collapseRates">
                 <ul class="nav">
-                  <li>
-                    <a href="<?php echo base_url() ?>index.php/admin/pricing">
-                      <span class="sidebar-mini-icon">R</span>
-                      <span class="sidebar-normal"> Rooms </span>
+                  <li class="<?= $active == 'room_rates' ? 'active' : '' ?>">
+                    <a href="<?= base_url('index.php/admin/roomRates') ?>">
+                      <span class="sidebar-mini-icon">RR</span>
+                      <span class="sidebar-normal"> Room Rates </span>
                     </a>
-                    <a href="<?= base_url('index.php/main/charges') ?>">
+                  </li>
+                  <li class="<?= $active == 'discounts' ? 'active' : '' ?>">
+                    <a href="<?= base_url('index.php/admin/discounts') ?>">
+                      <span class="sidebar-mini-icon">D</span>
+                      <span class="sidebar-normal"> Discounts </span>
+                    </a>
+                  </li>
+                  <li class="<?= $active == 'charges' ? 'active' : '' ?>">
+                    <a href="<?= base_url('index.php/admin/charges') ?>">
                       <span class="sidebar-mini-icon">EC</span>
-                      <span class="sidebar-normal"> Extra Charges </span>
+                      <span class="sidebar-normal"> Extras & Charges </span>
                     </a>
                   </li>
                 </ul>
               </div>
             </li>
 
-            <li class="<?= $active == 'logs' ? 'active' : '' ?>">
-              <a href="#">
-                <i class="fa fa-calendar-check-o"></i>
-                <p>Logs</p>
-              </a>
-            </li>
+
 
             <li class="<?= $active == 'users' ? 'active' : '' ?>">
-              <a href="#">
+              <a href="<?= base_url('index.php/admin/users') ?>">
                 <i class="fa-solid fa-user-group"></i>
                 <p>Users</p>
               </a>

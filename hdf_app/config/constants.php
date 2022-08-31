@@ -100,4 +100,13 @@ $reservation_status = [
   5 => 'Confirmed',
 ];
 
+$log_type = [
+  0 => 'Booking',
+  1 => 'User Account',
+  2 => 'Insert',
+  3 => 'Delete',
+  4 => 'Update'
+];
+
 define('RESERVATION_STATUS', $reservation_status);
+define('LOG_TYPE', $log_type);
