@@ -1,6 +1,6 @@
 const minDate = new Date();
-minDate.setDate(minDate.getDate()-1);
-$('.datepicker').datetimepicker({
+minDate.setDate(minDate.getDate() - 1);
+$(".datepicker").datetimepicker({
   icons: {
     time: "fa fa-clock-o",
     date: "fa fa-calender",
@@ -12,67 +12,70 @@ $('.datepicker').datetimepicker({
     clear: "fa fa-trash",
     close: "fa fa-remove",
   },
-  format: 'L',
+  format: "L",
   defaultDate: new Date(),
   minDate,
 });
 
-$(document).ready(function(){
-  $('[name=check_in]').on('dp.change', function(e) {
+$(document).ready(function () {
+  $("[name=check_in]").on("dp.change", function (e) {
     const checkin = moment($(this).val());
-    const checkout = moment($('[name=check_out]').val());
-    const nights = checkout.diff(checkin, 'days');
-    $('[name=check_out]').data("DateTimePicker").date(moment(checkin).add(1, 'days'));
-    $('[name=check_out]').data("DateTimePicker").minDate(moment(checkin).add(1, 'days'));
-    $('[name=nights]').val(1)
+    const checkout = moment($("[name=check_out]").val());
+    const nights = checkout.diff(checkin, "days");
+    $("[name=check_out]").data("DateTimePicker").date(moment(checkin).add(1, "days"));
+    $("[name=check_out]").data("DateTimePicker").minDate(moment(checkin).add(1, "days"));
+    $("[name=nights]").val(nights);
   });
 });
 
-
-$('#returning_guest').click(function() {
-  $('#modalGuest').modal('show');
+$("#returning_guest").click(function () {
+  $("#modalGuest").modal("show");
 });
 
-$('#modalGuest').on('shown.bs.modal', function() {
-  $('#search').focus();
+$("#modalGuest").on("shown.bs.modal", function () {
+  $("#search").focus();
 });
 
-$('[name=payment_option]').change(function() {
+$("[name=payment_option]").change(function () {
   const option = $(this).val();
-  if (option == 'Cash') {
-    $('.card-div').hide();
-    $('[name=card_number]').val('');
-    $('[name=card_name]').val('');
-    $('[name=card_number]').removeAttr('required');
-    $('[name=card_name]').removeAttr('required');
-    $('[name=card_type]').removeAttr('required');
+  if (option == "Cash") {
+    $(".card-div").hide();
+    $("[name=card_number]").val("");
+    $("[name=card_name]").val("");
+    $("[name=card_number]").removeAttr("required");
+    $("[name=card_name]").removeAttr("required");
+    $("[name=card_type]").removeAttr("required");
   } else {
-    $('[name=card_number]').attr('required', true);
-    $('[name=card_name]').attr('required', true);
-    $('[name=card_type]').attr('required', true);
-    $('.card-div').show();
+    $("[name=card_number]").attr("required", true);
+    $("[name=card_name]").attr("required", true);
+    $("[name=card_type]").attr("required", true);
+    $(".card-div").show();
   }
 });
 
-$('#search').on('keypress', function(e) {
+$("#search").on("keypress", function (e) {
   if (e.which === 13) {
-    $('.guests-tbody tr:first-child td:last-child button:first-child').click();
+    $(".guests-tbody tr:first-child td:last-child button:first-child").click();
   }
 });
 
-$('#search').on('input', function() {
+$("#search").on("input", function () {
   const search = $(this).val();
-  const guest = guests.filter(g => {
-    const guest_name = g.first_name + ' ' + g.last_name;
-    if (guest_name.toLowerCase().includes(search.toLowerCase()) || g.contact.toLowerCase().includes(search.toLowerCase()) || g.company_name.toLowerCase().includes(search.toLowerCase())) {
+  const guest = guests.filter((g) => {
+    const guest_name = g.first_name + " " + g.last_name;
+    if (
+      guest_name.toLowerCase().includes(search.toLowerCase()) ||
+      g.contact.toLowerCase().includes(search.toLowerCase()) ||
+      g.company_name.toLowerCase().includes(search.toLowerCase())
+    ) {
       return g;
     }
   });
 
-  $('.guests-tbody').html('');
+  $(".guests-tbody").html("");
 
   if (guest.length && search) {
-    guest.map(g => {
+    guest.map((g) => {
       let tbody = `
         <tr>
           <td>
@@ -91,81 +94,85 @@ $('#search').on('input', function() {
           </td>
         </tr>
         `;
-      $('.guests-tbody').append(tbody);
+      $(".guests-tbody").append(tbody);
     });
   } else {
-    $('.guests-tbody').html('<tr><td colspan="5" class="text-center">No result found</td></tr>');
+    $(".guests-tbody").html('<tr><td colspan="5" class="text-center">No result found</td></tr>');
   }
 });
 
-$(document).on('click', '.choose', function() {
-  const guest = JSON.parse($(this).attr('guest'));
-  $('[name=guest_id]').val(guest.guest_id);
-  $('[name=first_name]').val(guest.first_name);
-  $('[name=middle_name]').val(guest.middle_name);
-  $('[name=last_name]').val(guest.last_name);
-  $('[name=contact]').val(guest.contact);
-  $('[name=email]').val(guest.email);
-  $('[name=company_name]').val(guest.company_name);
-  $('#modalGuest').modal('hide');
-  $('#returning_guest').hide();
-  $('#new_guest').show();
-  $('.guest_details').prop('readonly', true);
+$(document).on("click", ".choose", function () {
+  const guest = JSON.parse($(this).attr("guest"));
+  $("[name=guest_id]").val(guest.guest_id);
+  $("[name=first_name]").val(guest.first_name);
+  $("[name=middle_name]").val(guest.middle_name);
+  $("[name=last_name]").val(guest.last_name);
+  $("[name=contact]").val(guest.contact);
+  $("[name=email]").val(guest.email);
+  $("[name=company_name]").val(guest.company_name);
+  $("#modalGuest").modal("hide");
+  $("#returning_guest").hide();
+  $("#new_guest").show();
+  $(".guest_details").prop("readonly", true);
 });
 
-$('#new_guest').click(function() {
-  $('.guest_details').prop('readonly', false).val('');
-  $('[name=guest_id]').val(0);
-  $('[name=first_name]').focus();
-  $('#returning_guest').show();
-  $('#new_guest').hide();
+$("#new_guest").click(function () {
+  $(".guest_details").prop("readonly", false).val("");
+  $("[name=guest_id]").val(0);
+  $("[name=first_name]").focus();
+  $("#returning_guest").show();
+  $("#new_guest").hide();
 });
 
-$('[name=nights]').on('input', function() {
+$("[name=nights]").on("input", function () {
   const nights = parseInt($(this).val());
-  const checkin = moment($('[name=check_in]').val());
-  const checkout = moment(checkin).add(nights, 'days');
+  const checkin = moment($("[name=check_in]").val());
+  const checkout = moment(checkin).add(nights, "days");
 
   if (!nights || nights > 0) {
     $(this).val(1);
   }
 
-  $('[name=check_out]').data("DateTimePicker").date(checkout);
+  $("[name=check_out]").data("DateTimePicker").date(checkout);
 });
 
-$('[name=check_out]').on('dp.change', function(e) {
+$("[name=check_out]").on("dp.change", function (e) {
   const checkout = moment($(this).val());
-  const checkin = moment($('[name=check_in]').val());
-  const nights = checkout.diff(checkin, 'days');
-  $('[name=nights]').val(nights)
+  const checkin = moment($("[name=check_in]").val());
+  const nights = checkout.diff(checkin, "days");
+  $("[name=nights]").val(nights);
 });
 
-const modalBooking = (obj, booking_type) => {
-  const date = $(obj).attr('date') ?? new Date();
-  const data = JSON.parse($(obj).attr('data'));
-  $('#room_type').val(data.room_type);
-  $('#room_number').val(data.room_number);
-  $('[name=room_id]').val(data.room_id);
-  $('[name=check_in]').data("DateTimePicker").date(date);
-  $('[name=check_out]').data("DateTimePicker").date(moment(date).add(1, 'days'));
-  $('[name=check_out]').data("DateTimePicker").minDate(moment(date).add(1, 'days'));
-  $('[name=nights]').val(1);
-  $('[name=booking_type]').val(booking_type);
-  if(booking_type=='Check In') {
-    $('.reservation-div').hide();
+const modalBooking = (obj, booking_type, minDate = 0) => {
+  const date = $(obj).attr("date") ?? new Date();
+  console.log(minDate);
+  const data = JSON.parse($(obj).attr("data"));
+  $("#room_type").val(data.room_type);
+  $("#room_number").val(data.room_number);
+  $("[name=room_id]").val(data.room_id);
+  $("[name=check_in]").data("DateTimePicker").date(date);
+  $("[name=check_out]").data("DateTimePicker").date(moment(date).add(1, "days"));
+  $("[name=check_out]").data("DateTimePicker").minDate(moment(date).add(minDate, "days"));
+  $("[name=nights]").val(1);
+  $("[name=booking_type]").val(booking_type);
+  if (booking_type == "Check In") {
+    $(".reservation-div").hide();
   } else {
-    $('.reservation-div').show();
+    $(".reservation-div").show();
   }
-  $('.titleBooking').text(`${booking_type} Details`);
-  $('#btnBooking').val(booking_type=='Check In' ? booking_type : 'Reserve');
+  $(".titleBooking").text(`${booking_type} Details`);
+  $("#btnBooking").val(booking_type == "Check In" ? booking_type : "Reserve");
   setTimeout(() => {
-    $('#title').text(`Room Calendar [ROOM: ${data.room_number} - ${date}]`);
+    $("#title").text(`Room Calendar [ROOM: ${data.room_number} - ${date}]`);
   });
-  $('#modalBooking').modal('show');
-}
+  $("#modalBooking").modal("show");
+};
 
-$('[name=card_number]').on('input', function() {
+$("[name=card_number]").on("input", function () {
   const value = $(this).val();
-  const newValue = value.replace(/[^\dA-Z]/g, '').replace(/(.{4})/g, '$1 ').trim();
+  const newValue = value
+    .replace(/[^\dA-Z]/g, "")
+    .replace(/(.{4})/g, "$1 ")
+    .trim();
   $(this).val(newValue);
 });

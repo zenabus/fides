@@ -18,7 +18,7 @@ $(document).on("click", ".confirm", function (e) {
 $(document).on("click", ".reset", function (e) {
   e.preventDefault();
   swal({
-    title: "Reset user password?",
+    title: "Are you sure?",
     html: "Password will be reset back to hdf2022",
     type: "warning",
     buttonsStyling: false,

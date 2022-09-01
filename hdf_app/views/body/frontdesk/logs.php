@@ -29,11 +29,10 @@
                   <td>
                     <?php
                     $date_time = date_create($row['date_entered']);
-                    $date = date_format($date_time, "F d, Y");
-                    $time = date_format($date_time, "l, h:i a");
+                    $date_time = date_format($date_time, "M d, Y h:i a");
                     ?>
-                    <?= $date ?><br>
-                    <small><?= $time ?></small>
+                    <?= $row['ago'] ?><br>
+                    <small><?= $date_time ?></small>
                   </td>
                 </tr>
               <?php }  ?>

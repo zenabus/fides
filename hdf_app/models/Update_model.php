@@ -276,4 +276,8 @@ class Update_model extends CI_Model {
     $password = password_hash('hdf2022', PASSWORD_BCRYPT);
     $this->db->where('id', $user_id)->update('users', ['password' => $password]);
   }
+
+  function updateLogin() {
+    $this->db->where('id', $_SESSION['user_id'])->update('users', ['last_login' => date('Y-m-d h:i:s')]);
+  }
 }

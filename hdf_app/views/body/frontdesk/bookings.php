@@ -43,7 +43,10 @@
                           <?php $this->load->view('body/frontdesk/components/booking-table-data', $data) ?>
                           <td class="action">
                             <a href="<?= base_url('index.php/main/booking/' . $row['booking_number']) ?>" class="btn btn-sm" data-placement="top" title="View Booking" rel="tooltip">
-                              <span class="fa fa-eye"></span>
+                              <span class="fa fa-address-book"></span>
+                            </a>
+                            <a href="#" class="btn btn-sm btn-info" data-placement="top" title="View Receipt" rel="tooltip">
+                              <i class="fa-solid fa-receipt"></i>
                             </a>
                             <a href="<?= base_url('index.php/main/updateReservationStatus/4/' . $row['booking_id']) ?>" class="btn btn-sm btn-danger confirm" data-placement="top" title="Cancel Booking" rel="tooltip">
                               <span class="fa fa-ban"></span>
@@ -76,7 +79,7 @@
                           <?php $this->load->view('body/frontdesk/components/booking-table-data', $data) ?>
                           <td class="action">
                             <a href="<?= base_url('index.php/main/booking/' . $row['booking_number']) ?>" class="btn btn-sm" data-placement="top" title="View Booking" rel="tooltip">
-                              <span class="fa fa-eye"></span>
+                              <span class="fa fa-address-book"></span>
                             </a>
                           </td>
                         </tr>

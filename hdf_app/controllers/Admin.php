@@ -43,6 +43,9 @@ class Admin extends MY_Controller {
   function users() {
     $data['active'] = 'users';
     $data['users'] = $this->get_model->getUsers();
+    foreach ($data['users'] as $i => $user) {
+      $data['users'][$i]['last_login_ago'] = $this->timeAgo($user['last_login']);
+    }
     $this->load->view('layout/header', $data);
     $this->load->view('body/admin/users');
     $this->load->view('layout/footer');

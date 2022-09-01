@@ -112,10 +112,9 @@
                   <td><?= $row['activity'] ?></td>
                   <?php
                   $date_time = date_create($row['booking_log_added']);
-                  $date = date_format($date_time, "F d, Y");
-                  $time = date_format($date_time, "l, h:i a");
+                  $date_time = date_format($date_time, "M d, Y h:i a");
                   ?>
-                  <td style="white-space: pre;"><?= $date ?><br><small><?= $time ?></small></td>
+                  <td style="white-space: pre;"><?= $row['ago'] ?><br><small><?= $date_time ?></small></td>
                 </tr>
               <?php } ?>
             </tbody>

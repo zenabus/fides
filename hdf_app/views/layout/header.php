@@ -287,8 +287,6 @@ if (!$this->session->userdata('connect')) {
               </div>
             </li>
 
-
-
             <li class="<?= $active == 'users' ? 'active' : '' ?>">
               <a href="<?= base_url('index.php/admin/users') ?>">
                 <i class="fa-solid fa-user-group"></i>

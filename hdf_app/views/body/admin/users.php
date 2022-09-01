@@ -14,6 +14,7 @@
                 <th>Name</th>
                 <th>Username</th>
                 <th>Contact Details</th>
+                <th>Last Login</th>
                 <th width="100px">Action</th>
               </tr>
             </thead>
@@ -31,6 +32,16 @@
                   <td>
                     <?= $row['contact'] ?><br>
                     <small><?= $row['email'] ?></small>
+                  </td>
+                  <td>
+                    <?php
+                    $date_time = date_create($row['last_login']);
+                    $date_time = date_format($date_time, "M d, Y h:i a");
+                    ?>
+                    <?php if ($row['last_login']) { ?>
+                      <?= ucfirst($row['last_login_ago']) ?><br>
+                      <small><?= $date_time ?></small>
+                    <?php } ?>
                   </td>
                   <td class="border-right-0 action">
                     <a href="javascript:" class="btn btn-success btn-sm updateUser" id='<?= json_encode($row) ?>' data-placement="top" title="Update User" rel="tooltip">

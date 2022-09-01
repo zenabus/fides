@@ -82,6 +82,7 @@
     background-color: #85C65F;
     text-align: center;
     border: 1px solid #dee2e6 !important;
+    cursor: pointer;
   }
 
   .no-data {
@@ -100,6 +101,21 @@
 
   .modal {
     overflow-y: scroll !important;
+  }
+
+  td.min {
+    box-shadow: inset 0 1px 0 0 #66615B, inset 1px 0 0 0 #66615B, inset 0 -1px 0 0 #66615B;
+    border-width: 0 !important;
+  }
+
+  td.max {
+    box-shadow: inset 0 1px 0 0 #66615B, inset -1px 0 0 0 #66615B, inset 0 -1px 0 0 #66615B;
+    border-width: 0 !important;
+  }
+
+  td.mid {
+    box-shadow: inset 0 1px 0 0 #66615B, inset 0 -1px 0 0 #66615B;
+    border-width: 0 !important;
   }
 </style>
 
@@ -132,7 +148,7 @@
       <div class="card">
         <div class="card-body">
           <div class="table-container">
-            <table class="table table-bordered mb-1">
+            <table class="table mb-1">
               <thead>
                 <tr>
                   <th class="white sticky-top border-shadow-1 text-center"><?= $y ?></th>
@@ -165,8 +181,9 @@
                     </td>
                     <?php for ($i = 1; $i <= $days; $i++) { ?>
                       <?php
-                      $data = array_filter($bookings, function ($booking) use ($i, $m, $y, $row) {
-                        return $booking['check_in'] == $m . '/' . str_pad($i, 2, '0', STR_PAD_LEFT) . '/' . $y && $row['room_number'] == $booking['room_number'];
+                      $date = $m . '/' . str_pad($i, 2, '0', STR_PAD_LEFT) . '/' . $y;
+                      $data = array_filter($bookings, function ($booking) use ($date, $row) {
+                        return in_array($date, $booking['dates_between']) && $row['room_number'] == $booking['room_number'];
                       });
                       ?>
                       <?php if ($data) { ?>
@@ -180,12 +197,17 @@
                             $color = 'info';
                           }
                         }
+                        $occupant = explode(' / ', $data['occupant'])[0];
+                        $guest = $occupant ? $occupant : "{$data['first_name']} {$data['middle_name']} {$data['last_name']}";
+
+                        $min = $date == min($data['dates_between']) ? 'min' : 'mid';
+                        $max = $date == max($data['dates_between']) ? 'max' : 'mid';
                         ?>
-                        <td class="with-data bg-<?= $color ?>" date="<?= $m . '/' . str_pad($i, 2, '0', STR_PAD_LEFT) . '/' . $y ?>" data='<?= json_encode($row) ?>'><?= $data['last_name'] ?>, <?= $data['first_name'] ?> <?= $data['middle_name'] ?></td>
-                        <td class="with-data bg-<?= $color ?>" date="<?= $m . '/' . str_pad($i, 2, '0', STR_PAD_LEFT) . '/' . $y ?>" data='<?= json_encode($row) ?>'><?= $data['remarks'] ?></td>
+                        <td class="with-data bg-<?= $color ?> <?= $min ?>" date="<?= $date ?>" data='<?= json_encode($row) ?>'><?= $min == 'min' ? $guest : '<i class="fa-solid fa-minus"></i>' ?></td>
+                        <td class="with-data bg-<?= $color ?> <?= $max ?>" date="<?= $date ?>" data='<?= json_encode($row) ?>'><?= $min == 'min' ?  $data['remarks'] : '<i class="fa-solid fa-minus"></i>' ?></td>
                       <?php } else { ?>
-                        <td class="no-data first" date="<?= $m . '/' . str_pad($i, 2, '0', STR_PAD_LEFT) . '/' . $y ?>" data='<?= json_encode($row) ?>'></td>
-                        <td class="no-data second" date="<?= $m . '/' . str_pad($i, 2, '0', STR_PAD_LEFT) . '/' . $y ?>" data='<?= json_encode($row) ?>'></td>
+                        <td class="no-data first" date="<?= $date ?>" data='<?= json_encode($row) ?>'></td>
+                        <td class="no-data second" date="<?= $date ?>" data='<?= json_encode($row) ?>'></td>
                     <?php }
                     } ?>
                   </tr>
@@ -204,37 +226,32 @@
 </div>
 
 <div class="modal fade" id="modalMonth" tabindex="-1" role="dialog">
-  <div class="modal-dialog" role="document">
+  <div class="modal-dialog modal-sm" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <i class="nc-icon nc-simple-remove"></i>
-        </button>
         <h4 class="title title-up">Select Month</h4>
       </div>
-      <div class="modal-body">
-        <div class="row">
-          <div class="form-group col-md-6">
-            <label>Month</label>
-            <select id="month" class="form-control">
-              <option value="01" <?= $m == '01' ? 'selected' : '' ?>>January</option>
-              <option value="02" <?= $m == '02' ? 'selected' : '' ?>>February</option>
-              <option value="03" <?= $m == '03' ? 'selected' : '' ?>>March</option>
-              <option value="04" <?= $m == '04' ? 'selected' : '' ?>>April</option>
-              <option value="05" <?= $m == '05' ? 'selected' : '' ?>>May</option>
-              <option value="06" <?= $m == '06' ? 'selected' : '' ?>>June</option>
-              <option value="07" <?= $m == '07' ? 'selected' : '' ?>>July</option>
-              <option value="08" <?= $m == '08' ? 'selected' : '' ?>>August</option>
-              <option value="09" <?= $m == '09' ? 'selected' : '' ?>>September</option>
-              <option value="10" <?= $m == '10' ? 'selected' : '' ?>>October</option>
-              <option value="11" <?= $m == '11' ? 'selected' : '' ?>>November</option>
-              <option value="12" <?= $m == '12' ? 'selected' : '' ?>>December</option>>
-            </select>
-          </div>
-          <div class="form-group col-md-6">
-            <label>Year</label>
-            <input type="number" class="form-control" id="year" value="<?= $y ?>" min="2021">
-          </div>
+      <div class="modal-body px-4">
+        <div class="form-group">
+          <label>Month</label>
+          <select id="month" class="form-control">
+            <option value="01" <?= $m == '01' ? 'selected' : '' ?>>January</option>
+            <option value="02" <?= $m == '02' ? 'selected' : '' ?>>February</option>
+            <option value="03" <?= $m == '03' ? 'selected' : '' ?>>March</option>
+            <option value="04" <?= $m == '04' ? 'selected' : '' ?>>April</option>
+            <option value="05" <?= $m == '05' ? 'selected' : '' ?>>May</option>
+            <option value="06" <?= $m == '06' ? 'selected' : '' ?>>June</option>
+            <option value="07" <?= $m == '07' ? 'selected' : '' ?>>July</option>
+            <option value="08" <?= $m == '08' ? 'selected' : '' ?>>August</option>
+            <option value="09" <?= $m == '09' ? 'selected' : '' ?>>September</option>
+            <option value="10" <?= $m == '10' ? 'selected' : '' ?>>October</option>
+            <option value="11" <?= $m == '11' ? 'selected' : '' ?>>November</option>
+            <option value="12" <?= $m == '12' ? 'selected' : '' ?>>December</option>>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Year</label>
+          <input type="number" class="form-control" id="year" value="<?= $y ?>" min="2021">
         </div>
       </div>
       <div class="modal-footer">
@@ -357,7 +374,7 @@
   });
 
   $('.no-data').click(function() {
-    modalBooking(this, 'Check In');
+    modalBooking(this, 'Check In', 1);
   });
 
   $('#month').change(function() {
@@ -374,5 +391,9 @@
 
   $('#test').click(function() {
     localStorage.setItem('test', 'test132');
+  });
+
+  $('.with-data').click(function() {
+    modalBooking(this, 'Check In', 1);
   });
 </script>

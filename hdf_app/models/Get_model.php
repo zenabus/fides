@@ -689,11 +689,11 @@ class Get_model extends CI_Model {
     return $this->db->where('id', $room_type_id)->get('room_type')->row();
   }
 
-  function getLogs($user_id = null) {
+  function getLogs() {
     $this->db->order_by('user_logs.id', 'DESC');
     $this->db->join('users', 'users.id=user_logs.user_id');
-    if ($user_id) {
-      $this->db->where('user_id', $user_id);
+    if ($_SESSION['user_type'] != 'Admin' && $_SESSION['user_type'] != 'Superadmin') {
+      $this->db->where('user_id', $_SESSION['user_id']);
     }
     return $this->db->get('user_logs')->result_array();
   }

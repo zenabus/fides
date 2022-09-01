@@ -34,6 +34,7 @@ class User extends MY_Controller {
     $this->session->set_userdata($user_session);
     $this->session->set_flashdata('success', 'Welcome, ' . $user->name . '!');
     $this->insert_model->log('User logged in', 1);
+    $this->update_model->updateLogin();
 
     if ($user->user_type == 'Admin') {
       redirect('main');
