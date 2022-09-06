@@ -159,8 +159,9 @@
             </td>
             <?php for ($i = 1; $i <= $days; $i++) { ?>
               <?php
-              $data = array_filter($bookings, function ($booking) use ($i, $m, $y, $row) {
-                return $booking['check_in'] == $m . '/' . str_pad($i, 2, '0', STR_PAD_LEFT) . '/' . $y && $row['room_number'] == $booking['room_number'];
+              $date = $m . '/' . str_pad($i, 2, '0', STR_PAD_LEFT) . '/' . $y;
+              $data = array_filter($bookings, function ($booking) use ($date, $row) {
+                return in_array($date, $booking['dates_between']) && $row['room_number'] == $booking['room_number'];
               });
               ?>
               <?php if ($data) { ?>
@@ -175,9 +176,9 @@
                   }
                 }
                 ?>
-                <td class="with-data bg-<?= $color ?>" date="<?= $m . '/' . str_pad($i, 2, '0', STR_PAD_LEFT) . '/' . $y ?>" data='<?= json_encode($row) ?>'></td>
+                <td class="with-data bg-<?= $color ?>" date="<?= $date ?>" data='<?= json_encode($row) ?>'></td>
               <?php } else { ?>
-                <td class="no-data first room room<?= $row['room_number'] ?>" day="<?= $i ?>" date=" <?= $m . '/' . str_pad($i, 2, '0', STR_PAD_LEFT) . '/' . $y ?>" data='<?= json_encode($row) ?>'></td>
+                <td class="no-data first room room<?= $row['room_number'] ?>" day="<?= $i ?>" date=" <?= $date ?>" data='<?= json_encode($row) ?>'></td>
             <?php }
             } ?>
             <?php for ($j = 1; $j <= 10; $j++) { ?>
@@ -266,11 +267,11 @@
     if (start != 0) {
       end = this_day;
       let nights = end - start;
-      console.log(end, start, nights)
       nights = nights <= 0 ? 0 : nights;
       $('#proceed').attr('disabled', nights <= 0);
       $('#end').text();
       $('#nights').text(`${nights} night${nights==1?'':'s'}`);
+      if (nights == 0) clearAll();
     }
 
     if (!room_number) {

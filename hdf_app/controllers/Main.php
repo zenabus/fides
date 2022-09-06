@@ -1,6 +1,10 @@
 <?php
 defined('BASEPATH') or exit('No direct script access allowed');
 
+require 'vendor/autoload.php';
+
+use Dompdf\Dompdf;
+
 class Main extends MY_Controller {
 
   function __construct() {
@@ -26,11 +30,11 @@ class Main extends MY_Controller {
 
     $this->load->view('layout/header', $data);
     $this->load->view('body/frontdesk/dashboard');
-    $this->load->view('body/frontdesk/components/modal-reservation');
+    $this->load->view('body/frontdesk/components/modal_reservation');
     $this->load->view('layout/footer');
   }
 
-  function calendar($year, $month) {
+  function calendarData($year, $month) {
     $this->load->library('calendar');
 
     $data['active'] = 'calendar';
@@ -38,34 +42,26 @@ class Main extends MY_Controller {
     $data['bookings'] = $this->get_model->getBookings();
     $data['days'] = $this->calendar->get_total_days($month, $year);
     $data['month'] = $this->calendar->get_month_name($month);
-    $data['guests'] = $this->get_model->getGuests();
+    $data['next_month'] = $this->calendar->get_month_name(str_pad($month + 1, 2, '0', STR_PAD_LEFT));
     $data['m'] = str_pad($month, 2, '0', STR_PAD_LEFT);
     $data['y'] = $year;
+    $data['guests'] = $this->get_model->getGuests();
     foreach ($data['bookings'] as $i => $booking) {
       $data['bookings'][$i]['dates_between'] = $this->datesBetween($booking['check_in'], $booking['check_out']);
     }
-
-    $this->load->view('layout/header', $data);
-    $this->load->view('body/frontdesk/calendar');
-    $this->load->view('body/frontdesk/components/modal-reservation');
-    $this->load->view('layout/footer');
+    return $data;
   }
 
-  function calendarWindow($year, $month) {
-    $this->load->library('calendar');
-
-    $data = [
-      'active' => 'calendar',
-      'rooms' => $this->get_model->getRoomsWithRoomType(),
-      'bookings' => $this->get_model->getBookings(),
-      'days' => $this->calendar->get_total_days($month, $year),
-      'month' => $this->calendar->get_month_name($month),
-      'next_month' => $this->calendar->get_month_name(str_pad($month + 1, 2, '0', STR_PAD_LEFT)),
-      'm' => str_pad($month, 2, '0', STR_PAD_LEFT),
-      'y' => $year,
-    ];
-
-    $this->load->view('body/frontdesk/calendar-window', $data);
+  function calendar($year, $month, $window = FALSE) {
+    $data = $this->calendarData($year, $month);
+    if ($window) {
+      $this->load->view('body/frontdesk/calendar-window', $data);
+    } else {
+      $this->load->view('layout/header', $data);
+      $this->load->view('body/frontdesk/calendar');
+      $this->load->view('body/frontdesk/components/modal_reservation');
+      $this->load->view('layout/footer');
+    }
   }
 
   function rooms() {
@@ -78,7 +74,7 @@ class Main extends MY_Controller {
 
     $this->load->view('layout/header', $data);
     $this->load->view('body/frontdesk/rooms');
-    $this->load->view('body/frontdesk/components/modal-reservation');
+    $this->load->view('body/frontdesk/components/modal_reservation');
     $this->load->view('layout/footer');
   }
 
@@ -123,7 +119,7 @@ class Main extends MY_Controller {
 
     $this->load->view('layout/header', $data);
     $this->load->view('body/frontdesk/reservations-' . $reservation_type);
-    $this->load->view('body/frontdesk/components/modal-reservation');
+    $this->load->view('body/frontdesk/components/modal_reservation');
     $this->load->view('layout/footer');
   }
 
@@ -186,6 +182,46 @@ class Main extends MY_Controller {
     $this->load->view('layout/footer');
   }
 
+  function registration($booking_id) {
+    $image = file_get_contents(base_url('assets/img/registration_form_letter.jpg'));
+    $data['image'] = 'data:image/jpg;base64,' . base64_encode($image);
+    $data['booking'] = $this->get_model->getBooking($booking_id);
+    $data['booked_rooms'] = $this->get_model->getBookedRooms($booking_id);
+    $view = $this->load->view('body/frontdesk/components/registration_form', $data, TRUE);
+    $dompdf = new Dompdf();
+    $dompdf->set_option('dpi', 300);
+    $dompdf->loadHtml($view);
+    $dompdf->render();
+    $dompdf->stream('Hotel de Fides - Guest Registration Form', ['Attachment' => FALSE]);
+  }
+
+  function receipt($booking_id) {
+    $image = file_get_contents(base_url('assets/img/acknowledgement_receipt.jpg'));
+    $data['bed'] = $this->get_model->getPrice('Bed');
+    $data['person'] = $this->get_model->getPrice('Person');
+    $data['image'] = 'data:image/jpg;base64,' . base64_encode($image);
+    $data['booking'] = $this->get_model->getBooking($booking_id);
+    $data['booked_rooms'] = $this->get_model->getBookedRooms($data['booking']->booking_id);
+    $data['payment'] = $this->get_model->getPaymentTotal($data['booking']->booking_id);
+    $room_charges = $this->get_model->getRoomChargesTotal($data['booking']->booking_id);
+    $amenities = $this->get_model->getRoomAmenitiesTotal($data['booking']->booking_id);
+    $data['charges_total'] = $room_charges->total + $amenities->total;
+
+    $i = 0;
+    foreach ($data['booked_rooms'] as $room) {
+      $data['booked_rooms'][$i]['restaurant'] = $this->get_model->getRoomCharges($room['booked_room_id'], 'Restaurant');
+      $data['booked_rooms'][$i]['coffeeshop'] = $this->get_model->getRoomCharges($room['booked_room_id'], 'Coffeeshop');
+      $data['booked_rooms'][$i++]['amenities'] = $this->get_model->getRoomAmenities($room['booked_room_id']);
+    }
+
+    $view = $this->load->view('body/frontdesk/components/receipt', $data, TRUE);
+    $dompdf = new Dompdf();
+    $dompdf->set_option('dpi', 300);
+    $dompdf->loadHtml($view);
+    $dompdf->render();
+    $dompdf->stream('Hotel de Fides - Acknowledgment Receipt', ['Attachment' => FALSE]);
+  }
+
   // ------------------------------------------------------------------------------------------------------- //
   // ------------------------------------------------ FRANZ ------------------------------------------------ //
   // ------------------------------------------------------------------------------------------------------- //
@@ -217,11 +253,16 @@ class Main extends MY_Controller {
     $room = $this->get_model->getRoomById($_POST['room_id']);
     $name = $_POST['first_name'] . ' ' . $_POST['last_name'];
     $type = $_POST['booking_type'] == 'Check In' ? 'booked' : 'reserved';
-    $this->insert_model->book();
-    $this->insert_model->addPayment();
-    $this->insert_model->log(ucfirst("{$type} {$name} in room {$room->room_number}"));
+    $booking_number = $this->insert_model->book();
+    $log = ucfirst("{$type} {$name} in room {$room->room_number}");
+    $this->insert_model->log($log);
+    $this->insert_model->addBookingLog($log);
     $this->session->set_flashdata('success', "Successfully {$type} {$name} in room {$room->room_number}");
-    $this->redirect();
+    if ($_POST['booking_type'] == 'Check In') {
+      redirect(base_url('index.php/main/booking/' . $booking_number));
+    } else {
+      $this->redirect();
+    }
   }
 
   function addGuest() {
@@ -243,8 +284,12 @@ class Main extends MY_Controller {
 
   function updateGuest() {
     $name = $_POST['first_name'] . ' ' . $_POST['middle_name'] . ' ' . $_POST['last_name'];
-    $log = "<b>{$_POST['booking_number']}</b> → Updated guest details";
-    $this->insert_model->addBookingLog($log);
+    if (isset($_POST['booking_number'])) {
+      $log = "<b>{$_POST['booking_number']}</b> → Updated guest details";
+      $this->insert_model->addBookingLog($log);
+    } else {
+      $log = "Updated guest details of " . $name;
+    }
     $this->insert_model->log($log);
     $this->update_model->updateGuest();
     $this->session->set_flashdata('success', 'Successfully updated ' . $name);
@@ -281,17 +326,27 @@ class Main extends MY_Controller {
     $this->redirect();
   }
 
-  function updateReservationStatus($reservation_status, $booking_id) {
-    $this->update_model->updateReservationStatus($reservation_status, $booking_id);
+  function checkIn($booking_id) {
+    $booking_number = 'HDF' . str_pad($booking_id, 5, '0', STR_PAD_LEFT);
+    $log = "<b>{$booking_number}</b> → Successfully checked in!";
+    $_POST['booking_id'] = $booking_id;
+    $this->update_model->updateReservationStatus(4, $booking_id);
+    $this->insert_model->log('Cancelled a reservation: #' . $booking_number, 3);
+    $this->insert_model->addBookingLog($log);
+    $this->session->set_flashdata('success', 'Reservation successfully checked in.');
+    redirect(base_url('index.php/main/booking/' . $booking_number));
+  }
+
+  function cancelReservation($booking_id) {
+    $this->update_model->updateReservationStatus(4, $booking_id);
     $booking_number = 'HDF' . str_pad($booking_id, 5, '0', STR_PAD_LEFT);
     $this->insert_model->log('Cancelled a reservation: #' . $booking_number, 3);
-    $this->session->set_flashdata('success', 'Reservation status successfully cancelled.');
+    $this->session->set_flashdata('success', 'Reservation successfully cancelled.');
     $this->redirect();
   }
 
   function confirm() {
     $this->update_model->updateReservationStatus(5, $_POST['booking_id']);
-    $this->update_model->updateBooking();
     $this->insert_model->addPayment();
     $booking_number = 'HDF' . str_pad($_POST['booking_id'], 5, '0', STR_PAD_LEFT);
     $this->insert_model->log('Verified a reservation: #' . $booking_number, 3);
@@ -327,33 +382,50 @@ class Main extends MY_Controller {
     $room = $this->get_model->getRoom($_POST['room_id']);
     $s = $_POST['nights'] == 1 ? '' : 's';
     $log = "<b>{$room->room_number} {$room->room_type_abbr}</b> → Booked room for <b>{$_POST['nights']} night{$s}</b> from <b>{$_POST['check_in']}</b> to <b>{$_POST['check_out']}</b>";
+    [$arrival, $departure] = $this->getMinMax($_POST['booking_id']);
     $this->insert_model->addBookingLog($log);
     $this->insert_model->log($log);
+    $this->update_model->updateBooking($arrival, $departure, $_POST['booking_id']);
     $this->session->set_flashdata('success', 'Room successfully added!');
     $this->redirect();
   }
 
   function removeRoom($booked_room_id) {
     $booked_room = $this->get_model->getBookedRoom($booked_room_id);
+    [$arrival, $departure] = $this->getMinMax($booked_room->booking_id);
     $_POST['booking_id'] = $booked_room->booking_id;
     $this->delete_model->removeRoom($booked_room_id);
     $s = $booked_room->nights == 1 ? '' : 's';
     $log = "<b>{$booked_room->room_number} {$booked_room->room_type_abbr}</b> → Removed room <b>{$booked_room->nights} night{$s}</b> from <b>{$booked_room->check_in}</b> to <b>{$booked_room->check_out}</b>";
     $this->insert_model->addBookingLog($log);
     $this->insert_model->log($log);
+    $this->update_model->updateBooking($arrival, $departure, $booked_room->booking_id);
     $this->session->set_flashdata('success', 'Room successfully removed!');
     $this->redirect();
+  }
+
+  function getMinMax($booking_id) {
+    $check_ins = [];
+    $check_outs = [];
+    $dates = $this->get_model->getDates($booking_id);
+    foreach ($dates as $date) {
+      array_push($check_ins, $this->toDashedDate($date['check_in']));
+      array_push($check_outs, $this->toDashedDate($date['check_out']));
+    }
+    return [$this->toSlashedDate(min($check_ins)), $this->toSlashedDate(max($check_outs))];
   }
 
   function changeRoom() {
     $room_from = $this->get_model->getBookedRoom($_POST['booked_room_id']);
     $this->update_model->changeRoom();
+    [$arrival, $departure] = $this->getMinMax($_POST['booking_id']);
     $room_to = $this->get_model->getRoom($_POST['room_id']);
     $s1 = $room_from->nights == 1 ? '' : 's';
     $s2 = $_POST['nights'] == 1 ? '' : 's';
     $log = "<b>{$room_to->room_number} {$room_to->room_type_abbr}</b> → Changed room from <b>{$room_from->room_type_abbr} {$room_from->room_number}</b> {$room_from->nights} night{$s1} {$room_from->check_in} - {$room_from->check_out} to <b>{$room_to->room_number} {$room_to->room_type_abbr}</b> {$_POST['nights']} night{$s2} {$_POST['check_in']} - {$_POST['check_out']}";
     $this->insert_model->addBookingLog($log);
     $this->insert_model->log($log);
+    $this->update_model->updateBooking($arrival, $departure, $_POST['booked_room_id']);
     $this->session->set_flashdata('success', 'Room successfully changed!');
     $this->redirect();
   }
@@ -460,12 +532,22 @@ class Main extends MY_Controller {
   }
 
   function updateNotes() {
-    $this->update_model->updateBooking();
+    $this->update_model->updateNotes();
     $booking_number = 'HDF' . str_pad($_POST['booking_id'], 5, '0', STR_PAD_LEFT);
     $log = "<b>{$booking_number}</b> → Updated notes";
     $this->insert_model->addBookingLog($log);
     $this->insert_model->log($log);
     $this->session->set_flashdata('success', 'Notes successfully updated!');
+    $this->redirect();
+  }
+
+  function updateRequest() {
+    $this->update_model->updateRequest();
+    $booking_number = 'HDF' . str_pad($_POST['booking_id'], 5, '0', STR_PAD_LEFT);
+    $log = "<b>{$booking_number}</b> → Updated special request(s)";
+    $this->insert_model->addBookingLog($log);
+    $this->insert_model->log($log);
+    $this->session->set_flashdata('success', 'Special Request(s) / allergence  successfully updated!');
     $this->redirect();
   }
 

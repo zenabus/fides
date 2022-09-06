@@ -191,11 +191,13 @@ class Update_model extends CI_Model {
     $this->db->where('booking_id', $booking_id)->update('bookings', ['reservation_status' => $reservation_status]);
   }
 
-  function updateBooking() {
-    $data = [
-      'reservation_status' => 5,
-      'remarks' => $_POST['remarks']
-    ];
+  function updateNotes() {
+    $data = ['remarks' => $_POST['remarks']];
+    $this->db->where('booking_id', $_POST['booking_id'])->update('bookings', $data);
+  }
+
+  function updateRequest() {
+    $data = ['request' => $_POST['request']];
     $this->db->where('booking_id', $_POST['booking_id'])->update('bookings', $data);
   }
 
@@ -279,5 +281,9 @@ class Update_model extends CI_Model {
 
   function updateLogin() {
     $this->db->where('id', $_SESSION['user_id'])->update('users', ['last_login' => date('Y-m-d h:i:s')]);
+  }
+
+  function updateBooking($arrival, $departure, $booking_id) {
+    $this->db->where('booking_id', $booking_id)->update('bookings', ['arrival' => $arrival, 'departure' => $departure]);
   }
 }

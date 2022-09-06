@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Hotel de Fides - Guest Registration Form</title>
+  <style type="text/css">
+    * {
+      font-family: 'DejaVu Serif' !important;
+      font-size: 36px;
+    }
+
+    body,
+    html {
+      margin: 0;
+      margin-top: 80px !important;
+    }
+
+    .absolute {
+      position: absolute;
+    }
+
+    footer {
+      position: absolute;
+      font-size: 24px;
+      font-weight: normal;
+      bottom: 32px;
+      right: 32px;
+    }
+
+    .page {
+      position: relative;
+      margin: 180px;
+    }
+
+    .date {
+      top: 31px;
+      left: 1500px;
+    }
+
+    .name,
+    .contact,
+    .address,
+    .company_name {
+      left: 385px;
+      /* left: 0; */
+    }
+
+    .name {
+      top: 140px;
+    }
+
+    .address {
+      top: 217px;
+    }
+
+    .contact,
+    .email {
+      top: 294px;
+    }
+
+    .company_name,
+    .company_address {
+      top: 373px;
+    }
+
+    .email,
+    .company_address {
+      left: 1560px
+    }
+
+    .table,
+    .table th {
+      border-collapse: collapse;
+      width: 100%;
+      font-size: 32px;
+    }
+
+    th {
+      border-top: 1px solid black;
+      border-bottom: 1px solid black;
+    }
+
+    td {
+      font-size: 32px;
+      padding-left: 8px;
+      padding-right: 8px;
+      vertical-align: top;
+    }
+
+    td:last-child,
+    td:nth-child(3) {
+      width: 300px;
+    }
+
+    .bt,
+    table {
+      border-top: 1px solid black;
+    }
+
+    .br {
+      border-right: 1px solid black;
+    }
+
+    .bb {
+      border-bottom: 1px solid black;
+    }
+
+    .bl {
+      border-left: 1px solid black;
+    }
+
+    .tl {
+      text-align: left !important;
+    }
+
+    .tr {
+      text-align: right !important;
+    }
+
+    .cost td,
+    .cost th {
+      border-right: 1px solid black
+    }
+
+    .bold {
+      font-weight: bold;
+    }
+
+    .space {
+      height: 510px;
+    }
+
+    img {
+      top: -80px;
+      width: 2565px;
+    }
+  </style>
+</head>
+
+<body>
+  <footer>
+    Document generated: <?= date('F d, Y h:ia'); ?>
+  </footer>
+  <img src="<?= $image ?>" width="100%" class="absolute">
+  <div class="page">
+    <p class="absolute date"><?= date('m/d/Y'); ?></p>
+    <p class="absolute name"><?= $booking->first_name ?> <?= $booking->middle_name ?> <?= $booking->last_name ?> <?= $booking->suffix ?></p>
+    <p class="absolute address"><?= $booking->address ?></p>
+    <p class="absolute contact"><?= $booking->contact ?></p>
+    <p class="absolute company_name"><?= $booking->company_name ?></p>
+    <p class="absolute email"><?= $booking->email ?></p>
+    <p class="absolute company_address"><?= $booking->company_address ?></p>
+
+    <div class="space"></div>
+
+    <table class="table">
+      <thead>
+        <tr class="bl br cost">
+          <th style="width:1099px">Description</th>
+          <th>Unit</th>
+          <th>Unit Cost</th>
+          <th>Subtotal</th>
+        </tr>
+      </thead>
+      <tbody>
+        <?php $grand_total = 0 ?>
+        <?php foreach ($booked_rooms as $row) { ?>
+          <tr class="bt bl br cost">
+            <td>Room <?= $row['room_number'] ?> - <?= $row['room_type'] ?> (-<?= $row['percentage'] ?>%)</td>
+            <td>(<?= $row['nights'] ?>) Night<?= $row['nights'] != 1 ? 's' : ''  ?></td>
+            <td class="tr"><?= number_format($row['pricing_type']) ?></td>
+            <?php $total = $row['pricing_type'] * $row['nights'] ?>
+            <?php $discount = $total * ($row['percentage'] / 100) ?>
+            <?php $subtotal = $total - $discount ?>
+            <?php $grand_total += $subtotal ?>
+            <td class="tr"><?= number_format($subtotal) ?></td>
+          </tr>
+
+          <?php if ($row['extra_bed']) { ?>
+            <tr class="bl br cost">
+              <td>↳</td>
+              <td>(<?= $row['extra_bed'] ?>) Extra Bed<?= $row['extra_bed'] != 1 ? 's' : ''  ?></td>
+              <?php $bed_total = $bed->price * $row['extra_bed'] ?>
+              <td class="tr"><?= number_format($bed->price) ?></td>
+              <td class="tr"><?= number_format($bed->price * $row['extra_bed']) ?></td>
+              <?php $grand_total += $bed_total ?>
+            </tr>
+          <?php } ?>
+
+          <?php if ($row['extra_person']) { ?>
+            <tr class="bl br cost">
+              <td>↳</td>
+              <td>(<?= $row['extra_person'] ?>) Extra Person<?= $row['extra_person'] != 1 ? 's' : ''  ?></td>
+              <?php $person_total = $person->price * $row['extra_person'] ?>
+              <td class="tr"><?= number_format($person->price) ?></td>
+              <td class="tr"><?= number_format($person_total) ?></td>
+              <?php $grand_total += $person_total ?>
+            </tr>
+          <?php } ?>
+
+          <?php foreach ($row['restaurant'] as $charges) { ?>
+            <tr class="bl br cost">
+              <td>Restaurant <?= $charges['reference'] ?></td>
+              <td>(<?= $charges['charges_food_quantity'] ?>) <?= $charges['particulars'] ?></td>
+              <td class="tr"><?= number_format($charges['charges_food_amount']) ?></td>
+              <td class="tr"><?= number_format($charges['charges_food_amount'] * $charges['charges_food_quantity']) ?></td>
+            </tr>
+          <?php } ?>
+
+          <?php foreach ($row['coffeeshop'] as $charges) { ?>
+            <tr class="bl br cost">
+              <td>Coffeeshop Ref.: <?= $charges['reference'] ?></td>
+              <td>(<?= $charges['charges_food_quantity'] ?>) <?= $charges['particulars'] ?></td>
+              <td class="tr"><?= number_format($charges['charges_food_amount']) ?></td>
+              <td class="tr"><?= number_format($charges['charges_food_amount'] * $charges['charges_food_quantity']) ?></td>
+            </tr>
+          <?php } ?>
+
+          <?php $type = ''; ?>
+          <?php foreach ($row['amenities'] as $charges) { ?>
+            <tr class="bl br cost">
+              <td><?= $type != $charges['category'] ? $charges['category'] : '↳' ?></td>
+              <td>(<?= $charges['charge_quantity'] ?>) <?= $charges['charge'] ?></td>
+              <td class="tr"><?= number_format($charges['charge_amount']) ?></td>
+              <td class="tr"> <?= number_format($charges['charge_amount'] * $charges['charge_quantity']) ?></td>
+              <?php $type = $charges['category'] ?>
+            </tr>
+          <?php } ?>
+        <?php } ?>
+
+        <tr class="bt">
+          <td colspan="4">&nbsp;</td>
+        </tr>
+      </tbody>
+    </table>
+    <table class="table" style="border-top: none">
+      <tr class="br">
+        <td style="width: 1085px"></td>
+        <td class="bl bt bb">Grand Total</td>
+        <td class="bt br bb bt"></td>
+        <td class="bt tr bb bt"><?= number_format($grand_total + $charges_total) ?></td>
+      </tr>
+      <tr class="br">
+        <td></td>
+        <td class="bl bb bt">Refund Amount</td>
+        <td class="br bb bt"></td>
+        <td class="tr bb bt"><?= number_format($booking->refund) ?></td>
+      </tr>
+      <tr class="br">
+        <td></td>
+        <td class="bl bb bt">Advanced Payment</td>
+        <td class="br bb bt"></td>
+        <td class="tr bb bt"><?= number_format($payment->amount) ?></td>
+      </tr>
+      <tr class="br">
+        <td></td>
+        <td class="bl bb bt">Remaining Balance</td>
+        <td class="br bb bt"></td>
+        <?php $charges_grand_total = $grand_total + $charges_total ?>
+        <?php $payment_grand_total = $booking->refund + $payment->amount ?>
+        <?php $overall_total = $charges_grand_total - $payment_grand_total ?>
+        <td class="tr bb bt bold"><?= number_format($overall_total > 0 ? $overall_total : 0) ?></td>
+      </tr>
+      <tr class="br">
+        <td></td>
+        <td class="bb bl bt">Change Due</td>
+        <td class="bb br bt"></td>
+        <?php $petty_cash = ($charges_grand_total - $payment_grand_total) * -1 ?>
+        <td class="bb tr bt"><?= number_format($petty_cash > 0 ? $petty_cash : 0) ?></td>
+      </tr>
+    </table>
+  </div>
+</body>
+
+</html>

@@ -1,7 +1,7 @@
 <div class="card">
   <div class="card-header px-4 pt-4 d-flex justify-content-between align-items-center">
     <h6>Room Details</h6>
-    <button class="btn btn-sm mb-2 mt-0" id="addRoom">Add Room</button>
+    <button class="btn btn-sm mb-2 mt-0 hidable" id="addRoom">Add Room</button>
   </div>
   <div class="card-body px-0 py-2">
     <table class="table table-bordered border-right-0 border-left-0">
@@ -79,9 +79,13 @@
         <input type="hidden" name="booked_room_id">
         <input type="hidden" name="booking_id" value="<?= $booking->booking_id ?>">
         <div class="form-row">
-          <div class="form-group col-md-6">
-            <label>Extra Bed</label>
+          <div class="form-group col-md-3">
+            <label>Bed</label>
             <input type="number" class="form-control" value="0" min="0" required name="extra_bed">
+          </div>
+          <div class="form-group col-md-3">
+            <label>Nights</label>
+            <!-- <input type="number" class="form-control" value="1" min="1" required name="extra_bed_nights"> -->
           </div>
           <div class="form-group col-md-6">
             <label>Subtotal</label>
@@ -89,9 +93,13 @@
           </div>
         </div>
         <div class="form-row">
-          <div class="form-group col-md-6">
-            <label>Extra Person</label>
+          <div class="form-group col-md-3">
+            <label>Person</label>
             <input type="number" class="form-control" value="0" min="0" required name="extra_person">
+          </div>
+          <div class="form-group col-md-3">
+            <label>Nights</label>
+            <!-- <input type="number" class="form-control" value="1" min="1" required name="extra_person_nights"> -->
           </div>
           <div class="form-group col-md-6">
             <label>Subtotal</label>
@@ -170,7 +178,7 @@
   <div class="modal-dialog modal-sm pt-0" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h4 class="title title-up room-title">Add Room</h4>
+        <h4 class="title title-up room-title ">Add Room</h4>
       </div>
       <div class="modal-body px-4">
         <?= form_open('main/bookRoom', ['id' => 'frmRoom']) ?>
@@ -416,9 +424,9 @@
     subtotal = room_rate * nights;
     $('[name=booked_room_id]').val(data.booked_room_id);
     $('[name=discount_id').val(data.discount_id);
-    $('#room_rate').val('₱ ' + formatNumber(room_rate) + '.00');
+    $('#room_rate').val('₱ ' + formatNumber(room_rate));
     $('#nights').val(nights);
-    $('#discount_subtotal').val('₱ ' + formatNumber(subtotal - subtotal * percentage) + '.00');
+    $('#discount_subtotal').val('₱ ' + formatNumber(subtotal - subtotal * percentage));
     $('#modalDiscount').modal('show');
   });
 
@@ -433,20 +441,21 @@
   });
 
   function extraPrices() {
-    $('#subtotal_bed').val('₱ ' + formatNumber(subtotal_bed) + '.00');
-    $('#subtotal_person').val('₱ ' + formatNumber(subtotal_person) + '.00');
-    $('#total').val('₱ ' + formatNumber(subtotal_bed + subtotal_person) + '.00');
+    $('#subtotal_bed').val('₱ ' + formatNumber(subtotal_bed));
+    $('#subtotal_person').val('₱ ' + formatNumber(subtotal_person));
+    $('#total').val('₱ ' + formatNumber(subtotal_bed + subtotal_person));
   }
 
   $('[name=discount_id').change(function() {
     const percentage = $(this).find(':selected').attr('percentage') / 100;
     const subtotal = room_rate * nights;
-    $('#discount_subtotal').val('₱ ' + formatNumber(subtotal - subtotal * percentage) + '.00');
+    $('#discount_subtotal').val('₱ ' + formatNumber(subtotal - subtotal * percentage));
   });
 
   $('#calendar').click(function() {
+    const date = new Date();
     const size = ['height=' + screen.height / 2, 'width=' + screen.width / 2].join(',');
-    const calendar = window.open(`${base_url}index.php/main/calendarWindow/2022/08`, "Calendar", size);
+    const calendar = window.open(`${base_url}index.php/main/calendar/${date.getFullYear()}/${pad(date.getMonth()+1)}/1`, "Calendar", size);
     calendar.onbeforeunload = function() {
       $('.btn-room').attr('disabled', false)
       $('[name=check_in]').val(localStorage.getItem('check_in'));

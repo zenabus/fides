@@ -111,6 +111,16 @@ if (!$this->session->userdata('connect')) {
     .wsp {
       white-space: pre;
     }
+
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    input[type=number] {
+      -moz-appearance: textfield;
+    }
   </style>
 
   <script>
@@ -235,19 +245,19 @@ if (!$this->session->userdata('connect')) {
             </a>
           </li>
 
-          <li class="<?= $active == 'transactions' ? 'active' : '' ?>">
+          <!-- <li class="<?= $active == 'transactions' ? 'active' : '' ?>">
             <a href="#">
               <i class="fa fa-tasks"></i>
               <p>Transactions</p>
             </a>
-          </li>
+          </li> -->
 
-          <li class="<?= $active == 'reports' ? 'active' : '' ?>">
+          <!-- <li class="<?= $active == 'reports' ? 'active' : '' ?>">
             <a href="#">
               <i class="fa fa-list-alt"></i>
               <p>Reports</p>
             </a>
-          </li>
+          </li> -->
 
           <li class="<?= $active == 'logs' ? 'active' : '' ?>">
             <a href="<?= base_url('index.php/main/logs') ?>">

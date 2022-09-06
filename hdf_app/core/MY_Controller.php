@@ -50,6 +50,11 @@ class MY_Controller extends CI_Controller {
     return $year . '-' . $month . '-' . $day;
   }
 
+  function toSlashedDate($date) {
+    [$year, $month, $day] = explode('-', $date);
+    return $month . '/' . $day . '/' . $year;
+  }
+
   function getDaysInBetween($check_in, $check_out) {
     $days = [];
     $start = new DateTime($check_in);

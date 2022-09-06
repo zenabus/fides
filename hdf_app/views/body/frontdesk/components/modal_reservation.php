@@ -52,7 +52,7 @@
           </div>
           <div class="form-group col-md-4">
             <label>Night(s)</label>
-            <input type="number" class="form-control text-center" name="nights" value="1" min="0">
+            <input type="number" class="form-control text-center" name="nights" value="1" min="0" autocomplete="off">
           </div>
         </div>
         <div class="form-group text-center">
@@ -66,7 +66,7 @@
           </div>
           <div class="form-group col-md-4">
             <label>Middle Name</label>
-            <input type="text" class="form-control guest_details" name="middle_name">
+            <input type="text" class="form-control guest_details" name="middle_name" placeholder="optional">
           </div>
           <div class="form-group col-md-4">
             <label>Last Name</label>
@@ -74,65 +74,22 @@
           </div>
         </div>
         <div class="form-row">
-          <div class="form-group col-md-4">
-            <label>Contact Number</label>
+          <div class="form-group col-md-8">
+            <label>Contact No.</label>
             <input type="text" class="form-control guest_details" name="contact" required>
           </div>
-          <div class="form-group col-md-8">
-            <label>E-mail <small>(optional)</small></label>
-            <input type="text" class="form-control guest_details" name="email">
+          <div class="form-group col-md-4">
+            <label>Suffix</label>
+            <input type="text" class="form-control guest_details" name="suffix" placeholder="optional">
           </div>
         </div>
         <div class="form-group">
-          <label>Company Name <small>(optional)</small></label>
-          <input type="text" class="form-control guest_details" name="company_name">
-        </div>
-        <div class="form-group">
-          <label>Advance Payment Option</label>
-          <div class="d-flex justify-content-around">
-            <div class="form-check-radio mb-0">
-              <label class="form-check-label">
-                <input class="form-check-input" type="radio" name="payment_option" value="Cash" checked>
-                Cash
-                <span class="form-check-sign"></span>
-              </label>
-            </div>
-            <div class="form-check-radio mb-0">
-              <label class="form-check-label">
-                <input class="form-check-input" type="radio" name="payment_option" value="Card">
-                Card
-                <span class="form-check-sign"></span>
-              </label>
-            </div>
-          </div>
-        </div>
-        <div class="form-group">
-          <label>Amount</label>
-          <input type="number" name="amount" class="form-control" value="0" min="0">
-        </div>
-        <div class="card-div">
-          <div class="row">
-            <div class="form-group col-md-12">
-              <label>Card Type</label>
-              <select name="card_type" class="form-control">
-                <option value="">- select card type -</option>
-                <option value="BDO">Banco de Oro (BDO)</option>
-                <option value="Landbank">Land Bank of the Philippines</option>
-              </select>
-            </div>
-            <div class="form-group col-md-6">
-              <label>Account Number</label>
-              <input type="text" name="card_number" class="form-control" placeholder="XXXX XXXX XXXX XXXX" maxlength="19">
-            </div>
-            <div class="form-group col-md-6">
-              <label>Account Name</label>
-              <input type="text" name="card_name" class="form-control">
-            </div>
-          </div>
+          <label>Special Request(s)</label>
+          <input type="text" class="form-control" name="request" placeholder="optional">
         </div>
         <div class="form-group">
           <label>Notes / Remarks</label>
-          <textarea name="remarks" rows="3" class="form-control"></textarea>
+          <textarea name="remarks" rows="3" class="form-control" placeholder="optional"></textarea>
         </div>
         <?= form_close() ?>
       </div>

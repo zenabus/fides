@@ -145,7 +145,6 @@ $("[name=check_out]").on("dp.change", function (e) {
 
 const modalBooking = (obj, booking_type, minDate = 0) => {
   const date = $(obj).attr("date") ?? new Date();
-  console.log(minDate);
   const data = JSON.parse($(obj).attr("data"));
   $("#room_type").val(data.room_type);
   $("#room_number").val(data.room_number);

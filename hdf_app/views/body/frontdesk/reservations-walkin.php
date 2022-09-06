@@ -40,10 +40,14 @@
                       <?php if ($row['reservation_status'] == 1) { ?>
                         <tr>
                           <?php $data['row'] = $row ?>
-                          <?php $this->load->view('body/frontdesk/components/booking-table-data', $data) ?>
+                          <?php $this->load->view('body/frontdesk/components/booking_table_data', $data) ?>
                           <td class="action">
-                            <a href="javascript:" class="btn btn-sm btn-default">Check In</a>
-                            <a href="<?= base_url('index.php/main/updateReservationStatus/4/' . $row['booking_id']) ?>" class="btn btn-sm btn-danger confirm">Cancel</a>
+                            <a href="javascript:" class="btn btn-sm btn-default checkIn" onclick="popup(event, 'Proceed Check In', 'Are you sure do you want to check in this reservation?', '<?= base_url('index.php/main/checkIn/' . $row['booking_id']) ?>')" data-placement="top" title="Check In Reservation" rel="tooltip">
+                              <i class="fa-solid fa-calendar-check"></i>
+                            </a>
+                            <a href="<?= base_url('index.php/main/cancelReservation/' . $row['booking_id']) ?>" class="btn btn-sm btn-danger confirm" data-placement="top" title="Cancel Reservation" rel="tooltip">
+                              <span class="fa fa-ban"></span>
+                            </a>
                           </td>
                         </tr>
                     <?php }
@@ -69,7 +73,7 @@
                       <?php if ($row['reservation_status'] == 4) { ?>
                         <tr>
                           <?php $data['row'] = $row ?>
-                          <?php $this->load->view('body/frontdesk/components/booking-table-data', $data) ?>
+                          <?php $this->load->view('body/frontdesk/components/booking_table_data', $data) ?>
                           <td></td>
                         </tr>
                     <?php }
@@ -92,8 +96,11 @@
     demo.initWizard();
 
     $('.tbl_reservations').DataTable({
-      "autoWidth": false,
-      "columnDefs": [{
+      order: [
+        [0, 'desc']
+      ],
+      autoWidth: false,
+      columnDefs: [{
           "width": "11%",
           "targets": 0
         },

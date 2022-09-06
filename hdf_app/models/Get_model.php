@@ -519,6 +519,14 @@ class Get_model extends CI_Model {
       ->get('bookings')->result_array();
   }
 
+  function getBooking($booking_id) {
+    return $this->db->join('booked_rooms', 'booked_rooms.booking_id=bookings.booking_id')
+      ->join('rooms', 'rooms.id=booked_rooms.room_id')
+      ->join('guests', 'guests.guest_id=bookings.guest_id')
+      ->where('bookings.booking_id', $booking_id)
+      ->get('bookings')->row();
+  }
+
   function getBookingByBookingNumber($booking_number) {
     return $this->db->join('guests', 'guests.guest_id=bookings.guest_id')
       ->where('booking_number', $booking_number)
@@ -696,5 +704,9 @@ class Get_model extends CI_Model {
       $this->db->where('user_id', $_SESSION['user_id']);
     }
     return $this->db->get('user_logs')->result_array();
+  }
+
+  function getDates($booking_id) {
+    return $this->db->select('check_in, check_out')->where('booking_id', $booking_id)->get('booked_rooms')->result_array();
   }
 }

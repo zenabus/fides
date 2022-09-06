@@ -143,10 +143,13 @@
       </tbody>
     </table>
   </div>
-  <div class="card-footer mb-2 mt-0 border-top px-4">
-    <a href="<?= base_url('index.php/main/completeOrder/' . $booking->booking_id . '/' . $booking->booking_number) ?>" class="btn confirm ">Complete Order</a>
-    <button type="button" class="btn mt-0 btn-success" data-toggle="modal" data-target="#modalPayment">Payment</button>
-    <button type="button" class="btn mt-0 btn-danger" data-toggle="modal" data-target="#modalRefund">Refund</button>
+  <div class="card-footer mb-2 mt-0 border-top px-4 d-flex justify-content-between">
+    <div>
+      <a href="<?= base_url('index.php/main/completeOrder/' . $booking->booking_id . '/' . $booking->booking_number) ?>" class="btn confirm hidable" <?= $overall_total > 0 ? 'disabled' : '' ?>>Complete Order</a>
+      <button type="button" class="btn mt-0 btn-success hidable" data-toggle="modal" data-target="#modalPayment">Payment</button>
+      <button type="button" class="btn mt-0 btn-danger hidable" data-toggle="modal" data-target="#modalRefund">Refund</button>
+    </div>
+    <a href="<?= base_url('index.php/main/receipt/' . $booking->booking_id) ?>" class="btn mt-0 btn-info receipt">Print Receipt</a>
   </div>
 </div>
 
@@ -270,5 +273,11 @@
     const value = $(this).val();
     const newValue = value.replace(/[^\dA-Z]/g, '').replace(/(.{4})/g, '$1 ').trim();
     $(this).val(newValue);
+  });
+
+  $(document).on('click', '.receipt', function(e) {
+    e.preventDefault();
+    const size = ['height=' + screen.height / 2, 'width=' + screen.width / 2].join(',');
+    window.open($(this).attr('href'), size, size);
   });
 </script>

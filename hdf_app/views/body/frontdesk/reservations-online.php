@@ -51,12 +51,12 @@
                       <?php if ($row['reservation_status'] == 5) { ?>
                         <tr>
                           <?php $data['row'] = $row ?>
-                          <?php $this->load->view('body/frontdesk/components/booking-table-data', $data) ?>
+                          <?php $this->load->view('body/frontdesk/components/booking_table_data', $data) ?>
                           <td class="action">
-                            <a href="<?= base_url('index.php/main/checked/') ?>" class="btn btn-sm mb-1" data-placement="top" title="Book Reservation" rel="tooltip">
+                            <a href="javascript:" class="btn btn-sm btn-default checkIn" onclick="popup(event, 'Proceed Check In', 'Are you sure do you want to check in this reservation?', '<?= base_url('index.php/main/checkIn/' . $row['booking_id']) ?>')" data-placement="top" title="Check In Reservation" rel="tooltip">
                               <i class="fa-solid fa-calendar-check"></i>
                             </a>
-                            <a href="<?= base_url('index.php/main/updateReservationStatus/4/' . $row['booking_id']) ?>" class="btn btn-sm btn-danger confirm mb-1" data-placement="top" title="Cancel Booking" rel="tooltip">
+                            <a href="<?= base_url('index.php/main/cancelReservation/' . $row['booking_id']) ?>" class="btn btn-sm btn-danger confirm" data-placement="top" title="Cancel Booking" rel="tooltip">
                               <span class="fa fa-ban"></span>
                             </a>
                           </td>
@@ -84,12 +84,12 @@
                       <?php if ($row['reservation_status'] == 2 || $row['reservation_status'] == 3) { ?>
                         <tr>
                           <?php $data['row'] = $row ?>
-                          <?php $this->load->view('body/frontdesk/components/booking-table-data', $data) ?>
+                          <?php $this->load->view('body/frontdesk/components/booking_table_data', $data) ?>
                           <td class="action">
                             <a href="javascript:" class="btn btn-sm confirm-reservation mb-1" data='<?= json_encode($row) ?>' data-placement="top" title="Confirm Reservation" rel="tooltip">
                               <span class="fa fa-check"></span>
                             </a>
-                            <a href="<?= base_url('index.php/main/updateReservationStatus/4/' . $row['booking_id']) ?>" class="btn btn-sm btn-danger confirm mb-1" data-placement="top" title="Cancel Reservation" rel="tooltip">
+                            <a href="<?= base_url('index.php/main/cancelReservation/' . $row['booking_id']) ?>" class="btn btn-sm btn-danger confirm mb-1" data-placement="top" title="Cancel Reservation" rel="tooltip">
                               <span class="fa fa-ban"></span>
                             </a>
                           </td>
@@ -116,7 +116,7 @@
                       <?php if ($row['reservation_status'] == 4) { ?>
                         <tr>
                           <?php $data['row'] = $row ?>
-                          <?php $this->load->view('body/frontdesk/components/booking-table-data', $data) ?>
+                          <?php $this->load->view('body/frontdesk/components/booking_table_data', $data) ?>
                         </tr>
                     <?php }
                     } ?>
@@ -210,14 +210,17 @@
 <script>
   const guests = JSON.parse('<?= json_encode($guests) ?>');
 </script>
-<script defer src="<?= base_url('assets/js/modal-reservation.js') ?>"></script>
+<script defer src="<?= base_url('assets/js/modal_reservation.js') ?>"></script>
 <script>
   $(document).ready(function() {
     demo.initWizard();
 
     $('.tbl_reservations').DataTable({
-      "autoWidth": false,
-      "columnDefs": [{
+      order: [
+        [0, 'desc']
+      ],
+      autoWidth: false,
+      columnDefs: [{
           "width": "11%",
           "targets": 0
         },
@@ -243,6 +246,23 @@
         },
       ]
     });
+  });
+
+  $("[name=payment_option]").change(function() {
+    const option = $(this).val();
+    if (option == "Cash") {
+      $(".card-div").hide();
+      $("[name=card_number]").val("");
+      $("[name=card_name]").val("");
+      $("[name=card_number]").removeAttr("required");
+      $("[name=card_name]").removeAttr("required");
+      $("[name=card_type]").removeAttr("required");
+    } else {
+      $("[name=card_number]").attr("required", true);
+      $("[name=card_name]").attr("required", true);
+      $("[name=card_type]").attr("required", true);
+      $(".card-div").show();
+    }
   });
 
   $('.confirm-reservation').click(function() {

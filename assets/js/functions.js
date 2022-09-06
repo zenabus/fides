@@ -1,3 +1,22 @@
+function popup(e, title, text, link) {
+  e.preventDefault();
+  swal({
+    title,
+    text,
+    type: "info",
+    buttonsStyling: false,
+    showCancelButton: true,
+    cancelButtonClass: "btn",
+    confirmButtonClass: "btn btn-primary mr-2",
+    confirmButtonText: "Yes",
+    cancelButtonText: "No",
+  }).then((result) => {
+    if (result) {
+      window.location.replace(link);
+    }
+  });
+}
+
 $(document).on("click", ".confirm", function (e) {
   e.preventDefault();
   swal({

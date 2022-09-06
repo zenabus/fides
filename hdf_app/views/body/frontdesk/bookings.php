@@ -40,15 +40,15 @@
                       <?php if ($row['reservation_status'] == 0) { ?>
                         <tr>
                           <?php $data['row'] = $row ?>
-                          <?php $this->load->view('body/frontdesk/components/booking-table-data', $data) ?>
+                          <?php $this->load->view('body/frontdesk/components/booking_table_data', $data) ?>
                           <td class="action">
                             <a href="<?= base_url('index.php/main/booking/' . $row['booking_number']) ?>" class="btn btn-sm" data-placement="top" title="View Booking" rel="tooltip">
                               <span class="fa fa-address-book"></span>
                             </a>
-                            <a href="#" class="btn btn-sm btn-info" data-placement="top" title="View Receipt" rel="tooltip">
+                            <a href="<?= base_url('index.php/main/receipt/' . $row['booking_id']) ?>" class="btn btn-sm btn-info receipt" data-placement="top" title="View Receipt" rel="tooltip">
                               <i class="fa-solid fa-receipt"></i>
                             </a>
-                            <a href="<?= base_url('index.php/main/updateReservationStatus/4/' . $row['booking_id']) ?>" class="btn btn-sm btn-danger confirm" data-placement="top" title="Cancel Booking" rel="tooltip">
+                            <a href="<?= base_url('index.php/main/cancelReservation/' . $row['booking_id']) ?>" class="btn btn-sm btn-danger confirm" data-placement="top" title="Cancel Booking" rel="tooltip">
                               <span class="fa fa-ban"></span>
                             </a>
                           </td>
@@ -76,10 +76,13 @@
                       <?php if ($row['reservation_status'] == -1) { ?>
                         <tr>
                           <?php $data['row'] = $row ?>
-                          <?php $this->load->view('body/frontdesk/components/booking-table-data', $data) ?>
+                          <?php $this->load->view('body/frontdesk/components/booking_table_data', $data) ?>
                           <td class="action">
                             <a href="<?= base_url('index.php/main/booking/' . $row['booking_number']) ?>" class="btn btn-sm" data-placement="top" title="View Booking" rel="tooltip">
                               <span class="fa fa-address-book"></span>
+                            </a>
+                            <a href="<?= base_url('index.php/main/receipt/' . $row['booking_id']) ?>" class="btn btn-sm btn-info receipt" data-placement="top" title="View Receipt" rel="tooltip">
+                              <i class="fa-solid fa-receipt"></i>
                             </a>
                           </td>
                         </tr>
@@ -101,8 +104,11 @@
     demo.initWizard();
 
     $('.tbl_booking').dataTable({
-      "autoWidth": false,
-      "columnDefs": [{
+      order: [
+        [0, 'desc']
+      ],
+      autoWidth: false,
+      columnDefs: [{
           "width": "12%",
           "targets": 0
         },
@@ -128,5 +134,11 @@
         },
       ]
     });
+  });
+
+  $(document).on('click', '.receipt', function(e) {
+    e.preventDefault();
+    const size = ['height=' + screen.height / 2, 'width=' + screen.width / 2].join(',');
+    window.open($(this).attr('href'), size, size);
   });
 </script>

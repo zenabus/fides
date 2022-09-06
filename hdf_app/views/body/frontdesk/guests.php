@@ -30,6 +30,7 @@
                       <th>Guest Name</th>
                       <th>Contact Details</th>
                       <th>Company Details</th>
+                      <th>Birthday</th>
                       <th>Last Check-In</th>
                       <th class="disabled-sorting text-center">Action</th>
                     </tr>
@@ -49,15 +50,19 @@
                           <?= $data['company_name'] ?><br>
                           <small><?= $data['company_address'] ?></small>
                         </td>
+                        <td>
+                          <?= $data['birthday'] ?><br>
+                          <small><?= $data['nationality'] ?></small>
+                        </td>
                         <td><?= $data['last_checkin'] ?></td>
                         <td class="action">
-                          <a href="javascript:" class="btn btn-sm" data-placement="top" title="View Guest" rel="tooltip">
+                          <a href="javascript:" class="btn btn-sm mb-1" data-placement="top" title="View Guest" rel="tooltip">
                             <span class="fa fa-eye"></span>
                           </a>
-                          <button class="btn btn-success btn-sm updateGuest" data='<?= json_encode($data) ?>' data-placement="top" title="Update Guest" rel="tooltip">
+                          <button class="btn btn-success btn-sm updateGuest mb-1" data='<?= json_encode($data) ?>' data-placement="top" title="Update Guest" rel="tooltip">
                             <i class="fa-solid fa-user-pen"></i>
                           </button>
-                          <a href="<?= base_url('index.php/main/statusGuest/1/' . $data['guest_id']) ?>" class="btn btn-warning btn-sm confirm" data-placement="top" title="Disable Guest" rel="tooltip">
+                          <a href="<?= base_url('index.php/main/statusGuest/1/' . $data['guest_id']) ?>" class="btn btn-warning btn-sm confirm mb-1" data-placement="top" title="Disable Guest" rel="tooltip">
                             <i class="fa-solid fa-user-xmark"></i>
                           </a>
                         </td>
@@ -73,6 +78,7 @@
                       <th>Guest Name</th>
                       <th>Contact Details</th>
                       <th>Company Details</th>
+                      <th>Birthday</th>
                       <th>Last Check-In</th>
                       <th class="disabled-sorting text-center">Action</th>
                     </tr>
@@ -91,6 +97,10 @@
                         <td>
                           <?= $data['company_name'] ?><br>
                           <small><?= $data['company_address'] ?></small>
+                        </td>
+                        <td>
+                          <?= $data['birthday'] ?><br>
+                          <small><?= $data['nationality'] ?></small>
                         </td>
                         <td><?= $data['last_checkin'] ?></td>
                         <td class="action">
@@ -144,6 +154,16 @@
           </div>
         </div>
         <div class="row">
+          <div class="form-group col-md-5">
+            <label>Contact Number</label>
+            <input type="text" class="form-control" name="contact" required>
+          </div>
+          <div class="form-group col-md-7">
+            <label>Email <small>(optional)</small></label>
+            <input type="text" class="form-control" name="email">
+          </div>
+        </div>
+        <div class="row">
           <div class="form-group col-md-6">
             <label>Company Name</label>
             <input type="text" class="form-control" name="company_name">
@@ -153,19 +173,19 @@
             <input type="text" class="form-control" name="company_address">
           </div>
         </div>
-        <div class="row">
-          <div class="form-group col-md-5">
-            <label>Contact Number</label>
-            <input type="text" class="form-control" name="contact" required>
-          </div>
-          <div class="form-group col-md-7">
-            <label>Email <small class="text-muted">(optional)</small></label>
-            <input type="text" class="form-control" name="email">
-          </div>
-        </div>
         <div class="form-group">
-          <label>Address <small class="text-muted">(optional)</small></label>
+          <label>Address <small>(optional)</small></label>
           <input type="text" class="form-control" name="address">
+        </div>
+        <div class="row">
+          <div class="form-group col-md-6">
+            <label>Birthday <small>(optional)</small></label>
+            <input type="text" class="form-control datepicker" name="birthday">
+          </div>
+          <div class="form-group col-md-6">
+            <label>Nationality <small>(optional)</small></label>
+            <input type="text" class="form-control" name="nationality">
+          </div>
         </div>
       </div>
       <div class="modal-footer">
@@ -185,27 +205,44 @@
 <script>
   $(document).ready(function() {
     demo.initWizard();
+    $('.datepicker').datetimepicker({
+      icons: {
+        time: "fa fa-clock-o",
+        date: "fa fa-calender",
+        up: "fa fa-chevron-up",
+        down: "fa fa-chevron-down",
+        previous: "fa fa-chevron-left",
+        next: "fa fa-chevron-right",
+        today: "fa fa-screenshot",
+        clear: "fa fa-trash",
+        close: "fa fa-remove",
+      },
+      format: 'L',
+    });
     $('.tbl_guest').dataTable({
-      "autoWidth": false,
-      "columnDefs": [{
-          "width": "23%",
+      autoWidth: false,
+      columnDefs: [{
+          "width": "18%",
           "targets": 0
         },
         {
-          "width": "23%",
+          "width": "18%",
           "targets": 1
         },
         {
-          "width": "23%",
+          "width": "18%",
           "targets": 2
         },
         {
-          "width": "23%",
+          "width": "18%",
           "targets": 3
         },
         {
-          "width": "80px",
+          "width": "18%",
           "targets": 4
+        }, {
+          "width": "120px",
+          "targets": 5
         }
       ]
     });
@@ -222,6 +259,8 @@
     $('[name=contact]').val(data.contact);
     $('[name=email]').val(data.email);
     $('[name=address]').val(data.address);
+    $('[name=birthday]').val(data.birthday);
+    $('[name=nationality]').val(data.nationality);
     $('#frmGuest').attr('action', 'updateGuest');
     $('#btnGuest').text('Update Guest');
     $('#modalGuest').modal('show');

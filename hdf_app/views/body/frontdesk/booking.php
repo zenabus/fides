@@ -44,7 +44,7 @@
                 <label>First Name</label>
                 <input type="text" class="form-control-plaintext editable" name="first_name" value="<?= $booking->first_name ?>" tabindex="-1" readonly>
               </div>
-              <div class="form-group col-md-4">
+              <div class="form-group col-md-3">
                 <label>Middle Name</label>
                 <input type="text" class="form-control-plaintext editable" name="middle_name" value="<?= $booking->middle_name ?>" tabindex="-1" readonly>
               </div>
@@ -52,9 +52,27 @@
                 <label>Last Name</label>
                 <input type="text" class="form-control-plaintext editable" name="last_name" value="<?= $booking->last_name ?>" tabindex="-1" readonly>
               </div>
+              <div class="form-group col-md-1">
+                <label>Suffix</label>
+                <input type="text" class="form-control-plaintext editable" name="suffix" value="<?= $booking->suffix ?>" tabindex="-1" readonly>
+              </div>
             </div>
             <div class="form-row">
               <div class="form-group col-md-4">
+                <label>Birthday</label>
+                <input type="text" class="form-control-plaintext editable datepicker" name="birthday" value="<?= $booking->birthday ?>" tabindex="-1" readonly>
+              </div>
+              <div class="form-group col-md-4">
+                <label>Nationality</label>
+                <input type="text" class="form-control-plaintext editable" name="nationality" value="<?= $booking->nationality ?>" tabindex="-1" readonly>
+              </div>
+              <div class="form-group col-md-4">
+                <label>Car Plate No.</label>
+                <input type="text" class="form-control-plaintext editable" name="plate_no" value="<?= $booking->plate_no ?>" tabindex="-1" readonly>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group col-md-3">
                 <label>Contact Number</label>
                 <input type="text" class="form-control-plaintext editable" name="contact" value="<?= $booking->contact ?>" tabindex="-1" readonly>
               </div>
@@ -62,7 +80,7 @@
                 <label>Email</label>
                 <input type="text" class="form-control-plaintext editable" name="email" value="<?= $booking->email ?>" tabindex="-1" readonly>
               </div>
-              <div class="form-group col-md-4">
+              <div class="form-group col-md-5">
                 <label>Address</label>
                 <input type="text" class="form-control-plaintext editable" name="address" value="<?= $booking->address ?>" tabindex="-1" readonly>
               </div>
@@ -80,10 +98,13 @@
           </div>
           <?= form_close() ?>
         </div>
-        <div class="card-footer my-2">
-          <button class="btn updateDetails" type="button">Update Details</button>
-          <button class="btn saveChanges" form="frmGuest">Save Changes</button>
-          <button class="btn btn-primary cancelUpdate" type="button">Cancel Update</button>
+        <div class="card-footer my-2 d-flex justify-content-between">
+          <div>
+            <button class="btn hidable updateDetails" type="button">Update Details</button>
+            <button class="btn saveChanges" form="frmGuest">Save Changes</button>
+            <button class="btn btn-primary cancelUpdate" type="button">Cancel Update</button>
+          </div>
+          <a href="<?= base_url('index.php/main/registration/' . $booking->booking_id) ?>" class="btn btn-info registration">Print Form</a>
         </div>
       </div>
 
@@ -114,7 +135,7 @@
                   $date_time = date_create($row['booking_log_added']);
                   $date_time = date_format($date_time, "M d, Y h:i a");
                   ?>
-                  <td style="white-space: pre;"><?= $row['ago'] ?><br><small><?= $date_time ?></small></td>
+                  <td style="white-space: pre;"><?= ucfirst($row['ago']) ?><br><small><?= $date_time ?></small></td>
                 </tr>
               <?php } ?>
             </tbody>
@@ -181,15 +202,32 @@
 
       <div class="card">
         <div class="card-header border-bottom px-4 pt-4 pb-2">
+          <h6>Special Request(s) / Allergence</h6>
+        </div>
+        <?= form_open('main/updateRequest', ['id' => 'frmRequest']) ?>
+        <input type="hidden" name="booking_id" value="<?= $booking->booking_id ?>">
+        <div class="card-body px-4">
+          <textarea class="form-control-plaintext px-2 pt-1" tabindex="-1" name="request" rows="3" readonly><?= $booking->request ?></textarea>
+        </div>
+        <div class="card-footer my-2 border-top px-4">
+          <input type="button" value="Update Request" class="btn updateRequest hidable">
+          <input type="submit" value="Save Request" class="btn saveRequest" form="frmRequest">
+          <input type="button" value="Cancel Request" class="btn btn-primary cancelRequest">
+        </div>
+        <?= form_close() ?>
+      </div>
+
+      <div class="card">
+        <div class="card-header border-bottom px-4 pt-4 pb-2">
           <h6>Notes</h6>
         </div>
         <?= form_open('main/updateNotes', ['id' => 'frmNotes']) ?>
         <input type="hidden" name="booking_id" value="<?= $booking->booking_id ?>">
         <div class="card-body px-4">
-          <textarea class="form-control-plaintext px-2 pt-1" tabindex="-1" name="remarks" rows="5" readonly><?= $booking->remarks ?></textarea>
+          <textarea class="form-control-plaintext px-2 pt-1" tabindex="-1" name="remarks" rows="3" readonly><?= $booking->remarks ?></textarea>
         </div>
         <div class="card-footer my-2 border-top px-4">
-          <input type="button" value="Update Notes" class="btn updateNotes">
+          <input type="button" value="Update Notes" class="btn updateNotes hidable">
           <input type="submit" value="Save Notes" class="btn saveNotes" form="frmNotes">
           <input type="button" value="Cancel Update" class="btn btn-primary cancelNotes">
         </div>
@@ -200,10 +238,6 @@
 
 <script type="text/javascript">
   $(document).ready(function() {
-    $('.cancelUpdate').hide();
-    $('.saveChanges').hide();
-    $('.saveNotes').hide();
-    $('.cancelNotes').hide();
     $('.datepicker').datetimepicker({
       icons: {
         time: "fa fa-clock-o",
@@ -221,18 +255,18 @@
     $('#datatable').dataTable({
       "ordering": false
     });
-
-    if (reservation_status == -1) {
-      $('.btn').attr('disabled', true);
-      $('.btn').hide();
-      $('.hidable').hide();
-      $('.form-control').attr('readonly', true);
-      $('.back').attr('disabled', false);
-      $('.back').show();
-      $('[type=search]').removeAttr('readonly');
-      $('[name=datatable_length]').removeAttr('readonly');
-    }
   });
+
+  $('.cancelUpdate, .saveChanges').hide();
+  $('.saveNotes, .cancelNotes').hide();
+  $('.saveRequest, .cancelRequest').hide();
+  if (reservation_status == -1) {
+    $('.hidable').attr('disabled', true);
+    $('.hidable').hide();
+    $('.form-control').attr('readonly', true);
+    $('[type=search]').removeAttr('readonly');
+    $('[name=datatable_length]').removeAttr('readonly');
+  }
 
   $('.updateDetails').click(function() {
     $('.editable').removeClass('form-control-plaintext').addClass('form-control').removeAttr('readonly').removeAttr('tabindex');
@@ -251,18 +285,41 @@
   });
 
   $('.updateNotes').click(function() {
-    $('textarea').removeClass('form-control-plaintext').addClass('form-control').removeAttr('readonly').removeAttr('tabindex');
+    $('[name=remarks]').removeClass('form-control-plaintext').addClass('form-control').removeAttr('readonly').removeAttr('tabindex');
     $('.updateNotes').hide();
     $('.cancelNotes').show();
     $('.saveNotes').show();
-    $('[name=first_name]').focus();
+    $('[name=remarks]').focus();
   });
 
   $('.cancelNotes').click(function() {
-    $('textarea').addClass('form-control-plaintext').removeClass('form-control').attr('readonly', true).attr('tabindex', -1);
+    $('[name=remarks]').addClass('form-control-plaintext').removeClass('form-control').attr('readonly', true).attr('tabindex', -1);
     $('.updateNotes').show();
     $('.cancelNotes').hide();
     $('.saveNotes').hide();
     $('#frmNotes').trigger('reset');
+  });
+
+  $('.updateRequest').click(function() {
+    $('[name=request]').removeClass('form-control-plaintext').addClass('form-control').removeAttr('readonly').removeAttr('tabindex');
+    $('.updateRequest').hide();
+    $('.cancelRequest').show();
+    $('.saveRequest').show();
+    $('[name=request]').focus();
+
+  });
+
+  $('.cancelRequest').click(function() {
+    $('[name=request]').addClass('form-control-plaintext').removeClass('form-control').attr('readonly', true).attr('tabindex', -1);
+    $('.updateRequest').show();
+    $('.cancelRequest').hide();
+    $('.saveRequest').hide();
+    $('#frmRequest').trigger('reset');
+  });
+
+  $('.registration').click(function(e) {
+    e.preventDefault();
+    const size = ['height=' + screen.height / 2, 'width=' + screen.width / 2].join(',');
+    window.open($(this).attr('href'), size, size);
   });
 </script>

@@ -144,7 +144,11 @@ class Insert_model extends CI_Model {
         'last_name' => $guest['last_name'],
         'contact' => $guest['contact'],
         'email' => $guest['email'],
-        'company_name' => $guest['company_name']
+        'company_name' => $guest['company_name'],
+        'suffix' => $guest['suffix'],
+        'plate_no' => $guest['plate_no'],
+        'birthday' => $guest['birthday'],
+        'nationality' => $guest['nationality'],
       ];
     } else {
       unset($_POST['guest_id']);
