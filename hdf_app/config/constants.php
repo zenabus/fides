@@ -110,3 +110,4 @@ $log_type = [
 
 define('RESERVATION_STATUS', $reservation_status);
 define('LOG_TYPE', $log_type);
+define('TITLE', 'Hotel de Fides');

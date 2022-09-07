@@ -2,7 +2,7 @@
 <html>
 
 <head>
-  <title>Hotel de Fides - Guest Registration Form</title>
+  <title><?= TITLE ?> - Guest Registration Form</title>
   <style type="text/css">
     * {
       font-family: 'DejaVu Serif' !important;

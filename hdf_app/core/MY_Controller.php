@@ -36,7 +36,7 @@ class MY_Controller extends CI_Controller {
     ];
 
     $this->email->initialize($config);
-    $this->email->from('hoteldefides@gmail.com', 'The Hotel de Fides');
+    $this->email->from('hoteldefides@gmail.com', 'The <?= TITLE ?>');
     $this->email->to($email);
     $this->email->subject($subject);
     $this->email->message($message);

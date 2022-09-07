@@ -46,13 +46,15 @@ Franz
 // Complete order
 // Add remove button on collection details
 // Remove extra if zero on update
-Div to image not working
-Calendar following month
-Ask if extras are per day
-Adjust arrival and departure dates depending on the booked rooms
+// Adjust arrival and departure dates depending on the booked rooms
 // Add checkin function on reservations
 // Fix locked bookings datatable width
 // Change worded buttons to icons on tables
 // Fix checkin dates cannot be 1 night
 // Delete images when updating image or deleting data
+Div to image not working
+Calendar following month
+Ask if extras are per day
 Request room delete to admin
+Add last checkin
+Time-based login

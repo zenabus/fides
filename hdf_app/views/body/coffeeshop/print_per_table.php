@@ -14,7 +14,7 @@ $pdf->AddPage();
 $pdf->SetFont("Arial","",12);
 $pdf->cell(0,5,"",0,1,'C');
 $pdf->SetFont("Arial","B",12);
-$pdf->cell(0,5,"Hotel De Fides",0,1,'C');
+$pdf->cell(0,5,"<?= TITLE ?>",0,1,'C');
 $pdf->SetFont("Arial","",12);
 $pdf->cell(0,5,"Official Reciept",0,1,'C');
 $pdf->cell(0,5,"Restaurant",0,1,'C');
@@ -111,6 +111,3 @@ if ($type) {
 
 
 $pdf->output();
-
-
- ?>

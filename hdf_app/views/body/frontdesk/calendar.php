@@ -203,8 +203,8 @@
                         $min = $date == min($data['dates_between']) ? 'min' : 'mid';
                         $max = $date == max($data['dates_between']) ? 'max' : 'mid';
                         ?>
-                        <td class="with-data bg-<?= $color ?> <?= $min ?>" date="<?= $date ?>" data='<?= json_encode($row) ?>'><?= $min == 'min' ? $guest : '<i class="fa-solid fa-minus"></i>' ?></td>
-                        <td class="with-data bg-<?= $color ?> <?= $max ?>" date="<?= $date ?>" data='<?= json_encode($row) ?>'><?= $min == 'min' ?  $data['remarks'] : '<i class="fa-solid fa-minus"></i>' ?></td>
+                        <td class="with-data bg-<?= $color ?> <?= $min ?>" date="<?= $date ?>" data='<?= json_encode($row) ?>' booking='<?= json_encode($data) ?>'><?= $min == 'min' ? $guest : '<i class="fa-solid fa-minus"></i>' ?></td>
+                        <td class="with-data bg-<?= $color ?> <?= $max ?>" date="<?= $date ?>" data='<?= json_encode($row) ?>' booking='<?= json_encode($data) ?>'><?= $min == 'min' ?  $data['remarks'] : '<i class="fa-solid fa-minus"></i>' ?></td>
                       <?php } else { ?>
                         <td class="no-data first" date="<?= $date ?>" data='<?= json_encode($row) ?>'></td>
                         <td class="no-data second" date="<?= $date ?>" data='<?= json_encode($row) ?>'></td>
@@ -373,10 +373,6 @@
     }
   });
 
-  $('.no-data').click(function() {
-    modalBooking(this, 'Check In', 1);
-  });
-
   $('#month').change(function() {
     const month = $(this).val();
     const year = $('#year').val();
@@ -389,11 +385,27 @@
     $('#selectMonth').attr('href', `${base_url}index.php/main/calendar/${year}/${month}`)
   });
 
-  $('#test').click(function() {
-    localStorage.setItem('test', 'test132');
+  $('.no-data').click(function() {
+    $('#returning_guest').show();
+    $('.form-control').val('').removeAttr('disabled');
+    modalBooking(this, 'Check In', 1);
   });
 
   $('.with-data').click(function() {
+    const room = JSON.parse($(this).attr('data'));
+    const booking = JSON.parse($(this).attr('booking'));
+
+    $('#returning_guest').hide();
+    $('[name=guest_id]').val(booking.guest_id);
+    $('[name=first_name]').val(booking.first_name).attr('disabled', true);
+    $('[name=middle_name]').val(booking.middle_name).attr('disabled', true);
+    $('[name=last_name]').val(booking.last_name).attr('disabled', true);
+    $('[name=suffix]').val(booking.suffix).attr('disabled', true);
+    $('[name=contact]').val(booking.contact).attr('disabled', true);
     modalBooking(this, 'Check In', 1);
+    console.log(booking.check_in)
+    $('[name=check_in]').val(booking.check_in);
+    $('[name=check_out]').val(booking.check_out);
+    $('[name=nights]').val(booking.nights);
   });
 </script>

@@ -280,7 +280,11 @@ class Update_model extends CI_Model {
   }
 
   function updateLogin() {
-    $this->db->where('id', $_SESSION['user_id'])->update('users', ['last_login' => date('Y-m-d h:i:s')]);
+    $this->db->where('id', $_SESSION['user_id'])->update('users', ['last_login' => date('Y-m-d H:i:s')]);
+  }
+
+  function updateCheckIn($guest_id) {
+    $this->db->where('guest_id', $guest_id)->update('guests', ['last_checkin' => date('Y-m-d H:i:s')]);
   }
 
   function updateBooking($arrival, $departure, $booking_id) {

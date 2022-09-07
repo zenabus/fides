@@ -14,7 +14,7 @@ $pdf->AddPage();
 $pdf->SetFont("Arial","",12);
 $pdf->cell(0,5,"",0,1,'C');
 $pdf->SetFont("Arial","B",12);
-$pdf->cell(0,5,"Hotel De Fides",0,1,'C');
+$pdf->cell(0,5,"<?= TITLE ?>",0,1,'C');
 $pdf->SetFont("Arial","",12);
 $pdf->cell(0,5,"Reports",0,1,'C');
 
@@ -61,6 +61,3 @@ $pdf->cell(50,7,"P ".$total_result[0]['total']."",0,1,'L');
 
 
 $pdf->output();
-
-
- ?>

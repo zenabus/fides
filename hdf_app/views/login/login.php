@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
-  <title> Hotel de Fides | iHotelier by WSM IT Services </title>
+  <title> <?= TITLE ?> | iHotelier by WSM IT Services </title>
   <meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, shrink-to-fit=no' name='viewport' />
   <!-- Fonts & Icons -->
   <link rel="icon" type="jpeg" href="<?= base_url('assets/img/logo.jpg') ?>">
@@ -48,7 +48,7 @@
   <nav class="navbar navbar-expand-lg navbar-absolute fixed-top navbar-transparent">
     <div class="container">
       <div class="navbar-wrapper">
-        <a class="navbar-brand text-center" href="javascript:">Hotel de Fides</a>
+        <a class="navbar-brand text-center" href="javascript:"><?= TITLE ?></a>
       </div>
       <div class="collapse navbar-collapse justify-content-end" id="navigation">
         <ul class="navbar-nav">

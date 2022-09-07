@@ -410,7 +410,7 @@
                                 <p style="font-size: 14px; line-height: 140%">
                                   Fatima Village Brgy. 75, Tacloban City, Leyte 6500
                                 </p>
-                                <p style="font-size: 14px; line-height: 140%">All rights reserved. Hotel de Fides</p>
+                                <p style="font-size: 14px; line-height: 140%">All rights reserved. <?= TITLE ?></p>
                                 <p style="font-size: 14px; line-height: 140%">&nbsp;</p>
                                 <p style="font-size: 14px; line-height: 140%">
                                   <a href="https://www.facebook.com/HoteldeFides" style="text-decoration: none; color: white" target="_blank">Facebook</a>

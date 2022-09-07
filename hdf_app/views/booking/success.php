@@ -2,7 +2,7 @@
 <html>
 
 <head>
-  <title>Hotel de Fides | iHotelier</title>
+  <title><?= TITLE ?> | iHotelier</title>
   <link rel="stylesheet" type="text/css" href="<?= base_url('assets/css/bootstrap.min.css') ?>">
   <link rel="stylesheet" type="text/css" href="<?= base_url('assets/css/paper-kit.min.css') ?>">
   <link rel="stylesheet" type="text/css" href="<?= base_url('assets/css/booking.css') ?>">
@@ -13,8 +13,8 @@
 
   <!-- SEO -->
   <meta name="author" content="Francisco Ibanez III" />
-  <meta name="description" content="iHotelier is developed and designed by Elpidio Villarosa, Francisco Ibanez III and Jovin Maneja of WSM IT Services for Hotel de Fides." />
-  <meta name="keywords" content="iHotelier, hoteldefides, defides, hotel tacloban, tacloban city, hotel tacloban city, hotel booking, booking, hotel de fides tacloban, hotel de fides" />
+  <meta name="description" content="iHotelier is developed and designed by Elpidio Villarosa, Francisco Ibanez III and Jovin Maneja of WSM IT Services for <?= TITLE ?>." />
+  <meta name="keywords" content="iHotelier, hoteldefides, defides, hotel tacloban, tacloban city, hotel tacloban city, hotel booking, booking, <?= TITLE ?> tacloban, <?= TITLE ?>" />
   <!-- SEO -->
 
   <script src="<?= base_url() ?>assets/js/plugins/jspdf.js"></script>
@@ -101,8 +101,8 @@
     <div class="container text-light">
       <div class="row">
         <div class="col-md-4 mb-3">
-          <h5>Hotel de Fides</h5>
-          <p class="text-justify">Hotel de Fides is a family-oriented hotel overlooking the Cancabato Bay. It is the perfect place to go to for an amazing atmosphere and venue. The ambience of the hotel is relaxing and pleasant from its thematic, to its general location. The service also aims to meet guest standards and leave a lasting positive impression upon them. Hotel de Fides will stay true to its name and be faithful to your standards for “Fides” means faith in Latin.</p><br>
+          <h5><?= TITLE ?></h5>
+          <p class="text-justify"><?= TITLE ?> is a family-oriented hotel overlooking the Cancabato Bay. It is the perfect place to go to for an amazing atmosphere and venue. The ambience of the hotel is relaxing and pleasant from its thematic, to its general location. The service also aims to meet guest standards and leave a lasting positive impression upon them. <?= TITLE ?> will stay true to its name and be faithful to your standards for “Fides” means faith in Latin.</p><br>
           <a href="https://www.facebook.com/HoteldeFides/" class="btn btn-just-icon btn-green border-0" target="_blank">
             <i class="fa fa-facebook" aria-hidden="true"></i>
           </a>
@@ -207,11 +207,11 @@
               <p><strong>You</strong> means the individual accessing or using the Service, or the company, or other legal entity on behalf of which such individual is accessing or using the Service, as applicable.</p>
             </li>
             <li>
-              <p><strong>Company</strong> (referred to as either "the Company", "We", "Us" or "Our" in this Agreement) refers to Hotel de Fides, Real Street, Brgy. 75 Fatima, Tacloban City, 6500 Leyte.</p>
+              <p><strong>Company</strong> (referred to as either "the Company", "We", "Us" or "Our" in this Agreement) refers to <?= TITLE ?>, Real Street, Brgy. 75 Fatima, Tacloban City, 6500 Leyte.</p>
             </li>
             <li><strong>Affiliate</strong> means an entity that controls, is controlled by or is under common control with a party, where "control" means ownership of 50% or more of the shares, equity interest or other securities entitled to vote for election of directors or other managing authority.</li>
             <li><strong>Account</strong> means a unique account created for You to access our Service or parts of our Service.</li>
-            <li><strong>Website</strong> refers to Hotel de Fides, accessible from hoteldefides.com</li>
+            <li><strong>Website</strong> refers to <?= TITLE ?>, accessible from hoteldefides.com</li>
             <li><strong>Service</strong> refers to the Website.</li>
             <li><strong>Country</strong> refers to: Philippines</li>
             <li>
@@ -366,7 +366,7 @@
             <li class="mb-2">All rooms and public areas are non-smoking (including vape), a penalty of Php 2,500.00 will be imposed in case of violation (please ask designated smoking areas from the front desk or housekeeping).</li>
             <li class="mb-2">Damages to mattresses and linens (towels, duvet covers, pillow cases, etc.) resulting from blood stains, oils (from massage or other oils), food stains, wines, make-up, hair color, shoe polish, etc. will result to extra charges for the special cleaning or replacement of stained/damaged items (inquire from the Front Desk)</li>
             <li class="mb-2">Pets are not allowed inside the hotel.</li>
-            <li class="mb-2">Hotel de Fides is not responsible for any valuables and money left unlocked and outside the individual safe, including those in the guest's rooms and public areas. We have provided safety deposit boxes available for use in every rooms.</li>
+            <li class="mb-2"><?= TITLE ?> is not responsible for any valuables and money left unlocked and outside the individual safe, including those in the guest's rooms and public areas. We have provided safety deposit boxes available for use in every rooms.</li>
             <li class="mb-2">Please observe silence, we hope you do not bother other guests. If more than 3 warnings have been issued, the hotel thru our security personnel has the authority to ask the guests to vacate the rooms.</li>
           </ul>
           <h4 class="mt-3">Extra bed and extra person</h4>
@@ -407,12 +407,12 @@
           <h4 class="mt-3">Cancellation Policy</h4>
           <h6>Cancellation charge will apply as below:</h6>
           <ol>
-            <li>All payments received by the Hotel de Fides is <b>NON-REFUNDABLE.</b></li>
+            <li>All payments received by the <?= TITLE ?> is <b>NON-REFUNDABLE.</b></li>
             <li>If cancelled or a no-show, 80% of the first night's room cost will be charged.</li>
             <li>Modification of booking can be done anytime and free of charge.</li>
             <li>Any cancellation fees are determined by the property.</li>
           </ol>
-          <i>Hotel de Fides reserves the right to cancel / release the bookings which have not been paid on the cut-off time of 6:00 PM on the arrival day without prior notice unless specified as late arrival.</i>
+          <i><?= TITLE ?> reserves the right to cancel / release the bookings which have not been paid on the cut-off time of 6:00 PM on the arrival day without prior notice unless specified as late arrival.</i>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-primary btn-link" data-dismiss="modal">Okay</button>

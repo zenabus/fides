@@ -86,6 +86,11 @@ class Main extends MY_Controller {
       'getRoomType' => $this->get_model->getRoomTypes(),
       'getRoom' => $this->get_model->getRooms()
     );
+
+    foreach ($data['guests_active'] as $i => $guest) {
+      $data['guests_active'][$i]['last_checkin_ago'] = $this->timeAgo($guest['last_checkin']);
+    }
+
     $this->load->view('layout/header', $data);
     $this->load->view('body/frontdesk/guests');
     $this->load->view('layout/footer');
@@ -192,7 +197,7 @@ class Main extends MY_Controller {
     $dompdf->set_option('dpi', 300);
     $dompdf->loadHtml($view);
     $dompdf->render();
-    $dompdf->stream('Hotel de Fides - Guest Registration Form', ['Attachment' => FALSE]);
+    $dompdf->stream('<?= TITLE ?> - Guest Registration Form', ['Attachment' => FALSE]);
   }
 
   function receipt($booking_id) {
@@ -219,7 +224,7 @@ class Main extends MY_Controller {
     $dompdf->set_option('dpi', 300);
     $dompdf->loadHtml($view);
     $dompdf->render();
-    $dompdf->stream('Hotel de Fides - Acknowledgment Receipt', ['Attachment' => FALSE]);
+    $dompdf->stream('<?= TITLE ?> - Acknowledgment Receipt', ['Attachment' => FALSE]);
   }
 
   // ------------------------------------------------------------------------------------------------------- //
@@ -257,6 +262,7 @@ class Main extends MY_Controller {
     $log = ucfirst("{$type} {$name} in room {$room->room_number}");
     $this->insert_model->log($log);
     $this->insert_model->addBookingLog($log);
+    $this->update_model->updateCheckIn($_POST['guest_id']);
     $this->session->set_flashdata('success', "Successfully {$type} {$name} in room {$room->room_number}");
     if ($_POST['booking_type'] == 'Check In') {
       redirect(base_url('index.php/main/booking/' . $booking_number));
@@ -326,12 +332,15 @@ class Main extends MY_Controller {
     $this->redirect();
   }
 
-  function checkIn($booking_id) {
+  function checkIn($booking_id = NULL) {
+    if (!$booking_id) {
+      $booking_id = $_POST['booking_id'];
+    }
     $booking_number = 'HDF' . str_pad($booking_id, 5, '0', STR_PAD_LEFT);
     $log = "<b>{$booking_number}</b> → Successfully checked in!";
     $_POST['booking_id'] = $booking_id;
     $this->update_model->updateReservationStatus(4, $booking_id);
-    $this->insert_model->log('Cancelled a reservation: #' . $booking_number, 3);
+    $this->insert_model->log('Checked in a reservation: #' . $booking_number, 3);
     $this->insert_model->addBookingLog($log);
     $this->session->set_flashdata('success', 'Reservation successfully checked in.');
     redirect(base_url('index.php/main/booking/' . $booking_number));

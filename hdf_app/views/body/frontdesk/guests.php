@@ -54,7 +54,16 @@
                           <?= $data['birthday'] ?><br>
                           <small><?= $data['nationality'] ?></small>
                         </td>
-                        <td><?= $data['last_checkin'] ?></td>
+                        <td>
+                          <?php
+                          $date_time = date_create($data['last_checkin']);
+                          $date_time = date_format($date_time, "M d, Y h:i a");
+                          ?>
+                          <?php if ($data['last_checkin']) { ?>
+                            <?= ucfirst($data['last_checkin_ago']) ?><br>
+                            <small><?= $date_time ?></small>
+                          <?php } ?>
+                        </td>
                         <td class="action">
                           <a href="javascript:" class="btn btn-sm mb-1" data-placement="top" title="View Guest" rel="tooltip">
                             <span class="fa fa-eye"></span>
@@ -102,7 +111,16 @@
                           <?= $data['birthday'] ?><br>
                           <small><?= $data['nationality'] ?></small>
                         </td>
-                        <td><?= $data['last_checkin'] ?></td>
+                        <td>
+                          <?php
+                          $date_time = date_create($data['last_checkin']);
+                          $date_time = date_format($date_time, "M d, Y h:i a");
+                          ?>
+                          <?php if ($data['last_checkin']) { ?>
+                            <?= ucfirst($data['last_checkin_ago']) ?><br>
+                            <small><?= $date_time ?></small>
+                          <?php } ?>
+                        </td>
                         <td class="action">
                           <a href="javascript:" class="btn mb-1 btn-sm" data-placement="top" title="View Guest" rel="tooltip">
                             <span class="fa fa-eye"></span>
