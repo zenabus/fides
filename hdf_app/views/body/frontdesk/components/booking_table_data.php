@@ -1,5 +1,8 @@
 <td>
   <?= $row['booking_number'] ?>
+  <?php if($row['reservation_status']==-1) { ?>
+    <span class="fa fa-lock"></span>
+  <?php } ?>
   <?php if ($row['remarks']) { ?>
     <span class="fa fa-info-circle ml-1 text-info" rel="tooltip" data-original-title="<?= $row['remarks'] ?>"></span>
   <?php } ?><br>

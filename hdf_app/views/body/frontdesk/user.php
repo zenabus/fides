@@ -1,5 +1,8 @@
 <div class="content pb-0">
-  <h5>Logs</h5>
+  <div class="d-flex justify-content-between align-items-center mb-2">
+    <h5 class="mb-0">Activity logs of <?=$user->name?></h5>
+    <button class="btn btn-primary my-0 back" onclick="history.back()">Back</button>
+  </div>
   <div class="row">
     <div class="col-md-12">
       <div class="card">
@@ -11,9 +14,6 @@
             <thead>
               <tr>
                 <th>User</th>
-                <?php if($_SESSION['user_type']=='Superadmin'){ ?>
-                  <th>IP Address</th>
-                <?php } ?>
                 <th>Activity</th>
                 <th>Log Date</th>
               </tr>
@@ -25,9 +25,6 @@
                     <?= $row['name'] ?><br>
                     <small><?= ucfirst(strtolower($row['user_type'])) ?></small>
                   </td>
-                  <?php if($_SESSION['user_type']=='Superadmin'){ ?>
-                    <td><?=$row['ip_address'] ?></td>
-                  <?php } ?>
                   <td>
                     <?= $row['content'] ?><br>
                     <small><?= LOG_TYPE[$row['log_type']] ?></small>

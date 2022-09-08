@@ -62,6 +62,7 @@ class Insert_model extends CI_Model {
       'user_id' => $_SESSION['user_id'],
       'content' => $content,
       'log_type' => $log_type,
+      'ip_address' => $this->input->ip_address()
     ];
     $this->db->insert('user_logs', $data);
   }

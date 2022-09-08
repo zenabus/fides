@@ -157,3 +157,31 @@
     </div>
   </div>
 </div>
+
+<div class="modal fade" id="modalReason" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-sm pt-0" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="title title-up">Reason</h4>
+      </div>
+      <div class="modal-body px-4">
+        <?=form_open('main/cancelReservation', ['id' => 'frmCancel']) ?>
+        <input type="hidden" name="booking_id">
+        <div class="form-group">
+          <label>Cancellation Reason</label>
+          <textarea class="form-control" name="cancel_reason" required></textarea>
+        </div>
+        <?=form_close() ?>
+      </div>
+      <div class="modal-footer">
+        <div class="left-side">
+          <button type="submit" class="btn btn-link" form="frmCancel">Confirm</button>
+        </div>
+        <div class="divider"></div>
+        <div class="right-side">
+          <button type="button" class="btn btn-link" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -300,4 +300,8 @@ class Update_model extends CI_Model {
 
     $this->db->where('booking_id', $_POST['booking_id'])->update('bookings', $data);
   }
+
+  function updateReason() {
+    $this->db->where('booking_id', $_POST['booking_id'])->update('bookings', ['cancel_reason' => $_POST['cancel_reason']]); 
+  }
 }

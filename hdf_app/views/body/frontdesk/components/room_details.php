@@ -79,28 +79,28 @@
         <input type="hidden" name="booked_room_id">
         <input type="hidden" name="booking_id" value="<?= $booking->booking_id ?>">
         <div class="form-row">
-          <div class="form-group col-md-3">
+          <div class="form-group col-md-6">
             <label>Bed</label>
             <input type="number" class="form-control" value="0" min="0" required name="extra_bed">
           </div>
-          <div class="form-group col-md-3">
+          <!-- <div class="form-group col-md-3">
             <label>Nights</label>
-            <!-- <input type="number" class="form-control" value="1" min="1" required name="extra_bed_nights"> -->
-          </div>
+            <input type="number" class="form-control" value="1" min="1" required name="extra_bed_nights">
+          </div> -->
           <div class="form-group col-md-6">
             <label>Subtotal</label>
             <input type="text" class="form-control" readonly value="₱ <?= number_format($bed->price) ?>" tabindex="-1" id="subtotal_bed">
           </div>
         </div>
         <div class="form-row">
-          <div class="form-group col-md-3">
+          <div class="form-group col-md-6">
             <label>Person</label>
             <input type="number" class="form-control" value="0" min="0" required name="extra_person">
           </div>
-          <div class="form-group col-md-3">
+          <!-- <div class="form-group col-md-3">
             <label>Nights</label>
-            <!-- <input type="number" class="form-control" value="1" min="1" required name="extra_person_nights"> -->
-          </div>
+            <input type="number" class="form-control" value="1" min="1" required name="extra_person_nights">
+          </div> -->
           <div class="form-group col-md-6">
             <label>Subtotal</label>
             <input type="text" class="form-control" readonly value="₱ <?= number_format($person->price) ?>" tabindex="-1" id="subtotal_person">

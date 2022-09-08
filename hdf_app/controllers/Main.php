@@ -79,13 +79,11 @@ class Main extends MY_Controller {
   }
 
   function guests() {
-    $data = array(
-      'active' => 'guests',
-      'guests_active' => $this->get_model->getGuests(),
-      'guests_inactive' => $this->get_model->getGuests(1),
-      'getRoomType' => $this->get_model->getRoomTypes(),
-      'getRoom' => $this->get_model->getRooms()
-    );
+    $data['active'] = 'guests';
+    $data['guests_active'] = $this->get_model->getGuests();
+    $data['guests_inactive'] = $this->get_model->getGuests(1);
+    $data['getRoomType'] = $this->get_model->getRoomTypes();
+    $data['getRoom'] = $this->get_model->getRooms();
 
     foreach ($data['guests_active'] as $i => $guest) {
       $data['guests_active'][$i]['last_checkin_ago'] = $this->timeAgo($guest['last_checkin']);
@@ -93,6 +91,28 @@ class Main extends MY_Controller {
 
     $this->load->view('layout/header', $data);
     $this->load->view('body/frontdesk/guests');
+    $this->load->view('layout/footer');
+  }
+
+   function guest($guest_id) {
+    $data['active'] = 'guests';
+    $data['guest'] = $this->get_model->getGuest($guest_id);
+    $data['bookings'] = $this->get_model->getBookingsByGuest($guest_id, [0, -1]);
+    $data['reservations'] = $this->get_model->getBookingsByGuest($guest_id, [1, 2, 3]);
+    $i = 0;
+    foreach ($data['bookings'] as $booking) {
+      $data['bookings'][$i]['rooms'] = $this->get_model->getBookedRooms($booking['booking_id']);
+      $data['bookings'][$i]['payment'] = $this->get_model->getPaymentTotal($booking['booking_id']);
+      $data['bookings'][$i++]['payments'] = $this->get_model->getPayment($booking['booking_id']);
+    }
+    $j = 0;
+    foreach ($data['reservations'] as $booking) {
+      $data['reservations'][$j]['rooms'] = $this->get_model->getBookedRooms($booking['booking_id']);
+      $data['reservations'][$j]['payment'] = $this->get_model->getPaymentTotal($booking['booking_id']);
+      $data['reservations'][$j++]['payments'] = $this->get_model->getPayment($booking['booking_id']);
+    }
+    $this->load->view('layout/header', $data);
+    $this->load->view('body/frontdesk/guest');
     $this->load->view('layout/footer');
   }
 
@@ -184,6 +204,18 @@ class Main extends MY_Controller {
     }
     $this->load->view('layout/header', $data);
     $this->load->view('body/frontdesk/logs');
+    $this->load->view('layout/footer');
+  }
+
+  function user($user_id) {
+    $data['active'] = 'users';
+    $data['user'] = $this->get_model->getUser($user_id);
+    $data['logs'] = $this->get_model->getLogsByUser($user_id);
+    foreach ($data['logs'] as $i => $log) {
+      $data['logs'][$i]['ago'] = $this->timeAgo($log['date_entered']);
+    }
+    $this->load->view('layout/header', $data);
+    $this->load->view('body/frontdesk/user');
     $this->load->view('layout/footer');
   }
 
@@ -366,7 +398,11 @@ class Main extends MY_Controller {
     redirect(base_url('index.php/main/booking/' . $booking_number));
   }
 
-  function cancelReservation($booking_id) {
+  function cancelReservation($booking_id=NULL) {
+    if(!$booking_id) {
+      $booking_id = $_POST['booking_id'];
+      $this->update_model->updateReason();
+    }
     $this->update_model->updateReservationStatus(4, $booking_id);
     $booking_number = 'HDF' . str_pad($booking_id, 5, '0', STR_PAD_LEFT);
     $this->insert_model->log('Cancelled a reservation: #' . $booking_number, 3);

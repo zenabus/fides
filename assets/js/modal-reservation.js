@@ -186,3 +186,7 @@ $("[name=action]").change(function () {
   }
   $("#btnBooking").val($(this).val());
 });
+
+$('#btnCancel').click(function(){
+  $('#modalReason').modal('show');
+});

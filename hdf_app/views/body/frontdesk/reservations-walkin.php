@@ -42,9 +42,11 @@
                           <?php $data['row'] = $row ?>
                           <?php $this->load->view('body/frontdesk/components/booking_table_data', $data) ?>
                           <td class="action">
+                            <?php if($row['arrival']==date('m/d/Y')){ ?>
                             <a href="javascript:" class="btn btn-sm btn-default checkIn" onclick="popup(event, 'Proceed Check In', 'Are you sure do you want to check in this reservation?', '<?= base_url('index.php/main/checkIn/' . $row['booking_id']) ?>')" data-placement="top" title="Check In Reservation" rel="tooltip">
                               <i class="fa-solid fa-calendar-check"></i>
                             </a>
+                            <?php } ?>
                             <a href="<?= base_url('index.php/main/cancelReservation/' . $row['booking_id']) ?>" class="btn btn-sm btn-danger confirm" data-placement="top" title="Cancel Reservation" rel="tooltip">
                               <span class="fa fa-ban"></span>
                             </a>

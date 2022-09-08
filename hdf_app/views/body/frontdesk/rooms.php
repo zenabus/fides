@@ -17,7 +17,7 @@
 <div class="content pb-0">
   <div class="row">
     <div class="col-md-12">
-      <h5 class="mb-0">Rooms</h5>
+      <h5 class="<?=$_SESSION['user_type'] == 'Admin' ? 'mb-0' : '' ?>">Rooms</h5>
       <?php if ($_SESSION['user_type'] == 'Admin') { ?>
         <button class="btn" id="addRoom">Add Room</button>
         <a href="<?= base_url('index.php/admin/roomTypes') ?>" class="btn btn-info">Room Types</a>

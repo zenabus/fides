@@ -44,6 +44,9 @@
                     <?php } ?>
                   </td>
                   <td class="border-right-0 action">
+                    <a href="<?=base_url('index.php/main/user/'.$row['id']) ?>" class="btn btn-sm" data-placement="top" title="View User" rel="tooltip">
+                      <span class="fa fa-eye"></span>
+                    </a>
                     <a href="javascript:" class="btn btn-success btn-sm updateUser" id='<?= json_encode($row) ?>' data-placement="top" title="Update User" rel="tooltip">
                       <span class="fa fa-edit"></span>
                     </a>

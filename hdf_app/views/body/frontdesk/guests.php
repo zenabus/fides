@@ -36,42 +36,42 @@
                     </tr>
                   </thead>
                   <tbody>
-                    <?php foreach ($guests_active as $data) { ?>
+                    <?php foreach ($guests_active as $row) { ?>
                       <tr>
                         <td>
-                          <?= $data['last_name'] ?>, <?= $data['first_name'] ?> <?= $data['middle_name'] ?><br>
-                          <small><?= $data['address'] ?></small>
+                          <?= $row['last_name'] ?>, <?= $row['first_name'] ?> <?= $row['middle_name'] ?><br>
+                          <small><?= $row['address'] ?></small>
                         </td>
                         <td>
-                          <?= $data['contact'] ?><br>
-                          <small><?= $data['email'] ?></small>
+                          <?= $row['contact'] ?><br>
+                          <small><?= $row['email'] ?></small>
                         </td>
                         <td>
-                          <?= $data['company_name'] ?><br>
-                          <small><?= $data['company_address'] ?></small>
+                          <?= $row['company_name'] ?><br>
+                          <small><?= $row['company_address'] ?></small>
                         </td>
                         <td>
-                          <?= $data['birthday'] ?><br>
-                          <small><?= $data['nationality'] ?></small>
+                          <?= $row['birthday'] ?><br>
+                          <small><?= $row['nationality'] ?></small>
                         </td>
                         <td>
                           <?php
-                          $date_time = date_create($data['last_checkin']);
+                          $date_time = date_create($row['last_checkin']);
                           $date_time = date_format($date_time, "M d, Y h:i a");
                           ?>
-                          <?php if ($data['last_checkin']) { ?>
-                            <?= ucfirst($data['last_checkin_ago']) ?><br>
+                          <?php if ($row['last_checkin']) { ?>
+                            <?= ucfirst($row['last_checkin_ago']) ?><br>
                             <small><?= $date_time ?></small>
                           <?php } ?>
                         </td>
                         <td class="action">
-                          <a href="javascript:" class="btn btn-sm mb-1" data-placement="top" title="View Guest" rel="tooltip">
+                          <a href="<?=base_url('index.php/main/guest/'.$row['guest_id']) ?>" class="btn btn-sm mb-1" data-placement="top" title="View Guest" rel="tooltip">
                             <span class="fa fa-eye"></span>
                           </a>
-                          <button class="btn btn-success btn-sm updateGuest mb-1" data='<?= json_encode($data) ?>' data-placement="top" title="Update Guest" rel="tooltip">
+                          <button class="btn btn-success btn-sm updateGuest mb-1" data='<?= json_encode($row) ?>' data-placement="top" title="Update Guest" rel="tooltip">
                             <i class="fa-solid fa-user-pen"></i>
                           </button>
-                          <a href="<?= base_url('index.php/main/statusGuest/1/' . $data['guest_id']) ?>" class="btn btn-warning btn-sm confirm mb-1" data-placement="top" title="Disable Guest" rel="tooltip">
+                          <a href="<?= base_url('index.php/main/statusGuest/1/' . $row['guest_id']) ?>" class="btn btn-warning btn-sm confirm mb-1" data-placement="top" title="Disable Guest" rel="tooltip">
                             <i class="fa-solid fa-user-xmark"></i>
                           </a>
                         </td>
@@ -93,42 +93,42 @@
                     </tr>
                   </thead>
                   <tbody>
-                    <?php foreach ($guests_inactive as $data) { ?>
+                    <?php foreach ($guests_inactive as $row) { ?>
                       <tr>
                         <td>
-                          <?= $data['last_name'] ?>, <?= $data['first_name'] ?> <?= $data['middle_name'] ?><br>
-                          <small><?= $data['address'] ?></small>
+                          <?= $row['last_name'] ?>, <?= $row['first_name'] ?> <?= $row['middle_name'] ?><br>
+                          <small><?= $row['address'] ?></small>
                         </td>
                         <td>
-                          <?= $data['contact'] ?><br>
-                          <small><?= $data['email'] ?></small>
+                          <?= $row['contact'] ?><br>
+                          <small><?= $row['email'] ?></small>
                         </td>
                         <td>
-                          <?= $data['company_name'] ?><br>
-                          <small><?= $data['company_address'] ?></small>
+                          <?= $row['company_name'] ?><br>
+                          <small><?= $row['company_address'] ?></small>
                         </td>
                         <td>
-                          <?= $data['birthday'] ?><br>
-                          <small><?= $data['nationality'] ?></small>
+                          <?= $row['birthday'] ?><br>
+                          <small><?= $row['nationality'] ?></small>
                         </td>
                         <td>
                           <?php
-                          $date_time = date_create($data['last_checkin']);
+                          $date_time = date_create($row['last_checkin']);
                           $date_time = date_format($date_time, "M d, Y h:i a");
                           ?>
-                          <?php if ($data['last_checkin']) { ?>
-                            <?= ucfirst($data['last_checkin_ago']) ?><br>
+                          <?php if ($row['last_checkin']) { ?>
+                            <?= ucfirst($row['last_checkin_ago']) ?><br>
                             <small><?= $date_time ?></small>
                           <?php } ?>
                         </td>
                         <td class="action">
-                          <a href="javascript:" class="btn mb-1 btn-sm" data-placement="top" title="View Guest" rel="tooltip">
+                          <a href="<?=base_url('index.php/main/guest/'.$row['guest_id']) ?>" class="btn btn-sm mb-1" data-placement="top" title="View Guest" rel="tooltip">
                             <span class="fa fa-eye"></span>
                           </a>
-                          <a href="javascript:" class="btn mb-1 btn-success btn-sm updateGuest" data='<?= json_encode($data) ?>' data-placement="top" title="Update Guest" rel="tooltip">
+                          <a href="javascript:" class="btn mb-1 btn-success btn-sm updateGuest" data='<?= json_encode($row) ?>' data-placement="top" title="Update Guest" rel="tooltip">
                             <i class="fa-solid fa-user-pen"></i>
                           </a>
-                          <a href="<?= base_url('index.php/main/statusGuest/0/' . $data['guest_id']) ?>" class="btn mb-1 btn-primary btn-sm confirm" data-placement="top" title="Enable Guest" rel="tooltip">
+                          <a href="<?= base_url('index.php/main/statusGuest/0/' . $row['guest_id']) ?>" class="btn mb-1 btn-primary btn-sm confirm" data-placement="top" title="Enable Guest" rel="tooltip">
                             <i class="fa-solid fa-user-check"></i>
                           </a>
                         </td>
