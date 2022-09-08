@@ -197,7 +197,7 @@
           </div>
           <div class="form-group col-md-6">
             <label>Nights</label>
-            <input type="text" class="form-control" name="nights" readonly>
+            <input type="number" class="form-control" name="nights" required>
           </div>
         </div>
         <div class="form-row">
@@ -207,7 +207,7 @@
           </div>
           <div class="form-group col-md-6">
             <label>Check Out</label>
-            <input type="text" class="form-control" name="check_out" readonly>
+            <input type="text" class="form-control checkoutpicker" name="check_out" required>
           </div>
         </div>
         <?= form_close() ?>
@@ -398,11 +398,41 @@
   let food_quantity = 1;
   let food_cost = 1;
 
+  const minDate = new Date();
+  $(".checkoutpicker").datetimepicker({
+    icons: {
+      time: "fa fa-clock-o",
+      date: "fa fa-calender",
+      up: "fa fa-chevron-up",
+      down: "fa fa-chevron-down",
+      previous: "fa fa-chevron-left",
+      next: "fa fa-chevron-right",
+      today: "fa fa-screenshot",
+      clear: "fa fa-trash",
+      close: "fa fa-remove",
+    },
+    format: "L",
+    defaultDate: new Date(),
+    minDate,
+  });
+
+  $("[name=nights]").on("input", function() {
+    const nights = parseInt($(this).val());
+    const checkin = moment($("[name=check_in]").val());
+    const checkout = moment(checkin).add(nights, "days");
+    if (!nights || nights > 0) {
+      $(this).val(1);
+    }
+    $("[name=check_out]").data("DateTimePicker").date(checkout);
+    $('.btn-room').removeAttr('disabled');
+  });
+
   $('[name=check_in], [name=check_out]').on('dp.change', function(e) {
     const checkin = moment($('[name=check_in]').val());
     const checkout = moment($('[name=check_out]').val());
     const nights = checkout.diff(checkin, 'days');
-    $('[name=nights]').val(nights)
+    $('[name=nights]').val(nights);
+    $('.btn-room').removeAttr('disabled');
   });
 
   $('.extra').click(function() {
@@ -478,18 +508,18 @@
     $('.room-title').text('Add Room');
     $('.btn-room').val('Add Room')
     $('#modalRoom').modal('show');
+    $('[name=nights]').attr('disabled', true);
+    $('[name=check_out]').attr('disabled', true);
   });
 
   $('.change').click(function() {
     const data = JSON.parse(this.id);
     $('[name=booked_room_id]').val(data.booked_room_id);
-
     $('[name=check_in]').val(data.check_in);
-    $('[name=check_out]').val(data.check_out);
+    $('[name=check_out]').val(data.check_out).removeAttr('disabled');
     $('.room_type').val(data.room_type);
     $('.room_number').val(data.room_number);
-    $('[name=nights]').val(data.nights);
-
+    $('[name=nights]').val(data.nights).removeAttr('disabled');
     $('#frmRoom').attr('action', `${base_url}index.php/main/changeRoom`);
     $('.room-title').text('Change Room');
     $('.btn-room').val('Change Room');

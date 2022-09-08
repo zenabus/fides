@@ -79,7 +79,7 @@ class Booking extends MY_Controller {
     $room_type = $this->get_model->getRoomById($_POST['room_id']);
     $price = number_format($room_type->pricing_type, 2);
     $amount = number_format($room_type->pricing_type * .25, 2);
-    $remarks = $_POST['remarks'];
+    $request = $_POST['request'];
     $verify_url = base_url('index.php/booking/verify/') . $booking_number;
 
     $message = "Good day <strong>{$guest->first_name} {$guest->last_name}!</strong><br>
@@ -90,7 +90,7 @@ class Booking extends MY_Controller {
       Room Type Reservation: <strong>{$room_type->room_type}</strong><br>
       Total Price: <strong>Php {$price}</strong><br>
       Amount to be paid: <strong>Php {$amount}</strong> / (25%)<br>
-      Special Request(s): <strong>{$remarks}</strong>
+      Special Request(s): <strong>{$request}</strong>
       <p>To verify your email please click the button below:</p>
       <a href='{$verify_url}'>
         <img src='https://studentclearinghouse.info/help/wp-content/uploads/2015/12/verify-now.png' height='60'>

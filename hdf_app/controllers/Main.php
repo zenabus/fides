@@ -252,6 +252,7 @@ class Main extends MY_Controller {
   }
 
   function book() {
+    unset($_POST['booking_id']);
     if (!$_POST['guest_id']) {
       $_POST['guest_id'] = $this->insert_model->addGuest($_POST, TRUE);
     }
@@ -332,6 +333,25 @@ class Main extends MY_Controller {
     $this->redirect();
   }
 
+  function updateReservation() {
+    unset($_POST['room_id']);
+    unset($_POST['booking_type']);
+    unset($_POST['booking_id']);
+    unset($_POST['action']);
+    unset($_POST['reservation_type']);
+    unset($_POST['check_in']);
+    unset($_POST['check_out']);
+    unset($_POST['nights']);
+    unset($_POST['request']);
+    unset($_POST['remarks']);
+    $name = "{$_POST['first_name']} {$_POST['middle_name']} {$_POST['last_name']} {$_POST['suffix']}";
+    $this->update_model->updateReservation();
+    $this->update_model->updateGuest();
+    $this->insert_model->log("Updated reservation details of <b> {$name}", 4);
+    $this->session->set_flashdata('success', 'Reservation successfully updated.');
+    $this->redirect();
+  }
+
   function checkIn($booking_id = NULL) {
     if (!$booking_id) {
       $booking_id = $_POST['booking_id'];
@@ -339,7 +359,7 @@ class Main extends MY_Controller {
     $booking_number = 'HDF' . str_pad($booking_id, 5, '0', STR_PAD_LEFT);
     $log = "<b>{$booking_number}</b> → Successfully checked in!";
     $_POST['booking_id'] = $booking_id;
-    $this->update_model->updateReservationStatus(4, $booking_id);
+    $this->update_model->updateReservationStatus(0, $booking_id);
     $this->insert_model->log('Checked in a reservation: #' . $booking_number, 3);
     $this->insert_model->addBookingLog($log);
     $this->session->set_flashdata('success', 'Reservation successfully checked in.');
@@ -478,7 +498,7 @@ class Main extends MY_Controller {
     $booking = $this->get_model->getBookingByBookingNumber($_POST['booking_number']);
     $previous = number_format($booking->refund);
     $current = number_format($_POST['refund']);
-    $log = "<b>{$_POST['booking_number']}</b> → Update refund amount from ₱<b>{$previous}</b> to ₱<b>{$current}</b>";
+    $log = "<b>{$_POST['booking_number']}</b> → Update refund amount from ₱<b>{$previous}</b> to ₱<b>{$current}</b> with a reason of <b>{$_POST['refund_reason']}</b>";
     $this->insert_model->addBookingLog($log);
     $this->insert_model->log($log);
     $this->update_model->updateRefund();

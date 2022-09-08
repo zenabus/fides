@@ -210,7 +210,7 @@
 <script>
   const guests = JSON.parse('<?= json_encode($guests) ?>');
 </script>
-<script defer src="<?= base_url('assets/js/modal_reservation.js') ?>"></script>
+<script defer src="<?= base_url('assets/js/modal-reservation.js') ?>"></script>
 <script>
   $(document).ready(function() {
     demo.initWizard();

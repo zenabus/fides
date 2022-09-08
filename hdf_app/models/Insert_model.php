@@ -110,7 +110,7 @@ class Insert_model extends CI_Model {
       'booking_type' => $_POST['booking_type'],
       'arrival' => $_POST['check_in'],
       'departure' => $_POST['check_out'],
-      'remarks' => $_POST['remarks'],
+      'request' => $_POST['request'],
       'reservation_type' => $_POST['reservation_type'],
       'reservation_status' => $_POST['reservation_status']
     ];
@@ -139,16 +139,16 @@ class Insert_model extends CI_Model {
   function addGuest($guest, $post = FALSE) {
     if ($post) {
       $data = [
-        'first_name' => $guest['first_name'],
-        'middle_name' => $guest['middle_name'],
-        'last_name' => $guest['last_name'],
-        'contact' => $guest['contact'],
-        'email' => $guest['email'],
-        'company_name' => $guest['company_name'],
-        'suffix' => $guest['suffix'],
-        'plate_no' => $guest['plate_no'],
-        'birthday' => $guest['birthday'],
-        'nationality' => $guest['nationality'],
+        'first_name' => $guest['first_name'] ?? '',
+        'middle_name' => $guest['middle_name'] ?? '',
+        'last_name' => $guest['last_name'] ?? '',
+        'contact' => $guest['contact'] ?? '',
+        'email' => $guest['email'] ?? '',
+        'company_name' => $guest['company_name'] ?? '',
+        'suffix' => $guest['suffix'] ?? '',
+        'plate_no' => $guest['plate_no'] ?? '',
+        'birthday' => $guest['birthday'] ?? '',
+        'nationality' => $guest['nationality'] ?? '',
       ];
     } else {
       unset($_POST['guest_id']);

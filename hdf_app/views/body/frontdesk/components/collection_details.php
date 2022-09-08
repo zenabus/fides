@@ -147,7 +147,7 @@
     <div>
       <a href="<?= base_url('index.php/main/completeOrder/' . $booking->booking_id . '/' . $booking->booking_number) ?>" class="btn confirm hidable" <?= $overall_total > 0 ? 'disabled' : '' ?>>Complete Order</a>
       <button type="button" class="btn mt-0 btn-success hidable" data-toggle="modal" data-target="#modalPayment">Payment</button>
-      <button type="button" class="btn mt-0 btn-danger hidable" data-toggle="modal" data-target="#modalRefund">Refund</button>
+      <button type="button" class="btn mt-0 btn-danger" data-toggle="modal" data-target="#modalRefund">Refund</button>
     </div>
     <a href="<?= base_url('index.php/main/receipt/' . $booking->booking_id) ?>" class="btn mt-0 btn-info receipt">Print Receipt</a>
   </div>
@@ -166,7 +166,11 @@
         <div class="form-group">
           <label>Refund Amount</label>
           <input type="number" class="form-control" name="refund" required min="0" value="<?= round($booking->refund) ?>">
-          <small>Refund amount will be changed.</small>
+        </div>
+        <div class="form-group">
+          <label>Refund reason</label>
+          <textarea name="refund_reason" class="form-control"><?= $booking->refund_reason ?></textarea>
+          <small>Refund amount and reason will be changed.</small>
         </div>
         <?= form_close() ?>
       </div>

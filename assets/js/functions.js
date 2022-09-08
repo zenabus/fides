@@ -34,6 +34,23 @@ $(document).on("click", ".confirm", function (e) {
   });
 });
 
+$(document).on("click", "#btnCancel", function (e) {
+  e.preventDefault();
+  swal({
+    title: "Cancel Reservation?",
+    text: "Are you sure do you want to cancel this reservation?",
+    type: "warning",
+    buttonsStyling: false,
+    showCancelButton: true,
+    cancelButtonClass: "btn",
+    confirmButtonClass: "btn btn-primary mr-2",
+  }).then((result) => {
+    if (result) {
+      window.location.replace(this.href);
+    }
+  });
+});
+
 $(document).on("click", ".reset", function (e) {
   e.preventDefault();
   swal({

@@ -175,3 +175,14 @@ $("[name=card_number]").on("input", function () {
     .trim();
   $(this).val(newValue);
 });
+
+$("[name=action]").change(function () {
+  if ($(this).val() == "Update") {
+    $("#frmBook").attr("action", `${base_url}index.php/main/updateReservation`);
+    $(".reservation-div").show();
+  } else {
+    $("#frmBook").attr("action", `${base_url}index.php/main/checkIn`);
+    $(".reservation-div").hide();
+  }
+  $("#btnBooking").val($(this).val());
+});

@@ -516,6 +516,7 @@ class Get_model extends CI_Model {
     return $this->db->join('booked_rooms', 'booked_rooms.booking_id=bookings.booking_id')
       ->join('rooms', 'rooms.id=booked_rooms.room_id')
       ->join('guests', 'guests.guest_id=bookings.guest_id')
+      ->where_in('reservation_status', [-1, 0, 1, 2])
       ->get('bookings')->result_array();
   }
 

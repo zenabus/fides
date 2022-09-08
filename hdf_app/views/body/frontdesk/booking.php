@@ -264,7 +264,7 @@
     $('.hidable').attr('disabled', true);
     $('.hidable').hide();
     $('.form-control').attr('readonly', true);
-    $('[type=search]').removeAttr('readonly');
+    $('[type=search], [name=refund], [name=refund_reason]').removeAttr('readonly');
     $('[name=datatable_length]').removeAttr('readonly');
   }
 

@@ -3,6 +3,10 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-contextmenu/2.7.1/jquery.ui.position.js"></script>
 
 <style type="text/css">
+  [disabled] {
+    pointer-events: none;
+  }
+
   .table-container {
     overflow-x: auto;
     max-height: calc(100vh - 200px);
@@ -153,7 +157,19 @@
                 <tr>
                   <th class="white sticky-top border-shadow-1 text-center"><?= $y ?></th>
                   <?php for ($i = 1; $i <= $days; $i++) { ?>
-                    <th colspan="2" class="text-center sticky-top border-shadow<?= $i % 2 ? ' bg-light' : '' ?>" id="<?= date('Y-m-d') == $y . '-' . $m . '-' . str_pad($i, 2, '0', STR_PAD_LEFT) ? 'today' : '' ?>"><?= $i ?>-<?= substr($month, 0, 3) ?></th>
+                    <?php
+                    $icon = '';
+                    $today = '';
+                    if (date('Y-m-d') == $y . '-' . $m . '-' . str_pad($i, 2, '0', STR_PAD_LEFT)) {
+                      $icon = '<i class="fa-regular fa-calendar-check"></i> ';
+                    }
+                    if (date('Y-m-d') == $y . '-' . $m . '-' . str_pad($i + 1, 2, '0', STR_PAD_LEFT)) {
+                      $today = 'today';
+                    } elseif (date('Y-m-d') == $y . '-' . $m . '-' . str_pad($i, 2, '0', STR_PAD_LEFT)) {
+                      $today = 'today';
+                    }
+                    ?>
+                    <th colspan="2" class="text-center sticky-top border-shadow<?= $i % 2 ? ' bg-light' : '' ?>" id="<?= $today ?>"><?= $icon ?><?= $i ?>-<?= substr($month, 0, 3) ?></th>
                   <?php } ?>
                 </tr>
               </thead>
@@ -179,8 +195,33 @@
                         <div class="d-inline-block" style="width:50px;"><?= $row['name'] ?></div>
                       </div>
                     </td>
+                    <?php
+                    $yesterday = date('Y-m-d', strtotime('-1 day'));
+                    $today = date('Y-m-d');
+                    $now = date('H');
+                    ?>
                     <?php for ($i = 1; $i <= $days; $i++) { ?>
                       <?php
+                      $disabled = '';
+                      $text = '';
+                      $checkin = '';
+                      $type = 'Reservation';
+                      $date_dash = $y . '-' .  $m . '-' . str_pad($i, 2, '0', STR_PAD_LEFT);
+                      if ($yesterday > $date_dash) {
+                        $disabled = 'disabled';
+                        $text = '<center><i class="fa-solid fa-xmark"></i></center>';
+                      } elseif ($yesterday == $date_dash) {
+                        if ($now >= 10) {
+                          $disabled = 'disabled';
+                          $text = '<center><i class="fa-solid fa-xmark"></i></center>';
+                        } else {
+                          $type = 'Check In';
+                        }
+                      } elseif ($today == $date_dash) {
+                        if ($now >= 10) {
+                          $type = 'Check In';
+                        }
+                      }
                       $date = $m . '/' . str_pad($i, 2, '0', STR_PAD_LEFT) . '/' . $y;
                       $data = array_filter($bookings, function ($booking) use ($date, $row) {
                         return in_array($date, $booking['dates_between']) && $row['room_number'] == $booking['room_number'];
@@ -189,16 +230,15 @@
                       <?php if ($data) { ?>
                         <?php $data = array_merge(...$data); ?>
                         <?php
-                        $color = 'success';
-                        if ($data['booking_type'] == 'Reservation') {
-                          if ($data['reservation_type'] == 'Arrival/Tentative') {
-                            $color = 'warning';
-                          } else if ($data['reservation_type'] == 'Confirmed') {
-                            $color = 'info';
-                          }
+                        if ($data['reservation_status'] == 0 || $data['reservation_status'] == -1) {
+                          $color = 'success';
+                        } elseif ($data['reservation_type'] == 'Confirmed') {
+                          $color = 'info';
+                        } else {
+                          $color = 'warning';
                         }
                         $occupant = explode(' / ', $data['occupant'])[0];
-                        $guest = $occupant ? $occupant : "{$data['first_name']} {$data['middle_name']} {$data['last_name']}";
+                        $guest = $occupant ? $occupant : "{$data['first_name']} {$data['middle_name']} {$data['last_name']} {$data['suffix']}";
 
                         $min = $date == min($data['dates_between']) ? 'min' : 'mid';
                         $max = $date == max($data['dates_between']) ? 'max' : 'mid';
@@ -206,8 +246,8 @@
                         <td class="with-data bg-<?= $color ?> <?= $min ?>" date="<?= $date ?>" data='<?= json_encode($row) ?>' booking='<?= json_encode($data) ?>'><?= $min == 'min' ? $guest : '<i class="fa-solid fa-minus"></i>' ?></td>
                         <td class="with-data bg-<?= $color ?> <?= $max ?>" date="<?= $date ?>" data='<?= json_encode($row) ?>' booking='<?= json_encode($data) ?>'><?= $min == 'min' ?  $data['remarks'] : '<i class="fa-solid fa-minus"></i>' ?></td>
                       <?php } else { ?>
-                        <td class="no-data first" date="<?= $date ?>" data='<?= json_encode($row) ?>'></td>
-                        <td class="no-data second" date="<?= $date ?>" data='<?= json_encode($row) ?>'></td>
+                        <td class="no-data first" date="<?= $date ?>" data='<?= json_encode($row) ?>' type="<?= $type ?>" <?= $disabled ?>><?= $text ?></td>
+                        <td class="no-data second" date="<?= $date ?>" data='<?= json_encode($row) ?>' type="<?= $type ?>" <?= $disabled ?>><?= $text ?></td>
                     <?php }
                     } ?>
                   </tr>
@@ -273,6 +313,9 @@
 <script defer src="<?= base_url('assets/js/modal-reservation.js') ?>"></script>
 <script>
   const base_url = ' <?= base_url() ?>';
+  const now = new Date();
+  let time = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+  let today = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}`;
 
   const toggleHovered = (obj, add = true) => {
     if (add) {
@@ -340,38 +383,44 @@
       $('#title').text(`Room Calendar`);
       toggleHovered(this, false);
     });
+
+    setInterval(() => {
+      const now = new Date();
+      const timeNow = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+      time = timeNow;
+    }, 1000);
   });
 
-  $.contextMenu({
-    selector: '.no-data',
-    events: {
-      show: function() {
-        const date = $(this).attr('date');
-        const data = JSON.parse($(this).attr('data'));
-        setTimeout(() => {
-          $('#title').text(`Room Calendar [ROOM: ${data.room_number} - ${date}]`);
-          toggleHovered(this);
-        });
-      },
-      hide: function() {
-        toggleHovered(this, false);
-      }
-    },
-    callback: function(key) {
-      console.log(key);
-      modalBooking(this, key == 'Check In' ? key : 'Reservation');
-    },
-    items: {
-      "Check In": {
-        name: "Check In",
-        icon: "fa-check"
-      },
-      "Reservation": {
-        name: "Reserve",
-        icon: "fa-hourglass"
-      },
-    }
-  });
+  // $.contextMenu({
+  //   selector: '.no-data',
+  //   events: {
+  //     show: function() {
+  //       const date = $(this).attr('date');
+  //       const data = JSON.parse($(this).attr('data'));
+  //       setTimeout(() => {
+  //         $('#title').text(`Room Calendar [ROOM: ${data.room_number} - ${date}]`);
+  //         toggleHovered(this);
+  //       });
+  //     },
+  //     hide: function() {
+  //       toggleHovered(this, false);
+  //     }
+  //   },
+  //   callback: function(key) {
+  //     console.log(key);
+  //     modalBooking(this, key == 'Check In' ? key : 'Reservation');
+  //   },
+  //   items: {
+  //     "Check In": {
+  //       name: "Check In",
+  //       icon: "fa-check"
+  //     },
+  //     "Reservation": {
+  //       name: "Reserve",
+  //       icon: "fa-hourglass"
+  //     },
+  //   }
+  // });
 
   $('#month').change(function() {
     const month = $(this).val();
@@ -386,9 +435,19 @@
   });
 
   $('.no-data').click(function() {
+    const room = JSON.parse($(this).attr('data'));
+    const type = $(this).attr('type');
+    let date = new Date();
+    date = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
     $('#returning_guest').show();
     $('.form-control').val('').removeAttr('disabled');
-    modalBooking(this, 'Check In', 1);
+    modalBooking(this, type, 1);
+    $('#frmBook').attr('action', `${base_url}index.php/main/book`);
+    $('.action-div').addClass('d-none');
+    $('[name=check_in]').attr('readonly', true);
+    $('#btnBooking').show();
+    $('#btnRedirect').addClass('d-none');
+    $('#btnCancel').addClass('d-none');
   });
 
   $('.with-data').click(function() {
@@ -402,10 +461,49 @@
     $('[name=last_name]').val(booking.last_name).attr('disabled', true);
     $('[name=suffix]').val(booking.suffix).attr('disabled', true);
     $('[name=contact]').val(booking.contact).attr('disabled', true);
-    modalBooking(this, 'Check In', 1);
-    console.log(booking.check_in)
+
+    if (booking.reservation_status == 0 || booking.reservation_status == -1) {
+      modalBooking(this, 'Check In', 0);
+      $('.form-control').attr('disabled', true);
+      $('.action-div').addClass('d-none');
+      $('#btnBooking').hide();
+      $('#btnRedirect').removeClass('d-none').attr('href', `${base_url}index.php/main/booking/${booking.booking_number}`);
+      $('#btnCancel').addClass('d-none');
+    } else if (booking.reservation_status == 1) {
+      const [month, day, year] = booking.check_in.split('/')
+      const checkin = `${year}-${month}-${day}`;
+      modalBooking(this, 'Reservation', 0);
+
+      if (checkin == today) {
+        $("#rdo_check").prop("checked", true);
+        $('.action-div').removeClass('d-none');
+        $('#frmBook').attr('action', `${base_url}index.php/main/checkIn`);
+        $('#btnBooking').show().val('Check In');
+        $(".reservation-div").hide();
+      } else {
+        $('#frmBook').attr('action', `${base_url}index.php/main/updateReservation`);
+        $('.action-div').addClass('d-none');
+      }
+
+      $(booking.reservation_type == 'Confirmed' ? "#rdo_confirmed" : '#rdo_arrival').prop("checked", true);
+      $('#btnBooking').show().val('Update');
+      $('[name=booking_id]').val(booking.booking_id);
+      $('[name=check_in]').removeAttr('readonly');
+      $('.form-control').removeAttr('disabled');
+      $('#btnRedirect').addClass('d-none');
+      $('#btnCancel').removeClass('d-none');
+    } else {
+      modalBooking(this, 'Check In', 0);
+      $('.action-div').addClass('d-none');
+      $('#btnBooking').hide();
+      $('#btnRedirect').removeClass('d-none');
+      $('#btnCancel').removeClass('d-none');
+    }
+
     $('[name=check_in]').val(booking.check_in);
     $('[name=check_out]').val(booking.check_out);
     $('[name=nights]').val(booking.nights);
+    $('[name=request]').val(booking.request);
+    $('[name=remarks]').val(booking.remarks);
   });
 </script>

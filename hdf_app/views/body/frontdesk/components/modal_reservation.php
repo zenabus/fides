@@ -12,19 +12,39 @@
         <input type="hidden" name="room_id">
         <input type="hidden" name="guest_id">
         <input type="hidden" name="booking_type">
+        <input type="hidden" name="booking_id">
+        <div class="form-group action-div d-none">
+          <label>Action</label>
+          <div class="d-flex justify-content-around">
+            <div class="form-check-radio">
+              <label class="form-check-label">
+                <input class="form-check-input" type="radio" name="action" id="rdo_check" value="Check In" checked>
+                Check In
+                <span class="form-check-sign"></span>
+              </label>
+            </div>
+            <div class="form-check-radio">
+              <label class="form-check-label">
+                <input class="form-check-input" type="radio" name="action" id="rdo_update" value="Update">
+                Update
+                <span class="form-check-sign"></span>
+              </label>
+            </div>
+          </div>
+        </div>
         <div class="form-group reservation-div">
           <label>Reservation Type</label>
           <div class="d-flex justify-content-around">
             <div class="form-check-radio">
               <label class="form-check-label">
-                <input class="form-check-input" type="radio" name="reservation_type" id="reservation_type" value="Arrival/Tentative" checked>
+                <input class="form-check-input" type="radio" name="reservation_type" id="rdo_arrival" value="Arrival/Tentative" checked>
                 Arrival/Tentative
                 <span class="form-check-sign"></span>
               </label>
             </div>
             <div class="form-check-radio">
               <label class="form-check-label">
-                <input class="form-check-input" type="radio" name="reservation_type" id="reservation_type" value="Confirmed">
+                <input class="form-check-input" type="radio" name="reservation_type" id="rdo_confirmed" value="Confirmed">
                 Confirmed
                 <span class="form-check-sign"></span>
               </label>
@@ -91,11 +111,13 @@
           <label>Notes / Remarks</label>
           <textarea name="remarks" rows="3" class="form-control" placeholder="optional"></textarea>
         </div>
+        <a href="javascript:" class="btn btn-danger my-0 d-none" id="btnCancel">Cancel Reservation</a>
         <?= form_close() ?>
       </div>
       <div class="modal-footer">
         <div class="left-side">
           <input type="submit" value="Check In" class="btn btn-link" form="frmBook" id="btnBooking">
+          <a href="javascript:" class="btn btn-link d-none" id="btnRedirect">Go to Booking</a>
         </div>
         <div class="divider"></div>
         <div class="right-side">

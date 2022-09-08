@@ -178,7 +178,7 @@ class Update_model extends CI_Model {
     $guest_id = $_POST['guest_id'];
     unset($_POST['guest_id']);
     unset($_POST['booking_number']);
-    unset($_POST['booking_id']);
+    unset($_POST['room_id']);
     $this->db->where('guest_id', $guest_id)->update('guests', $_POST);
   }
 
@@ -289,5 +289,15 @@ class Update_model extends CI_Model {
 
   function updateBooking($arrival, $departure, $booking_id) {
     $this->db->where('booking_id', $booking_id)->update('bookings', ['arrival' => $arrival, 'departure' => $departure]);
+  }
+
+  function updateReservation() {
+    $data = [
+      'reservation_type' => $_POST['reservation_type'],
+      'request' => $_POST['request'],
+      'remarks' => $_POST['remarks']
+    ];
+
+    $this->db->where('booking_id', $_POST['booking_id'])->update('bookings', $data);
   }
 }

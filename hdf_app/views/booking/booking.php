@@ -207,13 +207,17 @@
                     <label>First Name *</label>
                     <input type="text" class="form-control rounded-0" id="first">
                   </div>
-                  <div class="col-md-4 form-group">
+                  <div class="col-md-3 form-group">
                     <label>Middle Name</label>
                     <input type="text" class="form-control rounded-0" id="middle">
                   </div>
-                  <div class="col-md-4 form-group">
+                  <div class="col-md-3 form-group">
                     <label>Last Name *</label>
                     <input type="text" class="form-control rounded-0" id="last">
+                  </div>
+                  <div class="col-md-2 form-group">
+                    <label>Suffix</label>
+                    <input type="text" class="form-control rounded-0" id="suffix">
                   </div>
                 </div><!-- row -->
                 <div class="row">
@@ -672,7 +676,7 @@
             <li class="mb-2">De Fides Resto opens from 7:00 AM - 9:00 PM and breakfast is from 7:00 AM - 10:00 AM (breakfast can be served earlier upon request).</li>
             <li class="mb-2">Pool opens at 8:00 AM - 9:00 PM only. All guests using the pool should wear proper swimming attire and shower first before entering the pool. Unaccompanied children under 12 years old are not allowed in the pool. White towels are not allowed outside the room (pool towels are available upon requests).</li>
             <li class="mb-2">All deliveries (food and otherwise) as well as guests’ visitor(s) must be coordinated at the Front Office. Visitor(s) is/are allowed until 8:30 PM local time. Visitor(s) staying beyond the allowed time should pay the additional charges.</li>
-            <li class="mb-2">Guest rooms in total disarray or waste strewn every corner in the room is subject to maintenance and cleaning fee of Php 2,500.00.</li>
+            <li class="mb-2">Gues\t rooms in total disarray or waste strewn every corner in the room is subject to maintenance and cleaning fee of Php 2,500.00.</li>
             <li class="mb-2">All rooms and public areas are non-smoking (including vape), a penalty of Php 2,500.00 will be imposed in case of violation (please ask designated smoking areas from the front desk or housekeeping).</li>
             <li class="mb-2">Damages to mattresses and linens (towels, duvet covers, pillow cases, etc.) resulting from blood stains, oils (from massage or other oils), food stains, wines, make-up, hair color, shoe polish, etc. will result to extra charges for the special cleaning or replacement of stained/damaged items (inquire from the Front Desk)</li>
             <li class="mb-2">Pets are not allowed inside the hotel.</li>
@@ -791,13 +795,14 @@
       const first_name = $('#first').val();
       const middle_name = $('#middle').val();
       const last_name = $('#last').val();
+      const suffix = $('#suffix').val();
       const email = $('#email').val();
       const contact = $('#phone').val();
       const check_in = $('.checkinDate').val();
       const check_out = $('.checkoutDate').val();
       const nights = $('.nights').val();
       const room_id = $('.room_id').val();
-      const remarks = $('#special').val();
+      const request = $('#special').val();
       const company_name = '';
       const booking_type = 'Reservation';
       const reservation_type = 'Online';
@@ -817,20 +822,21 @@
             first_name,
             middle_name,
             last_name,
+            suffix,
             contact,
             email,
             check_in,
             check_out,
             nights,
             room_id,
-            remarks,
+            request,
             company_name,
             booking_type,
             payment_option,
             reservation_type,
           },
           success: function(response) {
-            const name = `${first_name} ${middle_name} ${last_name}`;
+            const name = `${first_name} ${middle_name} ${last_name} ${suffix}`;
             $('#w4').removeClass('invalid');
             $('#w4').click();
             $('#w1').addClass('invalid');
@@ -857,7 +863,7 @@
           },
           error: function(error) {
             $('.overlay').hide();
-            alert(error);
+            console.log(error)
           }
         });
       }
@@ -927,7 +933,7 @@
             const html = `
               <div class="row">
                 <div class="col-md-5">
-                  <img src="${base_url}uploaded_files/${room.upload_file}" style="width: 100%">
+                  <img src="${base_url}assets/img/rooms/${room.upload_file}" style="width: 100%">
                 </div>
                 <div class="col-md-7 text-light">
                   <h6 class="text-green mb-3">${room.room_type}</h6>

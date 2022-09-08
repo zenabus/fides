@@ -1,13 +1,13 @@
 1. Direct booking
 2. Change Room 
 3. Change Room with reason
-4. Notes not showing on pdf
+// 4. Notes not showing on pdf
 5. Refund with reason
 6. Extra Person charges specific dates
 7. Extra Bed charges specific dates
-8. Reservation (who transacted)
-9. Forecasting (bookings, reservations)
-10. Sort by room number in bookings
+// 8. Reservation (who transacted)
+// 9. Forecasting (bookings, reservations)
+// 10. Sort by room number in bookings
 
 Room Status (Bookings & Reservations)
 - Yellow (Arrival/Tentative)
@@ -52,9 +52,18 @@ Franz
 // Change worded buttons to icons on tables
 // Fix checkin dates cannot be 1 night
 // Delete images when updating image or deleting data
+// Add last checkin
+// Refund on locked booking
+// Refund reason
+// Editable checkout on change room
+// Minus 1 day on calendar
+
+Time-based login
+History per guest
+Add ip address on logs
 Div to image not working
 Calendar following month
 Ask if extras are per day
 Request room delete to admin
-Add last checkin
-Time-based login
+Cancel reservation and reason
+Checkin and reseravation on current day

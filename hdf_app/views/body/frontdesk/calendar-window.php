@@ -136,7 +136,7 @@
             <th class="text-center mw sticky-top border-shadow<?= $i % 2 ? ' bg-light' : '' ?>" id="<?= date('Y-m-d') == $y . '-' . $m . '-' . str_pad($i, 2, '0', STR_PAD_LEFT) ? 'today' : '' ?>"><?= $i ?>-<?= substr($month, 0, 3) ?></th>
           <?php } ?>
           <?php for ($j = 1; $j <= 10; $j++) { ?>
-            <th class="text-center mw sticky-top border-shadow"><?= $j ?>-<?= substr($next_month, 0, 3) ?></th>
+            <!-- <th class="text-center mw sticky-top border-shadow"><?= $j ?>-<?= substr($next_month, 0, 3) ?></th> -->
           <?php } ?>
         </tr>
         <tr>
@@ -182,7 +182,7 @@
             <?php }
             } ?>
             <?php for ($j = 1; $j <= 10; $j++) { ?>
-              <td class="no-data first room room<?= $row['room_number'] ?>" day="<?= $j ?>" date=" <?= $m + 1 . '/' . str_pad($j, 2, '0', STR_PAD_LEFT) . '/' . $y ?>" data='<?= json_encode($row) ?>'>s</td>
+              <!-- <td class="no-data first room room<?= $row['room_number'] ?>" day="<?= $j ?>" date=" <?= $m + 1 . '/' . str_pad($j, 2, '0', STR_PAD_LEFT) . '/' . $y ?>" data='<?= json_encode($row) ?>'>s</td> -->
             <?php } ?>
           </tr>
           <?php $prev = $row['room_number']; ?>
