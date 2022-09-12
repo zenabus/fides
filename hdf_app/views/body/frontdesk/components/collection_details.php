@@ -91,9 +91,17 @@
             <tr>
               <td class="pl-4"><?= $type != $charges['category'] ? $charges['category'] : '↳' ?></td>
               <td>(<?= $charges['charge_quantity'] ?>) <?= $charges['charge'] ?></td>
-              <td>₱ <?= number_format($charges['charge_amount']) ?></td>
+              <?php $charge_price =  $charges['charge_id'] == 39 ? $row['pricing_type'] : $charges['charge_amount'] ?>
+              <td>₱ <?= number_format($charge_price) ?></td>
+              <?php $total = $charge_price * $row['nights'] ?>
+              <?php $discount = $total * ($row['percentage'] / 100) ?>
+              <?php $subtotal = $total - $discount ?>
+              <?php $grand_total += $subtotal ?>
               <td>
-                ₱ <?= number_format($charges['charge_amount'] * $charges['charge_quantity']) ?>
+                ₱ <?= number_format($subtotal) ?>
+                <small data-placement="left" title="<?= $row['discount_type'] ?>
+                  <br>-₱ <?= number_format($discount) ?>" rel="tooltip" data-html="true">(-<?= $row['percentage'] ?>%)
+                </small>
                 <a href="<?= base_url('index.php/main/removeCharge/charges_other/' . $charges['charges_other_id']) ?>" class="float-right mt-1 text-danger confirm hidable" data-placement="left" title="Remove Amenity / Charge" rel="tooltip">
                   <span class="fa fa-times"></span>
                 </a>
@@ -101,6 +109,7 @@
               <?php $type = $charges['category'] ?>
             </tr>
           <?php } ?>
+
           <tr class="bg-default">
             <td colspan="5" style="padding:0.5px !important"></td>
           </tr>
@@ -225,25 +234,13 @@
         </div>
         <div class="form-group card-div d-none">
           <label>Account Number</label>
-          <input type="text" class="form-control" name="card_number" placeholder="XXXX XXXX XXXX XXXX" maxlength="19">
-        </div>
-        <div class="form-group card-div d-none">
-          <label>Account Name</label>
-          <input type="text" class="form-control" name="card_name">
-        </div>
-        <div class="form-group card-div d-none">
-          <label>Account Card</label>
-          <select name="card_type" class="form-control">
-            <option value="">- select card type -</option>
-            <option value="BDO">Banco de Oro (BDO)</option>
-            <option value="Landbank">Land Bank of the Philippines</option>
-          </select>
+          <input type="number" class="form-control" name="card_number" placeholder="XXXX" maxlength="4">
         </div>
         <?= form_close() ?>
       </div>
       <div class="modal-footer">
         <div class="left-side">
-          <button type="submit" class="btn btn-link" form="frmPayment">Add Payment</button>
+          <button type="submit" class="btn btn-link" form="frmPayment">Add</button>
         </div>
         <div class="divider"></div>
         <div class="right-side">
@@ -261,22 +258,11 @@
     if (option == 'Cash') {
       $('.card-div').addClass('d-none');
       $('[name=card_number]').val('');
-      $('[name=card_name]').val('');
       $('[name=card_number]').removeAttr('required');
-      $('[name=card_name]').removeAttr('required');
-      $('[name=card_type]').removeAttr('required');
     } else {
       $('[name=card_number]').attr('required', true);
-      $('[name=card_name]').attr('required', true);
-      $('[name=card_type]').attr('required', true);
       $('.card-div').removeClass('d-none');
     }
-  });
-
-  $('[name=card_number]').on('input', function() {
-    const value = $(this).val();
-    const newValue = value.replace(/[^\dA-Z]/g, '').replace(/(.{4})/g, '$1 ').trim();
-    $(this).val(newValue);
   });
 
   $(document).on('click', '.receipt', function(e) {

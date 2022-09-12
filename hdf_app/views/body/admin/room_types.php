@@ -179,7 +179,7 @@
 
   $('#addRoomType').click(function() {
     $('.title-up').text('Add Room Type');
-    $('.btn-room').val('Add Room Type')
+    $('.btn-room').val('Add')
     $('#frmRoom').attr('action', `${base_url}index.php/admin/addRoomType`).trigger('reset');
     $('#modalRoom').modal('show');
   });
@@ -187,7 +187,7 @@
   $('.updateRoomType').click(function() {
     const data = JSON.parse(this.id);
     $('.title-up').text('Update Room Type');
-    $('.btn-room').val('Update Room Type');
+    $('.btn-room').val('Update');
     $('[name=room_type_id]').val(data.id);
     $('[name=room_type]').val(data.room_type);
     $('[name=room_type_abbr]').val(data.room_type_abbr);

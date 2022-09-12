@@ -96,8 +96,9 @@ $reservation_status = [
   1 => 'Walk In',
   2 => 'Online',
   3 => 'Verified',
-  4 => 'Cancelled',
+  4 => 'Cancelled Reservation',
   5 => 'Confirmed',
+  6 => 'Cancelled Booking',
 ];
 
 $log_type = [

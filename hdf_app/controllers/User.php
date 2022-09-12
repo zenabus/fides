@@ -43,7 +43,7 @@ class User extends MY_Controller {
     } elseif ($user->user_type == 'Superadmin') {
       redirect('superadmin');
     } elseif ($user->user_type == 'Housekeeping') {
-      redirect('main/HousekeepingList');
+      redirect('housekeeping');
     } elseif ($user->user_type == 'Coffee Shop') {
       redirect('main/RestaurantDashboard');
     } elseif ($user->user_type == 'Restaurant') {

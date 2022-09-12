@@ -72,7 +72,7 @@
     .table th {
       border-collapse: collapse;
       width: 100%;
-      font-size: 32px;
+      font-size: 28px;
     }
 
     th {
@@ -168,12 +168,12 @@
           <tr class="bt bl br cost">
             <td>Room <?= $row['room_number'] ?> - <?= $row['room_type'] ?> (-<?= $row['percentage'] ?>%)</td>
             <td>(<?= $row['nights'] ?>) Night<?= $row['nights'] != 1 ? 's' : ''  ?></td>
-            <td class="tr"><?= number_format($row['pricing_type']) ?></td>
+            <td class="tr"><?= number_format($row['pricing_type'], 2) ?></td>
             <?php $total = $row['pricing_type'] * $row['nights'] ?>
             <?php $discount = $total * ($row['percentage'] / 100) ?>
             <?php $subtotal = $total - $discount ?>
             <?php $grand_total += $subtotal ?>
-            <td class="tr"><?= number_format($subtotal) ?></td>
+            <td class="tr"><?= number_format($subtotal, 2) ?></td>
           </tr>
 
           <?php if ($row['extra_bed']) { ?>
@@ -181,8 +181,8 @@
               <td>↳</td>
               <td>(<?= $row['extra_bed'] ?>) Extra Bed<?= $row['extra_bed'] != 1 ? 's' : ''  ?></td>
               <?php $bed_total = $bed->price * $row['extra_bed'] ?>
-              <td class="tr"><?= number_format($bed->price) ?></td>
-              <td class="tr"><?= number_format($bed->price * $row['extra_bed']) ?></td>
+              <td class="tr"><?= number_format($bed->price, 2) ?></td>
+              <td class="tr"><?= number_format($bed->price * $row['extra_bed'], 2) ?></td>
               <?php $grand_total += $bed_total ?>
             </tr>
           <?php } ?>
@@ -192,8 +192,8 @@
               <td>↳</td>
               <td>(<?= $row['extra_person'] ?>) Extra Person<?= $row['extra_person'] != 1 ? 's' : ''  ?></td>
               <?php $person_total = $person->price * $row['extra_person'] ?>
-              <td class="tr"><?= number_format($person->price) ?></td>
-              <td class="tr"><?= number_format($person_total) ?></td>
+              <td class="tr"><?= number_format($person->price, 2) ?></td>
+              <td class="tr"><?= number_format($person_total, 2) ?></td>
               <?php $grand_total += $person_total ?>
             </tr>
           <?php } ?>
@@ -202,8 +202,8 @@
             <tr class="bl br cost">
               <td>Restaurant <?= $charges['reference'] ?></td>
               <td>(<?= $charges['charges_food_quantity'] ?>) <?= $charges['particulars'] ?></td>
-              <td class="tr"><?= number_format($charges['charges_food_amount']) ?></td>
-              <td class="tr"><?= number_format($charges['charges_food_amount'] * $charges['charges_food_quantity']) ?></td>
+              <td class="tr"><?= number_format($charges['charges_food_amount'], 2) ?></td>
+              <td class="tr"><?= number_format($charges['charges_food_amount'] * $charges['charges_food_quantity'], 2) ?></td>
             </tr>
           <?php } ?>
 
@@ -211,8 +211,8 @@
             <tr class="bl br cost">
               <td>Coffeeshop Ref.: <?= $charges['reference'] ?></td>
               <td>(<?= $charges['charges_food_quantity'] ?>) <?= $charges['particulars'] ?></td>
-              <td class="tr"><?= number_format($charges['charges_food_amount']) ?></td>
-              <td class="tr"><?= number_format($charges['charges_food_amount'] * $charges['charges_food_quantity']) ?></td>
+              <td class="tr"><?= number_format($charges['charges_food_amount'], 2) ?></td>
+              <td class="tr"><?= number_format($charges['charges_food_amount'] * $charges['charges_food_quantity'], 2) ?></td>
             </tr>
           <?php } ?>
 
@@ -221,8 +221,8 @@
             <tr class="bl br cost">
               <td><?= $type != $charges['category'] ? $charges['category'] : '↳' ?></td>
               <td>(<?= $charges['charge_quantity'] ?>) <?= $charges['charge'] ?></td>
-              <td class="tr"><?= number_format($charges['charge_amount']) ?></td>
-              <td class="tr"> <?= number_format($charges['charge_amount'] * $charges['charge_quantity']) ?></td>
+              <td class="tr"><?= number_format($charges['charge_amount'], 2) ?></td>
+              <td class="tr"> <?= number_format($charges['charge_amount'] * $charges['charge_quantity'], 2) ?></td>
               <?php $type = $charges['category'] ?>
             </tr>
           <?php } ?>
@@ -238,19 +238,19 @@
         <td style="width: 1085px"></td>
         <td class="bl bt bb">Grand Total</td>
         <td class="bt br bb bt"></td>
-        <td class="bt tr bb bt"><?= number_format($grand_total + $charges_total) ?></td>
+        <td class="bt tr bb bt"><?= number_format($grand_total + $charges_total, 2) ?></td>
       </tr>
       <tr class="br">
         <td></td>
         <td class="bl bb bt">Refund Amount</td>
         <td class="br bb bt"></td>
-        <td class="tr bb bt"><?= number_format($booking->refund) ?></td>
+        <td class="tr bb bt"><?= number_format($booking->refund, 2) ?></td>
       </tr>
       <tr class="br">
         <td></td>
         <td class="bl bb bt">Advanced Payment</td>
         <td class="br bb bt"></td>
-        <td class="tr bb bt"><?= number_format($payment->amount) ?></td>
+        <td class="tr bb bt"><?= number_format($payment->amount, 2) ?></td>
       </tr>
       <tr class="br">
         <td></td>
@@ -259,14 +259,14 @@
         <?php $charges_grand_total = $grand_total + $charges_total ?>
         <?php $payment_grand_total = $booking->refund + $payment->amount ?>
         <?php $overall_total = $charges_grand_total - $payment_grand_total ?>
-        <td class="tr bb bt bold"><?= number_format($overall_total > 0 ? $overall_total : 0) ?></td>
+        <td class="tr bb bt bold"><?= number_format($overall_total > 0 ? $overall_total : 0, 2) ?></td>
       </tr>
       <tr class="br">
         <td></td>
         <td class="bb bl bt">Change Due</td>
         <td class="bb br bt"></td>
         <?php $petty_cash = ($charges_grand_total - $payment_grand_total) * -1 ?>
-        <td class="bb tr bt"><?= number_format($petty_cash > 0 ? $petty_cash : 0) ?></td>
+        <td class="bb tr bt"><?= number_format($petty_cash > 0 ? $petty_cash : 0, 2) ?></td>
       </tr>
     </table>
   </div>

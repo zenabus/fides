@@ -90,3 +90,17 @@ function getMonth() {
   ];
   return months[month.getMonth()];
 }
+
+const getDatesBetween = function (start, end) {
+  for (var arr = [], dt = new Date(start); dt <= new Date(end); dt.setDate(dt.getDate() + 1)) {
+    const date = new Date(dt);
+    const string_date = `${pad(date.getMonth() + 1)}/${pad(date.getDate())}/${date.getFullYear()}`;
+    arr.push(string_date);
+  }
+  return arr;
+};
+
+const toDashed = (date) => {
+  const [month, day, year] = date.split('/');
+  return `${year}-${month}-${day}`;
+}

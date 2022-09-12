@@ -112,6 +112,7 @@ class Insert_model extends CI_Model {
       'arrival' => $_POST['check_in'],
       'departure' => $_POST['check_out'],
       'request' => $_POST['request'],
+      'remarks' => $_POST['remarks'],
       'reservation_type' => $_POST['reservation_type'],
       'reservation_status' => $_POST['reservation_status']
     ];
@@ -134,7 +135,7 @@ class Insert_model extends CI_Model {
     $booking_number = 'HDF' . str_pad($booking_id, 5, '0', STR_PAD_LEFT);
     $this->db->where('booking_id', $booking_id)->update('bookings', ['booking_number' => $booking_number]);
     $_POST['booking_id'] = $booking_id;
-    return $booking_number;
+    return [$booking_number, $booking_id];
   }
 
   function addGuest($guest, $post = FALSE) {
@@ -191,8 +192,6 @@ class Insert_model extends CI_Model {
       'payment_option' => $_POST['payment_option'],
       'amount' => $_POST['amount'],
       'card_number' => $_POST['card_number'],
-      'card_name' => $_POST['card_name'],
-      'card_type' => $_POST['card_type'],
     ];
 
     $this->db->insert('booking_payment', $data);
@@ -226,5 +225,14 @@ class Insert_model extends CI_Model {
     unset($_POST['user_id']);
     $_POST['password'] = password_hash($_POST['password'], PASSWORD_BCRYPT);
     $this->db->insert('users', $_POST);
+  }
+
+  function addEarlyCheckin($booked_room_id) {
+    $data = [
+      'booked_room_id' => $booked_room_id,
+      'charge_id' => 32,
+      'charge_quantity' => 1
+    ];
+    $this->db->insert('charges_other', $data);
   }
 }

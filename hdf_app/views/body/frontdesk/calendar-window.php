@@ -25,6 +25,10 @@
 </head>
 
 <style type="text/css">
+  [disabled] {
+    pointer-events: none;
+  }
+
   .table-container table td:first-child,
   .table-container table th:first-child {
     position: sticky;
@@ -157,28 +161,58 @@
                 <div class="d-inline-block" style="width:50px;"><?= $row['room_number'] ?> <?= $row['room_type_abbr'] ?></div>
               </div>
             </td>
+            <?php
+            $yesterday = date('Y-m-d', strtotime('-1 day'));
+            $today = date('Y-m-d');
+            $now = date('H');
+            ?>
             <?php for ($i = 1; $i <= $days; $i++) { ?>
               <?php
+              $disabled = '';
+              $text = '';
+              $checkin = '';
+              $type = 'Reservation';
+              $date_dash = $y . '-' .  $m . '-' . str_pad($i, 2, '0', STR_PAD_LEFT);
+              if ($yesterday > $date_dash) {
+                $disabled = 'disabled';
+                $text = '<center><i class="fa-solid fa-xmark"></i></center>';
+              } elseif ($yesterday == $date_dash) {
+                if ($now >= 10) {
+                  $disabled = 'disabled';
+                  $text = '<center><i class="fa-solid fa-xmark"></i></center>';
+                } else {
+                  $type = 'Check In';
+                }
+              } elseif ($today == $date_dash) {
+                if ($now >= 10) {
+                  $type = 'Check In';
+                }
+              }
+
               $date = $m . '/' . str_pad($i, 2, '0', STR_PAD_LEFT) . '/' . $y;
               $data = array_filter($bookings, function ($booking) use ($date, $row) {
                 return in_array($date, $booking['dates_between']) && $row['room_number'] == $booking['room_number'];
               });
+
+              // echo '<pre>';
+              // print_r(var_dump($row['room_id']));
+
+
               ?>
               <?php if ($data) { ?>
                 <?php $data = array_merge(...$data); ?>
                 <?php
-                $color = 'success';
-                if ($data['booking_type'] == 'Reservation') {
-                  if ($data['reservation_type'] == 'Arrival/Tentative') {
-                    $color = 'warning';
-                  } else if ($data['reservation_type'] == 'Confirmed') {
-                    $color = 'info';
-                  }
+                if ($data['reservation_status'] == 0 || $data['reservation_status'] == -1) {
+                  $color = 'success';
+                } elseif ($data['reservation_type'] == 'Confirmed') {
+                  $color = 'info';
+                } else {
+                  $color = 'warning';
                 }
                 ?>
-                <td class="with-data bg-<?= $color ?>" date="<?= $date ?>" data='<?= json_encode($row) ?>'></td>
+                <td class="with-data bg-<?= $color ?>" room_id="<?= $row['room_id'] ?>" date="<?= $date ?>" data='<?= json_encode($row) ?>'></td>
               <?php } else { ?>
-                <td class="no-data first room room<?= $row['room_number'] ?>" day="<?= $i ?>" date=" <?= $date ?>" data='<?= json_encode($row) ?>'></td>
+                <td class="no-data first room room<?= $row['room_number'] ?> " day="<?= $i ?>" date=" <?= $date ?>" data='<?= json_encode($row) ?>' <?= $disabled ?>></td>
             <?php }
             } ?>
             <?php for ($j = 1; $j <= 10; $j++) { ?>
@@ -222,6 +256,12 @@
         inline: "start"
       });
     }
+
+    $('.with-data').css('opacity', 0.5);
+    const dates_between = JSON.parse(localStorage.getItem('highlight_between'));
+    for (const date of dates_between) {
+      $(`[room_id="${localStorage.getItem('highlight_room_id')}"][date="${$.escapeSelector(date)}"]`).css('opacity', 1);
+    }
   });
 
   $('#month').change(function() {
@@ -248,7 +288,6 @@
   function setStart(that, this_day, data) {
     $(that).addClass('bg-default');
     room_number = data.room_number;
-    console.log(data.room_number)
     start = this_day;
     $('#room_number').text(room_number);
     $('#room_type').text(data.room_type);

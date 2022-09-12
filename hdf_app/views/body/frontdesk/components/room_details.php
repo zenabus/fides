@@ -19,7 +19,10 @@
             <td class="border-left-0 pl-4">
               Room <?= $row['room_number'] ?><br>
               <small><?= $row['room_type'] ?></small><br>
-              <small>₱ <?= number_format($row['pricing_type']) ?> per night</small>
+              <small>₱ <?= number_format($row['pricing_type']) ?> per night</small><br>
+              <?php if ($row['change_reason']) { ?>
+                <small style="font-style:italic">(Change room - <?= $row['change_reason'] ?>)</small>
+              <?php } ?>
             </td>
             <td>
               <?= $row['nights'] ?> night<?= $row['nights'] == 1 ? '' : 's' ?><br>
@@ -56,10 +59,39 @@
                 <i class="fa-solid fa-person-circle-exclamation"></i>
               </button>
               <?php if (count($booked_rooms) != 1) { ?>
-                <a href="<?= base_url('index.php/main/removeRoom/' . $row['booked_room_id']) ?>" class="btn btn-danger btn-sm confirm mt-1" data-placement="top" title="Remove Room" rel="tooltip">
+                <a href="javascript:" id="<?= $row['booked_room_id'] ?>" class="btn btn-danger btn-sm mt-1 removeRoom" data-placement="top" title="Remove Room" rel="tooltip">
                   <span class="fa fa-trash"></span>
                 </a>
               <?php } ?>
+            </td>
+          </tr>
+        <?php }  ?>
+        <?php foreach ($archived_rooms as $row) { ?>
+          <tr>
+            <td class="border-left-0 pl-4">
+              Room <?= $row['room_number'] ?><br>
+              <small><?= $row['room_type'] ?></small><br>
+              <small>₱ <?= number_format($row['pricing_type']) ?> per night</small><br>
+              <?php if ($row['change_reason']) { ?>
+                <small style="font-style:italic">(Change room - <?= $row['change_reason'] ?>)</small>
+              <?php } ?>
+            </td>
+            <td>
+              <?= $row['nights'] ?> night<?= $row['nights'] == 1 ? '' : 's' ?><br>
+              <?php $total = $row['pricing_type'] * $row['nights'] ?>
+              <?php $discount = $total * ($row['percentage'] / 100) ?>
+              <?php $subtotal = $total - $discount ?>
+              <small><?= $row['check_in'] ?> - <?= $row['check_out'] ?></small><br>
+              <small>₱ <?= number_format($subtotal) ?> (<?= $row['discount_type'] ?> <?= $row['percentage'] ?>%)</small>
+            </td>
+            <td>
+              <?php [$name, $contact, $email] = explode(' / ', $row['occupant']) ?>
+              <?= $name ?><br><small><?= $email ?><br><?= $contact ?></small>
+            </td>
+            <td class="border-right-0 action hidable">
+              <small><b>THIS ROOM IS DELETED</b></small> <br>
+              <small>Reason: <?= $row['delete_reason'] ?></small><br>
+              <small>Processed: <?= $row['who_deleted'] ?></small>
             </td>
           </tr>
         <?php }  ?>
@@ -116,7 +148,7 @@
       </div>
       <div class="modal-footer">
         <div class="left-side">
-          <input type="submit" value="Update Extras" class="btn btn-link" form="frmExtra">
+          <input type="submit" value="Update" class="btn btn-link" form="frmExtra">
         </div>
         <div class="divider"></div>
         <div class="right-side">
@@ -163,7 +195,7 @@
       </div>
       <div class="modal-footer">
         <div class="left-side">
-          <input type="submit" value="Discount" class="btn btn-link" form="frmDiscount">
+          <input type="submit" value="Apply" class="btn btn-link" form="frmDiscount">
         </div>
         <div class="divider"></div>
         <div class="right-side">
@@ -197,7 +229,7 @@
           </div>
           <div class="form-group col-md-6">
             <label>Nights</label>
-            <input type="number" class="form-control" name="nights" required>
+            <input type="number" class="form-control" name="nights" required autocomplete="off" min="1" value="1">
           </div>
         </div>
         <div class="form-row">
@@ -209,6 +241,10 @@
             <label>Check Out</label>
             <input type="text" class="form-control checkoutpicker" name="check_out" required>
           </div>
+        </div>
+        <div class="form-group div-reason">
+          <label>Change Room Reason</label>
+          <textarea name="change_reason" class="form-control"></textarea>
         </div>
         <?= form_close() ?>
       </div>
@@ -226,7 +262,7 @@
 </div>
 
 <div class="modal fade" id="modalCharges" tabindex="-1" role="dialog">
-  <div class="modal-dialog pt-0" role="document">
+  <div class="modal-dialog modal-sm pt-0" role="document">
     <div class="modal-content">
       <div class="modal-header">
         <h4 class="title title-up mb-0">Charges</h4>
@@ -252,35 +288,31 @@
             </label>
           </div>
         </div>
-        <div class="row">
-          <div class="form-group col-md-6">
-            <label>Particulars</label>
-            <input type="text" class="form-control" name="particulars" required>
-          </div>
-          <div class="form-group col-md-6">
-            <label>Reference</label>
-            <input type="text" class="form-control" name="reference" required>
-          </div>
+        <div class="form-group">
+          <label>Particulars</label>
+          <input type="text" class="form-control" name="particulars" required>
         </div>
-        <div class="row">
-          <div class="form-group col-md-4">
-            <label>Unit Cost</label>
-            <input type="number" class="form-control" name="charges_food_amount" min="1" value="1">
-          </div>
-          <div class="form-group col-md-4">
+        <div class="form-group">
+          <label>Reference</label>
+          <input type="text" class="form-control" name="reference">
+        </div>
+        <div class="form-group">
+          <label>Unit Cost</label>
+          <input type="number" class="form-control" name="charges_food_amount" min="1" value="1">
+        </div>
+        <!-- <div class="form-group col-md-4">
             <label>Quantity</label>
             <input type="number" class="form-control" name="charges_food_quantity" min="1" value="1" required>
-          </div>
-          <div class="form-group col-md-4">
+          </div> -->
+        <!-- <div class="form-group col-md-6">
             <label>Subtotal</label>
             <input type="text" class="form-control" id="charges_food_total" value="₱ 1" readonly>
-          </div>
-        </div>
+          </div> -->
         <?= form_close() ?>
       </div>
       <div class="modal-footer">
         <div class="left-side">
-          <input type="submit" value="Add Charges" class="btn btn-link" form="frmCharges">
+          <input type="submit" value="Add" class="btn btn-link" form="frmCharges">
         </div>
         <div class="divider"></div>
         <div class="right-side">
@@ -335,7 +367,7 @@
       </div>
       <div class="modal-footer">
         <div class="left-side">
-          <input type="submit" value="Add Charges" class="btn btn-link" form="frmAmenities">
+          <input type="submit" value="Add" class="btn btn-link" form="frmAmenities">
         </div>
         <div class="divider"></div>
         <div class="right-side">
@@ -383,6 +415,35 @@
   </div>
 </div>
 
+<div class="modal fade" id="modalReason" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-sm pt-0" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="title title-up">Remove Room</h4>
+      </div>
+      <div class="modal-body px-4">
+        <?= form_open('main/removeRoom', ['id' => 'frmRemove']) ?>
+        <input type="hidden" name="booked_room_id">
+        <div class="form-group">
+          <label>Reason</label>
+          <textarea class="form-control" name="delete_reason" required></textarea>
+          <small>Note: All charges in this room will be deleted</small>
+        </div>
+        <?= form_close() ?>
+      </div>
+      <div class="modal-footer">
+        <div class="left-side">
+          <button type="submit" class="btn btn-link" form="frmRemove">Confirm</button>
+        </div>
+        <div class="divider"></div>
+        <div class="right-side">
+          <button type="button" class="btn btn-link" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
   const base_url = '<?= base_url() ?>';
   const price_bed = '<?= $bed->price ?>';
@@ -398,7 +459,8 @@
   let food_quantity = 1;
   let food_cost = 1;
 
-  const minDate = new Date();
+  let minDate = new Date();
+  minDate.setDate(minDate.getDate() - 1);
   $(".checkoutpicker").datetimepicker({
     icons: {
       time: "fa fa-clock-o",
@@ -419,10 +481,11 @@
   $("[name=nights]").on("input", function() {
     const nights = parseInt($(this).val());
     const checkin = moment($("[name=check_in]").val());
-    const checkout = moment(checkin).add(nights, "days");
-    if (!nights || nights > 0) {
-      $(this).val(1);
-    }
+    const additional = moment(checkin).add(nights, "days");
+    $("[name=check_out]").data("DateTimePicker").date(additional);
+    // if (!nights || nights > 0) {
+    //   $(this).val(1);
+    // }
     $("[name=check_out]").data("DateTimePicker").date(checkout);
     $('.btn-room').removeAttr('disabled');
   });
@@ -505,24 +568,32 @@
 
   $('#addRoom').click(function() {
     $('#frmRoom').attr('action', `${base_url}index.php/main/bookRoom`).trigger('reset');
+    $('.div-reason').hide();
     $('.room-title').text('Add Room');
-    $('.btn-room').val('Add Room')
+    $('.btn-room').val('Add')
     $('#modalRoom').modal('show');
-    $('[name=nights]').attr('disabled', true);
-    $('[name=check_out]').attr('disabled', true);
+    $('[name=nights]').attr('readonly', true);
+    $('[name=check_out]').attr('readonly', true);
   });
 
   $('.change').click(function() {
     const data = JSON.parse(this.id);
+    console.log(data);
+
+    localStorage.setItem('highlight_room_id', data.room_id);
+    localStorage.setItem('highlight_between', JSON.stringify(getDatesBetween(data.check_in, data.check_out)));
+
     $('[name=booked_room_id]').val(data.booked_room_id);
+    $('[name=room_id]').val(data.room_id);
     $('[name=check_in]').val(data.check_in);
-    $('[name=check_out]').val(data.check_out).removeAttr('disabled');
+    $('[name=check_out]').val(data.check_out).removeAttr('readonly');
     $('.room_type').val(data.room_type);
     $('.room_number').val(data.room_number);
-    $('[name=nights]').val(data.nights).removeAttr('disabled');
+    $('[name=nights]').val(data.nights).removeAttr('readonly');
     $('#frmRoom').attr('action', `${base_url}index.php/main/changeRoom`);
     $('.room-title').text('Change Room');
-    $('.btn-room').val('Change Room');
+    $('.btn-room').val('Update');
+    $('.div-reason').show();
     $('#modalRoom').modal('show');
   });
 
@@ -578,5 +649,10 @@
   $('[name=charges_food_amount]').on('input', function() {
     food_cost = $(this).val();
     $('#charges_food_total').val(`₱ ${formatNumber(Math.round(food_cost * food_quantity))}`);
+  });
+
+  $('.removeRoom').click(function() {
+    $('[name=booked_room_id]').val(this.id);
+    $('#modalReason').modal('show')
   });
 </script>

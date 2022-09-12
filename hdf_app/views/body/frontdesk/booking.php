@@ -2,7 +2,12 @@
 
 <div class="content pb-0">
   <div class="d-flex justify-content-between align-items-center mb-2">
-    <h5 class="mb-0">Booking Number: <?= $booking->booking_number ?></h5>
+    <div>
+      <h5 class="mb-0">Booking Number: <?= $booking->booking_number ?></h5>
+      <?php if ($booking->cancel_reason) { ?>
+        <small>Cancellation Reason: <?= $booking->cancel_reason ?></small>
+      <?php } ?>
+    </div>
     <button class="btn btn-primary my-0 back" onclick="history.back()">Back</button>
   </div>
   <div class="row">
@@ -100,7 +105,7 @@
         </div>
         <div class="card-footer my-2 d-flex justify-content-between">
           <div>
-            <button class="btn hidable updateDetails" type="button">Update Details</button>
+            <button class="btn hidable updateDetails" type="button">Update</button>
             <button class="btn saveChanges" form="frmGuest">Save Changes</button>
             <button class="btn btn-primary cancelUpdate" type="button">Cancel Update</button>
           </div>
@@ -173,12 +178,7 @@
                   <td class="pl-4">₱ <?= number_format($row['amount']) ?><br>
                     <small>Paid with <?= strtolower($row['payment_option']) ?></small>
                   </td>
-                  <td>
-                    <?= $row['card_number'] ?><br>
-                    <?php if ($row['payment_option'] == 'Card') { ?>
-                      <small><?= $row['card_type'] ?> / <?= $row['card_name'] ?></small>
-                    <?php } ?>
-                  </td>
+                  <td><?= $row['card_number'] ?></td>
                   <td>
                     <?php
                     $date_time = date_create($row['booking_payment_added']);
@@ -210,9 +210,9 @@
           <textarea class="form-control-plaintext px-2 pt-1" tabindex="-1" name="request" rows="3" readonly><?= $booking->request ?></textarea>
         </div>
         <div class="card-footer my-2 border-top px-4">
-          <input type="button" value="Update Request" class="btn updateRequest hidable">
-          <input type="submit" value="Save Request" class="btn saveRequest" form="frmRequest">
-          <input type="button" value="Cancel Request" class="btn btn-primary cancelRequest">
+          <input type="button" value="Update" class="btn updateRequest hidable">
+          <input type="submit" value="Save" class="btn saveRequest" form="frmRequest">
+          <input type="button" value="Cancel" class="btn btn-primary cancelRequest">
         </div>
         <?= form_close() ?>
       </div>
@@ -227,9 +227,9 @@
           <textarea class="form-control-plaintext px-2 pt-1" tabindex="-1" name="remarks" rows="3" readonly><?= $booking->remarks ?></textarea>
         </div>
         <div class="card-footer my-2 border-top px-4">
-          <input type="button" value="Update Notes" class="btn updateNotes hidable">
-          <input type="submit" value="Save Notes" class="btn saveNotes" form="frmNotes">
-          <input type="button" value="Cancel Update" class="btn btn-primary cancelNotes">
+          <input type="button" value="Update" class="btn updateNotes hidable">
+          <input type="submit" value="Save" class="btn saveNotes" form="frmNotes">
+          <input type="button" value="Cancel" class="btn btn-primary cancelNotes">
         </div>
       </div>
     </div>
@@ -261,11 +261,12 @@
   $('.saveNotes, .cancelNotes').hide();
   $('.saveRequest, .cancelRequest').hide();
   if (reservation_status == -1) {
-    $('.hidable').attr('disabled', true);
-    $('.hidable').hide();
+    $('.hidable').attr('disabled', true).hide();
     $('.form-control').attr('readonly', true);
     $('[type=search], [name=refund], [name=refund_reason]').removeAttr('readonly');
     $('[name=datatable_length]').removeAttr('readonly');
+  } else if (reservation_status == 6) {
+    $('.btn').attr('disabled', true).hide();
   }
 
   $('.updateDetails').click(function() {

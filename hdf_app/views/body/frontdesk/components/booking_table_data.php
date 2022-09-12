@@ -1,12 +1,15 @@
 <td>
   <?= $row['booking_number'] ?>
-  <?php if($row['reservation_status']==-1) { ?>
+  <?php if ($row['reservation_status'] == -1) { ?>
     <span class="fa fa-lock"></span>
   <?php } ?>
   <?php if ($row['remarks']) { ?>
     <span class="fa fa-info-circle ml-1 text-info" rel="tooltip" data-original-title="<?= $row['remarks'] ?>"></span>
   <?php } ?><br>
-  <small><?= date_format(date_create($row['booking_added']), "F d, Y h:i a") ?></small>
+  <small><?= date_format(date_create($row['booking_added']), "F d, Y h:i a") ?></small><br>
+  <?php if ($row['cancel_reason']) { ?>
+    <small style="font-style:italic">(Cancel Reason - <?= $row['cancel_reason'] ?>)</small>
+  <?php } ?>
 </td>
 <td>
   <?= $row['last_name'] ?>, <?= $row['first_name'] ?> <?= $row['middle_name'] ?><br>
@@ -34,11 +37,10 @@
     <?php foreach ($row['payments'] as $payment) { ?>
       <?php if ($payment['payment_option'] == 'Card') {
         $icon = 'credit-card';
-        $tooltip = $payment['payment_option'] . '<br>' . $payment['card_number'] . '<br>' . $payment['card_name'];
       } else {
         $icon = 'money-bills';
-        $tooltip =  $payment['payment_option'] . '<br>' . $payment['card_number'];
-      } ?>
+      }
+      $tooltip =  $payment['payment_option'] . '<br>' . $payment['card_number']; ?>
       <small class="mb-0">
         <span class="fa fa-<?= $icon ?> text-info mr-1" data-placement="top" title="<?= $tooltip ?>" rel="tooltip" data-html="true"></span>
         ₱ <?= number_format($payment['amount'], 2) ?> - <?= date_format(date_create($payment['booking_payment_added']), 'm/d/y g:ia') ?>

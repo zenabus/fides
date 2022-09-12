@@ -535,7 +535,7 @@ class Get_model extends CI_Model {
   }
 
   function authenticate() {
-    $data = $this->db->where('username', $_POST['username'])->get('users')->row();
+    $data = $this->db->where('status', 'Active')->where('username', $_POST['username'])->get('users')->row();
 
     if ($data) {
       if (password_verify($_POST['password'], $data->password)) {
@@ -597,11 +597,13 @@ class Get_model extends CI_Model {
     return $this->db->where('room_type_id', $room_type_id)->count_all_results('rooms');
   }
 
-  function getBookedRooms($booking_id) {
+  function getBookedRooms($booking_id, $booked_room_archived = 0) {
     return $this->db->where('booking_id', $booking_id)
       ->join('rooms', 'rooms.id=booked_rooms.room_id')
       ->join('room_type', 'room_type.id=rooms.room_type_id')
       ->join('discounts', 'discounts.discount_id=booked_rooms.discount_id')
+      ->order_by('booked_room_id', 'DESC')
+      ->where('booked_room_archived', $booked_room_archived)
       ->get('booked_rooms')->result_array();
   }
 
@@ -617,7 +619,7 @@ class Get_model extends CI_Model {
   }
 
   function getDiscounts() {
-    return $this->db->get('discounts')->result_array();
+    return $this->db->order_by('discount_type', 'ASC')->get('discounts')->result_array();
   }
 
   function getDiscount($discount_id) {
@@ -633,7 +635,7 @@ class Get_model extends CI_Model {
   }
 
   function getCharges() {
-    return $this->db->join('categories', 'categories.category_id=charges.category_id')->order_by('category')->get('charges')->result_array();
+    return $this->db->join('categories', 'categories.category_id=charges.category_id')->order_by('category')->order_by('charge')->get('charges')->result_array();
   }
 
   function getCharge($charge_id) {
@@ -717,6 +719,7 @@ class Get_model extends CI_Model {
       ->join('guests', 'guests.guest_id=bookings.guest_id')
       ->where('guests.guest_id', $guest_id)
       ->where_in('reservation_status', $reservation_status)
+      ->group_by('booking_number')
       ->get('bookings')->result_array();
   }
 
@@ -725,5 +728,21 @@ class Get_model extends CI_Model {
     $this->db->join('users', 'users.id=user_logs.user_id');
     $this->db->where('user_id', $user_id);
     return $this->db->get('user_logs')->result_array();
+  }
+
+  function getCheckouts() {
+    return $this->db->join('bookings', 'bookings.booking_id=booked_rooms.booking_id')
+      ->join('rooms', 'rooms.id=booked_rooms.room_id')
+      ->join('room_type', 'room_type.id=rooms.room_type_id')
+      ->join('guests', 'guests.guest_id=bookings.guest_id')
+      ->join('room_statuses', 'room_statuses.id=rooms.room_status_id')
+      ->where_in('reservation_status', [0, -1])
+      ->where('check_out', date('m/d/Y'))
+      ->order_by('room_number')
+      ->get('booked_rooms')->result_array();
+  }
+
+  function getRoomStatuses() {
+    return $this->db->get('room_statuses')->result_array();
   }
 }

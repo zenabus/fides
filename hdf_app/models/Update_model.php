@@ -292,16 +292,40 @@ class Update_model extends CI_Model {
   }
 
   function updateReservation() {
+    $booking_id = $_POST['booking_id'];
+    unset($_POST['booking_id']);
     $data = [
       'reservation_type' => $_POST['reservation_type'],
       'request' => $_POST['request'],
       'remarks' => $_POST['remarks']
     ];
 
-    $this->db->where('booking_id', $_POST['booking_id'])->update('bookings', $data);
+    $this->db->where('booking_id', $booking_id)->update('bookings', $data);
   }
 
   function updateReason() {
-    $this->db->where('booking_id', $_POST['booking_id'])->update('bookings', ['cancel_reason' => $_POST['cancel_reason']]); 
+    $this->db->where('booking_id', $_POST['booking_id'])->update('bookings', ['cancel_reason' => $_POST['cancel_reason']]);
+  }
+
+  function updateBookedRoomNights() {
+    $data = [
+      'nights' => $_POST['nights'],
+      'check_in' => $_POST['check_in'],
+      'check_out' => $_POST['check_out'],
+    ];
+    $this->db->where('room_id', $_POST['room_id'])
+      ->where('booking_id', $_POST['booking_id'])
+      ->update('booked_rooms', $data);
+  }
+
+  function removeRoom($booked_room_id) {
+    $data = [
+      'booked_room_archived' => 1,
+      'delete_reason' => $_POST['delete_reason'],
+      'who_deleted' => $_SESSION['name']
+    ];
+    $this->db->where('booked_room_id', $booked_room_id)->update('booked_rooms', $data);
+    $this->db->where('booked_room_id', $booked_room_id)->delete('charges_food');
+    $this->db->where('booked_room_id', $booked_room_id)->delete('charges_other');
   }
 }

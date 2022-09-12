@@ -53,10 +53,10 @@
                           <?php $data['row'] = $row ?>
                           <?php $this->load->view('body/frontdesk/components/booking_table_data', $data) ?>
                           <td class="action">
-                            <?php if($row['arrival']==date('m/d/Y')){ ?>
-                            <a href="javascript:" class="btn btn-sm btn-default checkIn" onclick="popup(event, 'Proceed Check In', 'Are you sure do you want to check in this reservation?', '<?= base_url('index.php/main/checkIn/' . $row['booking_id']) ?>')" data-placement="top" title="Check In Reservation" rel="tooltip">
-                              <i class="fa-solid fa-calendar-check"></i>
-                            </a>
+                            <?php if ($row['arrival'] == date('m/d/Y')) { ?>
+                              <a href="javascript:" class="btn btn-sm btn-default checkIn" onclick="popup(event, 'Proceed Check In', 'Are you sure do you want to check in this reservation?', '<?= base_url('index.php/main/checkIn/' . $row['booking_id']) ?>')" data-placement="top" title="Check In Reservation" rel="tooltip">
+                                <i class="fa-solid fa-calendar-check"></i>
+                              </a>
                             <?php } ?>
                             <a href="<?= base_url('index.php/main/cancelReservation/' . $row['booking_id']) ?>" class="btn btn-sm btn-danger confirm" data-placement="top" title="Cancel Booking" rel="tooltip">
                               <span class="fa fa-ban"></span>
@@ -174,20 +174,8 @@
           <div class="row">
             <div class="form-group col-md-6">
               <label>Account Number</label>
-              <input type="text" name="card_number" class="form-control" placeholder="XXXX XXXX XXXX XXXX" maxlength="19" required>
+              <input type="text" name="card_number" class="form-control" placeholder="XXXX" maxlength="4" required>
             </div>
-            <div class="form-group col-md-6">
-              <label>Account Name</label>
-              <input type="text" name="card_name" class="form-control" required>
-            </div>
-          </div>
-          <div class="form-group">
-            <label>Card Type</label>
-            <select name="card_type" class="form-control" required>
-              <option value="">- select card type -</option>
-              <option value="BDO">Banco de Oro (BDO)</option>
-              <option value="Landbank">Land Bank of the Philippines</option>
-            </select>
           </div>
         </div>
         <div class="form-group">
@@ -255,14 +243,9 @@
     if (option == "Cash") {
       $(".card-div").hide();
       $("[name=card_number]").val("");
-      $("[name=card_name]").val("");
       $("[name=card_number]").removeAttr("required");
-      $("[name=card_name]").removeAttr("required");
-      $("[name=card_type]").removeAttr("required");
     } else {
       $("[name=card_number]").attr("required", true);
-      $("[name=card_name]").attr("required", true);
-      $("[name=card_type]").attr("required", true);
       $(".card-div").show();
     }
   });
@@ -272,8 +255,6 @@
     $('[name=booking_id]').val(data.booking_id);
     $('[name=amount]').val(data.amount);
     $('[name=card_number]').val(data.card_number);
-    $('[name=card_name]').val(data.card_name);
-    $('[name=card_type]').val(data.card_type);
     $('[name=remarks]').val(data.remarks);
     $('#modalConfirm').modal('show');
   });

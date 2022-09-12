@@ -29,8 +29,10 @@
               <tr>
                 <th class="pl-4">Room #</th>
                 <th>Type</th>
-                <th>Price</th>
-                <th>Persons</th>
+                <?php if($_SESSION['user_type']!='Housekeeping'){ ?>
+                  <th>Price</th>
+                  <th>Persons</th>
+                <?php } ?>
                 <th>Status</th>
                 <th class="disabled-sorting">Action</th>
               </tr>
@@ -50,8 +52,10 @@
                 <tr>
                   <td class="pl-4"><?= $row['room_number'] ?></td>
                   <td><?= $row['room_type'] ?></td>
-                  <td>₱ <?= number_format($row['pricing_type']) ?></td>
-                  <td><?= $row['max_persons'] == 2 ? 'Two' : 'Three' ?></td>
+                  <?php if($_SESSION['user_type']!='Housekeeping'){ ?>
+                    <td>₱ <?= number_format($row['pricing_type']) ?></td>
+                    <td><?= $row['max_persons'] == 2 ? 'Two' : 'Three' ?></td>
+                  <?php } ?>
                   <td>
                     <span class="badge badge-<?= $badge ?>">
                       <span class="fa fa-<?= $row['icon'] ?>"></span>
@@ -59,18 +63,26 @@
                     </span>
                   </td>
                   <td class="action">
-                    <?php if ($_SESSION['user_type'] == 'Admin') { ?>
-                      <button class="btn btn-sm btn-success updateRoom" id='<?= json_encode($row) ?>' data='<?= json_encode($row) ?>' data-placement="top" title="Update Room" rel="tooltip">
-                        <span class="fa fa-edit"></span>
-                      </button>
-                      <a href="<?= base_url('index.php/admin/deleteRoom/' . $row['room_id']) ?>" class="btn btn-sm btn-danger deleteRoom confirm" data='<?= json_encode($row) ?>' data-placement="top" title="Delete Room" rel="tooltip">
-                        <span class="fa fa-trash"></span>
-                      </a>
-                    <?php } ?>
-                    <?php if ($row['room_status_id'] == 4) { ?>
-                      <button class="btn btn-sm checkin" data='<?= json_encode($row) ?>' data-placement="top" title="Check In Guest" rel="tooltip">
-                        <span class="fa fa-check"></span>
-                      </button>
+                    <?php if($_SESSION['user_type']!='Housekeeping'){ ?>
+                      <?php if ($_SESSION['user_type'] == 'Admin') { ?>
+                        <button class="btn btn-sm btn-success updateRoom" id='<?= json_encode($row) ?>' data='<?= json_encode($row) ?>' data-placement="top" title="Update Room" rel="tooltip">
+                          <span class="fa fa-edit"></span>
+                        </button>
+                        <a href="<?= base_url('index.php/admin/deleteRoom/' . $row['room_id']) ?>" class="btn btn-sm btn-danger deleteRoom confirm" data='<?= json_encode($row) ?>' data-placement="top" title="Delete Room" rel="tooltip">
+                          <span class="fa fa-trash"></span>
+                        </a>
+                      <?php } ?>
+                      <?php if ($row['room_status_id'] == 4) { ?>
+                        <button class="btn btn-sm checkin" data='<?= json_encode($row) ?>' data-placement="top" title="Check In Guest" rel="tooltip">
+                          <span class="fa fa-check"></span>
+                        </button>
+                      <?php } ?>
+                    <?php } else { ?>
+                      <select class="form-control" style="width:200px">
+                        <?php foreach($statuses as $status) { ?>
+                          <option value="<?=$status['id'] ?>"><?=$status['description'] ?></option>
+                        <?php } ?>
+                      </select>
                     <?php } ?>
                   </td>
                 </tr>

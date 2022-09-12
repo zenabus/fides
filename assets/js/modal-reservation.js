@@ -1,5 +1,5 @@
 const minDate = new Date();
-minDate.setDate(minDate.getDate() - 1);
+minDate.setDate(minDate.getDate() - 2);
 $(".datepicker").datetimepicker({
   icons: {
     time: "fa fa-clock-o",
@@ -41,14 +41,9 @@ $("[name=payment_option]").change(function () {
   if (option == "Cash") {
     $(".card-div").hide();
     $("[name=card_number]").val("");
-    $("[name=card_name]").val("");
     $("[name=card_number]").removeAttr("required");
-    $("[name=card_name]").removeAttr("required");
-    $("[name=card_type]").removeAttr("required");
   } else {
     $("[name=card_number]").attr("required", true);
-    $("[name=card_name]").attr("required", true);
-    $("[name=card_type]").attr("required", true);
     $(".card-div").show();
   }
 });
@@ -144,8 +139,15 @@ $("[name=check_out]").on("dp.change", function (e) {
 });
 
 const modalBooking = (obj, booking_type, minDate = 0) => {
-  const date = $(obj).attr("date") ?? new Date();
+  let date = $(obj).attr("date") ?? new Date();
   const data = JSON.parse($(obj).attr("data"));
+  const now = new Date();
+
+  // if(now.getHours() < 10) {
+  //   date = moment(date).subtract(1, 'days');
+  // }
+  // console.log(date);
+
   $("#room_type").val(data.room_type);
   $("#room_number").val(data.room_number);
   $("[name=room_id]").val(data.room_id);
@@ -167,14 +169,14 @@ const modalBooking = (obj, booking_type, minDate = 0) => {
   $("#modalBooking").modal("show");
 };
 
-$("[name=card_number]").on("input", function () {
-  const value = $(this).val();
-  const newValue = value
-    .replace(/[^\dA-Z]/g, "")
-    .replace(/(.{4})/g, "$1 ")
-    .trim();
-  $(this).val(newValue);
-});
+// $("[name=card_number]").on("input", function () {
+//   const value = $(this).val();
+//   const newValue = value
+//     .replace(/[^\dA-Z]/g, "")
+//     .replace(/(.{4})/g, "$1 ")
+//     .trim();
+//   $(this).val(newValue);
+// });
 
 $("[name=action]").change(function () {
   if ($(this).val() == "Update") {
@@ -187,6 +189,20 @@ $("[name=action]").change(function () {
   $("#btnBooking").val($(this).val());
 });
 
-$('#btnCancel').click(function(){
-  $('#modalReason').modal('show');
+$("#btnCancel").click(function () {
+  $("#modalReason").modal("show");
+});
+
+$("[name=rdo_booking_type]").change(function () {
+  if ($(this).val() == "Check In") {
+    $("#frmBook").attr("action", `${base_url}index.php/main/book`);
+    $("#btnBooking").val("Check In");
+    $(".reservation-div").hide();
+    $("[name=booking_type]").val("Check In");
+  } else {
+    $("#frmBook").attr("action", `${base_url}index.php/main/book`);
+    $("#btnBooking").val("Reserve");
+    $(".reservation-div").show();
+    $("[name=booking_type]").val("Reservation");
+  }
 });

@@ -28,9 +28,11 @@
                     <a href="javascript:" class="btn btn-success btn-sm updateCategory" id='<?= json_encode($row) ?>' data-placement="top" title="Update Category" rel="tooltip">
                       <span class="fa fa-edit"></span>
                     </a>
-                    <a href="<?= base_url('index.php/admin/deleteCategory/' . $row['category_id']) ?>" class="btn btn-danger btn-sm confirm" data-placement="top" title="Delete Category" rel="tooltip">
-                      <span class="fa fa-trash"></span>
-                    </a>
+                    <?php if ($_SESSION['user_type'] == 'Superadmin') { ?>
+                      <a href="<?= base_url('index.php/admin/deleteCategory/' . $row['category_id']) ?>" class="btn btn-danger btn-sm confirm" data-placement="top" title="Delete Category" rel="tooltip">
+                        <span class="fa fa-trash"></span>
+                      </a>
+                    <?php } ?>
                   </td>
                 </tr>
               <?php }  ?>
@@ -109,9 +111,11 @@
                     <a href="javascript:" class="btn btn-success btn-sm updateCharge" id='<?= json_encode($row) ?>' data-placement="top" title="Update Charge" rel="tooltip">
                       <span class="fa fa-edit"></span>
                     </a>
-                    <a href="<?= base_url('index.php/admin/deleteCharge/' . $row['charge_id']) ?>" class="btn btn-danger btn-sm confirm" data-placement="top" title="Delete Charge" rel="tooltip">
-                      <span class="fa fa-trash"></span>
-                    </a>
+                    <?php if ($_SESSION['user_type'] == 'Superadmin') { ?>
+                      <a href="<?= base_url('index.php/admin/deleteCharge/' . $row['charge_id']) ?>" class="btn btn-danger btn-sm confirm" data-placement="top" title="Delete Charge" rel="tooltip">
+                        <span class="fa fa-trash"></span>
+                      </a>
+                    <?php } ?>
                   </td>
                 </tr>
                 <?php $category = $row['category'] ?>

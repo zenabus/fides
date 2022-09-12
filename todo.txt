@@ -1,6 +1,6 @@
 // 1. Direct booking
 // 2. Change Room 
-3. Change Room with reason
+// 3. Change Room with reason
 // 4. Notes not showing on pdf
 // 5. Refund with reason
 6. Extra Person charges specific dates
@@ -61,10 +61,18 @@ Franz
 // History per guest
 // logs per user
 // Add ip address on logs
+// Checkin and reseravation on current day
 
 Time-based login
 Div to image not working
 Calendar following month
 Ask if extras are per day
 Request room delete to admin
-Checkin and reseravation on current day
+
+
+new development
+// - early checkin is 6:00am to 11:59am (rate of 560)
+- late checkout fee from 1:00pm to 4:59pm (rate of 560)
+- late checkout of 5:00pm onwards is full day charge
+
+// executive suite max person from 2-3 and with extra bed up to 5 persons

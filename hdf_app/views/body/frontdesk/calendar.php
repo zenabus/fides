@@ -160,8 +160,10 @@
                     <?php
                     $icon = '';
                     $today = '';
+                    $bg = '';
                     if (date('Y-m-d') == $y . '-' . $m . '-' . str_pad($i, 2, '0', STR_PAD_LEFT)) {
                       $icon = '<i class="fa-regular fa-calendar-check"></i> ';
+                      $bg = 'bg-default text-white';
                     }
                     if (date('Y-m-d') == $y . '-' . $m . '-' . str_pad($i + 1, 2, '0', STR_PAD_LEFT)) {
                       $today = 'today';
@@ -169,7 +171,7 @@
                       $today = 'today';
                     }
                     ?>
-                    <th colspan="2" class="text-center sticky-top border-shadow<?= $i % 2 ? ' bg-light' : '' ?>" id="<?= $today ?>"><?= $icon ?><?= $i ?>-<?= substr($month, 0, 3) ?></th>
+                    <th colspan="2" class="text-center sticky-top border-shadow<?= $i % 2 ? ' bg-light' : '' ?> <?= $bg ?>" id="<?= $today ?>"><?= $icon ?><?= $i ?>-<?= substr($month, 0, 3) ?></th>
                   <?php } ?>
                 </tr>
               </thead>
@@ -238,16 +240,17 @@
                           $color = 'warning';
                         }
                         $occupant = explode(' / ', $data['occupant'])[0];
-                        $guest = $occupant ? $occupant : "{$data['first_name']} {$data['middle_name']} {$data['last_name']} {$data['suffix']}";
+                        $name = "{$data['first_name']} {$data['middle_name']} {$data['last_name']} {$data['suffix']}";
+                        $guest = $occupant ? $name . ' / ' . $occupant : $name;
 
                         $min = $date == min($data['dates_between']) ? 'min' : 'mid';
                         $max = $date == max($data['dates_between']) ? 'max' : 'mid';
                         ?>
-                        <td class="with-data bg-<?= $color ?> <?= $min ?>" date="<?= $date ?>" data='<?= json_encode($row) ?>' booking='<?= json_encode($data) ?>'><?= $min == 'min' ? $guest : '<i class="fa-solid fa-minus"></i>' ?></td>
-                        <td class="with-data bg-<?= $color ?> <?= $max ?>" date="<?= $date ?>" data='<?= json_encode($row) ?>' booking='<?= json_encode($data) ?>'><?= $min == 'min' ?  $data['remarks'] : '<i class="fa-solid fa-minus"></i>' ?></td>
+                        <td class="with-data bg-<?= $color ?> <?= $min ?>" date="<?= $date ?>" data='<?= json_encode($row) ?>' booking='<?= json_encode($data) ?>'><?= $guest ?></td>
+                        <td class="with-data bg-<?= $color ?> <?= $max ?>" date="<?= $date ?>" data='<?= json_encode($row) ?>' booking='<?= json_encode($data) ?>'><?= $data['remarks'] ?></td>
                       <?php } else { ?>
-                        <td class="no-data first" date="<?= $date ?>" data='<?= json_encode($row) ?>' type="<?= $type ?>" <?= $disabled ?>><?= $text ?></td>
-                        <td class="no-data second" date="<?= $date ?>" data='<?= json_encode($row) ?>' type="<?= $type ?>" <?= $disabled ?>><?= $text ?></td>
+                        <td class="no-data first" date="<?= $date ?>" date="<?= $date ?>" data='<?= json_encode($row) ?>' type="<?= $type ?>" <?= $disabled ?>><?= $text ?></td>
+                        <td class="no-data second" date="<?= $date ?>" date="<?= $date ?>" data='<?= json_encode($row) ?>' type="<?= $type ?>" <?= $disabled ?>><?= $text ?></td>
                     <?php }
                     } ?>
                   </tr>
@@ -314,6 +317,7 @@
 <script>
   const base_url = ' <?= base_url() ?>';
   const now = new Date();
+  let hour = `${pad(now.getHours())}`;
   let time = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
   let today = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}`;
 
@@ -437,17 +441,29 @@
   $('.no-data').click(function() {
     const room = JSON.parse($(this).attr('data'));
     const type = $(this).attr('type');
-    let date = new Date();
-    date = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
+    const date = $(this).attr('date');
+    // let date = new Date();
+    // date = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
     $('#returning_guest').show();
     $('.form-control').val('').removeAttr('disabled');
     modalBooking(this, type, 1);
+
     $('#frmBook').attr('action', `${base_url}index.php/main/book`);
     $('.action-div').addClass('d-none');
     $('[name=check_in]').attr('readonly', true);
     $('#btnBooking').show();
     $('#btnRedirect').addClass('d-none');
     $('#btnCancel').addClass('d-none');
+    $('.type-div').addClass('d-none');
+
+    if (toDashed(date) == today) {
+      if (hour >= 6 && hour <= 12) {
+        $('.reservation-div').hide();
+        $('[name=booking_type]').val('Check In');
+        $('#btnBooking').val('Check In')
+      }
+      $('.type-div').removeClass('d-none');
+    }
   });
 
   $('.with-data').click(function() {
@@ -473,20 +489,26 @@
       const [month, day, year] = booking.check_in.split('/')
       const checkin = `${year}-${month}-${day}`;
       modalBooking(this, 'Reservation', 0);
-
       if (checkin == today) {
-        $("#rdo_check").prop("checked", true);
-        $('.action-div').removeClass('d-none');
-        $('#frmBook').attr('action', `${base_url}index.php/main/checkIn`);
-        $('#btnBooking').show().val('Check In');
-        $(".reservation-div").hide();
+        if (hour >= 10) {
+          $("#rdo_check").prop("checked", true);
+          $('.action-div').removeClass('d-none');
+          $('#frmBook').attr('action', `${base_url}index.php/main/checkIn`);
+          $('#btnBooking').show().val('Check In');
+          $(".reservation-div").hide();
+        } else {
+          $('#frmBook').attr('action', `${base_url}index.php/main/updateReservation`);
+          $('.action-div').addClass('d-none');
+          $('#btnBooking').show().val('Update');
+        }
       } else {
         $('#frmBook').attr('action', `${base_url}index.php/main/updateReservation`);
         $('.action-div').addClass('d-none');
+        $('#btnBooking').show().val('Update');
       }
 
       $(booking.reservation_type == 'Confirmed' ? "#rdo_confirmed" : '#rdo_arrival').prop("checked", true);
-      $('#btnBooking').show().val('Update');
+
       $('[name=booking_id]').val(booking.booking_id);
       $('[name=check_in]').removeAttr('readonly');
       $('.form-control').removeAttr('disabled');

@@ -2,7 +2,7 @@
   <div class="row">
     <div class="col-md-12">
       <div class="d-flex justify-content-between align-items-center mb-2">
-        <h5 class="mb-0">Guest Bookings</h5>
+        <h5 class="mb-0">Transaction History - <?= $guest->first_name ?> <?= $guest->middle_name ?> <?= $guest->last_name ?> <?= $guest->suffix ?></h5>
         <button class="btn btn-primary my-0 back" onclick="history.back()">Back</button>
       </div>
       <div class="wizard-container">
@@ -75,10 +75,10 @@
                         <?php $data['row'] = $row ?>
                         <?php $this->load->view('body/frontdesk/components/booking_table_data', $data) ?>
                         <td class="action">
-                          
+
                         </td>
                       </tr>
-                  <?php } ?>
+                    <?php } ?>
                   </tbody>
                 </table>
               </div>

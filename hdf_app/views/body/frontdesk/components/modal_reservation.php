@@ -13,6 +13,25 @@
         <input type="hidden" name="guest_id">
         <input type="hidden" name="booking_type">
         <input type="hidden" name="booking_id">
+        <div class="form-group type-div d-none">
+          <label>Booking Type</label>
+          <div class="d-flex justify-content-around">
+            <div class="form-check-radio">
+              <label class="form-check-label">
+                <input class="form-check-input" type="radio" name="rdo_booking_type" id="rdo_checkin" value="Check In" checked>
+                Check In
+                <span class="form-check-sign"></span>
+              </label>
+            </div>
+            <div class="form-check-radio">
+              <label class="form-check-label">
+                <input class="form-check-input" type="radio" name="rdo_booking_type" id="rdo_reservation" value="Reservation">
+                Reservation
+                <span class="form-check-sign"></span>
+              </label>
+            </div>
+          </div>
+        </div>
         <div class="form-group action-div d-none">
           <label>Action</label>
           <div class="d-flex justify-content-around">
@@ -162,16 +181,16 @@
   <div class="modal-dialog modal-sm pt-0" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h4 class="title title-up">Reason</h4>
+        <h4 class="title title-up">Cancel Reservation</h4>
       </div>
       <div class="modal-body px-4">
-        <?=form_open('main/cancelReservation', ['id' => 'frmCancel']) ?>
+        <?= form_open('main/cancelReservation', ['id' => 'frmCancel']) ?>
         <input type="hidden" name="booking_id">
         <div class="form-group">
-          <label>Cancellation Reason</label>
+          <label>Reason</label>
           <textarea class="form-control" name="cancel_reason" required></textarea>
         </div>
-        <?=form_close() ?>
+        <?= form_close() ?>
       </div>
       <div class="modal-footer">
         <div class="left-side">
