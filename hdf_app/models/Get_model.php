@@ -17,174 +17,12 @@ class Get_model extends CI_Model {
     return $this->db->join('room_type', 'room_type.id=rooms.room_type_id')->where('rooms.id', $room_id)->get('rooms')->row();
   }
 
-  function getUpdateRoomType($id) {
-    return $this->db->where('id', $id)->get('room_type')->result_array();
-  }
-
-  function getBed() {
-    return $this->db->get('room_bed')->result_array();
-  }
-
-  function getPerson() {
-    return $this->db->get('room_person')->result_array();
-  }
-
-  function getDeduction() {
-    return $this->db->get('deduction')->result_array();
-  }
-  function getDeductionById($id) {
-    return $this->db->where('id_ded', $id)->get('deduction')->row_array();
-  }
-
-  function coffeegetProductRes() {
-    return $this->db->get('product_coffeeshop')->result_array();
-  }
-
-  function getProductRes($res) {
-    if ($res == 'Restaurant') {
-      return $this->db->get('product_restaurant')->result_array();
-    } else {
-      return $this->db->get('product_coffeeshop')->result_array();
-    }
-  }
-
   function getUsers() {
     return $this->db->order_by('status')->order_by('user_type')->order_by('name')->get('users')->result_array();
   }
 
   function getUser($user_id) {
     return $this->db->where('id', $user_id)->get('users')->row();
-  }
-
-  function frontdeskgetReservationDetails($id_if_reserve) {
-    return $this->db->query('SELECT * FROM reserve_room_type WHERE form_id="' . $id_if_reserve . '"')->result_array();
-  }
-
-  function frontdeskgetRoomById($id) {
-    return $this->db->query('SELECT * FROM room_type INNER JOIN rooms ON room_type.id=rooms.room_type_id WHERE rooms.id="' . $id . '"')->result_array();
-  }
-
-  function frontdeskgetRoom() {
-    //return $this->db->query('SELECT * FROM room_type INNER JOIN rooms ON room_type.id=rooms.room_type_id WHERE status_by_room <> "CHECK"')->result_array();
-    return $this->db->query('SELECT * ,room_types_booking.name AS room_type FROM rooms_booking INNER JOIN room_types_booking ON rooms_booking.type= room_types_booking.id INNER JOIN room_statuses ON rooms_booking.status = room_statuses.id')->result_array();
-  }
-
-  function frontdeskgetRoomAndCheck($id) {
-    return $this->db->query('SELECT * FROM rooms INNER JOIN check_form ON rooms.room_number = check_form.room_id WHERE rooms.id="' . $id . '" and check_form.status="IN"')->result_array();
-  }
-
-  function frontdeskaddPricingTable($id) {
-    $this->db->query('SELECT * FROM room_type INNER JOIN rooms ON room_type.id=rooms.room_type_id WHERE rooms.id="' . $id . '"');
-  }
-
-  function getDataCart($res) {
-    if ($this->session->userdata('connect') == true) {
-      # code...
-      $sess = $this->session->userdata('username');
-    }
-
-    if ($res == 'Restaurant') {
-      return $this->db->query('SELECT * FROM product_restaurant INNER JOIN restaurant_cart ON product_restaurant.id=restaurant_cart.product_id WHERE restaurant_cart.id_of_user="' . $sess . '" and table_num="walkin" and status_cart="Not Deleted" order by id desc')->result_array();
-    } else {
-      return $this->db->query('SELECT * FROM product_coffeeshop INNER JOIN restaurant_cart ON product_coffeeshop.id=restaurant_cart.product_id WHERE restaurant_cart.id_of_user="' . $sess . '" and table_num="walkin" and status_cart="Not Deleted" order by id desc')->result_array();
-    }
-  }
-
-  function getDataCartReciept($id_reports, $res) {
-    if ($this->session->userdata('connect') == true) {
-      # code...
-      $sess = $this->session->userdata('username');
-    }
-
-    if ($res == 'Restaurant') {
-      return $this->db->query('SELECT * FROM product_restaurant INNER JOIN restaurant_cart ON product_restaurant.id=restaurant_cart.product_id WHERE restaurant_cart.id_of_user="' . $sess . '" and table_num="walkin" and status_cart="Deleted" and id_for_reports="' . $id_reports . '" order by id desc')->result_array();
-    } else {
-      return $this->db->query('SELECT * FROM product_coffeeshop INNER JOIN restaurant_cart ON product_coffeeshop.id=restaurant_cart.product_id WHERE restaurant_cart.id_of_user="' . $sess . '" and table_num="walkin" and status_cart="Deleted" and id_for_reports="' . $id_reports . '" order by id desc')->result_array();
-    }
-  }
-
-  function AdmingetDataCartReciept($id_reports, $res) {
-    if ($res == 'Restaurant') {
-      return $this->db->query('SELECT * FROM product_restaurant INNER JOIN restaurant_cart ON 
-                          product_restaurant.id=restaurant_cart.product_id 
-                WHERE table_num="walkin" and status_cart="Deleted" and id_for_reports="' . $id_reports . '" order by id desc')->result_array();
-    } else {
-      return $this->db->query('SELECT * FROM product_coffeeshop INNER JOIN restaurant_cart ON 
-                          product_coffeeshop.id=restaurant_cart.product_id 
-                WHERE table_num="walkin" and status_cart="Deleted" and id_for_reports="' . $id_reports . '" order by id desc')->result_array();
-    }
-  }
-
-  function getDataCartRecieptpertable($id_reports, $id, $res) {
-    if ($this->session->userdata('connect') == true) {
-      # code...
-      $sess = $this->session->userdata('username');
-    }
-
-    if ($res == 'Restaurant') {
-      return $this->db->query('SELECT * FROM product_restaurant INNER JOIN restaurant_cart ON product_restaurant.id=restaurant_cart.product_id WHERE restaurant_cart.id_of_user="' . $sess . '" and table_num="' . $id . '" and status_cart="Deleted" and id_for_reports="' . $id_reports . '" order by id desc')->result_array();
-    } else {
-      return $this->db->query('SELECT * FROM product_coffeeshop INNER JOIN restaurant_cart ON product_coffeeshop.id=restaurant_cart.product_id WHERE restaurant_cart.id_of_user="' . $sess . '" and table_num="' . $id . '" and status_cart="Deleted" and id_for_reports="' . $id_reports . '" order by id desc')->result_array();
-    }
-  }
-
-  function AdmingetDataCartRecieptpertable($id_reports, $id) {
-    return $this->db->query('SELECT * FROM product_restaurant INNER JOIN restaurant_cart ON product_restaurant.id=restaurant_cart.product_id WHERE table_num="' . $id . '" and status_cart="Deleted" and id_for_reports="' . $id_reports . '" order by id desc')->result_array();
-  }
-
-  function getDataCartDelivered($res) {
-    if ($this->session->userdata('connect') == true) {
-      # code...
-      $sess = $this->session->userdata('username');
-    }
-    if ($res == 'Restaurant') {
-      return $this->db->query('SELECT * FROM product_restaurant INNER JOIN restaurant_cart ON product_restaurant.id=restaurant_cart.product_id WHERE restaurant_cart.id_of_user="' . $sess . '" and table_num="walkin" and status_cart="Deleted" order by id desc')->result_array();
-    } else {
-      return $this->db->query('SELECT * FROM product_coffeeshop INNER JOIN restaurant_cart ON product_coffeeshop.id=restaurant_cart.product_id WHERE restaurant_cart.id_of_user="' . $sess . '" and table_num="walkin" and status_cart="Deleted" order by id desc')->result_array();
-    }
-  }
-
-  function CoffeeshopgetDataCart() {
-    if ($this->session->userdata('connect') == true) {
-      # code...
-      $sess = $this->session->userdata('username');
-    }
-
-    return $this->db->query('SELECT * FROM product_coffeeshop INNER JOIN coffeeshop_cart ON product_coffeeshop.id=coffeeshop_cart.product_id WHERE coffeeshop_cart.id_of_user="' . $sess . '" and table_num="walkin"')->result_array();
-  }
-
-  function getDataCartbyTable($id, $res) {
-    if ($this->session->userdata('connect') == true) {
-      # code...
-      $sess = $this->session->userdata('username');
-    }
-
-    if ($res == 'Restaurant') {
-      return $this->db->query('SELECT * FROM product_restaurant INNER JOIN restaurant_cart ON product_restaurant.id=restaurant_cart.product_id WHERE restaurant_cart.id_of_user="' . $sess . '" and table_num="' . $id . '" and status_cart="Not Deleted" order by id_cart desc')->result_array();
-    } else {
-      return $this->db->query('SELECT * FROM product_coffeeshop INNER JOIN restaurant_cart ON product_coffeeshop.id=restaurant_cart.product_id WHERE restaurant_cart.id_of_user="' . $sess . '" and table_num="' . $id . '" and status_cart="Not Deleted" order by id_cart desc')->result_array();
-    }
-  }
-
-  function getDataCartDeliveredPertable($id, $res) {
-    if ($this->session->userdata('connect') == true) {
-      # code...
-      $sess = $this->session->userdata('username');
-    }
-
-    if ($res == 'Restaurant') {
-      return $this->db->query('SELECT * FROM product_restaurant INNER JOIN restaurant_cart ON product_restaurant.id=restaurant_cart.product_id WHERE restaurant_cart.id_of_user="' . $sess . '" and table_num="' . $id . '" and status_cart="Not Deleted" order by id desc')->result_array();
-    } else {
-      return $this->db->query('SELECT * FROM product_coffeeshop INNER JOIN restaurant_cart ON product_coffeeshop.id=restaurant_cart.product_id WHERE restaurant_cart.id_of_user="' . $sess . '" and table_num="' . $id . '" and status_cart="Not Deleted" order by id desc')->result_array();
-    }
-  }
-
-  function coffeeshopgetDataCartbyTable($id) {
-    if ($this->session->userdata('connect') == true) {
-      # code...
-      $sess = $this->session->userdata('username');
-    }
-    return $this->db->query('SELECT * FROM product_coffeeshop INNER JOIN coffeeshop_cart ON product_coffeeshop.id=coffeeshop_cart.product_id WHERE coffeeshop_cart.id_of_user="' . $sess . '" and table_num="' . $id . '"')->result_array();
   }
 
   function frontdeskGetRoomTypeById($id) {
@@ -201,28 +39,6 @@ class Get_model extends CI_Model {
 
   function frondeskGetRoomNoRestriction() {
     return $this->db->get('rooms')->result_array();
-  }
-
-  function frondeskGetRoomCheckedNoRestriction() {
-    //return $this->db->where('room_status','Checked In')->get('rooms_checked')->result_array();
-    return $this->db->query('SELECT * FROM check_form INNER JOIN rooms_checked ON check_form.id = rooms_checked.check_id WHERE status_payment="Unpaid"')->result_array();
-  }
-
-  function frondeskGetRoomCheckedById($id) {
-    //return $this->db->where('check_id',$id)->get('rooms_checked')->result_array();
-    return $this->db->query('SELECT * FROM deduction INNER JOIN rooms_checked ON deduction.id_ded=rooms_checked.dedeuction WHERE check_id = "' . $id . '" ')->result_array();
-    //return $this->db->query('SELECT * FROM rooms_checked INNER JOIN restaurant_cart ON rooms_checked.id_rooms = restaurant_cart.charge_id INNER JOIN product_restaurant ON restaurant_cart.product_id = product_restaurant.id INNER JOIN deduction ON deduction.id_ded=rooms_checked.dedeuctionwhere rooms_checked.check_id = "'.$id.'"')->result_array();
-
-  }
-
-  // check if still used
-  function frontdeskRommAv() {
-    return $this->db->where('status', '1')->get('rooms_booking')->result_array();
-  }
-
-  // check if still used
-  function frontdeskRommUn() {
-    return $this->db->query('SELECT * FROM rooms_booking WHERE status<> "1"')->result_array();
   }
 
   function frontdeskgetDeduction() {
@@ -481,11 +297,11 @@ class Get_model extends CI_Model {
   }
 
   function getRoomsWithRoomType() {
-    $this->db->select('*, rooms.id AS room_id');
-    $this->db->join('room_type', 'room_type.id=rooms.room_type_id');
-    $this->db->join('room_statuses', 'room_statuses.id=rooms.room_status_id');
-    $this->db->order_by('room_number');
-    return $this->db->get('rooms')->result_array();
+    return $this->db->select('*, rooms.id AS room_id')
+      ->join('room_type', 'room_type.id=rooms.room_type_id')
+      ->join('room_statuses', 'room_statuses.id=rooms.room_status_id')
+      ->order_by('room_number')
+      ->get('rooms')->result_array();
   }
 
   function getRoomIdsByRoomType($room_type_id) {
@@ -548,10 +364,6 @@ class Get_model extends CI_Model {
 
   function getProfile() {
     return $this->db->where('id', $_SESSION['user_id'])->get('users')->row();
-  }
-
-  function getRoomById($id) {
-    return $this->db->join('room_type', 'room_type.id=rooms.room_type_id')->where('rooms.id', $id)->get('rooms')->row();
   }
 
   function getRoomsById($room_id) {
@@ -742,7 +554,11 @@ class Get_model extends CI_Model {
       ->get('booked_rooms')->result_array();
   }
 
-  function getRoomStatuses() {
-    return $this->db->get('room_statuses')->result_array();
+  function getRoomStatuses($room_status_id = NULL) {
+    if ($room_status_id) {
+      return $this->db->where('id', $room_status_id)->get('room_statuses')->row();
+    } else {
+      return $this->db->get('room_statuses')->result_array();
+    }
   }
 }

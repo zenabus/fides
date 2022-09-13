@@ -24,8 +24,9 @@
 
     .alert {
       z-index: 9999;
-      bottom: 16px;
-      right: 16px;
+      left: 50%;
+      transform: translate(-50%, 0);
+      top: 32px;
       min-width: 400px;
     }
   </style>

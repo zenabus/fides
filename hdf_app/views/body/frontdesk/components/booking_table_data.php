@@ -22,7 +22,11 @@
 <td>
   <?php foreach ($row['rooms'] as $room) { ?>
     <details>
-      <summary>Room <?= $room['room_number'] ?> - <?= $room['room_type'] ?></summary>
+      <summary>Room <?= $room['room_number'] ?> - <?= $room['room_type'] ?>
+        <?php if ($room['check_out'] == date('m/d/Y')) { ?>
+          <i class="fa-solid fa-calendar-day heart"></i>
+        <?php } ?>
+      </summary>
       <small class="ml-3">Check In: <?= $room['check_in'] ?></small><br>
       <small class="ml-3">Check Out: <?= $room['check_out'] ?></small><br>
       <small class="ml-3">No. Nights: <?= $room['nights'] ?> night<?= $room['nights'] ? '' : 's' ?></small><br>
@@ -47,6 +51,10 @@
       </small><br>
     <?php } ?>
   </details>
+  <?php if ($row['refund']) { ?>
+    <small>Refund amount: ₱ <?= number_format($row['refund']) ?></small><br>
+    <small>Refund reason: <?= $row['refund_reason'] ?></small>
+  <?php } ?>
 </td>
 <td>
   <?= $row['arrival'] ?> - <?= $row['departure'] ?><br>

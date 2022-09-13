@@ -197,8 +197,8 @@ class Admin extends MY_Controller {
 
   function changeStatus($user_id, $status) {
     $user = $this->get_model->getUser($user_id);
-    $status = strtolower($status);
     $this->update_model->changeStatus($user_id, $status);
+    $status = strtolower($status);
     $this->insert_model->log('Updated user status', 4);
     $this->insert_model->log("Updated user status for {$user->name} to {$status}", 4);
     $this->session->set_flashdata('success', "User is now {$status}!");

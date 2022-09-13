@@ -28,7 +28,7 @@ class Booking extends MY_Controller {
     $guest = $this->get_model->checkGuest();
     $email = $_POST['email'];
     $_POST['guest_id'] = $guest ? $guest->guest_id : $this->insert_model->addGuest($_POST, TRUE);
-    $booking_number = $this->insert_model->book();
+    [$booking_number] = $this->insert_model->book();
     $message = $this->reservationMessage($_POST['guest_id'], $booking_number);
     $this->sendMail($email, $message, 'Verify your reservation');
     echo $booking_number;
@@ -76,7 +76,7 @@ class Booking extends MY_Controller {
     $check_in = $_POST['check_in'];
     $check_out = $_POST['check_out'];
     $nights = $_POST['nights'];
-    $room_type = $this->get_model->getRoomById($_POST['room_id']);
+    $room_type = $this->get_model->getRoom($_POST['room_id']);
     $price = number_format($room_type->pricing_type, 2);
     $amount = number_format($room_type->pricing_type * .25, 2);
     $request = $_POST['request'];

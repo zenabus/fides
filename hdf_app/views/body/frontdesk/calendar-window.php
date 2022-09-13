@@ -137,7 +137,19 @@
         <tr>
           <th class="white sticky-top border-shadow-1 text-center"><?= $y ?></th>
           <?php for ($i = 1; $i <= $days; $i++) { ?>
-            <th class="text-center mw sticky-top border-shadow<?= $i % 2 ? ' bg-light' : '' ?>" id="<?= date('Y-m-d') == $y . '-' . $m . '-' . str_pad($i, 2, '0', STR_PAD_LEFT) ? 'today' : '' ?>"><?= $i ?>-<?= substr($month, 0, 3) ?></th>
+            <?php
+            $today = '';
+            $bg = '';
+            if (date('Y-m-d') == $y . '-' . $m . '-' . str_pad($i, 2, '0', STR_PAD_LEFT)) {
+              $bg = 'bg-default text-white';
+            }
+            if (date('Y-m-d') == $y . '-' . $m . '-' . str_pad($i + 2, 2, '0', STR_PAD_LEFT)) {
+              $today = 'today';
+            } elseif (date('Y-m-d') == $y . '-' . $m . '-' . str_pad($i, 2, '0', STR_PAD_LEFT)) {
+              $today = 'today';
+            }
+            ?>
+            <th class="text-center mw sticky-top border-shadow<?= $i % 2 ? ' bg-light' : '' ?> <?= $bg ?>" id="<?= $today ?>"><?= $i ?>-<?= substr($month, 0, 3) ?></th>
           <?php } ?>
           <?php for ($j = 1; $j <= 10; $j++) { ?>
             <!-- <th class="text-center mw sticky-top border-shadow"><?= $j ?>-<?= substr($next_month, 0, 3) ?></th> -->
@@ -193,11 +205,6 @@
               $data = array_filter($bookings, function ($booking) use ($date, $row) {
                 return in_array($date, $booking['dates_between']) && $row['room_number'] == $booking['room_number'];
               });
-
-              // echo '<pre>';
-              // print_r(var_dump($row['room_id']));
-
-
               ?>
               <?php if ($data) { ?>
                 <?php $data = array_merge(...$data); ?>

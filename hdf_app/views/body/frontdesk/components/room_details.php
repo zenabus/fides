@@ -29,7 +29,11 @@
               <?php $total = $row['pricing_type'] * $row['nights'] ?>
               <?php $discount = $total * ($row['percentage'] / 100) ?>
               <?php $subtotal = $total - $discount ?>
-              <small><?= $row['check_in'] ?> - <?= $row['check_out'] ?></small><br>
+              <small><?= $row['check_in'] ?> - <?= $row['check_out'] ?></small>
+              <?php if ($row['check_out'] == date('m/d/Y')) { ?>
+                <i class="fa-solid fa-calendar-day heart"></i>
+              <?php } ?>
+              <br>
               <small>₱ <?= number_format($subtotal) ?> (<?= $row['discount_type'] ?> <?= $row['percentage'] ?>%)</small>
             </td>
             <td>

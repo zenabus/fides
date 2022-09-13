@@ -69,6 +69,7 @@ class Delete_model extends CI_Model {
 
   function deleteCategory($category_id) {
     $this->db->where('category_id', $category_id)->delete('categories');
+    $this->db->where('category_id', $category_id)->delete('charges');
   }
 
   function deleteCharge($charge_id) {

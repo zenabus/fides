@@ -65,13 +65,11 @@ class Main extends MY_Controller {
   }
 
   function rooms() {
-    $data = [
-      'active' => 'rooms',
-      'rooms' => $this->get_model->getRoomsWithRoomType(),
-      'room_types' => $this->get_model->getRoomTypes(),
-      'guests' => $this->get_model->getGuests(),
-      'statuses' => $this->get_model->getRoomStatuses(),
-    ];
+    $data['active'] = 'rooms';
+    $data['rooms'] = $this->get_model->getRoomsWithRoomType();
+    $data['room_types'] = $this->get_model->getRoomTypes();
+    $data['guests'] = $this->get_model->getGuests();
+    $data['statuses'] = $this->get_model->getRoomStatuses();
 
     $this->load->view('layout/header', $data);
     $this->load->view('body/frontdesk/rooms');
@@ -102,7 +100,7 @@ class Main extends MY_Controller {
   function guest($guest_id) {
     $data['active'] = 'guests';
     $data['guest'] = $this->get_model->getGuest($guest_id);
-    $data['bookings'] = $this->get_model->getBookingsByGuest($guest_id, [0, -1]);
+    $data['bookings'] = $this->get_model->getBookingsByGuest($guest_id, [0, -1, 6]);
     $data['reservations'] = $this->get_model->getBookingsByGuest($guest_id, [1, 2, 3]);
     $i = 0;
     foreach ($data['bookings'] as $booking) {
@@ -136,6 +134,7 @@ class Main extends MY_Controller {
     $data['checkouts'] = $this->get_model->getCheckouts();
     $data['bed'] = $this->get_model->getPrice('Bed');
     $data['person'] = $this->get_model->getPrice('Person');
+    $data['statuses'] = $this->get_model->getRoomStatuses();
 
     foreach ($data['checkouts'] as $i => $row) {
       $data['checkouts'][$i]['restaurant'] = $this->get_model->getRoomCharges($row['booked_room_id'], 'Restaurant');
@@ -324,19 +323,20 @@ class Main extends MY_Controller {
     if (!$_POST['guest_id']) {
       $_POST['guest_id'] = $this->insert_model->addGuest($_POST, TRUE);
     }
-    $room = $this->get_model->getRoomById($_POST['room_id']);
+    $room = $this->get_model->getRoom($_POST['room_id']);
     $name = $_POST['first_name'] . ' ' . $_POST['last_name'];
     $type = $_POST['booking_type'] == 'Check In' ? 'booked' : 'reserved';
-    [$booking_number, $booking_id] = $this->insert_model->book();
+    [$booking_number, $booked_room_id] = $this->insert_model->book();
     $log = ucfirst("{$type} {$name} in room {$room->room_number}");
     $this->insert_model->log($log);
     $this->insert_model->addBookingLog($log);
     $this->update_model->updateCheckIn($_POST['guest_id']);
     $this->session->set_flashdata('success', "Successfully {$type} {$name} in room {$room->room_number}");
 
-    $booked_room = $this->get_model->getBookedRoom($booking_id);
+    // $booked_room = $this->get_model->getBookedRoom($booking_id);
     if ($_POST['check_in'] == date('m/d/Y')) {
-      $this->earlyCheckIn($booked_room->booked_room_id);
+      log_message('error', $booked_room_id);
+      $this->earlyCheckIn($booked_room_id);
     }
 
     if ($_POST['booking_type'] == 'Check In') {
@@ -431,6 +431,7 @@ class Main extends MY_Controller {
 
   function earlyCheckIn($booked_room_id) {
     if (date('H') >= 6 && date('H') <= 11) {
+      log_message('error', $booked_room_id);
       $this->insert_model->addEarlyCheckin($booked_room_id);
     }
   }
@@ -693,6 +694,16 @@ class Main extends MY_Controller {
     $this->insert_model->log($log);
     $this->delete_model->deletePayment($booking_payment_id);
     $this->session->set_flashdata('success', 'Payment successfully removed!');
+    $this->redirect();
+  }
+
+  function updateRoomStatus() {
+    $room = $this->get_model->getRoom($_POST['room_id']);
+    $old_status = $this->get_model->getRoomStatuses($room->room_status_id);
+    $room_status = $this->get_model->getRoomStatuses($_POST['room_status_id']);
+    $this->update_model->updateRoomStatus();
+    $this->insert_model->log("Updated room status of <b>{$room->room_number} {$room->room_type_abbr}</b> from <b>{$old_status->description}</b> to <b>{$room_status->description}</b>", 4);
+    $this->session->set_flashdata('success', 'Room status  successfully updated!');
     $this->redirect();
   }
 }

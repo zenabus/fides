@@ -8,12 +8,11 @@ class Housekeeping extends MY_Controller {
   // ------------------------------------------------------------------------------------------------------- //
 
   function index() {
-    $data = [
-      'active' => 'rooms',
-      'rooms' => $this->get_model->getRoomsWithRoomType(),
-      'room_types' => $this->get_model->getRoomTypes(),
-      'guests' => $this->get_model->getGuests(),
-    ];
+    $data['active'] = 'rooms';
+    $data['rooms'] = $this->get_model->getRoomsWithRoomType();
+    $data['room_types'] = $this->get_model->getRoomTypes();
+    $data['guests'] = $this->get_model->getGuests();
+    $data['statuses'] = $this->get_model->getRoomStatuses();
 
     $this->load->view('layout/header', $data);
     $this->load->view('body/frontdesk/rooms');

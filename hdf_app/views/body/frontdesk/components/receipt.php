@@ -2,7 +2,7 @@
 <html>
 
 <head>
-  <title><?= TITLE ?> - Guest Registration Form</title>
+  <title><?= TITLE ?> - Acknowledgment Receipt</title>
   <style type="text/css">
     * {
       font-family: 'DejaVu Serif' !important;
@@ -221,8 +221,20 @@
             <tr class="bl br cost">
               <td><?= $type != $charges['category'] ? $charges['category'] : '↳' ?></td>
               <td>(<?= $charges['charge_quantity'] ?>) <?= $charges['charge'] ?></td>
-              <td class="tr"><?= number_format($charges['charge_amount'], 2) ?></td>
-              <td class="tr"> <?= number_format($charges['charge_amount'] * $charges['charge_quantity'], 2) ?></td>
+              <?php
+              $charge_price =  $charges['charge_id'] == 39 ? $row['pricing_type'] : $charges['charge_amount'];
+              if ($charges['charge_id'] == 39) {
+                $total = $charge_price;
+                $discount = $total * ($row['percentage'] / 100);
+                $subtotal = $total - $discount;
+                $grand_total += $subtotal;
+              ?>
+                <td class="tr"><?= number_format($total, 2) ?></td>
+                <td class="tr"><?= number_format($subtotal, 2) ?></td>
+              <?php } else { ?>
+                <td class="tr"><?= number_format($charges['charge_amount'], 2) ?></td>
+                <td class="tr"> <?= number_format($charges['charge_amount'] * $charges['charge_quantity'], 2) ?></td>
+              <?php } ?>
               <?php $type = $charges['category'] ?>
             </tr>
           <?php } ?>

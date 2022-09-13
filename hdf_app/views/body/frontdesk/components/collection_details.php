@@ -1,6 +1,6 @@
 <div class="card">
-  <div class="card-header border-bottom px-4 pt-4 pb-2">
-    <h6>Collection Details</h6>
+  <div class="card-header border-bottom px-4 pt-4 pb-3">
+    <h6 class="mx-1">Collection Details</h6>
   </div>
   <div class="card-body p-0">
     <table class="table table-sm table-hover mb-0">
@@ -93,19 +93,30 @@
               <td>(<?= $charges['charge_quantity'] ?>) <?= $charges['charge'] ?></td>
               <?php $charge_price =  $charges['charge_id'] == 39 ? $row['pricing_type'] : $charges['charge_amount'] ?>
               <td>₱ <?= number_format($charge_price) ?></td>
-              <?php $total = $charge_price * $row['nights'] ?>
-              <?php $discount = $total * ($row['percentage'] / 100) ?>
-              <?php $subtotal = $total - $discount ?>
-              <?php $grand_total += $subtotal ?>
-              <td>
-                ₱ <?= number_format($subtotal) ?>
-                <small data-placement="left" title="<?= $row['discount_type'] ?>
+              <?php
+              if ($charges['charge_id'] == 39) {
+                $total = $charge_price;
+                $discount = $total * ($row['percentage'] / 100);
+                $subtotal = $total - $discount;
+                $grand_total += $subtotal;
+              ?>
+                <td>
+                  ₱ <?= number_format($subtotal) ?>
+                  <small data-placement="left" title="<?= $row['discount_type'] ?>
                   <br>-₱ <?= number_format($discount) ?>" rel="tooltip" data-html="true">(-<?= $row['percentage'] ?>%)
-                </small>
-                <a href="<?= base_url('index.php/main/removeCharge/charges_other/' . $charges['charges_other_id']) ?>" class="float-right mt-1 text-danger confirm hidable" data-placement="left" title="Remove Amenity / Charge" rel="tooltip">
-                  <span class="fa fa-times"></span>
-                </a>
-              </td>
+                  </small>
+                  <a href="<?= base_url('index.php/main/removeCharge/charges_other/' . $charges['charges_other_id']) ?>" class="float-right mt-1 text-danger confirm hidable" data-placement="left" title="Remove Amenity / Charge" rel="tooltip">
+                    <span class="fa fa-times"></span>
+                  </a>
+                </td>
+              <?php } else { ?>
+                <td>
+                  ₱ <?= number_format($charge_price * $charges['charge_quantity']) ?>
+                  <a href="<?= base_url('index.php/main/removeCharge/charges_other/' . $charges['charges_other_id']) ?>" class="float-right mt-1 text-danger confirm hidable" data-placement="left" title="Remove Amenity / Charge" rel="tooltip">
+                    <span class="fa fa-times"></span>
+                  </a>
+                </td>
+              <?php } ?>
               <?php $type = $charges['category'] ?>
             </tr>
           <?php } ?>

@@ -145,7 +145,7 @@
       </div>
       <div class="modal-footer">
         <div class="left-side">
-          <button type="submit" class="btn btn-link btn-category" form="frmCategory">Add Category</button>
+          <button type="submit" class="btn btn-link btn-category" form="frmCategory">Add</button>
         </div>
         <div class="divider"></div>
         <div class="right-side">
@@ -186,7 +186,7 @@
       </div>
       <div class="modal-footer">
         <div class="left-side">
-          <button type="submit" class="btn btn-link title-charge" form="frmCharge">Add Charge</button>
+          <button type="submit" class="btn btn-link btn-charge" form="frmCharge">Add</button>
         </div>
         <div class="divider"></div>
         <div class="right-side">
@@ -234,7 +234,7 @@
     $('#modalCategory').modal('show');
     $('#frmCategory').attr('action', `${base_url}index.php/admin/addCategory`).trigger('reset');
     $('.title-category').text('Add Category');
-    $('.btn-category').text('Add Category');
+    $('.btn-category').text('Add');
   });
 
   $('.updateCategory').click(function() {
@@ -251,6 +251,7 @@
     $('#modalCharge').modal('show');
     $('#frmCharge').attr('action', `${base_url}index.php/admin/addCharge`).trigger('reset');
     $('.title-charge').text('Add Charge');
+    $('.btn-charge').text('Add');
   });
 
   $('.updateCharge').click(function() {
@@ -261,6 +262,7 @@
     $('[name=charge_amount]').val(data.charge_amount);
     $('#frmCharge').attr('action', `${base_url}index.php/admin/updateCharge`);
     $('.title-charge').text('Update Charge');
+    $('.btn-charge').text('Update');
     $('#modalCharge').modal('show');
   });
 

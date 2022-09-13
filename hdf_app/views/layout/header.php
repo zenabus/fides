@@ -67,8 +67,9 @@ if (!$this->session->userdata('connect')) {
 
     .alert {
       z-index: 9999;
-      bottom: 16px;
-      right: 16px;
+      left: 50%;
+      transform: translate(-50%, 0);
+      top: 32px;
       min-width: 400px;
     }
 
@@ -187,97 +188,97 @@ if (!$this->session->userdata('connect')) {
 
         <ul class="nav">
           <?php $access = ['Admin', 'Superadmin', 'Front Desk']; ?>
-          <?php if(in_array($_SESSION['user_type'], $access)){ ?>
-          <li class="<?= $active == 'dashboard' ? 'active' : '' ?>">
-            <a href="<?= base_url('index.php/main') ?>">
-              <i class="fa fa-home"></i>
-              <p>Dashboard</p>
-            </a>
-          </li>
+          <?php if (in_array($_SESSION['user_type'], $access)) { ?>
+            <li class="<?= $active == 'dashboard' ? 'active' : '' ?>">
+              <a href="<?= base_url('index.php/main') ?>">
+                <i class="fa fa-home"></i>
+                <p>Dashboard</p>
+              </a>
+            </li>
           <?php } ?>
 
           <?php $access = ['Admin', 'Superadmin', 'Front Desk']; ?>
-          <?php if(in_array($_SESSION['user_type'], $access)){ ?>
-          <li class="<?= $active == 'calendar' ? 'active' : '' ?>">
-            <a href="<?= base_url('index.php/main/calendar/' . date('Y') . '/' . date('m')) ?>">
-              <i class="fa fa-calendar"></i>
-              <p>Express Calendar</p>
-            </a>
-          </li>
+          <?php if (in_array($_SESSION['user_type'], $access)) { ?>
+            <li class="<?= $active == 'calendar' ? 'active' : '' ?>">
+              <a href="<?= base_url('index.php/main/calendar/' . date('Y') . '/' . date('m')) ?>">
+                <i class="fa fa-calendar"></i>
+                <p>Express Calendar</p>
+              </a>
+            </li>
           <?php } ?>
 
           <?php $access = ['Admin', 'Superadmin', 'Front Desk', 'Housekeeping']; ?>
-          <?php if(in_array($_SESSION['user_type'], $access)){ ?>
-          <li class="<?= $active == 'rooms' ? 'active' : '' ?>">
-            <a href="<?= base_url('index.php/main/rooms') ?>">
-              <i class="fa fa-bed "></i>
-              <p>Rooms</p>
-            </a>
-          </li>
+          <?php if (in_array($_SESSION['user_type'], $access)) { ?>
+            <li class="<?= $active == 'rooms' ? 'active' : '' ?>">
+              <a href="<?= base_url('index.php/main/rooms') ?>">
+                <i class="fa fa-bed "></i>
+                <p>Rooms</p>
+              </a>
+            </li>
           <?php } ?>
 
           <?php $access = ['Admin', 'Superadmin', 'Front Desk']; ?>
-          <?php if(in_array($_SESSION['user_type'], $access)){ ?>
-          <li class="<?= $active == 'bookings' ? 'active' : '' ?>">
-            <a href="<?= base_url('index.php/main/bookings') ?>">
-              <i class="fa fa-bookmark"></i>
-              <p>Bookings</p>
-            </a>
-          </li>
+          <?php if (in_array($_SESSION['user_type'], $access)) { ?>
+            <li class="<?= $active == 'bookings' ? 'active' : '' ?>">
+              <a href="<?= base_url('index.php/main/bookings') ?>">
+                <i class="fa fa-bookmark"></i>
+                <p>Bookings</p>
+              </a>
+            </li>
           <?php } ?>
 
           <?php $access = ['Admin', 'Superadmin', 'Front Desk']; ?>
-          <?php if(in_array($_SESSION['user_type'], $access)){ ?>
-          <li>
-            <a data-toggle="collapse" href="#collapseReservation" aria-expanded="<?= $active == 'online' || $active == 'walkin' ? 'true' : 'false' ?>">
-              <i class="fa fa-clock"></i>
-              <p>Reservations
-                <b class="caret"></b>
-              </p>
-            </a>
-            <div class="collapse  <?= $active == 'online' || $active == 'walkin' ? 'show' : '' ?>" id="collapseReservation">
-              <ul class="nav">
-                <li class="<?= $active == 'online' ? 'active' : '' ?>">
-                  <a href="<?= base_url('index.php/main/reservations/online') ?>">
-                    <span class="sidebar-mini-icon">O</span>
-                    <span class="sidebar-normal">Online</span>
-                  </a>
-                </li>
-                <li class="<?= $active == 'walkin' ? 'active' : '' ?>">
-                  <a href="<?= base_url('index.php/main/reservations/walkin') ?>">
-                    <span class="sidebar-mini-icon">WI</span>
-                    <span class="sidebar-normal">Walk-In</span>
-                  </a>
-                </li>
-              </ul>
-            </div>
-          </li>
+          <?php if (in_array($_SESSION['user_type'], $access)) { ?>
+            <li>
+              <a data-toggle="collapse" href="#collapseReservation" aria-expanded="<?= $active == 'online' || $active == 'walkin' ? 'true' : 'false' ?>">
+                <i class="fa fa-clock"></i>
+                <p>Reservations
+                  <b class="caret"></b>
+                </p>
+              </a>
+              <div class="collapse  <?= $active == 'online' || $active == 'walkin' ? 'show' : '' ?>" id="collapseReservation">
+                <ul class="nav">
+                  <li class="<?= $active == 'online' ? 'active' : '' ?>">
+                    <a href="<?= base_url('index.php/main/reservations/online') ?>">
+                      <span class="sidebar-mini-icon">O</span>
+                      <span class="sidebar-normal">Online</span>
+                    </a>
+                  </li>
+                  <li class="<?= $active == 'walkin' ? 'active' : '' ?>">
+                    <a href="<?= base_url('index.php/main/reservations/walkin') ?>">
+                      <span class="sidebar-mini-icon">WI</span>
+                      <span class="sidebar-normal">Walk-In</span>
+                    </a>
+                  </li>
+                </ul>
+              </div>
+            </li>
           <?php } ?>
 
 
           <?php $access = ['Admin', 'Superadmin', 'Front Desk', 'Housekeeping']; ?>
-          <?php if(in_array($_SESSION['user_type'], $access)){ ?>
-          <li class="<?= $active == 'checkout' ? 'active' : '' ?>">
-            <a href="<?= base_url('index.php/main/checkout') ?>">
-              <i class="fa fa-calendar-check"></i>
-              <p>For Check-out</p>
-            </a>
-          </li>
+          <?php if (in_array($_SESSION['user_type'], $access)) { ?>
+            <li class="<?= $active == 'checkout' ? 'active' : '' ?>">
+              <a href="<?= base_url('index.php/main/checkout') ?>">
+                <i class="fa fa-calendar-check"></i>
+                <p>For Check-out</p>
+              </a>
+            </li>
           <?php } ?>
 
           <?php $access = ['Admin', 'Superadmin', 'Front Desk']; ?>
-          <?php if(in_array($_SESSION['user_type'], $access)){ ?>
-          <li class="<?= $active == 'guests' ? 'active' : '' ?>">
-            <a href="<?= base_url('index.php/main/guests') ?>">
-              <i class="fa fa-users"></i>
-              <p>Guest List</p>
-            </a>
-          </li>
+          <?php if (in_array($_SESSION['user_type'], $access)) { ?>
+            <li class="<?= $active == 'guests' ? 'active' : '' ?>">
+              <a href="<?= base_url('index.php/main/guests') ?>">
+                <i class="fa fa-users"></i>
+                <p>Guest List</p>
+              </a>
+            </li>
           <?php } ?>
 
 
           <?php $access = ['Admin', 'Superadmin']; ?>
-          <?php if(in_array($_SESSION['user_type'], $access)){ ?>
+          <?php if (in_array($_SESSION['user_type'], $access)) { ?>
             <li>
               <a data-toggle="collapse" href="#collapseRates" aria-expanded="<?= $active == 'room_rates' || $active == 'discounts' ||  $active == 'charges' ? 'true' : 'false' ?>">
                 <i class="fa fa-peso-sign"></i>
@@ -304,15 +305,15 @@ if (!$this->session->userdata('connect')) {
                     </a>
                   </li>
                 </ul>
-            </div>
-          </li>
+              </div>
+            </li>
 
-          <li class="<?= $active == 'users' ? 'active' : '' ?>">
-            <a href="<?= base_url('index.php/admin/users') ?>">
-              <i class="fa-solid fa-user-group"></i>
-              <p>Users</p>
-            </a>
-          </li>
+            <li class="<?= $active == 'users' ? 'active' : '' ?>">
+              <a href="<?= base_url('index.php/admin/users') ?>">
+                <i class="fa-solid fa-user-group"></i>
+                <p>Users</p>
+              </a>
+            </li>
           <?php } ?>
 
           <li class="<?= $active == 'logs' ? 'active' : '' ?>">
