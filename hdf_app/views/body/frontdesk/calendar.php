@@ -490,7 +490,7 @@
       const checkin = `${year}-${month}-${day}`;
       modalBooking(this, 'Reservation', 0);
       if (checkin == today) {
-        if (hour >= 10) {
+        if (hour >= 6 && hour <= 12) {
           $("#rdo_check").prop("checked", true);
           $('.action-div').removeClass('d-none');
           $('#frmBook').attr('action', `${base_url}index.php/main/checkIn`);

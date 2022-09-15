@@ -107,7 +107,7 @@
           <div>
             <button class="btn hidable updateDetails" type="button">Update</button>
             <button class="btn saveChanges" form="frmGuest">Save Changes</button>
-            <button class="btn btn-primary cancelUpdate" type="button">Cancel Update</button>
+            <button class="btn btn-primary cancelUpdate" type="button">Cancel</button>
           </div>
           <a href="<?= base_url('index.php/main/registration/' . $booking->booking_id) ?>" class="btn btn-info registration">Print Form</a>
         </div>
@@ -157,11 +157,11 @@
           <h6>Payment Details</h6>
         </div>
         <div class="card-body p-0">
-          <table class="table  mb-0">
+          <table class="table">
             <thead>
               <tr>
-                <th class="pl-4">Amount Paid</th>
-                <th>Card Details</th>
+                <th class="pl-4">Room</th>
+                <th>Amount Paid</th>
                 <th>Date Paid</th>
                 <th class="hidable p-0" width="15px"></th>
               </tr>
@@ -172,13 +172,20 @@
                   <td colspan="3" class="text-center">No record found</td>
                 </tr>
               <?php } ?>
-
               <?php foreach ($payments as $row) { ?>
                 <tr>
-                  <td class="pl-4">₱ <?= number_format($row['amount']) ?><br>
-                    <small>Paid with <?= strtolower($row['payment_option']) ?></small>
+                  <td class="pl-4">
+                    <?= $row['room_number'] ?> <?= $row['room_type_abbr'] ?><br>
+                    <small><?= ucfirst($row['payment_for']) ?></small>
                   </td>
-                  <td><?= $row['card_number'] ?></td>
+                  <td>
+                    ₱ <?= number_format($row['amount']) ?>
+                    <?php if ($row['payment_option'] == 'Card') { ?>
+                      <span class="fa fa-credit-card text-info" data-placement="top" title="XXXX XXXX XXXX <?= $row['card_number'] ?>" rel="tooltip"></span>
+                    <?php } ?>
+                    <br>
+                    <small><?= $row['name'] ?></small>
+                  </td>
                   <td>
                     <?php
                     $date_time = date_create($row['booking_payment_added']);
@@ -195,6 +202,68 @@
                   </td>
                 </tr>
               <?php } ?>
+              <tr class="bg-default text-white">
+                <th class="pl-4">TOTAL PAYMENT</th>
+                <th>₱ <?= number_format($payment->amount) ?></th>
+                <th></th>
+                <th></th>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header border-bottom px-4 pt-4 pb-2">
+          <h6>Refund Details</h6>
+        </div>
+        <div class="card-body p-0">
+          <table class="table">
+            <thead>
+              <tr>
+                <th class="pl-4">Room</th>
+                <th>Amount Refunded</th>
+                <th>Date Refund</th>
+                <th class="hidable p-0" width="15px"></th>
+              </tr>
+            </thead>
+            <tbody>
+              <?php if (!count($refunds)) { ?>
+                <tr>
+                  <td colspan="3" class="text-center">No record found</td>
+                </tr>
+              <?php } ?>
+              <?php foreach ($refunds as $row) { ?>
+                <tr>
+                  <td class="pl-4">
+                    <?= $row['room_number'] ?> <?= $row['room_type_abbr'] ?><br>
+                    <small><?= $row['booking_refund_reason'] ?></small>
+                  </td>
+                  <td>
+                    ₱ <?= number_format($row['booking_refund']) ?><br>
+                    <small><?= $row['name'] ?></small>
+                  </td>
+                  <td>
+                    <?php
+                    $date_time = date_create($row['booking_refund_added']);
+                    $date = date_format($date_time, "F d, Y");
+                    $time = date_format($date_time, "l, h:i a");
+                    ?>
+                    <?= $date ?><br>
+                    <small><?= $time ?></small>
+                  </td>
+                  <td class="action hidable p-0" width="15px">
+                    <a href="<?= base_url('index.php/main/deleteRefund/' . $row['booking_refund_id']) ?>" class="float-right mt-1 text-danger confirm" data-placement="left" title="Remove Refund" rel="tooltip">
+                      <span class="fa fa-times"></span>
+                    </a>
+                  </td>
+                </tr>
+              <?php } ?>
+              <tr class="bg-default text-white">
+                <th class="pl-4">TOTAL REFUND</th>
+                <th>₱ <?= number_format($refund->booking_refund) ?></th>
+                <th></th>
+                <th></th>
+              </tr>
             </tbody>
           </table>
         </div>
@@ -252,9 +321,12 @@
       },
       format: 'L',
     });
+
     $('#datatable').dataTable({
       "ordering": false
     });
+
+    $('.payment-div').perfectScrollbar();
   });
 
   $('.cancelUpdate, .saveChanges').hide();

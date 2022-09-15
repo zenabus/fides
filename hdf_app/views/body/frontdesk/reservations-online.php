@@ -174,7 +174,7 @@
           <div class="row">
             <div class="form-group col-md-6">
               <label>Account Number</label>
-              <input type="text" name="card_number" class="form-control" placeholder="XXXX" maxlength="4" required>
+              <input type="number" name="card_number" class="form-control" placeholder="XXXX" maxlength="4">
             </div>
           </div>
         </div>
@@ -196,7 +196,6 @@
     </div>
   </div>
 </div>
-
 <script>
   const guests = JSON.parse('<?= json_encode($guests) ?>');
 </script>

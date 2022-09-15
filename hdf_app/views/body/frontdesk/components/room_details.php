@@ -53,6 +53,9 @@
               <button class="btn btn-warning btn-sm discount" id='<?= json_encode($row) ?>' data-placement="top" title="Update Discount" rel="tooltip">
                 <span class="fa fa-percent"></span>
               </button>
+              <a href="<?= base_url('index.php/main/soa/' . $row['booked_room_id']) ?>" class="btn btn-warning btn-sm soa" data-placement="top" title="Statement of Account" rel="tooltip">
+                <span class="fa fa-receipt"></span>
+              </a>
               <br>
               <button class="btn mt-0 btn-primary btn-sm mt-1 charges" id='<?= $row['booked_room_id'] ?>' data-placement="top" title="Restaurant & Coffeeshop Charges" rel="tooltip">
                 <i class="fa-solid fa-utensils"></i>
@@ -62,6 +65,9 @@
                 <i class="fa-solid fa-tv"></i>
                 <i class="fa-solid fa-person-circle-exclamation"></i>
               </button>
+              <a href="javascript:" id="<?= $row['booked_room_id'] ?>" class="btn btn-danger btn-sm mt-1 removeRoom" data-placement="top" title="Remove Room" rel="tooltip">
+                <span class="fa fa-trash"></span>
+              </a>
               <?php if (count($booked_rooms) != 1) { ?>
                 <a href="javascript:" id="<?= $row['booked_room_id'] ?>" class="btn btn-danger btn-sm mt-1 removeRoom" data-placement="top" title="Remove Room" rel="tooltip">
                   <span class="fa fa-trash"></span>
@@ -658,5 +664,11 @@
   $('.removeRoom').click(function() {
     $('[name=booked_room_id]').val(this.id);
     $('#modalReason').modal('show')
+  });
+
+  $(document).on('click', '.soa', function(e) {
+    e.preventDefault();
+    const size = ['height=' + screen.height / 2, 'width=' + screen.width / 2].join(',');
+    window.open($(this).attr('href'), size, size);
   });
 </script>

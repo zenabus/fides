@@ -322,6 +322,16 @@ if (!$this->session->userdata('connect')) {
               <p>Logs</p>
             </a>
           </li>
+
+          <?php $access = ['Admin', 'Superadmin', 'Front Desk']; ?>
+          <?php if (in_array($_SESSION['user_type'], $access)) { ?>
+            <li class="<?= $active == 'logs' ? 'active' : '' ?>">
+              <a href="<?= base_url('index.php/main/logs') ?>">
+                <i class="fa-solid fa-file-invoice-dollar"></i>
+                <p>Daily Collection</p>
+              </a>
+            </li>
+          <?php } ?>
         </ul>
       </div>
     </div>

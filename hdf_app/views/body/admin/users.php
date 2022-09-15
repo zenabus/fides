@@ -15,7 +15,7 @@
                 <th>Username</th>
                 <th>Contact Details</th>
                 <th>Last Login</th>
-                <th width="100px">Action</th>
+                <th width="110px">Action</th>
               </tr>
             </thead>
             <tbody>
@@ -44,21 +44,21 @@
                     <?php } ?>
                   </td>
                   <td class="border-right-0 action">
-                    <a href="<?= base_url('index.php/main/user/' . $row['id']) ?>" class="btn btn-sm" data-placement="top" title="View User" rel="tooltip">
+                    <a href="<?= base_url('index.php/main/user/' . $row['id']) ?>" class="btn btn-sm mb-1" data-placement="top" title="View User" rel="tooltip">
                       <span class="fa fa-eye"></span>
                     </a>
-                    <a href="javascript:" class="btn btn-success btn-sm updateUser" id='<?= json_encode($row) ?>' data-placement="top" title="Update User" rel="tooltip">
+                    <a href="javascript:" class="btn btn-success btn-sm mb-1 updateUser" id='<?= json_encode($row) ?>' data-placement="top" title="Update User" rel="tooltip">
                       <span class="fa fa-edit"></span>
                     </a>
-                    <a href="<?= base_url('index.php/admin/resetPassword/' . $row['id']) ?>" class="btn btn-info btn-sm reset" data-placement="top" title="Reset User Password" rel="tooltip">
+                    <a href="<?= base_url('index.php/admin/resetPassword/' . $row['id']) ?>" class="btn btn-info btn-sm mb-1 reset" data-placement="top" title="Reset User Password" rel="tooltip">
                       <span class="fa fa-refresh"></span>
                     </a>
                     <?php if ($row['status'] == 'Active') { ?>
-                      <a href="<?= base_url('index.php/admin/changeStatus/' . $row['id'] . '/InActive') ?>" class="btn btn-danger btn-sm confirm" data-placement="top" title="Deactivate User" rel="tooltip">
+                      <a href="<?= base_url('index.php/admin/changeStatus/' . $row['id'] . '/InActive') ?>" class="btn btn-danger btn-sm mb-1 confirm" data-placement="top" title="Deactivate User" rel="tooltip">
                         <span class="fa fa-times"></span>
                       </a>
                     <?php } else { ?>
-                      <a href="<?= base_url('index.php/admin/changeStatus/' . $row['id'] . '/Active') ?>" class="btn btn-primary btn-sm confirm" data-placement="top" title="Activate User" rel="tooltip">
+                      <a href="<?= base_url('index.php/admin/changeStatus/' . $row['id'] . '/Active') ?>" class="btn btn-primary btn-sm mb-1 confirm" data-placement="top" title="Activate User" rel="tooltip">
                         <span class="fa fa-check"></span>
                       </a>
                     <?php } ?>

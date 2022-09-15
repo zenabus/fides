@@ -55,22 +55,6 @@ class MY_Controller extends CI_Controller {
     return $month . '/' . $day . '/' . $year;
   }
 
-  function getDaysInBetween($check_in, $check_out) {
-    $days = [];
-    $start = new DateTime($check_in);
-    $end = new DateTime($check_out);
-    $end = $end->modify('+1 day');
-
-    $interval = new DateInterval('P1D');
-    $dates = new DatePeriod($start, $interval, $end);
-
-    foreach ($dates as $date) {
-      array_push($days, $date->format("Y-m-d"));
-    }
-
-    return $days;
-  }
-
   function removeDuplicate($whole, $part) {
     $unique = [];
     foreach ($whole as $w) {
@@ -144,6 +128,7 @@ class MY_Controller extends CI_Controller {
     $interval = new DateInterval('P1D');
 
     $realEnd = new DateTime($end);
+    $realEnd = $realEnd->modify('-1 day');
     $realEnd->add($interval);
 
     $period = new DatePeriod(new DateTime($start), $interval, $realEnd);
@@ -153,5 +138,21 @@ class MY_Controller extends CI_Controller {
     }
 
     return $array;
+  }
+
+  function getDaysInBetween($check_in, $check_out) {
+    $days = [];
+    $start = new DateTime($check_in);
+    $end = new DateTime($check_out);
+    $end = $end->modify('+1 day');
+
+    $interval = new DateInterval('P1D');
+    $dates = new DatePeriod($start, $interval, $end);
+
+    foreach ($dates as $date) {
+      array_push($days, $date->format("Y-m-d"));
+    }
+
+    return $days;
   }
 }

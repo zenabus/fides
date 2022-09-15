@@ -344,6 +344,14 @@ class Get_model extends CI_Model {
       ->get('bookings')->row();
   }
 
+  function getBookingByBookedRoom($booked_room_id) {
+    return $this->db->join('booked_rooms', 'booked_rooms.booking_id=bookings.booking_id')
+      ->join('rooms', 'rooms.id=booked_rooms.room_id')
+      ->join('guests', 'guests.guest_id=bookings.guest_id')
+      ->where('booked_rooms.booked_room_id', $booked_room_id)
+      ->get('bookings')->row();
+  }
+
   function getBookingByBookingNumber($booking_number) {
     return $this->db->join('guests', 'guests.guest_id=bookings.guest_id')
       ->where('booking_number', $booking_number)
@@ -419,6 +427,15 @@ class Get_model extends CI_Model {
       ->get('booked_rooms')->result_array();
   }
 
+  function getBookedRoomById($booked_room_id) {
+    return $this->db->where('booked_room_id', $booked_room_id)
+      ->join('rooms', 'rooms.id=booked_rooms.room_id')
+      ->join('room_type', 'room_type.id=rooms.room_type_id')
+      ->join('discounts', 'discounts.discount_id=booked_rooms.discount_id')
+      ->order_by('booked_room_id', 'DESC')
+      ->get('booked_rooms')->result_array();
+  }
+
   function getBookedRoom($booked_room_id) {
     return $this->db->where('booked_room_id', $booked_room_id)
       ->join('rooms', 'rooms.id=booked_rooms.room_id')
@@ -454,12 +471,38 @@ class Get_model extends CI_Model {
     return $this->db->where('charge_id', $charge_id)->join('categories', 'categories.category_id=charges.category_id')->get('charges')->row();
   }
 
-  function getPayment($booking_id) {
-    return $this->db->where('booking_id', $booking_id)->order_by('booking_payment_added', 'DESC')->get('booking_payment')->result_array();
+  function getPayments($booking_id) {
+    return $this->db->join('booked_rooms', 'booked_rooms.booked_room_id=booking_payment.booked_room_id')
+      ->join('rooms', 'rooms.id=booked_rooms.room_id')
+      ->join('room_type', 'room_type.id=rooms.room_type_id')
+      ->join('users', 'users.id=booking_payment.user_id')
+      ->where('booking_payment.booking_id', $booking_id)
+      ->order_by('booking_payment_added', 'DESC')
+      ->get('booking_payment')->result_array();
   }
 
   function getPaymentTotal($booking_id) {
     return $this->db->select_sum('amount')->where('booking_id', $booking_id)->get('booking_payment')->row();
+  }
+
+  function getPaymentByBookedRoom($booked_room_id) {
+    return $this->db->select_sum('amount')->where('booked_room_id', $booked_room_id)->get('booking_payment')->row();
+  }
+
+  function getRefunds($booking_id) {
+    return $this->db->join('booked_rooms', 'booked_rooms.booked_room_id=booking_refund.booked_room_id')
+      ->join('rooms', 'rooms.id=booked_rooms.room_id')
+      ->join('room_type', 'room_type.id=rooms.room_type_id')
+      ->join('users', 'users.id=booking_refund.user_id')
+      ->where('booking_refund.booking_id', $booking_id)->get('booking_refund')->result_array();
+  }
+
+  function getRefundTotal($booking_id) {
+    return $this->db->select_sum('booking_refund')->where('booking_id', $booking_id)->get('booking_refund')->row();
+  }
+
+  function getRefundByBookedRoom($booked_room_id) {
+    return $this->db->select_sum('booking_refund')->where('booked_room_id', $booked_room_id)->get('booking_refund')->row();
   }
 
   function getRoomCharges($booked_room_id, $charge_type) {
@@ -491,6 +534,23 @@ class Get_model extends CI_Model {
       ->get('charges_other')->row();
   }
 
+  function getRoomChargesByRoomId($booked_room_id) {
+    return $this->db->select_sum('(charges_food_quantity * charges_food_amount)', 'total')
+      ->join('booked_rooms', 'booked_rooms.booked_room_id=charges_food.booked_room_id')
+      ->join('bookings', 'bookings.booking_id=booked_rooms.booking_id')
+      ->where('booked_rooms.booked_room_id', $booked_room_id)
+      ->get('charges_food')->row();
+  }
+
+  function getRoomAmenitiesByRoomId($booked_room_id) {
+    return $this->db->select_sum('(charge_quantity * charge_amount)', 'total')
+      ->join('charges', 'charges.charge_id=charges_other.charge_id')
+      ->join('booked_rooms', 'booked_rooms.booked_room_id=charges_other.booked_room_id')
+      ->join('bookings', 'bookings.booking_id=booked_rooms.booking_id')
+      ->where('booked_rooms.booked_room_id', $booked_room_id)
+      ->get('charges_other')->row();
+  }
+
   function getBookingLogs($booking_id) {
     return $this->db->join('users', 'users.id=booking_logs.user_id')->order_by('booking_log_added', 'DESC')->where('booking_id', $booking_id)->get('booking_logs')->result_array();
   }
@@ -506,6 +566,10 @@ class Get_model extends CI_Model {
 
   function getPaymentById($booking_payment_id) {
     return $this->db->where('booking_payment_id', $booking_payment_id)->get('booking_payment')->row();
+  }
+
+  function getRefundById($booking_refund_id) {
+    return $this->db->where('booking_refund_id', $booking_refund_id)->get('booking_refund')->row();
   }
 
   function getRoomType($room_type_id) {

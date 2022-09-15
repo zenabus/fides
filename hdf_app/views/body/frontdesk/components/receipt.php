@@ -256,11 +256,11 @@
         <td></td>
         <td class="bl bb bt">Refund Amount</td>
         <td class="br bb bt"></td>
-        <td class="tr bb bt"><?= number_format($booking->refund, 2) ?></td>
+        <td class="tr bb bt"><?= number_format($refund->booking_refund, 2) ?></td>
       </tr>
       <tr class="br">
         <td></td>
-        <td class="bl bb bt">Advanced Payment</td>
+        <td class="bl bb bt">Advance Payment</td>
         <td class="br bb bt"></td>
         <td class="tr bb bt"><?= number_format($payment->amount, 2) ?></td>
       </tr>
@@ -269,7 +269,7 @@
         <td class="bl bb bt">Remaining Balance</td>
         <td class="br bb bt"></td>
         <?php $charges_grand_total = $grand_total + $charges_total ?>
-        <?php $payment_grand_total = $booking->refund + $payment->amount ?>
+        <?php $payment_grand_total = $refund->booking_refund + $payment->amount ?>
         <?php $overall_total = $charges_grand_total - $payment_grand_total ?>
         <td class="tr bb bt bold"><?= number_format($overall_total > 0 ? $overall_total : 0, 2) ?></td>
       </tr>

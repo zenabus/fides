@@ -190,9 +190,12 @@ class Insert_model extends CI_Model {
   function addPayment() {
     $data = [
       'booking_id' => $_POST['booking_id'],
+      'booked_room_id' => $_POST['booked_room_id'],
       'payment_option' => $_POST['payment_option'],
       'amount' => $_POST['amount'],
       'card_number' => $_POST['card_number'],
+      'payment_for' => $_POST['payment_for'],
+      'user_id' => $_SESSION['user_id'],
     ];
 
     $this->db->insert('booking_payment', $data);
@@ -235,5 +238,11 @@ class Insert_model extends CI_Model {
       'charge_quantity' => 1
     ];
     $this->db->insert('charges_other', $data);
+  }
+
+  function addRefund() {
+    unset($_POST['booking_number']);
+    $_POST['user_id'] = $_SESSION['user_id'];
+    $this->db->insert('booking_refund', $_POST);
   }
 }

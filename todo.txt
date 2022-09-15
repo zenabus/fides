@@ -76,3 +76,26 @@ new development
 - late checkout of 5:00pm onwards is full day charge
 
 // executive suite max person from 2-3 and with extra bed up to 5 persons
+
+number of occupants
+breakfast monitoring
+
+Deluxe (King) max 3 with extra bed (1) 
+Deluxe (Twin) max 3 with extra bed (1)
+Executive Room / Family Room max 4 with extra bed (1)
+Seaside Suite Twin max 3 with extra bed (1)
+Seaside Suite (King) max 3 with extra bed (1)
+Executibe Suite max 5 with extra bed (2)
+
+SOA per room occupant
+
+DCR
+- corkage
+- pool usage
+
+Consumables
+- reference from previous booking number
+- charged to room/food/pool/etc.
+- issue for certificate or voucher
+
+checkout button per room

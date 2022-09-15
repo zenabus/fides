@@ -10,6 +10,7 @@
           <th>Unit</th>
           <th>Unit Cost</th>
           <th>Subtotal</th>
+          <th>Remaining</th>
         </tr>
       </thead>
       <tbody>
@@ -24,6 +25,9 @@
             <?php $subtotal = $total - $discount ?>
             <?php $grand_total += $subtotal ?>
             <td>₱ <?= number_format($subtotal) ?> <small data-placement="left" title="<?= $row['discount_type'] ?><br>-₱ <?= number_format($discount) ?>" rel="tooltip" data-html="true">(-<?= $row['percentage'] ?>%)</small></td>
+            <td>
+              asd
+            </td>
           </tr>
 
           <?php if ($row['extra_bed']) { ?>
@@ -38,6 +42,7 @@
                   <span class="fa fa-times"></span>
                 </a>
               </td>
+              <td>asd</td>
               <?php $grand_total += $bed_total ?>
             </tr>
           <?php } ?>
@@ -54,6 +59,7 @@
                   <span class="fa fa-times"></span>
                 </a>
               </td>
+              <td>asd</td>
               <?php $grand_total += $person_total ?>
             </tr>
           <?php } ?>
@@ -69,6 +75,7 @@
                   <span class="fa fa-times"></span>
                 </a>
               </td>
+              <td>asd</td>
             </tr>
           <?php } ?>
 
@@ -83,6 +90,7 @@
                   <span class="fa fa-times"></span>
                 </a>
               </td>
+              <td>asd</td>
             </tr>
           <?php } ?>
 
@@ -118,8 +126,45 @@
                 </td>
               <?php } ?>
               <?php $type = $charges['category'] ?>
+              <td>asd</td>
             </tr>
           <?php } ?>
+
+          <tr>
+            <td class="pl-4">Refund</td>
+            <td></td>
+            <td></td>
+            <td>
+              <?php
+              $room_refund = 0;
+              foreach ($refunds as $data) {
+                if ($data['booked_room_id'] == $row['booked_room_id']) {
+                  $room_refund += $data['booking_refund'];
+                }
+              }
+              echo '₱ ' . number_format($room_refund);
+              ?>
+            </td>
+            <td>asd</td>
+          </tr>
+
+          <tr>
+            <td class="pl-4">Payment</td>
+            <td></td>
+            <td></td>
+            <td>
+              <?php
+              $room_refund = 0;
+              foreach ($refunds as $data) {
+                if ($data['booked_room_id'] == $row['booked_room_id']) {
+                  $room_refund += $data['booking_refund'];
+                }
+              }
+              echo '₱ ' . number_format($room_refund);
+              ?>
+            </td>
+            <td>asd</td>
+          </tr>
 
           <tr class="bg-default">
             <td colspan="5" style="padding:0.5px !important"></td>
@@ -131,27 +176,31 @@
           <td></td>
           <td></td>
           <td>₱ <?= number_format($grand_total + $charges_total) ?></td>
+          <td>asd</td>
         </tr>
         <tr>
-          <td class="pl-4">Refund Amount</td>
+          <td class="pl-4">Total Refund</td>
           <td></td>
           <td></td>
-          <td>₱ <?= number_format($booking->refund) ?></td>
+          <td>₱ <?= number_format($refund->booking_refund) ?></td>
+          <td>asd</td>
         </tr>
         <tr>
-          <td class="pl-4">Advanced Payment</td>
+          <td class="pl-4">Total Payment</td>
           <td></td>
           <td></td>
           <td>₱ <?= number_format($payment->amount) ?></td>
+          <td>asd</td>
         </tr>
         <tr class="bg-default text-white">
           <th class="pl-4">TOTAL BALANCE</th>
           <th></th>
           <th></th>
           <?php $charges_grand_total = $grand_total + $charges_total ?>
-          <?php $payment_grand_total = $booking->refund + $payment->amount ?>
+          <?php $payment_grand_total = 0 + $payment->amount ?>
           <?php $overall_total = $charges_grand_total - $payment_grand_total ?>
           <td style="vertical-align: middle !important;">₱ <?= number_format($overall_total > 0 ? $overall_total : 0) ?></td>
+          <td>asd</td>
         </tr>
         <tr>
           <td class="pl-4">Petty Cash</td>
@@ -159,6 +208,7 @@
           <td></td>
           <?php $petty_cash = ($charges_grand_total - $payment_grand_total) * -1 ?>
           <td>₱ <?= number_format($petty_cash > 0 ? $petty_cash : 0) ?></td>
+          <td>asd</td>
         </tr>
       </tbody>
     </table>
@@ -177,26 +227,34 @@
   <div class="modal-dialog modal-sm pt-0" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h4 class="title title-up">Update Refund</h4>
+        <h4 class="title title-up">Add Refund</h4>
       </div>
       <div class="modal-body px-4">
-        <?= form_open('main/updateRefund', ['id' => 'frmRefund']) ?>
+        <?= form_open('main/addRefund', ['id' => 'frmRefund']) ?>
         <input type="hidden" name="booking_id" value="<?= $booking->booking_id ?>">
         <input type="hidden" name="booking_number" value="<?= $booking->booking_number ?>">
         <div class="form-group">
+          <label>Room</label>
+          <select name="booked_room_id" class="form-control" required>
+            <option value="">-</option>
+            <?php foreach ($booked_rooms as $room) { ?>
+              <option value="<?= $room['booked_room_id'] ?>"><?= $room['room_number'] ?> <?= $room['room_type'] ?></option>
+            <?php } ?>
+          </select>
+        </div>
+        <div class="form-group">
           <label>Refund Amount</label>
-          <input type="number" class="form-control" name="refund" required min="0" value="<?= round($booking->refund) ?>">
+          <input type="number" class="form-control" name="booking_refund" required min="0">
         </div>
         <div class="form-group">
           <label>Refund reason</label>
-          <textarea name="refund_reason" class="form-control"><?= $booking->refund_reason ?></textarea>
-          <small>Refund amount and reason will be changed.</small>
+          <textarea name="booking_refund_reason" class="form-control"></textarea>
         </div>
         <?= form_close() ?>
       </div>
       <div class="modal-footer">
         <div class="left-side">
-          <input type="submit" value="Update" class="btn btn-link" form="frmRefund">
+          <input type="submit" value="Add" class="btn btn-link" form="frmRefund">
         </div>
         <div class="divider"></div>
         <div class="right-side">
@@ -238,14 +296,37 @@
             </div>
           </div>
         </div>
+        <div class="form-row">
+          <div class="form-group col-md-4">
+            <label>Room</label>
+            <select name="booked_room_id" class="form-control" required>
+              <option value="">-</option>
+              <?php foreach ($booked_rooms as $room) { ?>
+                <option value="<?= $room['booked_room_id'] ?>"><?= $room['room_number'] ?></option>
+              <?php } ?>
+            </select>
+          </div>
+          <div class="form-group col-md-8">
+            <label>Payment For</label>
+            <select name="payment_for" class="form-control" required>
+              <option value="">-</option>
+              <option value="room">Room Rate</option>
+              <option value="restaurant">Resto</option>
+              <option value="coffeeshop">Otilla's</option>
+              <option value="addons">Add Ons</option>
+              <option value="reservation">Room Reservation</option>
+              <option value="event">Event</option>
+            </select>
+          </div>
+        </div>
         <div class="form-group">
           <label>Amount</label>
           <input type="number" class="form-control" name="amount" required value="0" min="0">
-          <small>Payment will be added up.</small>
         </div>
-        <div class="form-group card-div d-none">
+        <div class="form-group card-div d-none mb-0">
           <label>Account Number</label>
           <input type="number" class="form-control" name="card_number" placeholder="XXXX" maxlength="4">
+          <small>Last 4 digit only.</small>
         </div>
         <?= form_close() ?>
       </div>

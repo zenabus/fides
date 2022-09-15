@@ -109,6 +109,13 @@ $log_type = [
   4 => 'Update'
 ];
 
+$ip = [
+  '49.145.96.9' => 'Home',
+  '122.3.206.239' => 'Hotel de Fides',
+  '119.92.137.197' => 'Office',
+];
+
 define('RESERVATION_STATUS', $reservation_status);
 define('LOG_TYPE', $log_type);
 define('TITLE', 'Hotel de Fides');
+define('IP', $ip);
