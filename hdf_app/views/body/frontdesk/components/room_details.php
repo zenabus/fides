@@ -59,14 +59,43 @@
                 <i class="fa-solid fa-tv"></i>
                 <i class="fa-solid fa-person-circle-exclamation"></i>
               </button>
-              <a href="javascript:" id="<?= $row['booked_room_id'] ?>" class="btn btn-danger btn-sm mt-1 removeRoom" data-placement="top" title="Remove Room" rel="tooltip">
-                <span class="fa fa-trash"></span>
+              <a href="javascript:" id="<?= $row['booked_room_id'] ?>" class="btn btn-success btn-sm mt-1 checkout" data-placement="top" title="Checkout Room" rel="tooltip">
+                <i class="fa-solid fa-right-from-bracket"></i>
               </a>
               <?php if (count($booked_rooms) != 1) { ?>
                 <a href="javascript:" id="<?= $row['booked_room_id'] ?>" class="btn btn-danger btn-sm mt-1 removeRoom" data-placement="top" title="Remove Room" rel="tooltip">
                   <span class="fa fa-trash"></span>
                 </a>
               <?php } ?>
+            </td>
+          </tr>
+        <?php }  ?>
+        <?php foreach ($checkout_rooms as $row) { ?>
+          <tr>
+            <td class="border-left-0 pl-4">
+              Room <?= $row['room_number'] ?><br>
+              <small><?= $row['room_type'] ?></small><br>
+              <?php if ($row['change_reason']) { ?>
+                <small style="font-style:italic">(Change room - <?= $row['change_reason'] ?>)</small>
+              <?php } ?>
+            </td>
+            <td>
+              <?= $row['nights'] ?> night<?= $row['nights'] == 1 ? '' : 's' ?><br>
+              <small><?= $row['check_in'] ?> - <?= $row['check_out'] ?></small>
+            </td>
+            <td>
+              <?php [$name, $contact, $email] = explode(' / ', $row['occupant']) ?>
+              <?= $name ?><br><small><?= $email ?><br><?= $contact ?></small>
+            </td>
+            <td class="border-right-0 action hidable">
+              <small><b>THIS ROOM WAS CHECKED OUT</b></small> <br>
+              <small>Note: <?= $row['process_reason'] ?></small><br>
+              <small>Processed: <?= $row['processed_by'] ?></small><br>
+              <?php 
+                $date_time = date_create($row['booked_room_updated']);
+                $date_time = date_format($date_time, "M d, Y h:i a");
+               ?>
+              <small>Date: <?= $date_time ?></small>
             </td>
           </tr>
         <?php }  ?>
@@ -88,9 +117,14 @@
               <?= $name ?><br><small><?= $email ?><br><?= $contact ?></small>
             </td>
             <td class="border-right-0 action hidable">
-              <small><b>THIS ROOM IS DELETED</b></small> <br>
-              <small>Reason: <?= $row['delete_reason'] ?></small><br>
-              <small>Processed: <?= $row['who_deleted'] ?></small>
+              <small><b>THIS ROOM WAS DELETED</b></small> <br>
+              <small>Reason: <?= $row['process_reason'] ?></small><br>
+              <small>Processed: <?= $row['processed_by'] ?></small><br>
+              <?php 
+                $date_time = date_create($row['booked_room_updated']);
+                $date_time = date_format($date_time, "M d, Y h:i a");
+               ?>
+              <small>Date: <?= $date_time ?></small>
             </td>
           </tr>
         <?php }  ?>
@@ -425,7 +459,7 @@
         <input type="hidden" name="booked_room_id">
         <div class="form-group">
           <label>Reason</label>
-          <textarea class="form-control" name="delete_reason" required></textarea>
+          <textarea class="form-control" name="process_reason" required></textarea>
           <small>Note: All charges in this room will be deleted</small>
         </div>
         <?= form_close() ?>
@@ -433,6 +467,34 @@
       <div class="modal-footer">
         <div class="left-side">
           <button type="submit" class="btn btn-link" form="frmRemove">Confirm</button>
+        </div>
+        <div class="divider"></div>
+        <div class="right-side">
+          <button type="button" class="btn btn-link" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="modalCheckout" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-sm pt-0" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="title title-up">Checkout Room</h4>
+      </div>
+      <div class="modal-body px-4">
+        <?= form_open('main/checkoutRoom', ['id' => 'frmCheckout']) ?>
+        <input type="hidden" name="booked_room_id">
+        <div class="form-group">
+          <label>Note</label>
+          <textarea class="form-control" name="process_reason" required></textarea>
+        </div>
+        <?= form_close() ?>
+      </div>
+      <div class="modal-footer">
+        <div class="left-side">
+          <button type="submit" class="btn btn-link" form="frmCheckout">Confirm</button>
         </div>
         <div class="divider"></div>
         <div class="right-side">
@@ -620,11 +682,12 @@
     const charge = charges.filter(charge => charge.category_id == this.value);
     $("#charge_type").empty().trigger('change');
     $("#charge_type").append('<option>- select charge type -</option>');
-    charge.map((c) => {
+    charge.map(c => {
+      const text = c.charge_amount=='0.00' ? `₱ ${formatNumber(Math.round(c.charge_amount))} - ${c.charge}` : c.charge;;
       const option = $('<option></option>')
         .attr("value", c.charge_id)
         .attr("amount", c.charge_amount)
-        .text(`₱ ${formatNumber(Math.round(c.charge_amount))} - ${c.charge}`);
+        .text(text);
       $("#charge_type").append(option);
     });
   });
@@ -653,6 +716,11 @@
   $('.removeRoom').click(function() {
     $('[name=booked_room_id]').val(this.id);
     $('#modalReason').modal('show')
+  });
+
+  $('.checkout').click(function() {
+    $('[name=booked_room_id]').val(this.id);
+    $('#modalCheckout').modal('show')
   });
 
   $(document).on('click', '.soa', function(e) {

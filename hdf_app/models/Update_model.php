@@ -167,11 +167,11 @@ class Update_model extends CI_Model {
       ->update('booked_rooms', $data);
   }
 
-  function removeRoom($booked_room_id) {
+  function processRoom($booked_room_id, $archive) {
     $data = [
-      'booked_room_archived' => 1,
-      'delete_reason' => $_POST['delete_reason'],
-      'who_deleted' => $_SESSION['name']
+      'booked_room_archived' => $archive,
+      'process_reason' => $_POST['process_reason'],
+      'processed_by' => $_SESSION['name']
     ];
     $this->db->where('booked_room_id', $booked_room_id)->update('booked_rooms', $data);
     $this->db->where('booked_room_id', $booked_room_id)->delete('charges_food');

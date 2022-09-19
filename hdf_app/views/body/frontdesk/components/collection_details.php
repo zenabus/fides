@@ -18,13 +18,11 @@
       <tbody>
         <?php $grand_total = 0 ?>
         <?php foreach ($booked_rooms as $row) { ?>
+          <?php $addons = $row['payment_addons']->amount; ?>
 
           <!-- ------------------------------------------------------------ ROOM ------------------------------------------------------------ -->
 
-          <?php
-          $room_total = 0;
-          $addons = $row['payment_addons']->amount;
-          ?>
+          <?php $room_total = 0; ?>
           <tr>
             <td class="pl-4">
               Room <?= $row['room_number'] ?><br>
@@ -56,7 +54,18 @@
           <!-- ------------------------------------------------------------ BED ------------------------------------------------------------ -->
 
           <?php if ($row['extra_bed']) { ?>
-            <?php $bed_total = $bed->price * $row['extra_bed'] ?>
+            <?php 
+              $bed_total = $bed->price * $row['extra_bed'];
+              if($addons > $bed_total)  {
+                $balance = 0;
+                $paid = $bed_total;
+                $addons = $addons - $bed_total;
+              } else {
+                $balance = $bed_total - $addons;
+                $paid = $addons;
+                $addons = 0;
+              }
+            ?>
             <tr>
               <td class="pl-4"><span class="fa fa-bed text-info"></span></td>
               <td>
@@ -68,12 +77,11 @@
                 <a href="<?= base_url('index.php/main/removeExtra/extra_bed/' . $row['booked_room_id']) ?>" class="float-right text-danger confirm hidable" data-placement="left" title="Remove Extra Bed" rel="tooltip">
                   <span class="fa fa-times"></span>
                 </a>
-                ₱ <?= number_format($bed_total - $addons) ?><br>
-                <small>₱ <?= number_format($addons) ?></small>
+                ₱ <?= number_format($balance) ?><br>
+                <small>₱ <?= number_format($paid) ?></small>
               </td>
               <?php
               $grand_total += $bed_total;
-              $addons = $addons -  $bed_total;
               ?>
             </tr>
             <?php $room_total += $bed_total ?>
@@ -82,7 +90,18 @@
           <!-- ------------------------------------------------------------ PERSON ------------------------------------------------------------ -->
 
           <?php if ($row['extra_person']) { ?>
-            <?php $person_total = $person->price * $row['extra_person'] ?>
+            <?php 
+              $person_total = $person->price * $row['extra_person'];
+              if($addons > $person_total)  {
+                $balance = 0;
+                $paid = $person_total;
+                $addons = $addons - $person_total;
+              } else {
+                $balance = $person_total - $addons;
+                $paid = $addons;
+                $addons = 0;
+              }
+             ?>
             <tr>
               <td class="pl-4"><span class="fa fa-user text-info"></span></td>
               <td>
@@ -94,12 +113,11 @@
                 <a href="<?= base_url('index.php/main/removeExtra/extra_person/' . $row['booked_room_id']) ?>" class="float-right text-danger confirm hidable" data-placement="left" title="Remove Extra Person" rel="tooltip">
                   <span class="fa fa-times"></span>
                 </a>
-                ₱ <?= number_format($person_total - $addons) ?><br>
-                <small>₱ <?= number_format($addons) ?></small>
+                ₱ <?= number_format($balance) ?><br>
+                <small>₱ <?= number_format($paid) ?></small>
               </td>
               <?php
               $grand_total += $person_total;
-              $addons = $addons - $bed_total;
               ?>
             </tr>
             <?php $room_total += $person_total ?>
@@ -166,7 +184,7 @@
 
           <?php $type = ''; ?>
           <?php foreach ($row['amenities'] as $charges) { ?>
-            <?php $charge_price =  $charges['charge_id'] == 39 ? $row['pricing_type'] : $charges['charge_amount'] ?>
+            <?php $charge_price =  $charges['charge_id'] == 39 ? $row['pricing_type'] : $charges['charge_amount']; ?>
             <tr>
               <td class="pl-4"><?= $type != $charges['category'] ? $charges['category'] : '↳' ?></td>
               <td>
@@ -179,14 +197,14 @@
               </td>
               <?php
               if ($charges['charge_id'] == 39) {
-                $total = $charge_price;
-                $discount = $total * ($row['percentage'] / 100);
-                $subtotal = $total - $discount;
-                $grand_total += $subtotal;
+                $discount = $charge_price * ($row['percentage'] / 100);
+                $total = $charge_price - $discount;
+                $grand_total += $total;
               ?>
                 <td>
-                  ₱ <?= number_format($subtotal) ?>
-                  <small data-placement="left" title="<?= $row['discount_type'] ?><br>-₱ <?= number_format($discount) ?>" rel="tooltip" data-html="true">(-<?= $row['percentage'] ?>%)
+                  ₱ <?= number_format($total) ?>
+                  <small data-placement="left" title="<?= $row['discount_type'] ?><br>-₱ <?= number_format($discount) ?>" rel="tooltip" data-html="true">
+                    (-<?= $row['percentage'] ?>%)
                   </small>
                   <a href="<?= base_url('index.php/main/removeCharge/charges_other/' . $charges['charges_other_id']) ?>" class="float-right mt-1 text-danger confirm hidable" data-placement="left" title="Remove Amenity / Charge" rel="tooltip">
                     <span class="fa fa-times"></span>
@@ -194,14 +212,26 @@
                 </td>
               <?php } else { ?>
                 <?php $total = $charge_price * $charges['charge_quantity']; ?>
-                <td>₱ <?= number_format($charge_price * $charges['charge_quantity']) ?></td>
+                <td>₱ <?= number_format($total) ?></td>
               <?php } ?>
-              <?php $type = $charges['category'] ?>
+              <?php 
+                $type = $charges['category'];
+                if($addons > $total)  {
+                  $balance = 0;
+                  $paid = $total;
+                  $addons = $addons - $total;
+                } else {
+                  $balance = $total - $addons;
+                  $paid = $addons;
+                  $addons = 0;
+                }
+               ?>
               <td>
                 <a href="<?= base_url('index.php/main/removeCharge/charges_other/' . $charges['charges_other_id']) ?>" class="float-right mt-1 text-danger confirm hidable" data-placement="left" title="Remove Amenity / Charge" rel="tooltip">
                   <span class="fa fa-times"></span>
                 </a>
-                ₱ <?= number_format($total) ?>
+                ₱ <?= number_format($balance) ?><br>
+                <small>₱ <?= number_format($paid) ?></small>
               </td>
             </tr>
             <?php $room_total += $charge_price ?>
@@ -213,7 +243,7 @@
             <td class="pl-4">Room Total</td>
             <td></td>
             <td>₱ <?= number_format($room_total) ?></td>
-            <td>asd</td>
+            <td>0.00</td>
           </tr>
           <tr>
             <td class="pl-4">Refund</td>

@@ -99,4 +99,5 @@ Consumables
 - charged to room/food/pool/etc.
 - issue for certificate or voucher
 
-checkout button per room
+// checkout button per room
+get room total balance

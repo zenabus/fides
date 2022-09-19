@@ -184,6 +184,7 @@ class Main extends MY_Controller {
     $data['booking'] = $this->get_model->getBookingByBookingNumber($booking_number);
     $data['booked_rooms'] = $this->get_model->getBookedRooms($data['booking']->booking_id);
     $data['archived_rooms'] = $this->get_model->getBookedRooms($data['booking']->booking_id, 1);
+    $data['checkout_rooms'] = $this->get_model->getBookedRooms($data['booking']->booking_id, 2);
     $data['bed'] = $this->get_model->getPrice('Bed');
     $data['person'] = $this->get_model->getPrice('Person');
     $data['discounts'] = $this->get_model->getDiscounts();
@@ -561,13 +562,28 @@ class Main extends MY_Controller {
     $booked_room = $this->get_model->getBookedRoom($booked_room_id);
     [$arrival, $departure] = $this->getMinMax($booked_room->booking_id);
     $_POST['booking_id'] = $booked_room->booking_id;
-    $this->update_model->removeRoom($booked_room_id);
+    $this->update_model->processRoom($booked_room_id, 1);
     $s = $booked_room->nights == 1 ? '' : 's';
     $log = "<b>{$booked_room->room_number} {$booked_room->room_type_abbr}</b> → Removed room <b>{$booked_room->nights} night{$s}</b> from <b>{$booked_room->check_in}</b> to <b>{$booked_room->check_out}</b>";
     $this->insert_model->addBookingLog($log);
     $this->insert_model->log($log);
     $this->update_model->updateBooking($arrival, $departure, $booked_room->booking_id);
     $this->session->set_flashdata('success', 'Room successfully removed!');
+    $this->redirect();
+  }
+
+  function checkoutRoom() {
+    $booked_room_id = $_POST['booked_room_id'];
+    $booked_room = $this->get_model->getBookedRoom($booked_room_id);
+    [$arrival, $departure] = $this->getMinMax($booked_room->booking_id);
+    $_POST['booking_id'] = $booked_room->booking_id;
+    $this->update_model->processRoom($booked_room_id, 2);
+    $s = $booked_room->nights == 1 ? '' : 's';
+    $log = "<b>{$booked_room->room_number} {$booked_room->room_type_abbr}</b> → Checked out room <b>{$booked_room->nights} night{$s}</b> from <b>{$booked_room->check_in}</b> to <b>{$booked_room->check_out}</b>";
+    $this->insert_model->addBookingLog($log);
+    $this->insert_model->log($log);
+    $this->update_model->updateBooking($arrival, $departure, $booked_room->booking_id);
+    $this->session->set_flashdata('success', 'Room successfully checked out!');
     $this->redirect();
   }
 
