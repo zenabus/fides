@@ -200,7 +200,7 @@
 
           <?php foreach ($row['restaurant'] as $charges) { ?>
             <tr class="bl br cost">
-              <td>Restaurant <?= $charges['reference'] ?></td>
+              <td>Resto <?= $charges['reference'] ?></td>
               <td>(<?= $charges['charges_food_quantity'] ?>) <?= $charges['particulars'] ?></td>
               <td class="tr"><?= number_format($charges['charges_food_amount'], 2) ?></td>
               <td class="tr"><?= number_format($charges['charges_food_amount'] * $charges['charges_food_quantity'], 2) ?></td>
@@ -209,7 +209,7 @@
 
           <?php foreach ($row['coffeeshop'] as $charges) { ?>
             <tr class="bl br cost">
-              <td>Coffeeshop Ref.: <?= $charges['reference'] ?></td>
+              <td>Otilla's Ref.: <?= $charges['reference'] ?></td>
               <td>(<?= $charges['charges_food_quantity'] ?>) <?= $charges['particulars'] ?></td>
               <td class="tr"><?= number_format($charges['charges_food_amount'], 2) ?></td>
               <td class="tr"><?= number_format($charges['charges_food_amount'] * $charges['charges_food_quantity'], 2) ?></td>

@@ -30,14 +30,14 @@
       <small class="ml-3">Check In: <?= $room['check_in'] ?></small><br>
       <small class="ml-3">Check Out: <?= $room['check_out'] ?></small><br>
       <small class="ml-3">No. Nights: <?= $room['nights'] ?> night<?= $room['nights'] ? '' : 's' ?></small><br>
-      <small class="ml-3">Room Price: ₱ <?= number_format($room['pricing_type'], 2) ?></small><br>
-      <small class="ml-3">25% Percent: ₱ <?= number_format($room['pricing_type'] * 0.25 * $room['nights'], 2) ?> (25%)</small>
+      <small class="ml-3">Room Price: ₱ <?= number_format($room['pricing_type']) ?></small><br>
+      <small class="ml-3">25% Percent: ₱ <?= number_format($room['pricing_type'] * 0.25 * $room['nights']) ?> (25%)</small>
     </details>
   <?php } ?>
 </td>
 <td>
   <details>
-    <summary>₱ <?= number_format($row['payment']->amount, 2) ?></summary>
+    <summary>₱ <?= number_format($row['payment']->amount) ?> <small>Payment</small></summary>
     <?php foreach ($row['payments'] as $payment) { ?>
       <?php if ($payment['payment_option'] == 'Card') {
         $icon = 'credit-card';
@@ -47,14 +47,20 @@
       $tooltip =  $payment['payment_option'] . '<br>' . $payment['card_number']; ?>
       <small class="mb-0">
         <span class="fa fa-<?= $icon ?> text-info mr-1" data-placement="top" title="<?= $tooltip ?>" rel="tooltip" data-html="true"></span>
-        ₱ <?= number_format($payment['amount'], 2) ?> - <?= date_format(date_create($payment['booking_payment_added']), 'm/d/y g:ia') ?>
+        ₱ <?= number_format($payment['amount']) ?> - <?= date_format(date_create($payment['booking_payment_added']), 'm/d/y g:ia') ?>
       </small><br>
     <?php } ?>
   </details>
-  <?php if ($row['refund']) { ?>
-    <small>Refund amount: ₱ <?= number_format($row['refund']) ?></small><br>
-    <small>Refund reason: <?= $row['refund_reason'] ?></small>
-  <?php } ?>
+
+  <details>
+    <summary>₱ <?= number_format($row['refund']->booking_refund) ?> <small>Refund</small></summary>
+    <?php foreach ($row['refunds'] as $refund) { ?>
+      <small class="mb-0">
+        <span class="fa fa-info-circle text-info mr-1" data-placement="top" title="<?= $refund['booking_refund_reason'] ?>" rel="tooltip" data-html="true"></span>
+        ₱ <?= number_format($refund['booking_refund']) ?> - <?= date_format(date_create($payment['booking_payment_added']), 'm/d/y g:ia') ?>
+      </small><br>
+    <?php } ?>
+  </details>
 </td>
 <td>
   <?= $row['arrival'] ?> - <?= $row['departure'] ?><br>

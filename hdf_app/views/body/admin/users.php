@@ -90,8 +90,8 @@
             <option value="Admin">Administrator</option>
             <option value="Front Desk">Front Desk</option>
             <option value="Housekeeping">Housekeeping</option>
-            <option value="Restaurant">Restaurant</option>
-            <option value="Coffee Shop">Coffee Shop</option>
+            <!-- <option value="Restaurant">Restaurant</option>
+            <option value="Coffee Shop">Coffee Shop</option> -->
           </select>
         </div>
         <div class="form-group">

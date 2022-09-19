@@ -496,6 +496,12 @@
           $('#frmBook').attr('action', `${base_url}index.php/main/checkIn`);
           $('#btnBooking').show().val('Check In');
           $(".reservation-div").hide();
+        } else if (hour > 12) {
+          $("#rdo_check").prop("checked", true);
+          $('.action-div').removeClass('d-none');
+          $('#frmBook').attr('action', `${base_url}index.php/main/checkIn`);
+          $('#btnBooking').show().val('Check In');
+          $(".reservation-div").hide();
         } else {
           $('#frmBook').attr('action', `${base_url}index.php/main/updateReservation`);
           $('.action-div').addClass('d-none');

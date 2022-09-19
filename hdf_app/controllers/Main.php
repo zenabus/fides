@@ -9,9 +9,6 @@ class Main extends MY_Controller {
 
   function __construct() {
     parent::__construct();
-    $this->load->vars([
-      'notif' => $this->get_model->frontdeskGetNotif()
-    ]);
   }
 
   // ------------------------------------------------------------------------------------------------------- //
@@ -19,14 +16,12 @@ class Main extends MY_Controller {
   // ------------------------------------------------------------------------------------------------------- //
 
   function index() {
-    $data = array(
-      'rooms' => $this->get_model->getRoomsWithRoomType(),
-      'available' => $this->get_model->getFrontDeskRooms(),
-      'unavailable' => $this->get_model->getFrontDeskRooms(0),
-      'room_types' => $this->get_model->getRoomTypes(),
-      'guests' => $this->get_model->getGuests(),
-      'active' => 'dashboard'
-    );
+    $data['rooms'] = $this->get_model->getRoomsWithRoomType();
+    $data['available'] = $this->get_model->getFrontDeskRooms();
+    $data['unavailable'] = $this->get_model->getFrontDeskRooms(0);
+    $data['room_types'] = $this->get_model->getRoomTypes();
+    $data['guests'] = $this->get_model->getGuests();
+    $data['active'] = 'dashboard';
 
     $this->load->view('layout/header', $data);
     $this->load->view('body/frontdesk/dashboard');
@@ -102,17 +97,16 @@ class Main extends MY_Controller {
     $data['guest'] = $this->get_model->getGuest($guest_id);
     $data['bookings'] = $this->get_model->getBookingsByGuest($guest_id, [0, -1, 6]);
     $data['reservations'] = $this->get_model->getBookingsByGuest($guest_id, [1, 2, 3]);
-    $i = 0;
-    foreach ($data['bookings'] as $booking) {
+
+    foreach ($data['bookings'] as $i => $booking) {
       $data['bookings'][$i]['rooms'] = $this->get_model->getBookedRooms($booking['booking_id']);
       $data['bookings'][$i]['payment'] = $this->get_model->getPaymentTotal($booking['booking_id']);
-      $data['bookings'][$i++]['payments'] = $this->get_model->getPayments($booking['booking_id']);
+      $data['bookings'][$i]['payments'] = $this->get_model->getPayments($booking['booking_id']);
     }
-    $j = 0;
-    foreach ($data['reservations'] as $booking) {
-      $data['reservations'][$j]['rooms'] = $this->get_model->getBookedRooms($booking['booking_id']);
-      $data['reservations'][$j]['payment'] = $this->get_model->getPaymentTotal($booking['booking_id']);
-      $data['reservations'][$j++]['payments'] = $this->get_model->getPayments($booking['booking_id']);
+    foreach ($data['reservations'] as $i => $booking) {
+      $data['reservations'][$i]['rooms'] = $this->get_model->getBookedRooms($booking['booking_id']);
+      $data['reservations'][$i]['payment'] = $this->get_model->getPaymentTotal($booking['booking_id']);
+      $data['reservations'][$i]['payments'] = $this->get_model->getPayments($booking['booking_id']);
     }
     $this->load->view('layout/header', $data);
     $this->load->view('body/frontdesk/guest');
@@ -156,11 +150,10 @@ class Main extends MY_Controller {
     ];
     $data['reservations'] = $this->get_model->getReservations($reservation_type == 'walkin' ? ['Arrival/Tentative', 'Confirmed'] : ['Online']);
 
-    $i = 0;
-    foreach ($data['reservations'] as $booking) {
+    foreach ($data['reservations'] as $i => $booking) {
       $data['reservations'][$i]['rooms'] = $this->get_model->getBookedRooms($booking['booking_id']);
       $data['reservations'][$i]['payment'] = $this->get_model->getPaymentTotal($booking['booking_id']);
-      $data['reservations'][$i++]['payments'] = $this->get_model->getPayments($booking['booking_id']);
+      $data['reservations'][$i]['payments'] = $this->get_model->getPayments($booking['booking_id']);
     }
 
     $this->load->view('layout/header', $data);
@@ -173,11 +166,12 @@ class Main extends MY_Controller {
     $data['active'] = 'bookings';
     $data['bookings'] = $this->get_model->getBookingsByStatus([0, -1, 6]);
 
-    $i = 0;
-    foreach ($data['bookings'] as $booking) {
+    foreach ($data['bookings'] as $i => $booking) {
       $data['bookings'][$i]['rooms'] = $this->get_model->getBookedRooms($booking['booking_id']);
       $data['bookings'][$i]['payment'] = $this->get_model->getPaymentTotal($booking['booking_id']);
-      $data['bookings'][$i++]['payments'] = $this->get_model->getPayments($booking['booking_id']);
+      $data['bookings'][$i]['payments'] = $this->get_model->getPayments($booking['booking_id']);
+      $data['bookings'][$i]['refund'] = $this->get_model->getRefundTotal($booking['booking_id']);
+      $data['bookings'][$i]['refunds'] = $this->get_model->getRefunds($booking['booking_id']);
     }
 
     $this->load->view('layout/header', $data);
@@ -204,11 +198,16 @@ class Main extends MY_Controller {
       $data['logs'][$i]['ago'] = $this->timeAgo($log['booking_log_added']);
     }
 
-    $i = 0;
-    foreach ($data['booked_rooms'] as $room) {
+    foreach ($data['booked_rooms'] as $i => $room) {
       $data['booked_rooms'][$i]['restaurant'] = $this->get_model->getRoomCharges($room['booked_room_id'], 'Restaurant');
       $data['booked_rooms'][$i]['coffeeshop'] = $this->get_model->getRoomCharges($room['booked_room_id'], 'Coffeeshop');
-      $data['booked_rooms'][$i++]['amenities'] = $this->get_model->getRoomAmenities($room['booked_room_id']);
+      $data['booked_rooms'][$i]['amenities'] = $this->get_model->getRoomAmenities($room['booked_room_id']);
+      $data['booked_rooms'][$i]['payment_room'] = $this->get_model->getPaymentByType($room['booked_room_id'], 'room');
+      $data['booked_rooms'][$i]['payment_restaurant'] = $this->get_model->getPaymentByType($room['booked_room_id'], 'restaurant');
+      $data['booked_rooms'][$i]['payment_coffeeshop'] = $this->get_model->getPaymentByType($room['booked_room_id'], 'coffeeshop');
+      $data['booked_rooms'][$i]['payment_addons'] = $this->get_model->getPaymentByType($room['booked_room_id'], 'addons');
+      $data['booked_rooms'][$i]['payment'] = $this->get_model->getPaymentByBookedRoom($room['booked_room_id']);
+      $data['booked_rooms'][$i]['refund'] = $this->get_model->getRefundByBookedRoom($room['booked_room_id']);
     }
 
     $room_charges = $this->get_model->getRoomChargesTotal($data['booking']->booking_id);
@@ -275,11 +274,10 @@ class Main extends MY_Controller {
     $amenities = $this->get_model->getRoomAmenitiesTotal($data['booking']->booking_id);
     $data['charges_total'] = $room_charges->total + $amenities->total;
 
-    $i = 0;
-    foreach ($data['booked_rooms'] as $room) {
+    foreach ($data['booked_rooms'] as $i => $room) {
       $data['booked_rooms'][$i]['restaurant'] = $this->get_model->getRoomCharges($room['booked_room_id'], 'Restaurant');
       $data['booked_rooms'][$i]['coffeeshop'] = $this->get_model->getRoomCharges($room['booked_room_id'], 'Coffeeshop');
-      $data['booked_rooms'][$i++]['amenities'] = $this->get_model->getRoomAmenities($room['booked_room_id']);
+      $data['booked_rooms'][$i]['amenities'] = $this->get_model->getRoomAmenities($room['booked_room_id']);
     }
 
     $view = $this->load->view('body/frontdesk/components/receipt', $data, TRUE);
@@ -309,11 +307,10 @@ class Main extends MY_Controller {
     $amenities = $this->get_model->getRoomAmenitiesByRoomId($booked_room_id);
     $data['charges_total'] = $room_charges->total + $amenities->total;
 
-    $i = 0;
-    foreach ($data['booked_rooms'] as $room) {
+    foreach ($data['booked_rooms'] as $i => $booked_room) {
       $data['booked_rooms'][$i]['restaurant'] = $this->get_model->getRoomCharges($booked_room_id, 'Restaurant');
       $data['booked_rooms'][$i]['coffeeshop'] = $this->get_model->getRoomCharges($booked_room_id, 'Coffeeshop');
-      $data['booked_rooms'][$i++]['amenities'] = $this->get_model->getRoomAmenities($booked_room_id);
+      $data['booked_rooms'][$i]['amenities'] = $this->get_model->getRoomAmenities($booked_room_id);
     }
 
     $view = $this->load->view('body/frontdesk/components/receipt', $data, TRUE);

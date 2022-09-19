@@ -25,267 +25,6 @@ class Get_model extends CI_Model {
     return $this->db->where('id', $user_id)->get('users')->row();
   }
 
-  function frontdeskGetRoomTypeById($id) {
-    return $this->db->where('form_id', $id)->get('reserve_room_type')->result_array();
-  }
-
-  function frontdeskListOfCheckedInbyId($id) {
-    return $this->db->where('id', $id)->get('check_form')->result_array();
-  }
-
-  function frondeskGetRoom() {
-    return $this->db->where('status_by_room', 'EMPTY')->get('rooms')->result_array();
-  }
-
-  function frondeskGetRoomNoRestriction() {
-    return $this->db->get('rooms')->result_array();
-  }
-
-  function frontdeskgetDeduction() {
-    return $this->db->get('deduction')->result_array();
-  }
-
-  function houseKeepinggetRoom() {
-    //return $this->db->query('SELECT * FROM room_type INNER JOIN rooms ON room_type.id=rooms.room_type_id WHERE status_by_room ="Checkout"')->result_array();
-    return $this->db->query('SELECT * ,room_types_booking.name AS room_type, rooms_booking.id AS room_id FROM rooms_booking INNER JOIN room_types_booking ON rooms_booking.type= room_types_booking.id INNER JOIN room_statuses ON rooms_booking.status = room_statuses.id')->result_array();
-  }
-
-  function houseKeepinggetRoomReady() {
-    return $this->db->query('SELECT * FROM room_type INNER JOIN rooms ON room_type.id=rooms.room_type_id WHERE status_by_room ="EMPTY"')->result_array();
-  }
-
-  function houseKeepinggetRoomUM() {
-    return $this->db->query('SELECT * FROM room_type INNER JOIN rooms ON room_type.id=rooms.room_type_id WHERE status_by_room ="Under Maintenance"')->result_array();
-  }
-
-  function houseKeepinggetRoomUC() {
-    return $this->db->query('SELECT * FROM room_type INNER JOIN rooms ON room_type.id=rooms.room_type_id WHERE status_by_room ="Under Cleaning"')->result_array();
-  }
-
-  function houseKeepinggetRoomCheckin() {
-    return $this->db->query('SELECT * FROM rooms_checked WHERE room_status ="Checked In" and add_bed <> 0 order by bed_status desc limit 100')->result_array();
-  }
-
-  function frontdeskTOtalBalance($id) {
-    return $this->db->query('SELECT *,sum(total_balance) AS total FROM rooms_checked WHERE check_id="' . $id . '"')->result_array();
-  }
-  function coffeeshopTotalBalance() {
-    return $this->db->query('SELECT *,sum(total_cart_amount) AS total FROM coffeeshop_cart WHERE table_num="walkin"')->result_array();
-  }
-
-  function restaurantTotalBalance() {
-    if ($this->session->userdata('connect') == true);
-    $sess = $_SESSION['user_id'];
-    return $this->db->query('SELECT *,sum(total_cart_amount) AS total FROM restaurant_cart WHERE table_num="walkin" and status_cart="Not Deleted" and account_process="' . $sess . '"')->result_array();
-  }
-
-  function restaurantTotalBalanceReciept($id_reports, $res) {
-    if ($this->session->userdata('connect') == true);
-    $sess = $_SESSION['user_id'];
-    return $this->db->query('SELECT *,sum(total_cart_amount) AS total FROM restaurant_cart WHERE type_process="' . $res . '" and status_cart="Deleted" and account_process="' . $sess . '" and id_for_reports="' . $id_reports . '"')->result_array();
-  }
-
-  function ADminrestaurantTotalBalanceReciept($id_reports) {
-    return $this->db->query('SELECT *,sum(total_cart_amount) AS total FROM restaurant_cart WHERE table_num="walkin" and status_cart="Deleted" and id_for_reports="' . $id_reports . '"')->result_array();
-  }
-
-  function restaurantTotalBalanceRecieptpertable($id_reports, $id, $res) {
-    if ($this->session->userdata('connect') == true);
-    $sess = $_SESSION['user_id'];
-    return $this->db->query('SELECT *,sum(total_cart_amount) AS total FROM restaurant_cart WHERE type_process="' . $res . '" and table_num="' . $id . '" and status_cart="Deleted" and account_process="' . $sess . '" and id_for_reports="' . $id_reports . '"')->result_array();
-  }
-
-  function AdminrestaurantTotalBalanceRecieptpertable($id_reports, $id) {
-    return $this->db->query('SELECT *,sum(total_cart_amount) AS total FROM restaurant_cart WHERE table_num="' . $id . '" and status_cart="Deleted" and id_for_reports="' . $id_reports . '"')->result_array();
-  }
-
-  function restaurantTotalBalancePerTable($id, $res) {
-    return $this->db->query('SELECT *,sum(total_cart_amount) AS total FROM restaurant_cart WHERE type_process="' . $res . '" and table_num="' . $id . '" and status_cart="Not Deleted"')->result_array();
-  }
-
-  function coffeeshopTotalBalancePerTable($id) {
-    return $this->db->query('SELECT *,sum(total_cart_amount) AS total FROM coffeeshop_cart WHERE table_num="' . $id . '"')->result_array();
-  }
-
-  function frontdeskCharge($id) {
-    return $this->db->query('SELECT *,sum(total_cart_amount) AS total FROM rooms_checked INNER JOIN restaurant_cart ON rooms_checked.id_rooms = restaurant_cart.charge_id INNER JOIN product_restaurant ON restaurant_cart.product_id = product_restaurant.id WHERE rooms_checked.check_id="' . $id . '" and status_cart="Deleted"')->result_array();
-  }
-
-  function frontdeskgetChargeToRoom($id) {
-    return $this->db->query('SELECT * FROM rooms_checked INNER JOIN restaurant_cart ON rooms_checked.id_rooms = restaurant_cart.charge_id INNER JOIN product_restaurant ON restaurant_cart.product_id = product_restaurant.id WHERE rooms_checked.check_id="' . $id . '" and restaurant_cart.type_process="Restaurant"')->result_array();
-  }
-
-  function frontdeskgetChargeToRoomcof($id) {
-    return $this->db->query('SELECT * FROM rooms_checked INNER JOIN restaurant_cart ON rooms_checked.id_rooms = restaurant_cart.charge_id INNER JOIN product_restaurant ON restaurant_cart.product_id = product_restaurant.id WHERE rooms_checked.check_id="' . $id . '" and restaurant_cart.type_process="Coffee Shop"')->result_array();
-  }
-
-  function getTables() {
-    return $this->db->query('SELECT * FROM num_tables')->result_array();
-  }
-
-  function getTablesbyId($id) {
-    return $this->db->query('SELECT * FROM num_tables WHERE id_table="' . $id . '"')->result_array();
-  }
-
-  function updategetTables($id) {
-    return $this->db->query('SELECT * FROM num_tables WHERE id_table="' . $id . '"')->result_array();
-  }
-
-  function coffeeshopgetTables() {
-    return $this->db->query('SELECT * FROM coffee_tables')->result_array();
-  }
-
-  function coffeeshopgetTablesbyId($id) {
-    return $this->db->query('SELECT * FROM coffee_tables WHERE id_table="' . $id . '"')->result_array();
-  }
-
-  function coffeeshopupdategetTables($id) {
-    return $this->db->query('SELECT * FROM coffee_tables WHERE id_table="' . $id . '"')->result_array();
-  }
-
-  function logs_activity() {
-    return $this->db->query('SELECT * FROM user_logs WHERE logs_type <> "user"')->result_array();
-  }
-
-  function logs_user() {
-    return $this->db->query('SELECT * FROM user_logs WHERE logs_type="user" ')->result_array();
-  }
-
-  function forntdesklogs_user($id) {
-    return $this->db->query('SELECT * FROM user_logs WHERE frontdesk_id="' . $id . '" order by date_entered desc')->result_array();
-  }
-
-  function adminGetNotif() {
-    return $this->db->query('SELECT * FROM notification WHERE type="Admin" order by id desc limit 10')->result_array();
-  }
-
-  function housekeepingGetNotif() {
-    return $this->db->query('SELECT * FROM notification WHERE type="Housekeeping" order by id desc limit 10')->result_array();
-  }
-
-  function restaurantGetNotif() {
-    return $this->db->query('SELECT * FROM notification WHERE type="Restaurant" order by id desc limit 10')->result_array();
-  }
-  function frontdeskGetNotif() {
-    return $this->db->query('SELECT * FROM notification WHERE type="Front Desk" order by id desc limit 10')->result_array();
-  }
-
-  function coffeeshopGetNotif() {
-    return $this->db->query('SELECT * FROM notification WHERE type="Coffee Shop" order by id desc limit 10')->result_array();
-  }
-
-  function Viewreports($from, $to, $user_type) {
-    return $this->db->query('SELECT * FROM all_reports WHERE type_process="' . $user_type . '" and date_process between "' . $from . '" AND "' . $to . '"')->result_array();
-  }
-
-  function ViewReportsTotal($from, $to, $user_type) {
-    return $this->db->query('select sum(total_amount_process) AS total FROM all_reports WHERE type_process="' . $user_type . '" and date_process between "' . $from . '" AND "' . $to . '"')->result_array();
-  }
-
-  function ViewreportsFrontdesk($from, $to) {
-    return $this->db->query('SELECT * FROM all_reports WHERE  type_process="Frontdesk" and date_process between "' . $from . '" AND "' . $to . '"')->result_array();
-  }
-
-  function ViewReportsTotalFrontdesk($from, $to) {
-    return $this->db->query('select sum(total_amount_process) AS total FROM all_reports WHERE type_process="Frontdesk"  and date_process between "' . $from . '" AND "' . $to . '"')->result_array();
-  }
-
-  function restaurantViewreports($from, $to, $id, $res, $type) {
-    return $this->db->query('SELECT * FROM all_reports WHERE type_payment="' . $type . '" and type_process="' . $res . '" and account_process="' . $id . '" and date_process between "' . $from . '" AND "' . $to . '"')->result_array();
-  }
-
-  function restaurantViewReportsTotal($from, $to, $id, $res) {
-    return $this->db->query('select sum(total_amount_process) AS total FROM all_reports WHERE type_payment="' . $type . '" and type_process="' . $res . '" and account_process="' . $id . '" and date_process between "' . $from . '" AND "' . $to . '"')->result_array();
-  }
-
-  function MainViewreportsFrontdesk($from, $to, $id, $type) {
-    return $this->db->query('SELECT * FROM all_reports WHERE account_process="' . $id . '" and type_payment="' . $type . '" and type_process="Frontdesk" and date_process between "' . $from . '" AND "' . $to . '"')->result_array();
-  }
-
-  function MainViewReportsTotalFrontdesk($from, $to, $id, $type) {
-    return $this->db->query('select sum(total_amount_process) AS total FROM all_reports WHERE account_process="' . $id . '" and type_payment="' . $type . '" and type_process="Frontdesk"  and date_process between "' . $from . '" AND "' . $to . '"')->result_array();
-  }
-
-  function reportTransactionsRestaurant($res) {
-    if ($this->session->userdata('connect') == true);
-    $sess = $_SESSION['user_id'];
-    return $this->db->query('SELECT * FROM all_reports WHERE account_process="' . $sess . '" and type_process="' . $res . '"')->result_array();
-  }
-
-  function reportTransactionsfrontdesk() {
-    if ($this->session->userdata('connect') == true);
-    $sess = $_SESSION['user_id'];
-    //return $this->db->query('SELECT * FROM all_reports WHERE account_process="'.$sess.'" and type_process="Frontdesk"')->result_array();
-    return $this->db->query('SELECT * FROM all_reports WHERE type_process="Frontdesk"')->result_array();
-  }
-
-  function reportTransactionsAdmin() {
-    return $this->db->query('SELECT * FROM all_reports')->result_array();
-  }
-
-  function houseCount($status) {
-    return $this->db->query('select count(*) AS total FROM rooms_booking WHERE status="' . $status . '"')->result_array();
-  }
-
-  function countRoom() {
-    return $this->db->query('select count(*) AS total FROM rooms_booking')->result_array();
-  }
-
-  function countRoomTableRestaurant() {
-    return $this->db->query('select count(*) AS total FROM num_tables')->result_array();
-  }
-
-  function countRoomRestaurantProduct() {
-    return $this->db->query('select count(*) AS total FROM product_restaurant')->result_array();
-  }
-
-  function countRoomRestaurantProductActive() {
-    return $this->db->query('select count(*) AS total FROM product_restaurant WHERE product_status="ACTIVE"')->result_array();
-  }
-
-  function countRoomRestaurantProductINACTIVE() {
-    return $this->db->query('select count(*) AS total FROM product_restaurant WHERE product_status <> "ACTIVE"')->result_array();
-  }
-
-  function viewAllBookings() {
-    return $this->db->query('SELECT *,room_types_booking.name AS room_type,bookings.booking_id AS book_id FROM bookings INNER JOIN rooms_booking ON bookings.room_id = rooms_booking.id INNER JOIN room_types_booking ON rooms_booking.type = room_types_booking.id ')->result_array();
-  }
-
-  function counttotalFOchargeresto($id) {
-    return $this->db->query('select sum(charge_amount) AS restoTotal FROM charges_fo WHERE charge_type="Resto" and charge_to="' . $id . '"')->row_array();
-  }
-
-  function counttotalFOchargecoffee($id) {
-    return $this->db->query('select sum(charge_amount) AS cofTotal FROM charges_fo WHERE charge_type="Coffee Shop" and charge_to="' . $id . '"')->row_array();
-  }
-
-  function counttotalFOchargeAmenites($id) {
-    return $this->db->query('select sum(amen_amount) AS AmTotal FROM charges_amen WHERE amen_to_charge="' . $id . '"')->row_array();
-  }
-
-  function selectChargeResto($id) {
-    return $this->db->where('charge_type', 'Resto')->where('charge_to', $id)->get('charges_fo')->result_array();
-  }
-
-  function selectChargeCoffee($id) {
-    return $this->db->where('charge_type', 'Coffee Shop')->where('charge_to', $id)->get('charges_fo')->result_array();
-  }
-
-  function selectChargeAmen($id) {
-    return $this->db->where('amen_to_charge', $id)->get('charges_amen')->result_array();
-  }
-
-  function guestTransactionbyId($fname, $lname) {
-    // 	echo $fname;
-    // 	echo $lname;
-    //return $this->db->query('SELECT *,check_form.id AS che_id FROM check_form INNER JOIN bookings ON check_form.connect_booking = bookings.booking_id INNER JOIN rooms_booking ON bookings.room_id = rooms_booking.id INNER JOIN room_type ON rooms_booking.type = room_type.id INNER JOIN all_reports ON check_form.id=all_reports.if_frontdesk WHERE check_form.last_name="Villarosa" and check_form.first_name="Elpidio"')->result_array();
-    return $this->db->query('SELECT *,check_form.id AS che_id FROM check_form INNER JOIN bookings ON check_form.connect_booking = bookings.booking_id INNER JOIN rooms_booking ON bookings.room_id = rooms_booking.id INNER JOIN room_type ON rooms_booking.type = room_type.id INNER JOIN all_reports ON check_form.id=all_reports.if_frontdesk WHERE check_form.last_name="' . $fname . '" and check_form.first_name="' . $lname . '" or check_form.last_name="' . $fname . ',' . $lname . '"')->result_array();
-  }
-
-  // ------------------------------------------------------------------------------------------------------- //
-  // ------------------------------------------------ FRANZ ------------------------------------------------ //
-  // ------------------------------------------------------------------------------------------------------- //
-
   function getFrontDeskRooms($status = 1) {
     $status = $status ? 'room_status_id' : 'room_status_id!=';
     return $this->db->select('*, rooms.id AS room_id')
@@ -471,14 +210,8 @@ class Get_model extends CI_Model {
     return $this->db->where('charge_id', $charge_id)->join('categories', 'categories.category_id=charges.category_id')->get('charges')->row();
   }
 
-  function getPayments($booking_id) {
-    return $this->db->join('booked_rooms', 'booked_rooms.booked_room_id=booking_payment.booked_room_id')
-      ->join('rooms', 'rooms.id=booked_rooms.room_id')
-      ->join('room_type', 'room_type.id=rooms.room_type_id')
-      ->join('users', 'users.id=booking_payment.user_id')
-      ->where('booking_payment.booking_id', $booking_id)
-      ->order_by('booking_payment_added', 'DESC')
-      ->get('booking_payment')->result_array();
+  function ByType($booking_id) {
+    return $this->db->where('booking_id', $booking_id)->order_by('booking_payment_added', 'DESC')->get('booking_payment')->result_array();
   }
 
   function getPaymentTotal($booking_id) {
@@ -487,6 +220,14 @@ class Get_model extends CI_Model {
 
   function getPaymentByBookedRoom($booked_room_id) {
     return $this->db->select_sum('amount')->where('booked_room_id', $booked_room_id)->get('booking_payment')->row();
+  }
+
+  function getPayments($booking_id) {
+    return $this->db->join('booked_rooms', 'booked_rooms.booked_room_id=booking_payment.booked_room_id')
+      ->join('rooms', 'rooms.id=booked_rooms.room_id')
+      ->join('room_type', 'room_type.id=rooms.room_type_id')
+      ->join('users', 'users.id=booking_payment.user_id')
+      ->where('booking_payment.booking_id', $booking_id)->get('booking_payment')->result_array();
   }
 
   function getRefunds($booking_id) {
@@ -581,6 +322,8 @@ class Get_model extends CI_Model {
     $this->db->join('users', 'users.id=user_logs.user_id');
     if ($_SESSION['user_type'] != 'Admin' && $_SESSION['user_type'] != 'Superadmin') {
       $this->db->where('user_id', $_SESSION['user_id']);
+    } else {
+      $this->db->where('user_id!=', 34);
     }
     return $this->db->get('user_logs')->result_array();
   }
@@ -624,5 +367,12 @@ class Get_model extends CI_Model {
     } else {
       return $this->db->get('room_statuses')->result_array();
     }
+  }
+
+  function getPaymentByType($booked_room_id, $payment_for) {
+    return $this->db->select_sum('amount')
+      ->where('booked_room_id', $booked_room_id)
+      ->where('payment_for', $payment_for)
+      ->get('booking_payment')->row();
   }
 }

@@ -11,7 +11,7 @@
             <thead>
               <tr>
                 <th>User</th>
-                <?php if($_SESSION['user_type']=='Superadmin'){ ?>
+                <?php if ($_SESSION['user_type'] == 'Superadmin') { ?>
                   <th>IP Address</th>
                 <?php } ?>
                 <th>Activity</th>
@@ -25,8 +25,11 @@
                     <?= $row['name'] ?><br>
                     <small><?= ucfirst(strtolower($row['user_type'])) ?></small>
                   </td>
-                  <?php if($_SESSION['user_type']=='Superadmin'){ ?>
-                    <td><?=$row['ip_address'] ?></td>
+                  <?php if ($_SESSION['user_type'] == 'Superadmin') { ?>
+                    <td>
+                      <?= array_key_exists($row['ip_address'], IP) ? IP[$row['ip_address']] : 'Unknown' ?><br>
+                      <small><?= $row['ip_address'] ?></small>
+                    </td>
                   <?php } ?>
                   <td>
                     <?= $row['content'] ?><br>

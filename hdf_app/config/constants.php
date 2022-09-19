@@ -113,6 +113,7 @@ $ip = [
   '49.145.96.9' => 'Home',
   '122.3.206.239' => 'Hotel de Fides',
   '119.92.137.197' => 'Office',
+  '127.0.0.1' => 'Localhost',
 ];
 
 define('RESERVATION_STATUS', $reservation_status);

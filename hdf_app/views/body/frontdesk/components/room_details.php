@@ -19,22 +19,16 @@
             <td class="border-left-0 pl-4">
               Room <?= $row['room_number'] ?><br>
               <small><?= $row['room_type'] ?></small><br>
-              <small>₱ <?= number_format($row['pricing_type']) ?> per night</small><br>
               <?php if ($row['change_reason']) { ?>
                 <small style="font-style:italic">(Change room - <?= $row['change_reason'] ?>)</small>
               <?php } ?>
             </td>
             <td>
               <?= $row['nights'] ?> night<?= $row['nights'] == 1 ? '' : 's' ?><br>
-              <?php $total = $row['pricing_type'] * $row['nights'] ?>
-              <?php $discount = $total * ($row['percentage'] / 100) ?>
-              <?php $subtotal = $total - $discount ?>
               <small><?= $row['check_in'] ?> - <?= $row['check_out'] ?></small>
               <?php if ($row['check_out'] == date('m/d/Y')) { ?>
                 <i class="fa-solid fa-calendar-day heart"></i>
               <?php } ?>
-              <br>
-              <small>₱ <?= number_format($subtotal) ?> (<?= $row['discount_type'] ?> <?= $row['percentage'] ?>%)</small>
             </td>
             <td>
               <?php [$name, $contact, $email] = explode(' / ', $row['occupant']) ?>
@@ -81,18 +75,13 @@
             <td class="border-left-0 pl-4">
               Room <?= $row['room_number'] ?><br>
               <small><?= $row['room_type'] ?></small><br>
-              <small>₱ <?= number_format($row['pricing_type']) ?> per night</small><br>
               <?php if ($row['change_reason']) { ?>
                 <small style="font-style:italic">(Change room - <?= $row['change_reason'] ?>)</small>
               <?php } ?>
             </td>
             <td>
               <?= $row['nights'] ?> night<?= $row['nights'] == 1 ? '' : 's' ?><br>
-              <?php $total = $row['pricing_type'] * $row['nights'] ?>
-              <?php $discount = $total * ($row['percentage'] / 100) ?>
-              <?php $subtotal = $total - $discount ?>
-              <small><?= $row['check_in'] ?> - <?= $row['check_out'] ?></small><br>
-              <small>₱ <?= number_format($subtotal) ?> (<?= $row['discount_type'] ?> <?= $row['percentage'] ?>%)</small>
+              <small><?= $row['check_in'] ?> - <?= $row['check_out'] ?></small>
             </td>
             <td>
               <?php [$name, $contact, $email] = explode(' / ', $row['occupant']) ?>

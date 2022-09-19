@@ -68,6 +68,7 @@ Div to image not working
 Calendar following month
 Ask if extras are per day
 Request room delete to admin
+Checkin conflict
 
 
 new development

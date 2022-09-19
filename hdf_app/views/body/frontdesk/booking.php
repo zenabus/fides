@@ -115,6 +115,39 @@
 
       <div class="card">
         <div class="card-header border-bottom px-4 pt-4 pb-2">
+          <h6>Special Request(s) / Allergence</h6>
+        </div>
+        <?= form_open('main/updateRequest', ['id' => 'frmRequest']) ?>
+        <input type="hidden" name="booking_id" value="<?= $booking->booking_id ?>">
+        <div class="card-body px-4">
+          <textarea class="form-control-plaintext px-2 pt-1" tabindex="-1" name="request" rows="3" readonly><?= $booking->request ?></textarea>
+        </div>
+        <div class="card-footer my-2 border-top px-4">
+          <input type="button" value="Update" class="btn updateRequest hidable">
+          <input type="submit" value="Save" class="btn saveRequest" form="frmRequest">
+          <input type="button" value="Cancel" class="btn btn-primary cancelRequest">
+        </div>
+        <?= form_close() ?>
+      </div>
+
+      <div class="card">
+        <div class="card-header border-bottom px-4 pt-4 pb-2">
+          <h6>Notes</h6>
+        </div>
+        <?= form_open('main/updateNotes', ['id' => 'frmNotes']) ?>
+        <input type="hidden" name="booking_id" value="<?= $booking->booking_id ?>">
+        <div class="card-body px-4">
+          <textarea class="form-control-plaintext px-2 pt-1" tabindex="-1" name="remarks" rows="3" readonly><?= $booking->remarks ?></textarea>
+        </div>
+        <div class="card-footer my-2 border-top px-4">
+          <input type="button" value="Update" class="btn updateNotes hidable">
+          <input type="submit" value="Save" class="btn saveNotes" form="frmNotes">
+          <input type="button" value="Cancel" class="btn btn-primary cancelNotes">
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header border-bottom px-4 pt-4 pb-2">
           <h6>Logs</h6>
         </div>
         <div class="card-body">
@@ -266,39 +299,6 @@
               </tr>
             </tbody>
           </table>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-header border-bottom px-4 pt-4 pb-2">
-          <h6>Special Request(s) / Allergence</h6>
-        </div>
-        <?= form_open('main/updateRequest', ['id' => 'frmRequest']) ?>
-        <input type="hidden" name="booking_id" value="<?= $booking->booking_id ?>">
-        <div class="card-body px-4">
-          <textarea class="form-control-plaintext px-2 pt-1" tabindex="-1" name="request" rows="3" readonly><?= $booking->request ?></textarea>
-        </div>
-        <div class="card-footer my-2 border-top px-4">
-          <input type="button" value="Update" class="btn updateRequest hidable">
-          <input type="submit" value="Save" class="btn saveRequest" form="frmRequest">
-          <input type="button" value="Cancel" class="btn btn-primary cancelRequest">
-        </div>
-        <?= form_close() ?>
-      </div>
-
-      <div class="card">
-        <div class="card-header border-bottom px-4 pt-4 pb-2">
-          <h6>Notes</h6>
-        </div>
-        <?= form_open('main/updateNotes', ['id' => 'frmNotes']) ?>
-        <input type="hidden" name="booking_id" value="<?= $booking->booking_id ?>">
-        <div class="card-body px-4">
-          <textarea class="form-control-plaintext px-2 pt-1" tabindex="-1" name="remarks" rows="3" readonly><?= $booking->remarks ?></textarea>
-        </div>
-        <div class="card-footer my-2 border-top px-4">
-          <input type="button" value="Update" class="btn updateNotes hidable">
-          <input type="submit" value="Save" class="btn saveNotes" form="frmNotes">
-          <input type="button" value="Cancel" class="btn btn-primary cancelNotes">
         </div>
       </div>
     </div>

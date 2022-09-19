@@ -53,7 +53,7 @@
                     <?php } ?>
                     <?php if ($row['restaurant']) { ?>
                       <details>
-                        <summary>Restaurant charges</summary>
+                        <summary>Resto charges</summary>
                         <?php foreach ($row['restaurant'] as $r) { ?>
                           <small><?= $r['particulars'] ?>: ₱ <?= number_format($r['charges_food_amount']) ?></small>
                           <?php $total += $r['charges_food_amount']; ?>
@@ -62,7 +62,7 @@
                     <?php } ?>
                     <?php if ($row['coffeeshop']) { ?>
                       <details>
-                        <summary>Coffeeshop charges</summary>
+                        <summary>Otilla's charges</summary>
                         <?php foreach ($row['coffeeshop'] as $c) { ?>
                           <small><?= $c['particulars'] ?>: ₱ <?= number_format($c['charges_food_amount']) ?></small>
                           <?php $total += $c['charges_food_amount']; ?>

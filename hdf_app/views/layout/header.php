@@ -87,8 +87,8 @@ if (!$this->session->userdata('connect')) {
     }
 
     .table-sm td {
-      padding-top: 8px !important;
-      padding-bottom: 8px !important;
+      padding-top: 4px !important;
+      padding-bottom: 4px !important;
 
     }
 
@@ -365,9 +365,7 @@ if (!$this->session->userdata('connect')) {
                   <i class="nc-icon nc-bell-55"></i>
                 </a>
                 <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdownMenuLink">
-                  <?php foreach ($notif as $data) { ?>
-                    <a class="dropdown-item" href="<?= base_url() ?><?= $data['redirection'] ?>"><?= $data['content'] ?></a>
-                  <?php } ?>
+                  <a class="dropdown-item" href="#">Content</a>
                   <a class="dropdown-item" href="#">View all</a>
                 </div>
               </li>
