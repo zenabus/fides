@@ -56,7 +56,7 @@ $("#search").on("keypress", function (e) {
 
 $("#search").on("input", function () {
   const search = $(this).val();
-  const guest = guests.filter((g) => {
+  const guest = guests.filter(g => {
     const guest_name = g.first_name + " " + g.last_name;
     if (
       guest_name.toLowerCase().includes(search.toLowerCase()) ||
@@ -70,7 +70,7 @@ $("#search").on("input", function () {
   $(".guests-tbody").html("");
 
   if (guest.length && search) {
-    guest.map((g) => {
+    guest.map(g => {
       let tbody = `
         <tr>
           <td>
@@ -216,8 +216,8 @@ $("[name=reservation_type]").change(function () {
   if ($(this).val() == "Confirmed") {
     $(".advanced-div").show();
   } else {
-    $("[name=amount]").val("");
-    $("[name=card_number]").val("");
+    // $("[name=amount]").val("");
+    // $("[name=card_number]").val("");
     $(".advanced-div").hide();
   }
 });

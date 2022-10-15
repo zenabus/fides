@@ -110,7 +110,7 @@ class Main extends MY_Controller {
     $data['reservations'] = $this->get_model->getBookingsByGuest($guest_id, [1, 2, 3]);
     $data['collectables'] = $this->get_model->getCollectables($guest_id);
 
-    $this->dd($data['collectables']);
+    // $this->dd($data['collectables']);
 
     foreach ($data['bookings'] as $i => $booking) {
       $data['bookings'][$i]['rooms'] = $this->get_model->getBookedRooms($booking['booking_id']);
@@ -520,7 +520,7 @@ class Main extends MY_Controller {
         } else {
           $_POST['payment_details'] = $_POST['card_number'];
         }
-        $this->insert_model->addPayment();
+        $this->insert_model->addPayment($_POST['payment_for'], $_POST['amount'], $_POST['booked_room_id']);
       }
       $this->redirect();
     }
@@ -593,7 +593,7 @@ class Main extends MY_Controller {
     unset($_POST['booking_type']);
     [$arrival, $departure] = $this->getMinMax($_POST['booking_id']);
     $this->update_model->updateBookedRoomNights();
-    $this->update_model->updateBooking($arrival, $departure, $_POST['booked_room_id']);
+    $this->update_model->updateBooking($arrival, $departure, $_POST['booking_id']);
     unset($_POST['check_in']);
     unset($_POST['check_out']);
     unset($_POST['nights']);
@@ -603,6 +603,9 @@ class Main extends MY_Controller {
     unset($_POST['request']);
     unset($_POST['remarks']);
     unset($_POST['reservation_type']);
+    unset($_POST['payment_option']);
+    unset($_POST['amount']);
+    unset($_POST['card_number']);
     $this->update_model->updateGuest();
     $this->insert_model->log("Updated reservation details of <b> {$name}", 4);
     $this->session->set_flashdata('success', 'Reservation successfully updated.');
@@ -659,7 +662,7 @@ class Main extends MY_Controller {
 
   function confirm() {
     $this->update_model->updateReservationStatus(5, $_POST['booking_id']);
-    $this->insert_model->addPayment();
+    $this->insert_model->addPayment($_POST['payment_for'], $_POST['amount'], $_POST['booked_room_id']);
     $booking_number = 'HDF' . str_pad($_POST['booking_id'], 5, '0', STR_PAD_LEFT);
     $this->insert_model->log('Verified a reservation: #' . $booking_number, 4);
     $this->session->set_flashdata('success', 'Reservation successfully verified!');
