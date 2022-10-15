@@ -24,6 +24,7 @@
       <script src="<?= base_url() ?>assets/js/demo.js"></script>
       <script>
         $(document).ready(function() {
+          $('.selectpicker').selectpicker();
           $('[rel="tooltip"]').click(function() {
             $(this).tooltip('hide')
             $('.tooltip').remove();
@@ -35,7 +36,6 @@
 
           $('.datatable').DataTable();
         });
-        $("[rel='tooltip']").tooltip();
       </script>
       </body>
 

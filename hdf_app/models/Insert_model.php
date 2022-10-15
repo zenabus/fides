@@ -111,18 +111,32 @@ class Insert_model extends CI_Model {
     $this->db->insert('charges_other', $_POST);
   }
 
-  function addPayment() {
+  function addPayment($payment_for, $amount, $booked_room_id) {
     $data = [
       'booking_id' => $_POST['booking_id'],
-      'booked_room_id' => $_POST['booked_room_id'],
+      'booked_room_id' => $booked_room_id,
       'payment_option' => $_POST['payment_option'],
-      'amount' => $_POST['amount'],
-      'card_number' => $_POST['card_number'],
-      'payment_for' => $_POST['payment_for'],
+      'amount' => $amount,
+      'payment_details' => $_POST['payment_details'],
+      'payment_for' => $payment_for,
       'user_id' => $_SESSION['user_id'],
     ];
 
     $this->db->insert('booking_payment', $data);
+    if ($_POST['payment_option'] == 'Cash') {
+      $this->addCash($_POST['amount']);
+    }
+  }
+
+  function addCash($amount, $deduct = FALSE) {
+    $amount = str_replace(',', '', $amount);
+    $cash = $this->db->order_by('cash_id', 'DESC')->limit(1)->get('cash')->row();
+    if ($deduct) {
+      $cash = $cash->cash_amount - $amount;
+    } else {
+      $cash = $cash->cash_amount + $amount;
+    }
+    $this->db->insert('cash', ['cash_amount' => $cash]);
   }
 
   function addBookingLog($log) {
@@ -168,5 +182,20 @@ class Insert_model extends CI_Model {
     unset($_POST['booking_number']);
     $_POST['user_id'] = $_SESSION['user_id'];
     $this->db->insert('booking_refund', $_POST);
+  }
+
+  function remit() {
+    $_POST['user_id'] = $_SESSION['user_id'];
+    $_POST['remittance_date'] = date_create()->modify('-1 days')->format('Y-m-d');
+    $this->addCash($_POST['remitted_amount'], TRUE);
+    $this->db->insert('remittances', $_POST);
+  }
+
+  function addExpense() {
+    $this->db->insert('expenses', $_POST);
+  }
+
+  function addSales() {
+    $this->db->insert('sales', $_POST);
   }
 }

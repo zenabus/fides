@@ -53,7 +53,7 @@ class Get_model extends CI_Model {
   }
 
   function getGuests($guest_disabled = 0) {
-    return $this->db->where('guest_disabled', $guest_disabled)->get('guests')->result_array();
+    return $this->db->where('guest_disabled', $guest_disabled)->order_by('first_name')->get('guests')->result_array();
   }
 
   function getGuest($guest_id) {
@@ -72,6 +72,7 @@ class Get_model extends CI_Model {
       ->join('rooms', 'rooms.id=booked_rooms.room_id')
       ->join('guests', 'guests.guest_id=bookings.guest_id')
       ->where_in('reservation_status', [-1, 0, 1, 2])
+      ->where('booked_room_archived', 0)
       ->get('bookings')->result_array();
   }
 
@@ -156,23 +157,27 @@ class Get_model extends CI_Model {
     return $this->db->where('room_type_id', $room_type_id)->count_all_results('rooms');
   }
 
-  function getBookedRooms($booking_id, $booked_room_archived = 0) {
+  function getBookedRooms($booking_id, $booked_room_archived = [0, 2]) {
     return $this->db->where('booking_id', $booking_id)
       ->join('rooms', 'rooms.id=booked_rooms.room_id')
       ->join('room_type', 'room_type.id=rooms.room_type_id')
       ->join('discounts', 'discounts.discount_id=booked_rooms.discount_id')
       ->order_by('booked_room_id', 'DESC')
-      ->where('booked_room_archived', $booked_room_archived)
+      ->where_in('booked_room_archived', $booked_room_archived)
       ->get('booked_rooms')->result_array();
   }
 
-  function getBookedRoomById($booked_room_id) {
-    return $this->db->where('booked_room_id', $booked_room_id)
-      ->join('rooms', 'rooms.id=booked_rooms.room_id')
-      ->join('room_type', 'room_type.id=rooms.room_type_id')
-      ->join('discounts', 'discounts.discount_id=booked_rooms.discount_id')
-      ->order_by('booked_room_id', 'DESC')
-      ->get('booked_rooms')->result_array();
+  function getBookedRoomById($booked_room_id, $array = FALSE) {
+    $this->db->where('booked_room_id', $booked_room_id);
+    $this->db->join('rooms', 'rooms.id=booked_rooms.room_id');
+    $this->db->join('room_type', 'room_type.id=rooms.room_type_id');
+    $this->db->join('discounts', 'discounts.discount_id=booked_rooms.discount_id');
+    $this->db->order_by('booked_room_id', 'DESC');
+    if ($array) {
+      return  $this->db->get('booked_rooms')->result_array();
+    } else {
+      return  $this->db->get('booked_rooms')->row();
+    }
   }
 
   function getBookedRoom($booked_room_id) {
@@ -218,8 +223,12 @@ class Get_model extends CI_Model {
     return $this->db->select_sum('amount')->where('booking_id', $booking_id)->get('booking_payment')->row();
   }
 
-  function getPaymentByBookedRoom($booked_room_id) {
+  function getRoomPaymentTotal($booked_room_id) {
     return $this->db->select_sum('amount')->where('booked_room_id', $booked_room_id)->get('booking_payment')->row();
+  }
+
+  function getAdvanceByBookedRoom($booked_room_id) {
+    return $this->db->where('booked_room_id', $booked_room_id)->get('booking_payment')->row();
   }
 
   function getPayments($booking_id) {
@@ -227,6 +236,7 @@ class Get_model extends CI_Model {
       ->join('rooms', 'rooms.id=booked_rooms.room_id')
       ->join('room_type', 'room_type.id=rooms.room_type_id')
       ->join('users', 'users.id=booking_payment.user_id')
+      ->order_by('booking_payment_added', 'DESC')
       ->where('booking_payment.booking_id', $booking_id)->get('booking_payment')->result_array();
   }
 
@@ -235,6 +245,7 @@ class Get_model extends CI_Model {
       ->join('rooms', 'rooms.id=booked_rooms.room_id')
       ->join('room_type', 'room_type.id=rooms.room_type_id')
       ->join('users', 'users.id=booking_refund.user_id')
+      ->order_by('booking_refund_added', 'DESC')
       ->where('booking_refund.booking_id', $booking_id)->get('booking_refund')->result_array();
   }
 
@@ -246,27 +257,61 @@ class Get_model extends CI_Model {
     return $this->db->select_sum('booking_refund')->where('booked_room_id', $booked_room_id)->get('booking_refund')->row();
   }
 
-  function getRoomCharges($booked_room_id, $charge_type) {
-    return $this->db->where('booked_room_id', $booked_room_id)->where('charge_type', $charge_type)->get('charges_food')->result_array();
+  function getRoomCharges($booked_room_id, $charge_type, $total = FALSE) {
+    if ($total) {
+      $this->db->select_sum('(charges_food_quantity * charges_food_amount)', 'total');
+    }
+    $this->db->where('booked_room_id', $booked_room_id);
+    $this->db->where('charge_type', $charge_type);
+    if ($total) {
+      return $this->db->get('charges_food')->row();
+    } else {
+      return $this->db->get('charges_food')->result_array();
+    }
   }
 
-  function getRoomAmenities($booked_room_id) {
-    return $this->db->join('charges', 'charges.charge_id=charges_other.charge_id')
-      ->join('categories', 'categories.category_id=charges.category_id')
-      ->where('booked_room_id', $booked_room_id)
-      ->order_by('category')
-      ->get('charges_other')->result_array();
+  function getRoomAmenitiesByRoomId($booked_room_id) {
+    return $this->db->select_sum('(charge_quantity * charge_amount)', 'total')
+      ->join('charges', 'charges.charge_id=charges_other.charge_id')
+      ->join('booked_rooms', 'booked_rooms.booked_room_id=charges_other.booked_room_id')
+      ->join('bookings', 'bookings.booking_id=booked_rooms.booking_id')
+      ->where('booked_rooms.booked_room_id', $booked_room_id)
+      ->get('charges_other')->row();
   }
 
-  function getRoomChargesTotal($booking_id) {
-    return $this->db->select_sum('(charges_food_quantity * charges_food_amount)', 'total')
+  function getRoomAmenities($booked_room_id, $total = FALSE) {
+    if ($total) {
+      $this->db->select_sum('(charge_quantity * charge_amount)', 'total');
+    }
+    $this->db->join('charges', 'charges.charge_id=charges_other.charge_id');
+    $this->db->join('categories', 'categories.category_id=charges.category_id');
+    $this->db->where('booked_room_id', $booked_room_id);
+    $this->db->order_by('category');
+    if ($total) {
+      return $this->db->get('charges_other')->row();
+    } else {
+      return $this->db->get('charges_other')->result_array();
+    }
+  }
+
+  function getEarlyCheckout($booked_room_id) {
+    $this->db->join('charges', 'charges.charge_id=charges_other.charge_id');
+    $this->db->join('categories', 'categories.category_id=charges.category_id');
+    $this->db->where('booked_room_id', $booked_room_id);
+    $this->db->where('charges_other.charge_id', 39);
+    $this->db->order_by('category');
+    return $this->db->get('charges_other')->row();
+  }
+
+  function getChargesTotal($booking_id) {
+    $this->db->select_sum('(charges_food_quantity * charges_food_amount)', 'total')
       ->join('booked_rooms', 'booked_rooms.booked_room_id=charges_food.booked_room_id')
       ->join('bookings', 'bookings.booking_id=booked_rooms.booking_id')
       ->where('bookings.booking_id', $booking_id)
       ->get('charges_food')->row();
   }
 
-  function getRoomAmenitiesTotal($booking_id) {
+  function getAmenitiesTotal($booking_id) {
     return $this->db->select_sum('(charge_quantity * charge_amount)', 'total')
       ->join('charges', 'charges.charge_id=charges_other.charge_id')
       ->join('booked_rooms', 'booked_rooms.booked_room_id=charges_other.booked_room_id')
@@ -283,14 +328,6 @@ class Get_model extends CI_Model {
       ->get('charges_food')->row();
   }
 
-  function getRoomAmenitiesByRoomId($booked_room_id) {
-    return $this->db->select_sum('(charge_quantity * charge_amount)', 'total')
-      ->join('charges', 'charges.charge_id=charges_other.charge_id')
-      ->join('booked_rooms', 'booked_rooms.booked_room_id=charges_other.booked_room_id')
-      ->join('bookings', 'bookings.booking_id=booked_rooms.booking_id')
-      ->where('booked_rooms.booked_room_id', $booked_room_id)
-      ->get('charges_other')->row();
-  }
 
   function getBookingLogs($booking_id) {
     return $this->db->join('users', 'users.id=booking_logs.user_id')->order_by('booking_log_added', 'DESC')->where('booking_id', $booking_id)->get('booking_logs')->result_array();
@@ -369,10 +406,122 @@ class Get_model extends CI_Model {
     }
   }
 
-  function getPaymentByType($booked_room_id, $payment_for) {
-    return $this->db->select_sum('amount')
-      ->where('booked_room_id', $booked_room_id)
-      ->where('payment_for', $payment_for)
-      ->get('booking_payment')->row();
+  function getPaymentByType($booked_room_id, $payment_for, $payment_option = NULL, $date = NULL) {
+    if ($payment_option) {
+      return $this->db->select_sum('amount')
+        ->where('booked_room_id', $booked_room_id)
+        ->where('payment_for', $payment_for)
+        ->where('payment_option', $payment_option)
+        ->like('booking_payment_added', $date)
+        ->get('booking_payment')->row();
+    } else {
+      return $this->db->select_sum('amount')
+        ->where('booked_room_id', $booked_room_id)
+        ->where('payment_for', $payment_for)
+        ->get('booking_payment')->row();
+    }
+  }
+
+  function getDCR() {
+    return $this->db->select('booking_payment_id, CAST(booking_payment_added as DATE) as payment_added, count(*) as count, sum(amount) as sum')
+      ->group_by('payment_added')
+      ->order_by('payment_added', 'DESC')
+      ->get('booking_payment')->result_array();
+  }
+
+  function getDCRTotal($payment_option) {
+    return $this->db->select('booking_payment_id, CAST(booking_payment_added as DATE) as payment_added, sum(amount) as sum')
+      ->where_in('payment_option', $payment_option)
+      ->group_by('payment_added')
+      ->order_by('payment_added', 'DESC')
+      ->get('booking_payment')->result_array();
+  }
+
+  function getPaymentsByDateGrouped($date) {
+    return $this->db->join('booked_rooms', 'booked_rooms.booked_room_id=booking_payment.booked_room_id')
+      ->join('rooms', 'rooms.id=booked_rooms.room_id')
+      ->join('room_type', 'room_type.id=rooms.room_type_id')
+      ->join('bookings', 'bookings.booking_id=booked_rooms.booking_id')
+      ->join('guests', 'guests.guest_id=bookings.guest_id')
+      ->like('booking_payment_added', $date)
+      ->group_by('booking_payment.booked_room_id')
+      ->get('booking_payment')->result_array();
+  }
+
+  function getCurrentCash() {
+    return $this->db->order_by('cash_id', 'DESC')->limit(1)->get('cash')->row();
+  }
+
+  function getRemitted($date) {
+    return $this->db->join('users', 'users.id=remittances.user_id')->where('remittance_date', $date)->get('remittances')->row();
+  }
+
+  function getPaymentsByDate($date) {
+    return $this->db->join('booked_rooms', 'booked_rooms.booked_room_id=booking_payment.booked_room_id')
+      ->join('rooms', 'rooms.id=booked_rooms.room_id')
+      ->join('room_type', 'room_type.id=rooms.room_type_id')
+      ->join('bookings', 'bookings.booking_id=booked_rooms.booking_id')
+      ->join('guests', 'guests.guest_id=bookings.guest_id')
+      ->join('users', 'users.id=booking_payment.user_id')
+      ->like('booking_payment_added', $date)
+      ->order_by('booking_payment_id', 'DESC')
+      ->get('booking_payment')->result_array();
+  }
+
+  function getExpensesByDate($date) {
+    return $this->db->where('expense_date', $date)->get('expenses')->result_array();
+  }
+
+  function getSalesByDate($date) {
+    return $this->db->where('sales_date', $date)->get('sales')->result_array();
+  }
+
+  function getExpenses($date, $total = FALSE) {
+    if ($total) {
+      return $this->db->select_sum('expense_amount')->where('expense_date', $date)->get('expenses')->row();
+    } else {
+      return $this->db->where('expense_date', $date)->get('expenses')->result_array();
+    }
+  }
+
+  function getSales($date, $total = FALSE) {
+    if ($total) {
+      return $this->db->select_sum('sales_amount')->where('sales_date', $date)->get('sales')->row();
+    } else {
+      return $this->db->where('sales_date', $date)->get('sales')->result_array();
+    }
+  }
+
+  function getExpenseByDateAndType($date, $type) {
+    return $this->db->select_sum('expense_amount')->where('expense_type', $type)->where('expense_date', $date)->get('expenses')->row();
+  }
+
+  function getSalesByDateAndType($date, $type) {
+    return $this->db->select_sum('sales_amount')->where('sales_type', $type)->where('sales_date', $date)->get('sales')->row();
+  }
+
+  function getHotelSales($date) {
+    return $this->db->where_in('payment_for', ['room', 'advance', 'addons'])->like('booking_payment_added', $date)->get('booking_payment')->result_array();
+  }
+
+  function getEventSales($date) {
+    return $this->db->where_in('sales_type', ['Event', 'Pool'])->like('sales_added', $date)->get('sales')->result_array();
+  }
+
+  function getHotelExpense($date) {
+    return $this->db->where_in('expense_type', ['Hotel', 'Pool'])->like('expense_added', $date)->get('expenses')->result_array();
+  }
+
+  function getEventExpense($date) {
+    return $this->db->where_in('expense_type', ['Event'])->like('expense_added', $date)->get('expenses')->result_array();
+  }
+
+  function getCollectables($guest_id) {
+    return $this->db->join('booked_rooms', 'booked_rooms.booking_id=bookings.booking_id')
+      ->join('rooms', 'rooms.id=booked_rooms.room_id')
+      ->join('guests', 'guests.guest_id=bookings.guest_id')
+      ->where('bookings.charged_to', $guest_id)
+      ->group_by('booking_number')
+      ->get('bookings')->result_array();
   }
 }

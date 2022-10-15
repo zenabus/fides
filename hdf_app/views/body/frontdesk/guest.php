@@ -16,6 +16,11 @@
                   </a>
                 </li>
                 <li class="nav-item">
+                  <a class="nav-link" href="#collectables" data-toggle="tab" role="tab">
+                    <i class="fa fa-money"></i> Collectables
+                  </a>
+                </li>
+                <li class="nav-item">
                   <a class="nav-link" href="#reservations" data-toggle="tab" role="tab">
                     <i class="fa fa-hourglass"></i> Reservations
                   </a>
@@ -56,6 +61,30 @@
                   </tbody>
                 </table>
               </div>
+              <div class="tab-pane show" id="collectables">
+                <table class="table table-striped table-bordered tbl_booking">
+                  <thead>
+                    <tr>
+                      <th>Booking No.</th>
+                      <th>Guest Name</th>
+                      <th>Contact Details</th>
+                      <th>Room Details</th>
+                      <th>Payment Details</th>
+                      <th>Date(s)</th>
+                      <th class="disabled-sorting">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <?php foreach ($collectables as $row) { ?>
+                      <tr>
+                        <?php $data['row'] = $row ?>
+                        <?php $this->load->view('body/frontdesk/components/booking_table_data', $data) ?>
+                        <td class="action"></td>
+                      </tr>
+                    <?php } ?>
+                  </tbody>
+                </table>
+              </div>
               <div class="tab-pane show" id="reservations">
                 <table class="table table-striped table-bordered tbl_booking">
                   <thead>
@@ -74,9 +103,7 @@
                       <tr>
                         <?php $data['row'] = $row ?>
                         <?php $this->load->view('body/frontdesk/components/booking_table_data', $data) ?>
-                        <td class="action">
-
-                        </td>
+                        <td class="action"></td>
                       </tr>
                     <?php } ?>
                   </tbody>

@@ -199,10 +199,49 @@ $("[name=rdo_booking_type]").change(function () {
     $("#btnBooking").val("Check In");
     $(".reservation-div").hide();
     $("[name=booking_type]").val("Check In");
+    $(".advanced-div").hide();
   } else {
     $("#frmBook").attr("action", `${base_url}index.php/main/book`);
     $("#btnBooking").val("Reserve");
     $(".reservation-div").show();
     $("[name=booking_type]").val("Reservation");
+  }
+});
+
+$(document).ready(function () {
+  $(".advanced-div").hide();
+});
+
+$("[name=reservation_type]").change(function () {
+  if ($(this).val() == "Confirmed") {
+    $(".advanced-div").show();
+  } else {
+    $("[name=amount]").val("");
+    $("[name=card_number]").val("");
+    $(".advanced-div").hide();
+  }
+});
+
+$("#modalBooking").on("hide.bs.modal", function (e) {
+  $(".advanced-div").hide();
+  $("[name=guest_id]").removeAttr("value");
+  $("#frmBook").trigger("reset");
+  $("[name=booking_id]").val("");
+
+  $("[name=amount]").removeAttr("disabled");
+  $("[name=card_number]").removeAttr("disabled");
+  $("[name=payment_option]").removeAttr("disabled");
+});
+
+$("[name=payment_option]").change(function () {
+  const option = $(this).val();
+  $("[name=amount]").focus();
+  if (option == "Cash") {
+    $(".card-div").addClass("d-none");
+    $("[name=card_number]").val("");
+    $("[name=card_number]").removeAttr("required");
+  } else {
+    $("[name=card_number]").attr("required", true);
+    $(".card-div").removeClass("d-none");
   }
 });

@@ -31,7 +31,7 @@
       <small class="ml-3">Check Out: <?= $room['check_out'] ?></small><br>
       <small class="ml-3">No. Nights: <?= $room['nights'] ?> night<?= $room['nights'] ? '' : 's' ?></small><br>
       <small class="ml-3">Room Price: ₱ <?= number_format($room['pricing_type']) ?></small><br>
-      <small class="ml-3">25% Percent: ₱ <?= number_format($room['pricing_type'] * 0.25 * $room['nights']) ?> (25%)</small>
+      <small class="ml-3">Discount: <?= $room['discount_type'] ?> (<?= $room['percentage'] ?>%)</small>
     </details>
   <?php } ?>
 </td>
@@ -39,14 +39,18 @@
   <details>
     <summary>₱ <?= number_format($row['payment']->amount) ?> <small>Payment</small></summary>
     <?php foreach ($row['payments'] as $payment) { ?>
-      <?php if ($payment['payment_option'] == 'Card') {
-        $icon = 'credit-card';
-      } else {
-        $icon = 'money-bills';
+      <?php if ($payment['payment_option'] == 'Cash') {
+        $icon = 'fa-solid fa-money-bill text-success';
+      } else if ($payment['payment_option'] == 'Card') {
+        $icon = 'fa-solid fa-credit-card text-warning';
+      } else if ($payment['payment_option'] == 'Check') {
+        $icon = 'fa-solid fa-money-check text-info';
+      } else if ($payment['payment_option'] == 'Bank Transfer') {
+        $icon = 'fa fa-bank text-danger';
       }
-      $tooltip =  $payment['payment_option'] . '<br>' . $payment['card_number']; ?>
+      $tooltip =  $payment['payment_option'] . '<br>' . $payment['payment_details']; ?>
       <small class="mb-0">
-        <span class="fa fa-<?= $icon ?> text-info mr-1" data-placement="top" title="<?= $tooltip ?>" rel="tooltip" data-html="true"></span>
+        <span class="<?= $icon ?> mr-1" data-placement="top" title="<?= $tooltip ?>" rel="tooltip" data-html="true"></span>
         ₱ <?= number_format($payment['amount']) ?> - <?= date_format(date_create($payment['booking_payment_added']), 'm/d/y g:ia') ?>
       </small><br>
     <?php } ?>

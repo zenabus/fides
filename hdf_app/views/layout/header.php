@@ -17,8 +17,10 @@ if (!$this->session->userdata('connect')) {
   <!-- CSS Files -->
   <link href="<?= base_url() ?>assets/css/bootstrap.min.css" rel="stylesheet" />
   <link href="<?= base_url() ?>assets/css/paper-dashboard.css?v=2.0.1" rel="stylesheet" />
+
   <!-- CSS Just for demo purpose, don't include it in your project -->
   <link href="<?= base_url() ?>assets/demo/demo.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/css/bootstrap-select.min.css">
   <!-- Scripts -->
   <script src="https://kit.fontawesome.com/3abc918931.js" crossorigin="anonymous"></script>
   <script src="<?= base_url() ?>assets/js/core/jquery.min.js"></script>
@@ -27,6 +29,7 @@ if (!$this->session->userdata('connect')) {
   <script src="<?= base_url() ?>assets/js/plugins/moment.min.js"></script>
   <script src="<?= base_url() ?>assets/js/plugins/bootstrap-datetimepicker.js"></script>
   <script src="<?= base_url() ?>assets/js/functions.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/js/bootstrap-select.min.js"></script>
 
   <style type="text/css">
     .dataTables_paginate {
@@ -325,8 +328,8 @@ if (!$this->session->userdata('connect')) {
 
           <?php $access = ['Admin', 'Superadmin', 'Front Desk']; ?>
           <?php if (in_array($_SESSION['user_type'], $access)) { ?>
-            <li class="<?= $active == 'logs' ? 'active' : '' ?>">
-              <a href="<?= base_url('index.php/main/logs') ?>">
+            <li class="<?= $active == 'dcr' ? 'active' : '' ?>">
+              <a href="<?= base_url('index.php/main/dcr') ?>">
                 <i class="fa-solid fa-file-invoice-dollar"></i>
                 <p>Daily Collection</p>
               </a>
@@ -353,6 +356,15 @@ if (!$this->session->userdata('connect')) {
               </button>
             </div>
           </div>
+
+          <h3 class="mb-0" data-placement="bottom" title="(Beginning Balance + Total Sales of the day)" rel="tooltip">₱ <?= number_format($cash->cash_amount, 2) ?>
+            <?php if ($remitted) { ?>
+              <span class="fa fa-check-circle text-success"></span>
+            <?php } else { ?>
+              <a href="<?= base_url('index.php/main/dcr') ?>"> <span class="fa fa-info-circle text-danger heart"></span></a>
+            <?php } ?>
+          </h3>
+
           <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navigation" aria-controls="navigation-index" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-bar navbar-kebab"></span>
             <span class="navbar-toggler-bar navbar-kebab"></span>

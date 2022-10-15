@@ -16,7 +16,8 @@
 
       <div class="card">
         <div class="card-header border-bottom px-4 pt-4 pb-2">
-          <h6>Guest Details</h6>
+          <h6 class="mb-0">Guest Details</h6>
+          <small><a href="<?= base_url('index.php/main/guest/' . $booking->guest_id); ?>">View Guest</a></small>
         </div>
         <div class="card-body p-0">
           <?= form_open('main/updateGuest', ['id' => 'frmGuest']) ?>
@@ -105,11 +106,11 @@
         </div>
         <div class="card-footer my-2 d-flex justify-content-between">
           <div>
-            <button class="btn hidable updateDetails" type="button">Update</button>
-            <button class="btn saveChanges" form="frmGuest">Save Changes</button>
-            <button class="btn btn-primary cancelUpdate" type="button">Cancel</button>
+            <button class="btn btn-sm hidable updateDetails" type="button">Update</button>
+            <button class="btn btn-sm saveChanges" form="frmGuest">Save Changes</button>
+            <button class="btn btn-sm btn-primary cancelUpdate" type="button">Cancel</button>
           </div>
-          <a href="<?= base_url('index.php/main/registration/' . $booking->booking_id) ?>" class="btn btn-info registration">Print Form</a>
+          <a href="<?= base_url('index.php/main/registration/' . $booking->booking_id) ?>" class="btn btn-sm btn-info registration">Print Form</a>
         </div>
       </div>
 
@@ -125,12 +126,12 @@
               <textarea class="form-control-plaintext px-2 pt-1" tabindex="-1" name="request" rows="3" readonly><?= $booking->request ?></textarea>
             </div>
             <div class="card-footer my-2 border-top px-4">
-              <input type="button" value="Update" class="btn updateRequest hidable">
-              <input type="submit" value="Save" class="btn saveRequest" form="frmRequest">
-              <input type="button" value="Cancel" class="btn btn-primary cancelRequest">
+              <input type="button" value="Update" class="btn btn-sm updateRequest hidable">
+              <input type="submit" value="Save" class="btn btn-sm saveRequest" form="frmRequest">
+              <input type="button" value="Cancel" class="btn btn-sm btn-primary cancelRequest">
             </div>
             <?= form_close() ?>
-          </div>          
+          </div>
         </div>
 
         <div class="col-md-6">
@@ -143,12 +144,13 @@
             <div class="card-body px-4">
               <textarea class="form-control-plaintext px-2 pt-1" tabindex="-1" name="remarks" rows="3" readonly><?= $booking->remarks ?></textarea>
             </div>
+            <?= form_close() ?>
             <div class="card-footer my-2 border-top px-4">
-              <input type="button" value="Update" class="btn updateNotes hidable">
-              <input type="submit" value="Save" class="btn saveNotes" form="frmNotes">
-              <input type="button" value="Cancel" class="btn btn-primary cancelNotes">
+              <input type="button" value="Update" class="btn btn-sm updateNotes hidable">
+              <input type="submit" value="Save" class="btn btn-sm saveNotes" form="frmNotes">
+              <input type="button" value="Cancel" class="btn btn-sm btn-primary cancelNotes">
             </div>
-          </div>    
+          </div>
         </div>
       </div>
 
@@ -215,12 +217,27 @@
                 <tr>
                   <td class="pl-4">
                     <?= $row['room_number'] ?> <?= $row['room_type_abbr'] ?><br>
-                    <small><?= ucfirst($row['payment_for']) ?></small>
+                    <small>
+                      <span class="<?= ICON[$row['payment_for']] ?>"></span>
+                      <?= ucfirst($row['payment_for']) ?>
+                    </small>
                   </td>
                   <td>
                     ₱ <?= number_format($row['amount']) ?>
                     <?php if ($row['payment_option'] == 'Card') { ?>
-                      <span class="fa fa-credit-card text-info" data-placement="top" title="XXXX XXXX XXXX <?= $row['card_number'] ?>" rel="tooltip"></span>
+                      <span class="fa-solid fa-credit-card text-warning" data-placement="top" title="XXXX XXXX XXXX <?= $row['payment_details'] ?>" rel="tooltip"></span>
+                    <?php } else if ($row['payment_option'] == 'Check') {
+                      [$check_name, $check_number, $check_branch, $check_date] = explode('|', $row['payment_details']);
+                      $payment_details = "{$check_name}<br>{$check_number}<br>{$check_branch}<br>{$check_date}";
+                    ?>
+                      <span class="fa-solid fa-money-check text-info" data-placement="top" title="<?= $payment_details ?>" rel="tooltip" data-html="true"></span>
+                    <?php } else if ($row['payment_option'] == 'Bank Transfer') {
+                      [$bank_name, $bank_number, $bank_date] = explode('|', $row['payment_details']);
+                      $payment_details = "{$bank_name}<br>{$bank_number}<br>{$bank_date}";
+                    ?>
+                      <span class="fa fa-bank text-danger" data-placement="top" title="<?= $payment_details ?>" rel="tooltip" data-html="true"></span>
+                    <?php } else { ?>
+                      <i class="fa-solid fa-money-bill text-success"></i>
                     <?php } ?>
                     <br>
                     <small><?= $row['name'] ?></small>

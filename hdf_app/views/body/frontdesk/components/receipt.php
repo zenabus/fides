@@ -198,16 +198,22 @@
             </tr>
           <?php } ?>
 
-          <?php foreach ($row['restaurant'] as $charges) { ?>
+          <?php foreach ($row['restaurant'] as $charges) {
+            $restaurant_total = $charges['charges_food_amount'] * $charges['charges_food_quantity'];
+            $grand_total += $restaurant_total;
+          ?>
             <tr class="bl br cost">
-              <td>Resto <?= $charges['reference'] ?></td>
+              <td>Resto Ref.: <?= $charges['reference'] ?></td>
               <td>(<?= $charges['charges_food_quantity'] ?>) <?= $charges['particulars'] ?></td>
               <td class="tr"><?= number_format($charges['charges_food_amount'], 2) ?></td>
-              <td class="tr"><?= number_format($charges['charges_food_amount'] * $charges['charges_food_quantity'], 2) ?></td>
+              <td class="tr"><?= number_format($restaurant_total, 2) ?></td>
             </tr>
           <?php } ?>
 
-          <?php foreach ($row['coffeeshop'] as $charges) { ?>
+          <?php foreach ($row['coffeeshop'] as $charges) {
+            $coffeeshop_total = $charges['charges_food_amount'] * $charges['charges_food_quantity'];
+            $grand_total += $coffeeshop_total;
+          ?>
             <tr class="bl br cost">
               <td>Otilla's Ref.: <?= $charges['reference'] ?></td>
               <td>(<?= $charges['charges_food_quantity'] ?>) <?= $charges['particulars'] ?></td>
@@ -231,9 +237,12 @@
               ?>
                 <td class="tr"><?= number_format($total, 2) ?></td>
                 <td class="tr"><?= number_format($subtotal, 2) ?></td>
-              <?php } else { ?>
+              <?php } else {
+                $charges_total = $charges['charge_amount'] * $charges['charge_quantity'];
+                $grand_total += $charges_total;
+              ?>
                 <td class="tr"><?= number_format($charges['charge_amount'], 2) ?></td>
-                <td class="tr"> <?= number_format($charges['charge_amount'] * $charges['charge_quantity'], 2) ?></td>
+                <td class="tr"> <?= number_format($charges_total, 2) ?></td>
               <?php } ?>
               <?php $type = $charges['category'] ?>
             </tr>
@@ -250,7 +259,7 @@
         <td style="width: 1085px"></td>
         <td class="bl bt bb">Grand Total</td>
         <td class="bt br bb bt"></td>
-        <td class="bt tr bb bt"><?= number_format($grand_total + $charges_total, 2) ?></td>
+        <td class="bt tr bb bt"><?= number_format($grand_total, 2) ?></td>
       </tr>
       <tr class="br">
         <td></td>
@@ -260,25 +269,16 @@
       </tr>
       <tr class="br">
         <td></td>
-        <td class="bl bb bt">Advance Payment</td>
+        <td class="bl bb bt">Paid Amount</td>
         <td class="br bb bt"></td>
-        <td class="tr bb bt"><?= number_format($payment->amount, 2) ?></td>
+        <td class="tr bb bt"><?= number_format($payment, 2) ?></td>
       </tr>
       <tr class="br">
         <td></td>
         <td class="bl bb bt">Remaining Balance</td>
         <td class="br bb bt"></td>
-        <?php $charges_grand_total = $grand_total + $charges_total ?>
-        <?php $payment_grand_total = $refund->booking_refund + $payment->amount ?>
-        <?php $overall_total = $charges_grand_total - $payment_grand_total ?>
-        <td class="tr bb bt bold"><?= number_format($overall_total > 0 ? $overall_total : 0, 2) ?></td>
-      </tr>
-      <tr class="br">
-        <td></td>
-        <td class="bb bl bt">Change Due</td>
-        <td class="bb br bt"></td>
-        <?php $petty_cash = ($charges_grand_total - $payment_grand_total) * -1 ?>
-        <td class="bb tr bt"><?= number_format($petty_cash > 0 ? $petty_cash : 0, 2) ?></td>
+        <?php $payment_total = $refund->booking_refund + $payment ?>
+        <td class="tr bb bt bold"><?= number_format($grand_total - $payment_total, 2) ?></td>
       </tr>
     </table>
   </div>

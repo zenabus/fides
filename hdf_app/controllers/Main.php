@@ -9,6 +9,10 @@ class Main extends MY_Controller {
 
   function __construct() {
     parent::__construct();
+    $this->load->vars([
+      'cash' => $this->get_model->getCurrentCash(),
+      'remitted' => $this->get_model->getRemitted(date_create()->modify('-1 days')->format('Y-m-d'))
+    ]);
   }
 
   // ------------------------------------------------------------------------------------------------------- //
@@ -37,17 +41,24 @@ class Main extends MY_Controller {
     $data['bookings'] = $this->get_model->getBookings();
     $data['days'] = $this->calendar->get_total_days($month, $year);
     $data['month'] = $this->calendar->get_month_name($month);
-    $data['next_month'] = $this->calendar->get_month_name(str_pad($month + 1, 2, '0', STR_PAD_LEFT));
+    if ($month + 1 == 13) {
+      $next_month = str_pad(1, 2, '0', STR_PAD_LEFT);
+    } else {
+      $next_month = str_pad($month + 1, 2, '0', STR_PAD_LEFT);
+    }
+    $data['next_month'] = $this->calendar->get_month_name($next_month);
     $data['m'] = str_pad($month, 2, '0', STR_PAD_LEFT);
     $data['y'] = $year;
     $data['guests'] = $this->get_model->getGuests();
     foreach ($data['bookings'] as $i => $booking) {
       $data['bookings'][$i]['dates_between'] = $this->datesBetween($booking['check_in'], $booking['check_out']);
+      $data['bookings'][$i]['payments'] = $this->get_model->getAdvanceByBookedRoom($booking['booked_room_id']);
     }
     return $data;
   }
 
   function calendar($year, $month, $window = FALSE) {
+    $this->load->helper('text');
     $data = $this->calendarData($year, $month);
     if ($window) {
       $this->load->view('body/frontdesk/calendar-window', $data);
@@ -97,16 +108,23 @@ class Main extends MY_Controller {
     $data['guest'] = $this->get_model->getGuest($guest_id);
     $data['bookings'] = $this->get_model->getBookingsByGuest($guest_id, [0, -1, 6]);
     $data['reservations'] = $this->get_model->getBookingsByGuest($guest_id, [1, 2, 3]);
+    $data['collectables'] = $this->get_model->getCollectables($guest_id);
+
+    $this->dd($data['collectables']);
 
     foreach ($data['bookings'] as $i => $booking) {
       $data['bookings'][$i]['rooms'] = $this->get_model->getBookedRooms($booking['booking_id']);
       $data['bookings'][$i]['payment'] = $this->get_model->getPaymentTotal($booking['booking_id']);
       $data['bookings'][$i]['payments'] = $this->get_model->getPayments($booking['booking_id']);
+      $data['bookings'][$i]['refund'] = $this->get_model->getRefundTotal($booking['booking_id']);
+      $data['bookings'][$i]['refunds'] = $this->get_model->getRefunds($booking['booking_id']);
     }
     foreach ($data['reservations'] as $i => $booking) {
       $data['reservations'][$i]['rooms'] = $this->get_model->getBookedRooms($booking['booking_id']);
       $data['reservations'][$i]['payment'] = $this->get_model->getPaymentTotal($booking['booking_id']);
       $data['reservations'][$i]['payments'] = $this->get_model->getPayments($booking['booking_id']);
+      $data['reservations'][$i]['refund'] = $this->get_model->getRefundTotal($booking['booking_id']);
+      $data['reservations'][$i]['refunds'] = $this->get_model->getRefunds($booking['booking_id']);
     }
     $this->load->view('layout/header', $data);
     $this->load->view('body/frontdesk/guest');
@@ -154,6 +172,8 @@ class Main extends MY_Controller {
       $data['reservations'][$i]['rooms'] = $this->get_model->getBookedRooms($booking['booking_id']);
       $data['reservations'][$i]['payment'] = $this->get_model->getPaymentTotal($booking['booking_id']);
       $data['reservations'][$i]['payments'] = $this->get_model->getPayments($booking['booking_id']);
+      $data['reservations'][$i]['refund'] = $this->get_model->getRefundTotal($booking['booking_id']);
+      $data['reservations'][$i]['refunds'] = $this->get_model->getRefunds($booking['booking_id']);
     }
 
     $this->load->view('layout/header', $data);
@@ -183,8 +203,7 @@ class Main extends MY_Controller {
     $data['active'] = 'bookings';
     $data['booking'] = $this->get_model->getBookingByBookingNumber($booking_number);
     $data['booked_rooms'] = $this->get_model->getBookedRooms($data['booking']->booking_id);
-    $data['archived_rooms'] = $this->get_model->getBookedRooms($data['booking']->booking_id, 1);
-    $data['checkout_rooms'] = $this->get_model->getBookedRooms($data['booking']->booking_id, 2);
+    $data['archived_rooms'] = $this->get_model->getBookedRooms($data['booking']->booking_id, [1]);
     $data['bed'] = $this->get_model->getPrice('Bed');
     $data['person'] = $this->get_model->getPrice('Person');
     $data['discounts'] = $this->get_model->getDiscounts();
@@ -195,25 +214,27 @@ class Main extends MY_Controller {
     $data['payment'] = $this->get_model->getPaymentTotal($data['booking']->booking_id);
     $data['payments'] = $this->get_model->getPayments($data['booking']->booking_id);
     $data['logs'] = $this->get_model->getBookingLogs($data['booking']->booking_id);
+    $data['guests'] = $this->get_model->getGuests();
+    if ($data['booking']->charged_to) {
+      $data['charged_to'] = $this->get_model->getGuest($data['booking']->charged_to);
+    }
+
     foreach ($data['logs'] as $i => $log) {
       $data['logs'][$i]['ago'] = $this->timeAgo($log['booking_log_added']);
     }
 
     foreach ($data['booked_rooms'] as $i => $room) {
+      $payment_room  = $this->get_model->getPaymentByType($room['booked_room_id'], 'room');
+      $payment_advance  = $this->get_model->getPaymentByType($room['booked_room_id'], 'advance');
       $data['booked_rooms'][$i]['restaurant'] = $this->get_model->getRoomCharges($room['booked_room_id'], 'Restaurant');
       $data['booked_rooms'][$i]['coffeeshop'] = $this->get_model->getRoomCharges($room['booked_room_id'], 'Coffeeshop');
       $data['booked_rooms'][$i]['amenities'] = $this->get_model->getRoomAmenities($room['booked_room_id']);
-      $data['booked_rooms'][$i]['payment_room'] = $this->get_model->getPaymentByType($room['booked_room_id'], 'room');
+      $data['booked_rooms'][$i]['payment_room'] = $payment_room->amount + $payment_advance->amount;
       $data['booked_rooms'][$i]['payment_restaurant'] = $this->get_model->getPaymentByType($room['booked_room_id'], 'restaurant');
       $data['booked_rooms'][$i]['payment_coffeeshop'] = $this->get_model->getPaymentByType($room['booked_room_id'], 'coffeeshop');
       $data['booked_rooms'][$i]['payment_addons'] = $this->get_model->getPaymentByType($room['booked_room_id'], 'addons');
-      $data['booked_rooms'][$i]['payment'] = $this->get_model->getPaymentByBookedRoom($room['booked_room_id']);
       $data['booked_rooms'][$i]['refund'] = $this->get_model->getRefundByBookedRoom($room['booked_room_id']);
     }
-
-    $room_charges = $this->get_model->getRoomChargesTotal($data['booking']->booking_id);
-    $amenities = $this->get_model->getRoomAmenitiesTotal($data['booking']->booking_id);
-    $data['charges_total'] = $room_charges->total + $amenities->total;
 
     $this->load->view('layout/header', $data);
     $this->load->view('body/frontdesk/booking');
@@ -229,6 +250,135 @@ class Main extends MY_Controller {
     $this->load->view('layout/header', $data);
     $this->load->view('body/frontdesk/logs');
     $this->load->view('layout/footer');
+  }
+
+  function dcr($date = NULL) {
+    if (!$date) {
+      $data['active'] = 'dcr';
+      $data['dcr'] = $this->get_model->getDCR();
+      $cash = $this->get_model->getDCRTotal(['Cash']);
+      $card = $this->get_model->getDCRTotal(['Card', 'Check', 'Bank Transfer']);
+      foreach ($data['dcr'] as $i => $row) {
+        foreach ($cash as $c) {
+          if ($c['payment_added'] == $row['payment_added']) {
+            $data['dcr'][$i]['cash'] = $c['sum'];
+          }
+        }
+        foreach ($card as $c) {
+          if ($c['payment_added'] == $row['payment_added']) {
+            $data['dcr'][$i]['card'] = $c['sum'];
+          }
+        }
+        $data['dcr'][$i]['remitted'] = $this->get_model->getRemitted($row['payment_added']);
+        $data['dcr'][$i]['expenses']  = $this->get_model->getExpenses($row['payment_added']);
+        $data['dcr'][$i]['expense_total']  = $this->get_model->getExpenses($row['payment_added'], TRUE);
+        $data['dcr'][$i]['sales']  = $this->get_model->getSales($row['payment_added']);
+        $data['dcr'][$i]['sales_total']  = $this->get_model->getSales($row['payment_added'], TRUE);
+      }
+      $this->load->view('layout/header', $data);
+      $this->load->view('body/frontdesk/dcr');
+      $this->load->view('layout/footer');
+    } else {
+      $data['date'] = $date;
+      $data['payments'] = $this->get_model->getPaymentsByDateGrouped($date);
+
+      $data['expenses_hotel'] = $this->get_model->getExpenseByDateAndType($date, 'Hotel');
+      $data['expenses_event'] = $this->get_model->getExpenseByDateAndType($date, 'Event');
+      $data['expenses_pool'] = $this->get_model->getExpenseByDateAndType($date, 'Pool');
+      $data['expenses_resto'] = $this->get_model->getExpenseByDateAndType($date, 'Resto');
+      $data['expenses_otillas'] = $this->get_model->getExpenseByDateAndType($date, "Otilla's");
+
+      $data['sales_event']  = $this->get_model->getSalesByDateAndType($date, 'Event');
+      $data['sales_pool']  = $this->get_model->getSalesByDateAndType($date, 'Pool');
+
+      foreach ($data['payments'] as $i => $row) {
+        $data['payments'][$i]['cash_room'] = $this->get_model->getPaymentByType($row['booked_room_id'], 'room', 'Cash', $date);
+        $data['payments'][$i]['cash_restaurant'] = $this->get_model->getPaymentByType($row['booked_room_id'], 'restaurant', 'Cash', $date);
+        $data['payments'][$i]['cash_coffeeshop'] = $this->get_model->getPaymentByType($row['booked_room_id'], 'coffeeshop', 'Cash', $date);
+        $data['payments'][$i]['cash_addons'] = $this->get_model->getPaymentByType($row['booked_room_id'], 'addons', 'Cash', $date);
+        $data['payments'][$i]['cash_reservation'] = $this->get_model->getPaymentByType($row['booked_room_id'], 'advance', 'Cash', $date);
+
+        $data['payments'][$i]['card_room'] = $this->get_model->getPaymentByType($row['booked_room_id'], 'room', 'Card', $date);
+        $data['payments'][$i]['card_restaurant'] = $this->get_model->getPaymentByType($row['booked_room_id'], 'restaurant', 'Card', $date);
+        $data['payments'][$i]['card_coffeeshop'] = $this->get_model->getPaymentByType($row['booked_room_id'], 'coffeeshop', 'Card', $date);
+        $data['payments'][$i]['card_addons'] = $this->get_model->getPaymentByType($row['booked_room_id'], 'addons', 'Card', $date);
+        $data['payments'][$i]['card_reservation'] = $this->get_model->getPaymentByType($row['booked_room_id'], 'advance', 'Card', $date);
+      }
+
+      $hotel_sales = $this->get_model->getHotelSales($date);
+      $event_sales = $this->get_model->getEventSales($date);
+      $hotel_sales_am = 0;
+      $hotel_sales_pm = 0;
+      $event_sales_am = 0;
+      $event_sales_pm = 0;
+
+      $hotel_expense = $this->get_model->getHotelExpense($date);
+      $event_expense = $this->get_model->getEventExpense($date);
+      $hotel_expense_am = 0;
+      $hotel_expense_pm = 0;
+      $event_expense_am = 0;
+      $event_expense_pm = 0;
+
+      $test = [];
+
+      foreach ($hotel_sales as $row) {
+        [, $time] = explode(' ', $row['booking_payment_added']);
+        [$hour] = explode(':', $time);
+        if ($hour <= 12) {
+          $hotel_sales_am += $row['amount'];
+          // array_push($test, $row);
+        } else {
+          // array_push($test, $row);
+          $hotel_sales_pm += $row['amount'];
+        }
+      }
+
+      // $this->dd($test);
+      // $this->dd($hotel_sales_am);
+
+      foreach ($event_sales as $row) {
+        [, $time] = explode(' ', $row['sales_added']);
+        [$hour] = explode(':', $time);
+        if ($hour <= 12) {
+          $event_sales_am += $row['sales_amount'];
+        } else {
+          $event_sales_pm += $row['sales_amount'];
+        }
+      }
+
+      foreach ($hotel_expense as $row) {
+        [, $time] = explode(' ', $row['expense_added']);
+        [$hour] = explode(':', $time);
+        if ($hour <= 12) {
+          $hotel_expense_am += $row['expense_amount'];
+        } else {
+          $hotel_expense_pm += $row['expense_amount'];
+        }
+      }
+
+      foreach ($event_expense as $row) {
+        [, $time] = explode(' ', $row['expense_added']);
+        [$hour] = explode(':', $time);
+        if ($hour <= 12) {
+          $event_expense_am += $row['expense_amount'];
+        } else {
+          $event_expense_pm += $row['expense_amount'];
+        }
+      }
+
+      $data['hotel_sales_am'] = $hotel_sales_am - $hotel_expense_am;
+      $data['hotel_sales_pm'] = $hotel_sales_pm - $hotel_expense_pm;
+      $data['event_sales_am'] = $event_sales_am - $event_expense_am;
+      $data['event_sales_pm'] = $event_sales_pm - $event_expense_pm;
+
+      $view = $this->load->view('body/frontdesk/components/dcr', $data, TRUE);
+      $dompdf = new Dompdf();
+      $dompdf->set_option('dpi', 300);
+      $dompdf->set_paper('letter', 'landscape');
+      $dompdf->loadHtml($view);
+      $dompdf->render();
+      $dompdf->stream('Statement of Account', ['Attachment' => FALSE]);
+    }
   }
 
   function user($user_id) {
@@ -253,11 +403,7 @@ class Main extends MY_Controller {
     $dompdf->set_option('dpi', 300);
     $dompdf->loadHtml($view);
     $dompdf->render();
-    if (isset($data['booking']->middle_name[0])) {
-      $middle = $data['booking']->middle_name[0];
-    } else {
-      $middle = '';
-    }
+    $middle = isset($data['booking']->middle_name[0]) ? $data['booking']->middle_name[0] : '';
     $name = $data['booking']->first_name[0] . $middle . $data['booking']->last_name[0];
     $dompdf->stream($data['booking']->booking_number . ' - ' . $name . ' - Guest Registration Form', ['Attachment' => FALSE]);
   }
@@ -270,10 +416,8 @@ class Main extends MY_Controller {
     $data['booking'] = $this->get_model->getBooking($booking_id);
     $data['booked_rooms'] = $this->get_model->getBookedRooms($data['booking']->booking_id);
     $data['refund'] = $this->get_model->getRefundTotal($data['booking']->booking_id);
-    $data['payment'] = $this->get_model->getPaymentTotal($data['booking']->booking_id);
-    $room_charges = $this->get_model->getRoomChargesTotal($data['booking']->booking_id);
-    $amenities = $this->get_model->getRoomAmenitiesTotal($data['booking']->booking_id);
-    $data['charges_total'] = $room_charges->total + $amenities->total;
+    $payment = $this->get_model->getPaymentTotal($data['booking']->booking_id);
+    $data['payment'] = $payment ? $payment->amount : 0;
 
     foreach ($data['booked_rooms'] as $i => $room) {
       $data['booked_rooms'][$i]['restaurant'] = $this->get_model->getRoomCharges($room['booked_room_id'], 'Restaurant');
@@ -286,11 +430,7 @@ class Main extends MY_Controller {
     $dompdf->set_option('dpi', 300);
     $dompdf->loadHtml($view);
     $dompdf->render();
-    if (isset($data['booking']->middle_name[0])) {
-      $middle = $data['booking']->middle_name[0];
-    } else {
-      $middle = '';
-    }
+    $middle = isset($data['booking']->middle_name[0]) ? $data['booking']->middle_name[0] : '';
     $name = $data['booking']->first_name[0] . $middle . $data['booking']->last_name[0];
     $dompdf->stream($data['booking']->booking_number . ' - ' . $name . ' - Acknowledgment Receipt', ['Attachment' => FALSE]);
   }
@@ -301,9 +441,10 @@ class Main extends MY_Controller {
     $data['person'] = $this->get_model->getPrice('Person');
     $data['image'] = 'data:image/jpg;base64,' . base64_encode($image);
     $data['booking'] = $this->get_model->getBookingByBookedRoom($booked_room_id);
-    $data['booked_rooms'] = $this->get_model->getBookedRoomById($booked_room_id);
+    $data['booked_rooms'] = $this->get_model->getBookedRoomById($booked_room_id, TRUE);
     $data['refund'] = $this->get_model->getRefundByBookedRoom($booked_room_id);
-    $data['payment'] = $this->get_model->getPaymentByBookedRoom($booked_room_id);
+    $payment = $this->get_model->getRoomPaymentTotal($booked_room_id);
+    $data['payment'] = $payment ? $payment->amount : 0;
     $room_charges = $this->get_model->getRoomChargesByRoomId($booked_room_id);
     $amenities = $this->get_model->getRoomAmenitiesByRoomId($booked_room_id);
     $data['charges_total'] = $room_charges->total + $amenities->total;
@@ -319,13 +460,8 @@ class Main extends MY_Controller {
     $dompdf->set_option('dpi', 300);
     $dompdf->loadHtml($view);
     $dompdf->render();
-    if (isset($data['booking']->middle_name[0])) {
-      $middle = $data['booking']->middle_name[0];
-    } else {
-      $middle = '';
-    }
-    // $name = $data['booking']->first_name[0] . $middle . $data['booking']->last_name[0];
-    $name = 'as';
+    $middle = isset($data['booking']->middle_name[0]) ? $data['booking']->middle_name[0] : '';
+    $name = $data['booking']->first_name[0] . $middle . $data['booking']->last_name[0];
     $dompdf->stream($data['booked_rooms'][0]['booking_id'] . ' - ' . $name . ' - Statement of Account', ['Attachment' => FALSE]);
   }
 
@@ -354,7 +490,6 @@ class Main extends MY_Controller {
   }
 
   function book() {
-    $booking_id = $_POST['booking_id'];
     unset($_POST['booking_id']);
     if (!$_POST['guest_id']) {
       $_POST['guest_id'] = $this->insert_model->addGuest($_POST, TRUE);
@@ -369,7 +504,6 @@ class Main extends MY_Controller {
     $this->update_model->updateCheckIn($_POST['guest_id']);
     $this->session->set_flashdata('success', "Successfully {$type} {$name} in room {$room->room_number}");
 
-    // $booked_room = $this->get_model->getBookedRoom($booking_id);
     if ($_POST['check_in'] == date('m/d/Y')) {
       log_message('error', $booked_room_id);
       $this->earlyCheckIn($booked_room_id);
@@ -378,6 +512,16 @@ class Main extends MY_Controller {
     if ($_POST['booking_type'] == 'Check In') {
       redirect(base_url('index.php/main/booking/' . $booking_number));
     } else {
+      if ($_POST['amount']) {
+        $_POST['booked_room_id'] = $booked_room_id;
+        $_POST['payment_for'] = 'advance';
+        if ($_POST['payment_option'] == 'Cash') {
+          $_POST['payment_details'] = '';
+        } else {
+          $_POST['payment_details'] = $_POST['card_number'];
+        }
+        $this->insert_model->addPayment();
+      }
       $this->redirect();
     }
   }
@@ -480,6 +624,7 @@ class Main extends MY_Controller {
     if ($_POST['check_in'] == date('m/d/Y')) {
       $this->earlyCheckIn($booked_room->booked_room_id);
     }
+    $this->update_model->updateGuestFromReservation();
     $this->update_model->updateBookedRoomNights();
     $booking_number = 'HDF' . str_pad($booking_id, 5, '0', STR_PAD_LEFT);
     $log = "<b>{$booking_number}</b> → Successfully checked in!";
@@ -587,6 +732,50 @@ class Main extends MY_Controller {
     $this->redirect();
   }
 
+  function processRoom($archive) {
+    $booked_room_id = $_POST['booked_room_id'];
+    $booked_room = $this->get_model->getBookedRoom($booked_room_id);
+    [$arrival, $departure] = $this->getMinMax($booked_room->booking_id);
+    $_POST['booking_id'] = $booked_room->booking_id;
+    $this->update_model->processRoom($booked_room_id, $archive);
+    $s = $booked_room->nights == 1 ? '' : 's';
+    if ($archive == 2) {
+      $log = "<b>{$booked_room->room_number} {$booked_room->room_type_abbr}</b> → Checked out room <b>{$booked_room->nights} night{$s}</b> from <b>{$booked_room->check_in}</b> to <b>{$booked_room->check_out}</b>";
+      $message = 'Room successfully checked out!';
+    } else {
+      $log = "<b>{$booked_room->room_number} {$booked_room->room_type_abbr}</b> → Removed room <b>{$booked_room->nights} night{$s}</b> from <b>{$booked_room->check_in}</b> to <b>{$booked_room->check_out}</b>";
+      $message = 'Room successfully removed!';
+    }
+    $this->insert_model->addBookingLog($log);
+    $this->insert_model->log($log);
+    $this->update_model->updateBooking($arrival, $departure, $booked_room->booking_id);
+    $this->session->set_flashdata('success', $message);
+    $this->redirect();
+  }
+
+
+  function revert($type, $booked_room_id) {
+    $booked_room = $this->get_model->getBookedRoom($booked_room_id);
+
+    if ($type == 'request') {
+    } else {
+    }
+
+
+
+
+    [$arrival, $departure] = $this->getMinMax($booked_room->booking_id);
+    $_POST['booking_id'] = $booked_room->booking_id;
+    $this->update_model->processRoom($booked_room_id, 2);
+    $s = $booked_room->nights == 1 ? '' : 's';
+    $log = "<b>{$booked_room->room_number} {$booked_room->room_type_abbr}</b> → Checked out room <b>{$booked_room->nights} night{$s}</b> from <b>{$booked_room->check_in}</b> to <b>{$booked_room->check_out}</b>";
+    $this->insert_model->addBookingLog($log);
+    $this->insert_model->log($log);
+    $this->update_model->updateBooking($arrival, $departure, $booked_room->booking_id);
+    $this->session->set_flashdata('success', 'Room successfully checked out!');
+    $this->redirect();
+  }
+
   function getMinMax($booking_id) {
     $check_ins = [];
     $check_outs = [];
@@ -629,7 +818,7 @@ class Main extends MY_Controller {
     $charge = $this->get_model->getCharge($_POST['charge_id']);
     $booked_room = $this->get_model->getBookedRoom($_POST['booked_room_id']);
     $cost = number_format($charge->charge_amount);
-    $log = "<b>{$booked_room->room_number} {$booked_room->room_type_abbr}</b> → Added {$_POST['charge_quantity']} {$charge->category} - {$charge->charge} amounting ₱{$cost} each";
+    $log = "<b>{$booked_room->room_number} {$booked_room->room_type_abbr}</b> → Added <b>{$_POST['charge_quantity']} {$charge->category}</b> - <b>{$charge->charge}</b> amounting ₱<b>{$cost}</b> each";
     $this->insert_model->addBookingLog($log);
     $this->insert_model->log($log);
     $this->insert_model->addOtherCharges();
@@ -637,22 +826,99 @@ class Main extends MY_Controller {
     $this->redirect();
   }
 
-  function addPayment() {
-    $room = $this->get_model->getBookedRoomById($_POST['booked_room_id']);
-    $room = $room[0]['room_number'] . ' ' . $room[0]['room_type_abbr'];
-    $amount = number_format($_POST['amount']);
+  function processPayment($room) {
+    $amount = $_POST['amount'];
+    $bed = $this->get_model->getPrice('Bed');
+    $person = $this->get_model->getPrice('Person');
+    $rate = $this->percentage($room['pricing_type'], $room['percentage']);
+    $early = $this->get_model->getEarlyCheckout($room['booked_room_id']);
+    $charge_early = $early ? $rate : 0;
+    $charge_room = $rate * $room['nights'];
+    $charge_person = $person->price * $room['extra_person'];
+    $charge_bed = $bed->price * $room['extra_bed'];
+    $charge_restaurant = $this->get_model->getRoomCharges($room['booked_room_id'], 'Restaurant', TRUE);
+    $charge_coffeeshop = $this->get_model->getRoomCharges($room['booked_room_id'], 'Coffeeshop', TRUE);
+    $charge_amenities = $this->get_model->getRoomAmenities($room['booked_room_id'], TRUE);
+
+    $payment_room  = $this->get_model->getPaymentByType($room['booked_room_id'], 'room');
+    $payment_advance  = $this->get_model->getPaymentByType($room['booked_room_id'], 'advance');
+    $payment_restaurant = $this->get_model->getPaymentByType($room['booked_room_id'], 'restaurant');
+    $payment_coffeeshop = $this->get_model->getPaymentByType($room['booked_room_id'], 'coffeeshop');
+    $payment_addons = $this->get_model->getPaymentByType($room['booked_room_id'], 'addons');
+
+    if ($amount > 0) {
+      $payable_room = $charge_room - ($payment_room->amount + $payment_advance->amount);
+      $payable_restaurant = $charge_restaurant->total - $payment_restaurant->amount;
+      $payable_coffeeshop = $charge_coffeeshop->total - $payment_coffeeshop->amount;
+      $payable_addons = ($charge_early + $charge_person + $charge_bed + $charge_amenities->total) - $payment_addons->amount;
+
+      log_message('error', $amount);
+      $amount = $this->loopPay($amount, 'room', $payable_room, $room['booked_room_id']);
+      log_message('error', $amount);
+      $amount = $this->loopPay($amount, 'restaurant', $payable_restaurant, $room['booked_room_id']);
+      log_message('error', $amount);
+      $amount = $this->loopPay($amount, 'coffeeshop', $payable_coffeeshop, $room['booked_room_id']);
+      log_message('error', $amount);
+      $amount = $this->loopPay($amount, 'addons', $payable_addons, $room['booked_room_id']);
+      log_message('error', $amount);
+    }
+  }
+
+  function pay($payment_for, $amount, $booked_room_id) {
+    $room = $this->get_model->getBookedRoomById($booked_room_id);
+    $room = $room->room_number . ' ' . $room->room_type_abbr;
+    $formatted_amount = number_format($amount);
     $option = strtolower($_POST['payment_option']);
-    $log = "<b>{$_POST['booking_number']}</b> → Added <b>{$_POST['payment_for']}</b> payment to <b>{$room}</b> using <b>{$option}</b> amounting ₱<b>{$amount}</b>";
+    $log = "<b>{$_POST['booking_number']}</b> → Added <b>{$payment_for}</b> payment to <b>{$room}</b> using <b>{$option}</b> amounting ₱<b>{$formatted_amount}</b>";
+
+    if ($_POST['payment_option'] == 'Cash') {
+      $_POST['payment_details'] = '';
+    } else if ($_POST['payment_option'] == 'Card') {
+      $_POST['payment_details'] = $_POST['card_number'];
+    } else if ($_POST['payment_option'] == 'Check') {
+      $_POST['payment_details'] = "{$_POST['check_name']}|{$_POST['check_number']}|{$_POST['check_branch']}|{$_POST['check_date']}";
+    } else if ($_POST['payment_option'] == 'Bank Transfer') {
+      $_POST['payment_details'] = "{$_POST['bank_name']}|{$_POST['bank_number']}|{$_POST['bank_date']}";
+    }
+
+    $this->insert_model->addPayment($payment_for, $amount, $booked_room_id);
     $this->insert_model->addBookingLog($log);
     $this->insert_model->log($log);
-    $this->insert_model->addPayment();
+  }
+
+  function loopPay($amount, $payment_for, $payable, $booked_room_id) {
+    $amount_payable = $amount < $payable ? $amount :  $payable;
+    if ($amount_payable) {
+      $this->pay($payment_for, $amount_payable, $booked_room_id);
+      $amount -= $amount_payable;
+    }
+    return $amount;
+  }
+
+  function addPayment() {
+    if ($_POST['booked_room_id'] == 'All Rooms') {
+      $data['booking'] = $this->get_model->getBookingByBookingNumber($_POST['booking_number']);
+      $data['booked_rooms'] = $this->get_model->getBookedRooms($data['booking']->booking_id);
+      foreach ($data['booked_rooms'] as $room) {
+        $this->processPayment($room);
+      }
+    } else {
+      if ($_POST['payment_for'] == 'All Types') {
+        $room = $this->get_model->getBookedRoomById($_POST['booked_room_id']);
+        $room = json_decode(json_encode($room), true);
+        $this->processPayment($room);
+      } else {
+        $this->pay($_POST['payment_for'], $_POST['amount'], $_POST['booked_room_id']);
+      }
+    }
+
     $this->session->set_flashdata('success', 'Payment successfully added!');
     $this->redirect();
   }
 
   function addRefund() {
     $room = $this->get_model->getBookedRoomById($_POST['booked_room_id']);
-    $room = $room[0]['room_number'] . ' ' . $room[0]['room_type_abbr'];
+    $room = $room->room_number . ' ' . $room->room_type_abbr;
     $refund = number_format($_POST['booking_refund']);
     $log = "<b>{$_POST['booking_number']}</b> → Added refund amount of ₱<b>{$refund}</b> to <b>{$room}</b> with a reason of <b>{$_POST['booking_refund_reason']}</b>";
     $this->insert_model->addBookingLog($log);
@@ -745,6 +1011,9 @@ class Main extends MY_Controller {
     $_POST['booking_id'] = $payment->booking_id;
     $this->insert_model->addBookingLog($log);
     $this->insert_model->log($log);
+    if ($payment->payment_option == 'Cash') {
+      $this->insert_model->addCash($amount, TRUE);
+    }
     $this->delete_model->deletePayment($booking_payment_id);
     $this->session->set_flashdata('success', 'Payment successfully removed!');
     $this->redirect();
@@ -770,7 +1039,54 @@ class Main extends MY_Controller {
     $room_status = $this->get_model->getRoomStatuses($_POST['room_status_id']);
     $this->update_model->updateRoomStatus();
     $this->insert_model->log("Updated room status of <b>{$room->room_number} {$room->room_type_abbr}</b> from <b>{$old_status->description}</b> to <b>{$room_status->description}</b>", 4);
-    $this->session->set_flashdata('success', 'Room status  successfully updated!');
+    $this->session->set_flashdata('success', 'Room status successfully updated!');
+    $this->redirect();
+  }
+
+  function remit() {
+    $date = date('Y-m-d');
+    $this->insert_model->remit();
+    $this->insert_model->log("Remitted the daily collection for <b>{$date}</b>", 2);
+    $this->session->set_flashdata('success', 'Daily collection successfully remitted!');
+    $this->redirect();
+  }
+
+  function getPaymentsByDate($date) {
+    $payments = $this->get_model->getPaymentsBydate($date);
+    echo json_encode($payments);
+  }
+
+  function getExpensesByDate($date) {
+    $expenses = $this->get_model->getExpensesByDate($date);
+    echo json_encode($expenses);
+  }
+
+  function getSalesByDate($date) {
+    $sales = $this->get_model->getSalesByDate($date);
+    echo json_encode($sales);
+  }
+
+  function addExpense() {
+    $this->insert_model->addExpense();
+    $this->insert_model->log("{$_POST['expense_type']} expense added on <b>{$_POST['expense_date']}</b> amounting <b>{$_POST['expense_amount']}</b>", 2);
+    $this->session->set_flashdata('success', 'Expense successfully added!');
+    $this->redirect();
+  }
+
+  function addSales() {
+    $this->insert_model->addSales();
+    $this->insert_model->log("{$_POST['sales_type']} sales added on <b>{$_POST['sales_date']}</b> amounting <b>{$_POST['sales_amount']}</b>", 2);
+    $this->session->set_flashdata('success', 'Sales successfully added!');
+    $this->redirect();
+  }
+
+  function chargeTo() {
+    $this->update_model->chargeTo($_POST['guest_id']);
+    $guest = $this->get_model->getGuest($_POST['guest_id']);
+    $log = "<b>{$_POST['booking_number']}</b> → Charged this booking to <b>{$guest->first_name} {$guest->middle_name} {$guest->last_name} {$guest->suffix}</b>";
+    $this->insert_model->log($log, 4);
+    $this->insert_model->addBookingLog($log);
+    $this->session->set_flashdata('success', "Booking successfully charged to {$guest->first_name} {$guest->middle_name} {$guest->last_name} {$guest->suffix}!");
     $this->redirect();
   }
 }

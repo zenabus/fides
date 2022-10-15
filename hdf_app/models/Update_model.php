@@ -35,6 +35,17 @@ class Update_model extends CI_Model {
     $this->db->where('guest_id', $guest_id)->update('guests', $_POST);
   }
 
+  function updateGuestFromReservation() {
+    $data = [
+      'first_name' => $_POST['first_name'],
+      'middle_name' => $_POST['middle_name'],
+      'last_name' => $_POST['last_name'],
+      'contact' => $_POST['contact'],
+      'suffix' => $_POST['suffix'],
+    ];
+    $this->db->where('guest_id', $_POST['guest_id'])->update('guests', $data);
+  }
+
   function changepassword() {
     $password = password_hash($_POST['password'], PASSWORD_BCRYPT);
     $this->db->where('id', $_SESSION['user_id'])->update('users', ['password' => $password]);
@@ -174,8 +185,10 @@ class Update_model extends CI_Model {
       'processed_by' => $_SESSION['name']
     ];
     $this->db->where('booked_room_id', $booked_room_id)->update('booked_rooms', $data);
-    $this->db->where('booked_room_id', $booked_room_id)->delete('charges_food');
-    $this->db->where('booked_room_id', $booked_room_id)->delete('charges_other');
+    if ($archive != 2) {
+      $this->db->where('booked_room_id', $booked_room_id)->delete('charges_food');
+      $this->db->where('booked_room_id', $booked_room_id)->delete('charges_other');
+    }
   }
 
   function updateRoomStatus() {
@@ -184,5 +197,9 @@ class Update_model extends CI_Model {
       'last_updated_by' => $_SESSION['name'],
     ];
     $this->db->where('id', $_POST['room_id'])->update('rooms', $data);
+  }
+
+  function chargeTo() {
+    $this->db->where('booking_id', $_POST['booking_id'])->update('bookings', ['charged_to' => $_POST['guest_id']]);
   }
 }

@@ -246,8 +246,8 @@
                         $min = $date == min($data['dates_between']) ? 'min' : 'mid';
                         $max = $date == max($data['dates_between']) ? 'max' : 'mid';
                         ?>
-                        <td class="with-data bg-<?= $color ?> <?= $min ?>" date="<?= $date ?>" data='<?= json_encode($row) ?>' booking='<?= json_encode($data) ?>'><?= $guest ?></td>
-                        <td class="with-data bg-<?= $color ?> <?= $max ?>" date="<?= $date ?>" data='<?= json_encode($row) ?>' booking='<?= json_encode($data) ?>'><?= $data['remarks'] ?></td>
+                        <td class="with-data bg-<?= $color ?> <?= $min ?>" date="<?= $date ?>" data='<?= json_encode($row) ?>' booking='<?= json_encode($data) ?>'><?= character_limiter($guest, 15) ?></td>
+                        <td class="with-data bg-<?= $color ?> <?= $max ?>" date="<?= $date ?>" data='<?= json_encode($row) ?>' booking='<?= json_encode($data) ?>'><?= character_limiter($data['remarks'], 15) ?></td>
                       <?php } else { ?>
                         <td class="no-data first" date="<?= $date ?>" date="<?= $date ?>" data='<?= json_encode($row) ?>' type="<?= $type ?>" <?= $disabled ?>><?= $text ?></td>
                         <td class="no-data second" date="<?= $date ?>" date="<?= $date ?>" data='<?= json_encode($row) ?>' type="<?= $type ?>" <?= $disabled ?>><?= $text ?></td>
@@ -451,6 +451,7 @@
     $('#frmBook').attr('action', `${base_url}index.php/main/book`);
     $('.action-div').addClass('d-none');
     $('[name=check_in]').attr('readonly', true);
+    $('[name=remarks]').removeAttr('readonly');
     $('#btnBooking').show();
     $('#btnRedirect').addClass('d-none');
     $('#btnCancel').addClass('d-none');
@@ -481,6 +482,7 @@
     if (booking.reservation_status == 0 || booking.reservation_status == -1) {
       modalBooking(this, 'Check In', 0);
       $('.form-control').attr('disabled', true);
+      $('textarea').attr('disabled', false).attr('readonly', true);
       $('.action-div').addClass('d-none');
       $('#btnBooking').hide();
       $('#btnRedirect').removeClass('d-none').attr('href', `${base_url}index.php/main/booking/${booking.booking_number}`);
@@ -489,6 +491,7 @@
       const [month, day, year] = booking.check_in.split('/')
       const checkin = `${year}-${month}-${day}`;
       modalBooking(this, 'Reservation', 0);
+      $('[name=remarks]').removeAttr('readonly');
       if (checkin == today) {
         if (hour >= 6 && hour <= 12) {
           $("#rdo_check").prop("checked", true);
@@ -520,6 +523,15 @@
       $('.form-control').removeAttr('disabled');
       $('#btnRedirect').addClass('d-none');
       $('#btnCancel').removeClass('d-none');
+
+      if (booking.reservation_type == 'Confirmed') {
+        console.log(booking.payments.payment_option)
+        $("[name=payment_option][value=" + booking.payments.payment_option + "]").prop('checked', true).trigger('change');
+        $('[name=amount]').val(booking.payments.amount).attr('disabled', true);
+        $('[name=card_number]').attr('disabled', true);
+        $('[name=payment_option]').attr('disabled', true);
+        $(".advanced-div").show();
+      }
     } else {
       modalBooking(this, 'Check In', 0);
       $('.action-div').addClass('d-none');

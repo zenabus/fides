@@ -3,6 +3,14 @@ defined('BASEPATH') or exit('No direct script access allowed');
 
 class Admin extends MY_Controller {
 
+  function __construct() {
+    parent::__construct();
+    $this->load->vars([
+      'cash' => $this->get_model->getCurrentCash(),
+      'remitted' => $this->get_model->getRemitted(date_create()->modify('-1 days')->format('Y-m-d'))
+    ]);
+  }
+
   function roomTypes() {
     $data['active'] = 'rooms';
     $data['room_types'] = $this->get_model->getRoomTypes();

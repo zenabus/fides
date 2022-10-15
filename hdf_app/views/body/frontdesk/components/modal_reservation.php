@@ -130,6 +130,38 @@
           <label>Notes / Remarks</label>
           <textarea name="remarks" rows="3" class="form-control" placeholder="optional"></textarea>
         </div>
+        <div class="advanced-div">
+          <div class="form-row">
+            <div class="form-group col-md-12">
+              <label>Payment Option</label>
+              <div class="d-flex justify-content-around my-2">
+                <div class="form-check-radio mb-0">
+                  <label class="form-check-label">
+                    <input class="form-check-input" type="radio" name="payment_option" value="Cash" checked>
+                    Cash
+                    <span class="form-check-sign"></span>
+                  </label>
+                </div>
+                <div class="form-check-radio mb-0">
+                  <label class="form-check-label">
+                    <input class="form-check-input" type="radio" name="payment_option" value="Card">
+                    Card
+                    <span class="form-check-sign"></span>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Advance Payment</label>
+            <input type="number" class="form-control" name="amount" value="0" min="0">
+          </div>
+          <div class="form-group card-div d-none mb-0">
+            <label>Account Number</label>
+            <input type="number" class="form-control" name="card_number" placeholder="XXXX" maxlength="4">
+            <small>Last 4 digit only.</small>
+          </div>
+        </div>
         <a href="javascript:" class="btn btn-danger my-0 d-none" id="btnCancel">Cancel Reservation</a>
         <?= form_close() ?>
       </div>

@@ -88,11 +88,11 @@ Seaside Suite Twin max 3 with extra bed (1)
 Seaside Suite (King) max 3 with extra bed (1)
 Executibe Suite max 5 with extra bed (2)
 
-SOA per room occupant
+// SOA per room occupant
 
-DCR
+// DCR
 - corkage
-- pool usage
+// - pool usage
 
 Consumables
 - reference from previous booking number
@@ -100,4 +100,37 @@ Consumables
 - issue for certificate or voucher
 
 // checkout button per room
-get room total balance
+// get room total balance
+add revert checkout
+// add click payment on collection details table
+
+bookings tab add charge to or utang
+// add button for charge to
+
+// payment options for credits
+// - cash
+// - card
+// - check
+//  - acct name
+//  - date
+//  - amount
+//  - check num
+//  - branch
+// - bank transfer
+//  - acct name
+//  - date
+//  - amount
+//  - bank name
+
+// add event amount input
+
+// - Reservation - multiple rooms
+// - Sales for Swimming Pool (walk-ins)
+// - Event payment is flexible time to input
+- Backup (checkout print button)
+
+beginning balance
+
+discount
+
+// pay all

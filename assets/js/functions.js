@@ -101,6 +101,21 @@ const getDatesBetween = function (start, end) {
 };
 
 const toDashed = (date) => {
-  const [month, day, year] = date.split('/');
+  const [month, day, year] = date.split("/");
   return `${year}-${month}-${day}`;
-}
+};
+
+const ampm = (date) => {
+  var date = new Date(date);
+  let hours = date.getHours();
+  let minutes = date.getMinutes();
+  const ampm = hours >= 12 ? "pm" : "am";
+  hours = hours % 12;
+  hours = hours ? hours : 12;
+  minutes = minutes < 10 ? "0" + minutes : minutes;
+  return hours + ":" + minutes + " " + ampm;
+};
+
+const capitalize = (str) => {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+};

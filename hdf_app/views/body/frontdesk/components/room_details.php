@@ -35,67 +35,58 @@
               <?= $name ?><br><small><?= $email ?><br><?= $contact ?></small>
             </td>
             <td class="border-right-0 action hidable">
-              <button class="btn btn-secondary btn-sm occupant" id='<?= json_encode($row) ?>' data-placement="top" title="Room Occupant" rel="tooltip">
-                <span class=" fa fa-user"></span>
-              </button>
-              <button class="btn btn-success btn-sm change" id='<?= json_encode($row) ?>' data-placement="top" title="Change Room" rel="tooltip">
-                <span class=" fa fa-refresh"></span>
-              </button>
-              <button class="btn btn-info btn-sm extra" id='<?= json_encode($row) ?>' data-placement="top" title="Extra Bed & Person" rel="tooltip">
-                <i class="fa-solid fa-bed"></i>
-              </button>
-              <button class="btn btn-warning btn-sm discount" id='<?= json_encode($row) ?>' data-placement="top" title="Update Discount" rel="tooltip">
-                <span class="fa fa-percent"></span>
-              </button>
-              <a href="<?= base_url('index.php/main/soa/' . $row['booked_room_id']) ?>" class="btn btn-warning btn-sm soa" data-placement="top" title="Statement of Account" rel="tooltip">
-                <span class="fa fa-receipt"></span>
-              </a>
-              <br>
-              <button class="btn mt-0 btn-primary btn-sm mt-1 charges" id='<?= $row['booked_room_id'] ?>' data-placement="top" title="Restaurant & Coffeeshop Charges" rel="tooltip">
-                <i class="fa-solid fa-utensils"></i>
-                <i class="fa-solid fa-mug-saucer"></i>
-              </button>
-              <button class="btn mt-0 btn-primary btn-sm mt-1 amenities" id='<?= $row['booked_room_id'] ?>' data-placement="top" title="Amenities & Other Charges" rel="tooltip">
-                <i class="fa-solid fa-tv"></i>
-                <i class="fa-solid fa-person-circle-exclamation"></i>
-              </button>
-              <a href="javascript:" id="<?= $row['booked_room_id'] ?>" class="btn btn-success btn-sm mt-1 checkout" data-placement="top" title="Checkout Room" rel="tooltip">
-                <i class="fa-solid fa-right-from-bracket"></i>
-              </a>
-              <?php if (count($booked_rooms) != 1) { ?>
-                <a href="javascript:" id="<?= $row['booked_room_id'] ?>" class="btn btn-danger btn-sm mt-1 removeRoom" data-placement="top" title="Remove Room" rel="tooltip">
-                  <span class="fa fa-trash"></span>
-                </a>
-              <?php } ?>
-            </td>
-          </tr>
-        <?php }  ?>
-        <?php foreach ($checkout_rooms as $row) { ?>
-          <tr>
-            <td class="border-left-0 pl-4">
-              Room <?= $row['room_number'] ?><br>
-              <small><?= $row['room_type'] ?></small><br>
-              <?php if ($row['change_reason']) { ?>
-                <small style="font-style:italic">(Change room - <?= $row['change_reason'] ?>)</small>
-              <?php } ?>
-            </td>
-            <td>
-              <?= $row['nights'] ?> night<?= $row['nights'] == 1 ? '' : 's' ?><br>
-              <small><?= $row['check_in'] ?> - <?= $row['check_out'] ?></small>
-            </td>
-            <td>
-              <?php [$name, $contact, $email] = explode(' / ', $row['occupant']) ?>
-              <?= $name ?><br><small><?= $email ?><br><?= $contact ?></small>
-            </td>
-            <td class="border-right-0 action hidable">
-              <small><b>THIS ROOM WAS CHECKED OUT</b></small> <br>
-              <small>Note: <?= $row['process_reason'] ?></small><br>
-              <small>Processed: <?= $row['processed_by'] ?></small><br>
-              <?php 
+              <?php if ($row['booked_room_archived'] == 2) { ?>
+                <small><b>THIS ROOM WAS CHECKED OUT</b></small> <br>
+                <small>Note: <?= $row['process_reason'] ?></small><br>
+                <small>Processed: <?= $row['processed_by'] ?></small><br>
+                <?php
                 $date_time = date_create($row['booked_room_updated']);
                 $date_time = date_format($date_time, "M d, Y h:i a");
-               ?>
-              <small>Date: <?= $date_time ?></small>
+                ?>
+                <small>Date: <?= $date_time ?></small><br>
+                <?php if ($_SESSION['user_type'] == 'Front Desk') { ?>
+                  <!-- <a href="<?= base_url('index.php/main/revert/request') ?>" class="btn btn-sm ml-2 mt-1 btn-success" data-placement="top" title="Request Revert Checkout" rel="tooltip">
+                    <i class="fa-solid fa-rotate-left"></i>
+                  </a> -->
+                <?php } elseif ($_SESSION['user_type'] == 'Admin' || $_SESSION['user_type'] == 'Superadmin') { ?>
+                  <!-- <a href="<?= base_url('index.php/main/revert/approve') ?>" class="btn btn-sm ml-2 mt-1 btn-success" data-placement="top" title="Revert Checkout" rel="tooltip">
+                    <i class="fa-solid fa-rotate-left"></i>
+                  </a> -->
+                <?php } ?>
+              <?php } elseif ($row['booked_room_archived'] == 0) { ?>
+                <button class="btn btn-secondary btn-sm occupant ml-2" id='<?= json_encode($row) ?>' data-placement="top" title="Room Occupant" rel="tooltip">
+                  <span class=" fa fa-user"></span>
+                </button>
+                <button class="btn btn-success btn-sm change" id='<?= json_encode($row) ?>' data-placement="top" title="Change Room" rel="tooltip">
+                  <span class=" fa fa-refresh"></span>
+                </button>
+                <button class="btn btn-info btn-sm extra" id='<?= json_encode($row) ?>' data-placement="top" title="Extra Bed & Person" rel="tooltip">
+                  <i class="fa-solid fa-bed"></i>
+                </button>
+                <button class="btn btn-warning btn-sm discount" id='<?= json_encode($row) ?>' data-placement="top" title="Update Discount" rel="tooltip">
+                  <span class="fa fa-percent"></span>
+                </button>
+                <a href="<?= base_url('index.php/main/soa/' . $row['booked_room_id']) ?>" class="btn btn-warning btn-sm soa" data-placement="top" title="Statement of Account" rel="tooltip">
+                  <span class="fa fa-receipt"></span>
+                </a>
+                <br>
+                <button class="btn btn-primary btn-sm mt-1 charges ml-2" id='<?= $row['booked_room_id'] ?>' data-placement="top" title="Restaurant & Coffeeshop Charges" rel="tooltip">
+                  <i class="fa-solid fa-utensils"></i>
+                  <i class="fa-solid fa-mug-saucer"></i>
+                </button>
+                <button class="btn btn-primary btn-sm mt-1 amenities" id='<?= $row['booked_room_id'] ?>' data-placement="top" title="Amenities & Other Charges" rel="tooltip">
+                  <i class="fa-solid fa-tv"></i>
+                  <i class="fa-solid fa-person-circle-exclamation"></i>
+                </button>
+                <a href="javascript:" id="<?= $row['booked_room_id'] ?>" class="btn btn-success btn-sm mt-1 checkout" data-placement="top" title="Checkout Room" rel="tooltip">
+                  <i class="fa-solid fa-right-from-bracket"></i>
+                </a>
+                <?php if (count($booked_rooms) != 1) { ?>
+                  <a href="javascript:" id="<?= $row['booked_room_id'] ?>" class="btn btn-danger btn-sm mt-1 removeRoom" data-placement="top" title="Remove Room" rel="tooltip">
+                    <span class="fa fa-trash"></span>
+                  </a>
+              <?php }
+              } ?>
             </td>
           </tr>
         <?php }  ?>
@@ -120,10 +111,10 @@
               <small><b>THIS ROOM WAS DELETED</b></small> <br>
               <small>Reason: <?= $row['process_reason'] ?></small><br>
               <small>Processed: <?= $row['processed_by'] ?></small><br>
-              <?php 
-                $date_time = date_create($row['booked_room_updated']);
-                $date_time = date_format($date_time, "M d, Y h:i a");
-               ?>
+              <?php
+              $date_time = date_create($row['booked_room_updated']);
+              $date_time = date_format($date_time, "M d, Y h:i a");
+              ?>
               <small>Date: <?= $date_time ?></small>
             </td>
           </tr>
@@ -683,7 +674,7 @@
     $("#charge_type").empty().trigger('change');
     $("#charge_type").append('<option>- select charge type -</option>');
     charge.map(c => {
-      const text = c.charge_amount=='0.00' ? `₱ ${formatNumber(Math.round(c.charge_amount))} - ${c.charge}` : c.charge;;
+      const text = c.charge_amount == '0.00' ? `₱ ${formatNumber(Math.round(c.charge_amount))} - ${c.charge}` : c.charge;;
       const option = $('<option></option>')
         .attr("value", c.charge_id)
         .attr("amount", c.charge_amount)

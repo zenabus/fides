@@ -116,7 +116,17 @@ $ip = [
   '127.0.0.1' => 'Localhost',
 ];
 
+$icon = [
+  'room' => 'fa fa-bed',
+  'addons' => 'fa fa-plus',
+  'restaurant' => 'fa-solid fa-utensils',
+  'coffeeshop' => 'fa-solid fa-mug-saucer',
+  'reservation' => 'fa-solid fa-hourglass',
+  'advance' => 'fa-solid fa-money-bill-1',
+];
+
 define('RESERVATION_STATUS', $reservation_status);
 define('LOG_TYPE', $log_type);
 define('TITLE', 'Hotel de Fides');
 define('IP', $ip);
+define('ICON', $icon);

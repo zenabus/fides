@@ -155,4 +155,8 @@ class MY_Controller extends CI_Controller {
 
     return $days;
   }
+
+  function percentage($num, $percentage) {
+    return $num - ($num * $percentage / 100);
+  }
 }
