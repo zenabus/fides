@@ -511,9 +511,15 @@
           $('#btnBooking').show().val('Update');
         }
       } else {
-        $('#frmBook').attr('action', `${base_url}index.php/main/updateReservation`);
-        $('.action-div').addClass('d-none');
-        $('#btnBooking').show().val('Update');
+        // $('#frmBook').attr('action', `${base_url}index.php/main/updateReservation`);
+        // $('.action-div').addClass('d-none');
+        // $('#btnBooking').show().val('Update');
+
+        $("#rdo_check").prop("checked", true);
+        $('.action-div').removeClass('d-none');
+        $('#frmBook').attr('action', `${base_url}index.php/main/checkIn`);
+        $('#btnBooking').show().val('Check In');
+        $(".reservation-div").hide();
       }
 
       $(booking.reservation_type == 'Confirmed' ? "#rdo_confirmed" : '#rdo_arrival').prop("checked", true);

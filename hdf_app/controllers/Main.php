@@ -504,10 +504,10 @@ class Main extends MY_Controller {
     $this->update_model->updateCheckIn($_POST['guest_id']);
     $this->session->set_flashdata('success', "Successfully {$type} {$name} in room {$room->room_number}");
 
-    if ($_POST['check_in'] == date('m/d/Y')) {
-      log_message('error', $booked_room_id);
-      $this->earlyCheckIn($booked_room_id);
-    }
+    // if ($_POST['check_in'] == date('m/d/Y')) {
+    //   log_message('error', $booked_room_id);
+    //   $this->earlyCheckIn($booked_room_id);
+    // }
 
     if ($_POST['booking_type'] == 'Check In') {
       redirect(base_url('index.php/main/booking/' . $booking_number));
@@ -621,9 +621,9 @@ class Main extends MY_Controller {
       $booking_id = $_POST['booking_id'];
     }
     $booked_room = $this->get_model->getBookedRoom($booking_id);
-    if ($_POST['check_in'] == date('m/d/Y')) {
-      $this->earlyCheckIn($booked_room->booked_room_id);
-    }
+    // if ($_POST['check_in'] == date('m/d/Y')) {
+    //   $this->earlyCheckIn($booked_room->booked_room_id);
+    // }
     $this->update_model->updateGuestFromReservation();
     $this->update_model->updateBookedRoomNights();
     $booking_number = 'HDF' . str_pad($booking_id, 5, '0', STR_PAD_LEFT);
