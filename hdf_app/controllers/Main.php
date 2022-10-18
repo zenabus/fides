@@ -110,8 +110,6 @@ class Main extends MY_Controller {
     $data['reservations'] = $this->get_model->getBookingsByGuest($guest_id, [1, 2, 3]);
     $data['collectables'] = $this->get_model->getCollectables($guest_id);
 
-    // $this->dd($data['collectables']);
-
     foreach ($data['bookings'] as $i => $booking) {
       $data['bookings'][$i]['rooms'] = $this->get_model->getBookedRooms($booking['booking_id']);
       $data['bookings'][$i]['payment'] = $this->get_model->getPaymentTotal($booking['booking_id']);
@@ -332,9 +330,6 @@ class Main extends MY_Controller {
           $hotel_sales_pm += $row['amount'];
         }
       }
-
-      // $this->dd($test);
-      // $this->dd($hotel_sales_am);
 
       foreach ($event_sales as $row) {
         [, $time] = explode(' ', $row['sales_added']);
@@ -833,7 +828,12 @@ class Main extends MY_Controller {
     $amount = $_POST['amount'];
     $bed = $this->get_model->getPrice('Bed');
     $person = $this->get_model->getPrice('Person');
-    $rate = $this->percentage($room['pricing_type'], $room['percentage']);
+    if ($room['using_formula'] == '1') {
+      [$multiplicand, $multiplier] = explode('x', $room['percentage']);
+      $rate = $room['pricing_type'] / $multiplicand * $multiplier;
+    } else {
+      $rate = $this->percentage($room['pricing_type'], $room['percentage']);
+    }
     $early = $this->get_model->getEarlyCheckout($room['booked_room_id']);
     $charge_early = $early ? $rate : 0;
     $charge_room = $rate * $room['nights'];
@@ -855,15 +855,10 @@ class Main extends MY_Controller {
       $payable_coffeeshop = $charge_coffeeshop->total - $payment_coffeeshop->amount;
       $payable_addons = ($charge_early + $charge_person + $charge_bed + $charge_amenities->total) - $payment_addons->amount;
 
-      log_message('error', $amount);
       $amount = $this->loopPay($amount, 'room', $payable_room, $room['booked_room_id']);
-      log_message('error', $amount);
       $amount = $this->loopPay($amount, 'restaurant', $payable_restaurant, $room['booked_room_id']);
-      log_message('error', $amount);
       $amount = $this->loopPay($amount, 'coffeeshop', $payable_coffeeshop, $room['booked_room_id']);
-      log_message('error', $amount);
       $amount = $this->loopPay($amount, 'addons', $payable_addons, $room['booked_room_id']);
-      log_message('error', $amount);
     }
   }
 

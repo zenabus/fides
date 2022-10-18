@@ -120,6 +120,11 @@ class Update_model extends CI_Model {
   function updateDiscounts() {
     $discount_id = $_POST['discount_id'];
     unset($_POST['discount_id']);
+    if (isset($_POST['using_formula'])) {
+      $_POST['using_formula'] = 1;
+    } else {
+      $_POST['using_formula'] = 0;
+    }
     $this->db->where('discount_id', $discount_id)->update('discounts', $_POST);
   }
 

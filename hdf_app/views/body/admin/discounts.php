@@ -1,7 +1,7 @@
 <div class="content pb-0">
   <h5>Discounts</h5>
   <div class="row">
-    <div class="col-md-6">
+    <div class="col-md-8">
       <div class="card">
         <div class="card-header px-4 pt-4 d-flex justify-content-between align-items-center">
           <h6>Discounts</h6>
@@ -12,7 +12,8 @@
             <thead>
               <tr>
                 <th class="pl-4">Discount Type</th>
-                <th>Percentage</th>
+                <th>Percentage / Formula</th>
+                <th>Using Formula</th>
                 <th>Action</th>
               </tr>
             </thead>
@@ -23,6 +24,7 @@
                   <tr>
                     <td class="border-left-0 pl-4"><?= $row['discount_type'] ?></td>
                     <td><?= $row['percentage'] ?>%</td>
+                    <td><?= $row['using_formula'] ? '✔️' : '' ?></td>
                     <td class="border-right-0 action">
                       <a href="javascript:" class="btn btn-success btn-sm updateDiscount" id='<?= json_encode($row) ?>' data-placement="top" title="Update Discount" rel="tooltip">
                         <span class="fa fa-edit"></span>
@@ -39,7 +41,8 @@
               ?>
                   <tr>
                     <td class="border-left-0 pl-4"><?= $row['discount_type'] ?></td>
-                    <td><?= $row['percentage'] ?>%</td>
+                    <td><?= $row['percentage'] ?><?= $row['using_formula'] ? '' : '%' ?> </td>
+                    <td><?= $row['using_formula'] ? '✔️' : '' ?></td>
                     <td class="border-right-0 action">
                       <a href="javascript:" class="btn btn-success btn-sm updateDiscount" id='<?= json_encode($row) ?>' data-placement="top" title="Update Discount" rel="tooltip">
                         <span class="fa fa-edit"></span>
@@ -73,8 +76,17 @@
           <input type="text" class="form-control" required name="discount_type">
         </div>
         <div class="form-group">
-          <label>Percentage</label>
-          <input type="number" class="form-control" required name="percentage" value="0" min="0">
+          <label>Percentage / Formula</label>
+          <input type="text" class="form-control" required name="percentage">
+        </div>
+        <div class="form-group">
+          <div class="form-check">
+            <label class="form-check-label">
+              <input class="form-check-input" type="checkbox" name="using_formula">
+              <span class="form-check-sign"></span>
+              Use Formula
+            </label>
+          </div>
         </div>
         <?= form_close() ?>
       </div>
@@ -100,6 +112,7 @@
     $('.title-up').text('Add Discount');
     $('.btn-discount').val('Add Discount');
     $('#frmDiscount').attr('action', `${base_url}index.php/admin/addDiscount`).trigger('reset');
+    $('[name=using_formula]').attr('checked', false);
     $('#modalDiscount').modal('show');
   });
 
@@ -108,9 +121,14 @@
     $('#frmDiscount').attr('action', `${base_url}index.php/admin/updateDiscount`);
     $('.title-up').text('Update Discount');
     $('.btn-discount').text('Update');
-    $('[name=discount_id').val(data.discount_id);
-    $('[name=discount_type').val(data.discount_type);
-    $('[name=percentage').val(data.percentage);
+    $('[name=discount_id]').val(data.discount_id);
+    $('[name=discount_type]').val(data.discount_type);
+    $('[name=percentage]').val(data.percentage);
+    $('[name=using_formula]').attr('checked', data.using_formula == '1' ? true : false);
     $('#modalDiscount').modal('show');
+  });
+
+  $('[name=using_formula]').change(function() {
+    $('[name=percentage]').attr('type', this.checked ? 'text' : 'number');
   });
 </script>

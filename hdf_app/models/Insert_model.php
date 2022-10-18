@@ -160,6 +160,9 @@ class Insert_model extends CI_Model {
 
   function addDiscount() {
     unset($_POST['discount_id']);
+    if (isset($_POST['using_formula'])) {
+      $_POST['using_formula'] = 1;
+    }
     $this->db->insert('discounts', $_POST);
   }
 

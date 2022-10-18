@@ -69,9 +69,17 @@
 <td>
   <?= $row['arrival'] ?> - <?= $row['departure'] ?><br>
   <?php
-  $arrival = new DateTime($row['arrival']);
-  $departure = new DateTime($row['departure']);
-  $nights = $arrival->diff($departure);
+  try {
+    $arrival = new DateTime($row['arrival']);
+    $departure = new DateTime($row['departure']);
+    $nights = $arrival->diff($departure);
+    $nights = $nights->d;
+  } catch (Exception $e) {
+    $nights = 0;
+  }
+
+
+
   ?>
-  <small>Number of nights: <?= $nights->d ?></small>
+  <small>Number of nights: <?= $nights ?></small>
 </td>

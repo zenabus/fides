@@ -197,11 +197,18 @@
           <label>Discount Type</label>
           <select name="discount_id" class="form-control" required>
             <?php foreach ($discounts as $row) { ?>
-              <option value="<?= $row['discount_id'] ?>" percentage="<?= $row['percentage'] ?>"><?= $row['discount_type'] ?> (<?= $row['percentage'] ?>%)</option>
+              <?php if ($row['discount_type'] == 'N/A') { ?>
+                <option value="<?= $row['discount_id'] ?>" using_formula="<?= $row['percentage'] ?>" percentage="<?= $row['percentage'] ?>"><?= $row['discount_type'] ?> (<?= $row['percentage'] ?><?= $row['using_formula'] ? '' : '%' ?>)</option>
+              <?php } ?>
+            <?php } ?>
+            <?php foreach ($discounts as $row) { ?>
+              <?php if ($row['discount_type'] != 'N/A') { ?>
+                <option value="<?= $row['discount_id'] ?>" using_formula="<?= $row['using_formula'] ?>" percentage="<?= $row['percentage'] ?>"><?= $row['discount_type'] ?> (<?= $row['percentage'] ?><?= $row['using_formula'] ? '' : '%' ?>)</option>
+              <?php } ?>
             <?php } ?>
           </select>
         </div>
-        <div class=" form-row">
+        <div class="form-row">
           <div class="form-group col-md-6">
             <label>Room Rate</label>
             <input type="text" class="form-control" id="room_rate" readonly tabindex="-1">
@@ -563,15 +570,25 @@
 
   $('.discount').click(function() {
     const data = JSON.parse(this.id);
-    const percentage = data.percentage / 100;
+    let value = data.percentage
+    let discounted = 0;
+
     room_rate = data.pricing_type;
     nights = data.nights;
-    subtotal = room_rate * nights;
+
+    if (data.using_formula == '1') {
+      const [multiplicand, multiplier] = value.split('x');
+      discounted = parseFloat(room_rate / parseFloat(multiplicand) * parseFloat(multiplier)).toFixed(2);
+    } else {
+      value = value / 100;
+      discounted = room_rate - room_rate * value;
+    }
+
     $('[name=booked_room_id]').val(data.booked_room_id);
     $('[name=discount_id').val(data.discount_id);
     $('#room_rate').val('₱ ' + formatNumber(room_rate));
     $('#nights').val(nights);
-    $('#discount_subtotal').val('₱ ' + formatNumber(subtotal - subtotal * percentage));
+    $('#discount_subtotal').val('₱ ' + formatNumber(discounted * nights));
     $('#modalDiscount').modal('show');
   });
 
@@ -592,9 +609,18 @@
   }
 
   $('[name=discount_id').change(function() {
-    const percentage = $(this).find(':selected').attr('percentage') / 100;
-    const subtotal = room_rate * nights;
-    $('#discount_subtotal').val('₱ ' + formatNumber(subtotal - subtotal * percentage));
+    const using_formula = parseInt($(this).find(':selected').attr('using_formula'));
+    let value = $(this).find(':selected').attr('percentage');
+    let discounted = 0;
+
+    if (using_formula) {
+      const [multiplicand, multiplier] = value.split('x');
+      discounted = parseFloat(room_rate / parseFloat(multiplicand) * parseFloat(multiplier)).toFixed(2);
+    } else {
+      value = value / 100;
+      discounted = room_rate - room_rate * value
+    }
+    $('#discount_subtotal').val('₱ ' + formatNumber(discounted * nights));
   });
 
   $('#calendar').click(function() {

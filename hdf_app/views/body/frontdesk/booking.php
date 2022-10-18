@@ -34,13 +34,18 @@
               <input type="text" class="form-control-plaintext" tabindex="-1" value="<?= $booking->departure ?>" readonly>
             </div>
             <?php
-            $arrival = new DateTime($booking->arrival);
-            $departure = new DateTime($booking->departure);
-            $nights = $arrival->diff($departure);
+            try {
+              $arrival = new DateTime($booking->arrival);
+              $departure = new DateTime($booking->departure);
+              $nights = $arrival->diff($departure);
+              $nights = $nights->d;
+            } catch (Exception $e) {
+              $nights =  0;
+            }
             ?>
             <div class="form-group col-md-4 mb-0">
               <label>Nights</label>
-              <input type="text" class="form-control-plaintext" tabindex="-1" value="<?= $nights->d ?>" readonly>
+              <input type="text" class="form-control-plaintext" tabindex="-1" value="<?= $nights ?>" readonly>
             </div>
           </div>
 
@@ -223,7 +228,7 @@
                     </small>
                   </td>
                   <td>
-                    ₱ <?= number_format($row['amount']) ?>
+                    ₱ <?= number_format($row['amount'], 2) ?>
                     <?php if ($row['payment_option'] == 'Card') { ?>
                       <span class="fa-solid fa-credit-card text-warning" data-placement="top" title="XXXX XXXX XXXX <?= $row['payment_details'] ?>" rel="tooltip"></span>
                     <?php } else if ($row['payment_option'] == 'Check') {
@@ -260,7 +265,7 @@
               <?php } ?>
               <tr class="bg-default text-white">
                 <th class="pl-4">TOTAL PAYMENT</th>
-                <th>₱ <?= number_format($payment->amount) ?></th>
+                <th>₱ <?= number_format($payment->amount, 2) ?></th>
                 <th></th>
                 <th></th>
               </tr>
@@ -295,7 +300,7 @@
                     <small><?= $row['booking_refund_reason'] ?></small>
                   </td>
                   <td>
-                    ₱ <?= number_format($row['booking_refund']) ?><br>
+                    ₱ <?= number_format($row['booking_refund'], 2) ?><br>
                     <small><?= $row['name'] ?></small>
                   </td>
                   <td>
@@ -316,7 +321,7 @@
               <?php } ?>
               <tr class="bg-default text-white">
                 <th class="pl-4">TOTAL REFUND</th>
-                <th>₱ <?= number_format($refund->booking_refund) ?></th>
+                <th>₱ <?= number_format($refund->booking_refund, 2) ?></th>
                 <th></th>
                 <th></th>
               </tr>

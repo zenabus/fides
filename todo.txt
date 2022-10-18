@@ -104,7 +104,7 @@ Consumables
 add revert checkout
 // add click payment on collection details table
 
-bookings tab add charge to or utang
+// bookings tab add charge to or utang
 // add button for charge to
 
 // payment options for credits

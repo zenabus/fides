@@ -532,10 +532,12 @@
 
       if (booking.reservation_type == 'Confirmed') {
         // console.log(booking.payments.payment_option)
-        $("[name=payment_option][value=" + booking.payments.payment_option + "]").prop('checked', true).trigger('change');
-        $('[name=amount]').val(booking.payments.amount).attr('disabled', true);
-        $('[name=card_number]').attr('disabled', true);
-        $('[name=payment_option]').attr('disabled', true);
+        if (booking.payments) {
+          $("[name=payment_option][value=" + booking.payments.payment_option + "]").prop('checked', true).trigger('change');
+          $('[name=amount]').val(booking.payments.amount).attr('disabled', true);
+          $('[name=card_number]').attr('disabled', true);
+          $('[name=payment_option]').attr('disabled', true);
+        }
         $(".advanced-div").show();
       }
     } else {

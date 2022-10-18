@@ -355,17 +355,17 @@
         </tr>
         <tr>
           <td class="bgw nb" colspan="15">&nbsp;</td>
-          <td class="bgw bt bl nw">
-            HOTEL SALES<br>
-            (ad)
-          </td>
+          <td class="bgw bt bl nw">HOTEL SALES</td>
           <td class="bgw bt"><?= number_format($hotel_sales_am, 2) ?></td>
           <td class="bgw bt"><?= number_format($hotel_sales_pm, 2) ?></td>
           <td class="bgw bt tr"><?= number_format($hotel_sales_am + $hotel_sales_pm, 2) ?></td>
         </tr>
         <tr>
           <td class="bgw nb" colspan="15">&nbsp;</td>
-          <td class="bgw bt bl nw">EVENT SALES</td>
+          <td class="bgw bt bl nw">
+            EVENT SALES<br>
+            (Event + Pool)
+          </td>
           <td class="bgw bt"><?= number_format($event_sales_am, 2) ?></td>
           <td class="bgw bt"><?= number_format($event_sales_pm, 2) ?></td>
           <td class="bgw bt tr"><?= number_format($event_sales_am + $event_sales_pm, 2) ?></td>

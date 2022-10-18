@@ -154,7 +154,7 @@
           </div>
           <div class="form-group">
             <label>Advance Payment</label>
-            <input type="number" class="form-control" name="amount" value="0" min="0">
+            <input type="number" class="form-control" name="amount" value="0" min="0" step="0.01">
           </div>
           <div class="form-group card-div d-none mb-0">
             <label>Account Number</label>

@@ -1,3 +1,9 @@
+<?php
+function round_format($num) {
+  return number_format($num, 2);
+}
+?>
+
 <style>
   .payment-click {
     cursor: pointer;
@@ -40,38 +46,46 @@
           $room_paid = 0;
 
           $total = $row['pricing_type'] * $row['nights'];
-          $discount = $total * ($row['percentage'] / 100);
-          $subtotal = $total - $discount;
+
+          if ($row['using_formula'] == 1) {
+            [$multiplicand, $multiplier] = explode('x', $row['percentage']);
+            $subtotal = $total / $multiplicand * $multiplier;
+          } else {
+            $discount = $total * ($row['percentage'] / 100);
+            $subtotal = $total - $discount;
+          }
+
           $balance = $subtotal - $row['payment_room'];
+
           $room_total += $subtotal;
           $room_balance += $balance;
           $room_paid += $row['payment_room'];
           ?>
 
-          <tr class="<?= $balance ? 'payment-click'  : '' ?>" booked-room-id="<?= $row['booked_room_id'] ?>" payment-for="room" amount="<?= $balance ?>">
+          <tr class="<?= $balance >= 0.01 ? 'payment-click'  : '' ?>" booked-room-id="<?= $row['booked_room_id'] ?>" payment-for="room" amount="<?= $balance >= 0.01 ?>">
             <td class="pl-4">
               Room <?= $row['room_number'] ?><br>
               <small><?= $row['room_type'] ?></small>
             </td>
             <td>
               (<?= $row['nights'] ?>) Night<?= $row['nights'] != 1 ? 's' : ''  ?><br>
-              <small>₱ <?= number_format($row['pricing_type']) ?> per night</small>
+              <small>₱ <?= round_format($row['pricing_type']) ?> per night</small>
             </td>
             <td>
-              ₱ <?= number_format($subtotal) ?> <br>
-              <?php if ($discount != 0) { ?>
-                <small data-placement="left" title="Less ₱ <?= number_format($discount) ?>" rel="tooltip" data-html="true"><?= $row['discount_type'] ?> (-<?= $row['percentage'] ?>%)</small>
+              ₱ <?= round_format($subtotal) ?> <br>
+              <?php if ($row['discount_type'] != 'N/A') { ?>
+                <small data-placement="left" title="Less ₱ <?= round_format($subtotal - $total) ?>" rel="tooltip" data-html="true"><?= $row['discount_type'] ?> (<?= $row['percentage'] ?><?= $row['using_formula'] ? '' : '%' ?>)</small>
               <?php } else { ?>
                 <small>No discount</small>
               <?php } ?>
             </td>
             <td>
-              <?php if ($balance <= 0) { ?>
+              <?php if ($balance <= 0.01) { ?>
                 <span class="fa fa-check-circle text-success"></span> Paid
               <?php } else { ?>
-                ₱ <?= number_format($balance) ?>
+                ₱ <?= round_format($balance) ?>
               <?php } ?><br>
-              <small>₱ <?= number_format($row['payment_room']) ?></small>
+              <small>₱ <?= round_format($row['payment_room']) ?></small>
             </td>
           </tr>
 
@@ -92,7 +106,7 @@
             $room_balance += $balance;
             $room_paid += $paid;
           ?>
-            <tr class="<?= $balance ? 'payment-click'  : '' ?>" booked-room-id="<?= $row['booked_room_id'] ?>" payment-for="restaurant" amount="<?= $balance ?>">
+            <tr class="<?= $balance >= 0.01 ? 'payment-click'  : '' ?>" booked-room-id="<?= $row['booked_room_id'] ?>" payment-for="restaurant" amount="<?= $balance >= 0.01 ?>">
               <td class="pl-4">
                 <i class="fa-solid fa-utensils text-success mr-1"></i><br>
                 <?php if ($charges['reference']) { ?>
@@ -101,21 +115,21 @@
               </td>
               <td>
                 (<?= $charges['charges_food_quantity'] ?>) <?= $charges['particulars'] ?><br>
-                <small>₱ <?= number_format($charges['charges_food_amount']) ?></small>
+                <small>₱ <?= round_format($charges['charges_food_amount']) ?></small>
               </td>
-              <td>₱ <?= number_format($food_total) ?></td>
+              <td>₱ <?= round_format($food_total) ?></td>
               <td>
                 <?php if ($balance == $food_total) { ?>
                   <a href="<?= base_url('index.php/main/removeCharge/charges_food/' . $charges['charges_food_id']) ?>" class="float-right text-danger confirm hidable" data-placement="left" title="Remove Resto Charge" rel="tooltip">
                     <span class="fa fa-times"></span>
                   </a>
                 <?php } ?>
-                <?php if ($balance <= 0) { ?>
+                <?php if ($balance <= 0.01) { ?>
                   <span class="fa fa-check-circle text-success"></span> Paid
                 <?php } else { ?>
-                  ₱ <?= number_format($balance) ?>
+                  ₱ <?= round_format($balance) ?>
                 <?php } ?><br>
-                <small>₱ <?= number_format($paid) ?></small>
+                <small>₱ <?= round_format($paid) ?></small>
               </td>
             </tr>
 
@@ -138,7 +152,7 @@
             $room_total += $coffee_total;
             $room_paid += $paid;
           ?>
-            <tr class="<?= $balance ? 'payment-click'  : '' ?>" booked-room-id="<?= $row['booked_room_id'] ?>" payment-for="coffeeshop" amount="<?= $balance ?>">
+            <tr class="<?= $balance >= 0.01 ? 'payment-click'  : '' ?>" booked-room-id="<?= $row['booked_room_id'] ?>" payment-for="coffeeshop" amount="<?= $balance >= 0.01 ?>">
               <td class="pl-4">
                 <i class="fa-solid fa-mug-saucer text-primary mr-1"></i><br>
                 <?php if ($charges['reference']) { ?>
@@ -147,21 +161,21 @@
               </td>
               <td>
                 (<?= $charges['charges_food_quantity'] ?>) <?= $charges['particulars'] ?><br>
-                <small>₱ <?= number_format($charges['charges_food_amount']) ?></small>
+                <small>₱ <?= round_format($charges['charges_food_amount']) ?></small>
               </td>
-              <td>₱ <?= number_format($coffee_total) ?></td>
+              <td>₱ <?= round_format($coffee_total) ?></td>
               <td>
                 <?php if ($balance == $coffee_total) { ?>
                   <a href="<?= base_url('index.php/main/removeCharge/charges_food/' . $charges['charges_food_id']) ?>" class="float-right text-danger confirm hidable" data-placement="left" title="Remove Otilla's Charge" rel="tooltip">
                     <span class="fa fa-times"></span>
                   </a>
                 <?php } ?>
-                <?php if ($balance <= 0) { ?>
+                <?php if ($balance <= 0.01) { ?>
                   <span class="fa fa-check-circle text-success"></span> Paid
                 <?php } else { ?>
-                  ₱ <?= number_format($balance) ?>
+                  ₱ <?= round_format($balance) ?>
                 <?php } ?><br>
-                <small>₱ <?= number_format($paid) ?></small>
+                <small>₱ <?= round_format($paid) ?></small>
               </td>
             </tr>
           <?php } ?>
@@ -184,25 +198,25 @@
             $room_balance += $balance;
             $room_paid += $paid;
             ?>
-            <tr class="<?= $balance ? 'payment-click'  : '' ?>" booked-room-id="<?= $row['booked_room_id'] ?>" payment-for="addons" amount="<?= $balance ?>">
+            <tr class="<?= $balance >= 0.01 ? 'payment-click'  : '' ?>" booked-room-id="<?= $row['booked_room_id'] ?>" payment-for="addons" amount="<?= $balance >= 0.01 ?>">
               <td class="pl-4"><span class="fa fa-bed text-info"></span></td>
               <td>
                 (<?= $row['extra_bed'] ?>) Extra Bed<?= $row['extra_bed'] != 1 ? 's' : ''  ?><br>
-                <small>₱ <?= number_format($bed->price) ?> per bed</small>
+                <small>₱ <?= round_format($bed->price) ?> per bed</small>
               </td>
-              <td>₱ <?= number_format($bed->price * $row['extra_bed']) ?></td>
+              <td>₱ <?= round_format($bed->price * $row['extra_bed']) ?></td>
               <td>
                 <?php if ($balance == $bed_total) { ?>
                   <a href="<?= base_url('index.php/main/removeExtra/extra_bed/' . $row['booked_room_id']) ?>" class="float-right text-danger confirm hidable" data-placement="left" title="Remove Extra Bed" rel="tooltip">
                     <span class="fa fa-times"></span>
                   </a>
                 <?php } ?>
-                <?php if ($balance <= 0) { ?>
+                <?php if ($balance <= 0.01) { ?>
                   <span class="fa fa-check-circle text-success"></span> Paid
                 <?php } else { ?>
-                  ₱ <?= number_format($balance) ?>
+                  ₱ <?= round_format($balance) ?>
                 <?php } ?><br>
-                <small>₱ <?= number_format($paid) ?></small>
+                <small>₱ <?= round_format($paid) ?></small>
               </td>
             </tr>
 
@@ -226,25 +240,25 @@
             $room_balance += $balance;
             $room_paid += $paid;
             ?>
-            <tr class="<?= $balance ? 'payment-click'  : '' ?>" booked-room-id="<?= $row['booked_room_id'] ?>" payment-for="addons" amount="<?= $balance ?>">
+            <tr class="<?= $balance >= 0.01 ? 'payment-click'  : '' ?>" booked-room-id="<?= $row['booked_room_id'] ?>" payment-for="addons" amount="<?= $balance >= 0.01 ?>">
               <td class="pl-4"><span class="fa fa-user text-info"></span></td>
               <td>
                 (<?= $row['extra_person'] ?>) Extra Person<?= $row['extra_person'] != 1 ? 's' : ''  ?><br>
-                <small>₱ <?= number_format($person->price) ?> per person</small>
+                <small>₱ <?= round_format($person->price) ?> per person</small>
               </td>
-              <td>₱ <?= number_format($person_total) ?></td>
+              <td>₱ <?= round_format($person_total) ?></td>
               <td>
                 <?php if ($balance == $person_total) { ?>
                   <a href="<?= base_url('index.php/main/removeExtra/extra_person/' . $row['booked_room_id']) ?>" class="float-right text-danger confirm hidable" data-placement="left" title="Remove Extra Person" rel="tooltip">
                     <span class="fa fa-times"></span>
                   </a>
                 <?php } ?>
-                <?php if ($balance <= 0) { ?>
+                <?php if ($balance <= 0.01) { ?>
                   <span class="fa fa-check-circle text-success"></span> Paid
                 <?php } else { ?>
-                  ₱ <?= number_format($balance) ?>
+                  ₱ <?= round_format($balance) ?>
                 <?php } ?><br>
-                <small>₱ <?= number_format($paid) ?></small>
+                <small>₱ <?= round_format($paid) ?></small>
               </td>
             </tr>
 
@@ -255,11 +269,11 @@
           <?php $type = ''; ?>
           <?php foreach ($row['amenities'] as $charges) { ?>
             <?php $charge_price =  $charges['charge_id'] == 39 ? $row['pricing_type'] : $charges['charge_amount']; ?>
-            <tr class="payment-click" booked-room-id="<?= $row['booked_room_id'] ?>" payment-for="addons" amount="<?= $balance ?>">
+            <tr class="payment-click" booked-room-id="<?= $row['booked_room_id'] ?>" payment-for="addons" amount="<?= $balance >= 0.01 ?>">
               <td class="pl-4"><?= $type != $charges['category'] ? $charges['category'] : '↳' ?></td>
               <td>
                 (<?= $charges['charge_quantity'] ?>) <?= $charges['charge'] ?><br>
-                <small>₱ <?= number_format($charge_price) ?>
+                <small>₱ <?= round_format($charge_price) ?>
                   <?php if (!in_array($charges['charge_id'], [39, 32, 33])) { ?>
                     each
                   <?php } ?>
@@ -271,16 +285,16 @@
                 $total = $charge_price - $discount;
               ?>
                 <td>
-                  ₱ <?= number_format($total) ?><br>
+                  ₱ <?= round_format($total) ?><br>
                   <?php if ($discount != 0) { ?>
-                    <small data-placement="left" title="Less ₱ <?= number_format($discount) ?>" rel="tooltip" data-html="true"><?= $row['discount_type'] ?> (-<?= $row['percentage'] ?>%)</small>
+                    <small data-placement="left" title="Less ₱ <?= round_format($discount) ?>" rel="tooltip" data-html="true"><?= $row['discount_type'] ?> (-<?= $row['percentage'] ?>%)</small>
                   <?php } else { ?>
                     <small>No discount</small>
                   <?php } ?>
                 </td>
               <?php } else { ?>
                 <?php $total = $charge_price * $charges['charge_quantity']; ?>
-                <td>₱ <?= number_format($total) ?></td>
+                <td>₱ <?= round_format($total) ?></td>
               <?php } ?>
               <?php
               $type = $charges['category'];
@@ -297,18 +311,18 @@
               $room_balance += $balance;
               $room_paid += $paid;
               ?>
-              <td class="<?= $balance <= 0 ? 'paid balance' : 'balance' ?>" balance="<?= $balance ?>">
+              <td class="<?= $balance <= 0.01 ? 'paid balance' : 'balance' ?>" balance="<?= $balance >= 0.01 ?>">
                 <?php if ($balance == $total) { ?>
                   <a href="<?= base_url('index.php/main/removeCharge/charges_other/' . $charges['charges_other_id']) ?>" class="float-right mt-1 text-danger confirm hidable" data-placement="left" title="Remove Amenity / Charge" rel="tooltip">
                     <span class="fa fa-times"></span>
                   </a>
                 <?php } ?>
-                <?php if ($balance <= 0) { ?>
+                <?php if ($balance <= 0.01) { ?>
                   <span class="fa fa-check-circle text-success"></span> Paid
                 <?php } else { ?>
-                  ₱ <?= number_format($balance) ?>
+                  ₱ <?= round_format($balance) ?>
                 <?php } ?><br>
-                <small>₱ <?= number_format($paid) ?></small>
+                <small>₱ <?= round_format($paid) ?></small>
               </td>
             </tr>
           <?php } ?>
@@ -318,20 +332,20 @@
           <tr class="bg-default text-white <?= $room_balance ? 'payment-click'  : '' ?>" booked-room-id="<?= $row['booked_room_id'] ?>" payment-for="All Types" amount="<?= $room_balance ?>">
             <td class="pl-4">Room Total</td>
             <td></td>
-            <td>₱ <?= number_format($room_total) ?></td>
-            <td>₱ <?= number_format($room_balance) ?></td>
+            <td>₱ <?= round_format($room_total) ?></td>
+            <td>₱ <?= round_format($room_balance) ?></td>
           </tr>
           <tr>
             <td class="pl-4"><small>Room Refund</small></td>
             <td></td>
             <td></td>
-            <td><small>₱ <?= number_format($row['refund']->booking_refund) ?></small></td>
+            <td><small>₱ <?= round_format($row['refund']->booking_refund) ?></small></td>
           </tr>
           <tr>
             <td class="pl-4"><small>Room Payment</small></td>
             <td></td>
             <td></td>
-            <td><small>₱ <?= number_format($room_paid) ?></small></td>
+            <td><small>₱ <?= round_format($room_paid) ?></small></td>
           </tr>
           <tr class="bg-default">
             <td colspan="5" style="padding:0.5px !important"></td>
@@ -347,21 +361,21 @@
           <td class="pl-4">Total Refund</td>
           <td></td>
           <td></td>
-          <td>₱ <?= number_format($refund->booking_refund) ?></td>
+          <td>₱ <?= round_format($refund->booking_refund) ?></td>
         </tr>
 
         <tr>
           <td class="pl-4">Total Payment</td>
           <td></td>
           <td></td>
-          <td>₱ <?= number_format($payment->amount) ?></td>
+          <td>₱ <?= round_format($payment->amount) ?></td>
         </tr>
 
         <tr class="bg-default text-white <?= $balance_total ? 'payment-click'  : '' ?>" booked-room-id="All Rooms" payment-for="" amount="<?= $balance_total ?>">
           <th class="pl-4">GRAND TOTAL</th>
           <th></th>
-          <th>₱ <?= number_format($grand_total) ?></th>
-          <th style="vertical-align: middle !important;">₱ <?= number_format($balance_total) ?></th>
+          <th>₱ <?= round_format($grand_total) ?></th>
+          <th style="vertical-align: middle !important;">₱ <?= round_format($balance_total) ?></th>
         </tr>
       </tbody>
     </table>
@@ -369,7 +383,7 @@
 
   <div class="card-footer mb-2 mt-0 border-top px-4 d-flex justify-content-between align-items-start">
     <div>
-      <a href="<?= base_url('index.php/main/completeOrder/' . $booking->booking_id . '/' . $booking->booking_number) ?>" class="btn btn-sm confirm hidable" <?= $balance_total > 0 ? 'disabled' : '' ?>>Complete Order</a>
+      <a href="<?= base_url('index.php/main/completeOrder/' . $booking->booking_id . '/' . $booking->booking_number) ?>" class="btn btn-sm confirm hidable" <?= $balance_total > 0.01 ? 'disabled' : '' ?>>Complete Order</a>
       <button type="button" class="btn btn-sm mt-0 btn-success hidable" data-toggle="modal" data-target="#modalPayment">Payment</button>
       <button type="button" class="btn btn-sm mt-0 btn-danger" data-toggle="modal" data-target="#modalRefund">Refund</button>
       <?php if (!$booking->charged_to) { ?>
@@ -473,7 +487,7 @@
         </div>
         <div class="form-group">
           <label>Amount</label>
-          <input type="number" class="form-control" name="amount" required value="0" min="0">
+          <input type="number" class="form-control" name="amount" required value="0" min="0" step="0.01">
         </div>
         <div class="form-group card-div all-div d-none mb-0">
           <label>Account Number</label>
@@ -612,7 +626,7 @@
     if (e.target.nodeName != 'SPAN') {
       const booked_room_id = $(this).attr('booked-room-id');
       const payment_for = $(this).attr('payment-for');
-      const amount = $(this).attr('amount');
+      const amount = parseFloat($(this).attr('amount')).toFixed(2);
       $('[name=booked_room_id]').val(booked_room_id);
       $('[name=payment_for]').val(payment_for);
       $('#modalPayment').modal('show');
