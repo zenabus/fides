@@ -62,7 +62,7 @@ function round_format($num) {
           $room_paid += $row['payment_room'];
           ?>
 
-          <tr class="<?= $balance >= 0.01 ? 'payment-click'  : '' ?>" booked-room-id="<?= $row['booked_room_id'] ?>" payment-for="room" amount="<?= $balance >= 0.01 ?>">
+          <tr class="<?= $balance >= 0.01 ? 'payment-click'  : '' ?>" booked-room-id="<?= $row['booked_room_id'] ?>" payment-for="room" amount="<?= $balance ?>">
             <td class="pl-4">
               Room <?= $row['room_number'] ?><br>
               <small><?= $row['room_type'] ?></small>
@@ -106,7 +106,7 @@ function round_format($num) {
             $room_balance += $balance;
             $room_paid += $paid;
           ?>
-            <tr class="<?= $balance >= 0.01 ? 'payment-click'  : '' ?>" booked-room-id="<?= $row['booked_room_id'] ?>" payment-for="restaurant" amount="<?= $balance >= 0.01 ?>">
+            <tr class="<?= $balance >= 0.01 ? 'payment-click'  : '' ?>" booked-room-id="<?= $row['booked_room_id'] ?>" payment-for="restaurant" amount="<?= $balance ?>">
               <td class="pl-4">
                 <i class="fa-solid fa-utensils text-success mr-1"></i><br>
                 <?php if ($charges['reference']) { ?>
@@ -152,7 +152,7 @@ function round_format($num) {
             $room_total += $coffee_total;
             $room_paid += $paid;
           ?>
-            <tr class="<?= $balance >= 0.01 ? 'payment-click'  : '' ?>" booked-room-id="<?= $row['booked_room_id'] ?>" payment-for="coffeeshop" amount="<?= $balance >= 0.01 ?>">
+            <tr class="<?= $balance >= 0.01 ? 'payment-click'  : '' ?>" booked-room-id="<?= $row['booked_room_id'] ?>" payment-for="coffeeshop" amount="<?= $balance ?>">
               <td class="pl-4">
                 <i class="fa-solid fa-mug-saucer text-primary mr-1"></i><br>
                 <?php if ($charges['reference']) { ?>
@@ -198,7 +198,7 @@ function round_format($num) {
             $room_balance += $balance;
             $room_paid += $paid;
             ?>
-            <tr class="<?= $balance >= 0.01 ? 'payment-click'  : '' ?>" booked-room-id="<?= $row['booked_room_id'] ?>" payment-for="addons" amount="<?= $balance >= 0.01 ?>">
+            <tr class="<?= $balance >= 0.01 ? 'payment-click'  : '' ?>" booked-room-id="<?= $row['booked_room_id'] ?>" payment-for="addons" amount="<?= $balance ?>">
               <td class="pl-4"><span class="fa fa-bed text-info"></span></td>
               <td>
                 (<?= $row['extra_bed'] ?>) Extra Bed<?= $row['extra_bed'] != 1 ? 's' : ''  ?><br>
@@ -240,7 +240,7 @@ function round_format($num) {
             $room_balance += $balance;
             $room_paid += $paid;
             ?>
-            <tr class="<?= $balance >= 0.01 ? 'payment-click'  : '' ?>" booked-room-id="<?= $row['booked_room_id'] ?>" payment-for="addons" amount="<?= $balance >= 0.01 ?>">
+            <tr class="<?= $balance >= 0.01 ? 'payment-click'  : '' ?>" booked-room-id="<?= $row['booked_room_id'] ?>" payment-for="addons" amount="<?= $balance ?>">
               <td class="pl-4"><span class="fa fa-user text-info"></span></td>
               <td>
                 (<?= $row['extra_person'] ?>) Extra Person<?= $row['extra_person'] != 1 ? 's' : ''  ?><br>
@@ -269,7 +269,7 @@ function round_format($num) {
           <?php $type = ''; ?>
           <?php foreach ($row['amenities'] as $charges) { ?>
             <?php $charge_price =  $charges['charge_id'] == 39 ? $row['pricing_type'] : $charges['charge_amount']; ?>
-            <tr class="payment-click" booked-room-id="<?= $row['booked_room_id'] ?>" payment-for="addons" amount="<?= $balance >= 0.01 ?>">
+            <tr class="payment-click" booked-room-id="<?= $row['booked_room_id'] ?>" payment-for="addons" amount="<?= $balance ?>">
               <td class="pl-4"><?= $type != $charges['category'] ? $charges['category'] : '↳' ?></td>
               <td>
                 (<?= $charges['charge_quantity'] ?>) <?= $charges['charge'] ?><br>
@@ -287,7 +287,7 @@ function round_format($num) {
                 <td>
                   ₱ <?= round_format($total) ?><br>
                   <?php if ($discount != 0) { ?>
-                    <small data-placement="left" title="Less ₱ <?= round_format($discount) ?>" rel="tooltip" data-html="true"><?= $row['discount_type'] ?> (-<?= $row['percentage'] ?>%)</small>
+                    <small data-placement="left" title="Less ₱ <?= round_format($discount) ?>" rel="tooltip" data-html="true"><?= $row['discount_type'] ?> (<?= $row['percentage'] ?><?= $row['using_formula'] ? '' : '%' ?>)</small>
                   <?php } else { ?>
                     <small>No discount</small>
                   <?php } ?>

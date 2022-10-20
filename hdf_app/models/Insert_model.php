@@ -124,7 +124,7 @@ class Insert_model extends CI_Model {
 
     $this->db->insert('booking_payment', $data);
     if ($_POST['payment_option'] == 'Cash') {
-      $this->addCash($_POST['amount']);
+      $this->addCash($amount);
     }
   }
 

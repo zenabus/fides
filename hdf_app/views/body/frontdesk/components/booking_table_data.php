@@ -31,7 +31,7 @@
       <small class="ml-3">Check Out: <?= $room['check_out'] ?></small><br>
       <small class="ml-3">No. Nights: <?= $room['nights'] ?> night<?= $room['nights'] ? '' : 's' ?></small><br>
       <small class="ml-3">Room Price: ₱ <?= number_format($room['pricing_type']) ?></small><br>
-      <small class="ml-3">Discount: <?= $room['discount_type'] ?> (<?= $room['percentage'] ?>%)</small>
+      <small class="ml-3">Discount: <?= $room['discount_type'] ?> (<?= $room['percentage'] ?><?= $room['using_formula'] ? '' : '%' ?>)</small>
     </details>
   <?php } ?>
 </td>
@@ -65,6 +65,10 @@
       </small><br>
     <?php } ?>
   </details>
+  <?php if (isset($row['collectable'])) { ?>
+    <hr>
+    ₱ <?= number_format($row['collectable']) ?> <small>Collectable</small>
+  <?php } ?>
 </td>
 <td>
   <?= $row['arrival'] ?> - <?= $row['departure'] ?><br>
@@ -77,9 +81,6 @@
   } catch (Exception $e) {
     $nights = 0;
   }
-
-
-
   ?>
   <small>Number of nights: <?= $nights ?></small>
 </td>

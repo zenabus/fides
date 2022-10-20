@@ -49,7 +49,11 @@
                   <td>
                     <?php if ($row['remitted']) { ?>
                       <?= $row['remitted']->name ?> <span class="fa fa-info-circle text-info" data-placement="top" title="<?= $row['remitted']->remittance_note ?>" rel="tooltip"></span><br>
-                      <small><?= $row['remitted']->remittance_added ?></small>
+                      <?php
+                      $time = date_create($row['remitted']->remittance_added);
+                      $time = date_format($time, "h:i a");
+                      ?>
+                      <small>₱ <?= number_format($row['remitted']->remitted_amount) ?> - <?= $time ?></small>
                     <?php } ?>
                   </td>
                   <td class="action">
@@ -98,10 +102,13 @@
       </div>
       <div class="modal-body px-4">
         <?= form_open('main/remit', ['id' => 'frmRemit']) ?>
-        <input type="hidden" name="remitted_amount">
         <div class="form-group">
-          <label>Amount</label>
-          <input type="text" class="form-control" id="remittance_amount" readonly>
+          <label>Amount remitted</label>
+          <input type="number" class="form-control" name="remitted_amount" required>
+        </div>
+        <div class="form-group">
+          <label>Amount left</label>
+          <input type="text" class="form-control" id="left" readonly value="₱ 0">
         </div>
         <div class="form-group">
           <label>Note</label>
@@ -111,7 +118,7 @@
       </div>
       <div class="modal-footer">
         <div class="left-side">
-          <button type="submit" class="btn btn-link" form="frmRemit">Confirm</button>
+          <button type="submit" class="btn btn-link btnRemit" form="frmRemit">Confirm</button>
         </div>
         <div class="divider"></div>
         <div class="right-side">
@@ -289,6 +296,7 @@
 
 <script>
   const base_url = '<?= base_url() ?>';
+  let current_cash = 0;
 
   $(document).ready(function() {
     $('.datatable').dataTable({
@@ -298,9 +306,20 @@
 
   $('.remit').click(function() {
     const cash = $(this).attr('cash');
-    $('#remittance_amount').val('₱ ' + cash);
+    current_cash = cash;
     $('[name=remitted_amount]').val(cash);
     $('#modalNote').modal('show');
+  });
+
+  $('[name=remitted_amount]').on('input', function() {
+    const remit_amount = parseInt($(this).val());
+    const left = current_cash - remit_amount;
+    $('#left').val('₱ ' + formatNumber(left));
+    if (left < 0) {
+      $('.btnRemit').attr('disabled', 'disabled');
+    } else {
+      $('.btnRemit').removeAttr('disabled');
+    }
   });
 
   $('.payments').click(function() {

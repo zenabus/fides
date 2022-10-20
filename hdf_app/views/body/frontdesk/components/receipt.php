@@ -166,13 +166,21 @@
         <?php $grand_total = 0 ?>
         <?php foreach ($booked_rooms as $row) { ?>
           <tr class="bt bl br cost">
-            <td>Room <?= $row['room_number'] ?> - <?= $row['room_type'] ?> (-<?= $row['percentage'] ?>%)</td>
+            <td>Room <?= $row['room_number'] ?> - <?= $row['room_type'] ?> (<?= $row['percentage'] ?><?= $row['using_formula'] ? '' : '%' ?>)</td>
             <td>(<?= $row['nights'] ?>) Night<?= $row['nights'] != 1 ? 's' : ''  ?></td>
             <td class="tr"><?= number_format($row['pricing_type'], 2) ?></td>
-            <?php $total = $row['pricing_type'] * $row['nights'] ?>
-            <?php $discount = $total * ($row['percentage'] / 100) ?>
-            <?php $subtotal = $total - $discount ?>
-            <?php $grand_total += $subtotal ?>
+            <?php
+            $total = $row['pricing_type'] * $row['nights'];
+
+            if ($row['using_formula'] == 1) {
+              [$multiplicand, $multiplier] = explode('x', $row['percentage']);
+              $subtotal = $total / $multiplicand * $multiplier;
+            } else {
+              $discount = $total * ($row['percentage'] / 100);
+              $subtotal = $total - $discount;
+            }
+            $grand_total += $subtotal;
+            ?>
             <td class="tr"><?= number_format($subtotal, 2) ?></td>
           </tr>
 

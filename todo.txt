@@ -73,8 +73,8 @@ Checkin conflict
 
 new development
 // - early checkin is 6:00am to 11:59am (rate of 560)
-- late checkout fee from 1:00pm to 4:59pm (rate of 560)
-- late checkout of 5:00pm onwards is full day charge
+// - late checkout fee from 1:00pm to 4:59pm (rate of 560)
+// - late checkout of 5:00pm onwards is full day charge
 
 // executive suite max person from 2-3 and with extra bed up to 5 persons
 
@@ -91,7 +91,7 @@ Executibe Suite max 5 with extra bed (2)
 // SOA per room occupant
 
 // DCR
-- corkage
+// - corkage
 // - pool usage
 
 Consumables
@@ -129,8 +129,8 @@ add revert checkout
 // - Event payment is flexible time to input
 - Backup (checkout print button)
 
-beginning balance
+// beginning balance
 
-discount
+// discount
 
 // pay all

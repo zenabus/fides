@@ -108,7 +108,8 @@ class Main extends MY_Controller {
     $data['guest'] = $this->get_model->getGuest($guest_id);
     $data['bookings'] = $this->get_model->getBookingsByGuest($guest_id, [0, -1, 6]);
     $data['reservations'] = $this->get_model->getBookingsByGuest($guest_id, [1, 2, 3]);
-    $data['collectables'] = $this->get_model->getCollectables($guest_id);
+    $data['charged'] = $this->get_model->getChargedBookings($guest_id);
+    $total_collectable = 0;
 
     foreach ($data['bookings'] as $i => $booking) {
       $data['bookings'][$i]['rooms'] = $this->get_model->getBookedRooms($booking['booking_id']);
@@ -117,6 +118,16 @@ class Main extends MY_Controller {
       $data['bookings'][$i]['refund'] = $this->get_model->getRefundTotal($booking['booking_id']);
       $data['bookings'][$i]['refunds'] = $this->get_model->getRefunds($booking['booking_id']);
     }
+    foreach ($data['charged'] as $i => $booking) {
+      $data['charged'][$i]['rooms'] = $this->get_model->getBookedRooms($booking['booking_id']);
+      $data['charged'][$i]['payment'] = $this->get_model->getPaymentTotal($booking['booking_id']);
+      $data['charged'][$i]['payments'] = $this->get_model->getPayments($booking['booking_id']);
+      $data['charged'][$i]['refund'] = $this->get_model->getRefundTotal($booking['booking_id']);
+      $data['charged'][$i]['refunds'] = $this->get_model->getRefunds($booking['booking_id']);
+      $booking_collectable = $this->getCharges($booking['booking_id']);
+      $data['charged'][$i]['collectable'] = $booking_collectable - $data['charged'][$i]['payment']->amount;
+      $total_collectable += $data['charged'][$i]['collectable'];
+    }
     foreach ($data['reservations'] as $i => $booking) {
       $data['reservations'][$i]['rooms'] = $this->get_model->getBookedRooms($booking['booking_id']);
       $data['reservations'][$i]['payment'] = $this->get_model->getPaymentTotal($booking['booking_id']);
@@ -124,6 +135,8 @@ class Main extends MY_Controller {
       $data['reservations'][$i]['refund'] = $this->get_model->getRefundTotal($booking['booking_id']);
       $data['reservations'][$i]['refunds'] = $this->get_model->getRefunds($booking['booking_id']);
     }
+
+    $data['total_collectable'] = $total_collectable;
     $this->load->view('layout/header', $data);
     $this->load->view('body/frontdesk/guest');
     $this->load->view('layout/footer');
@@ -180,9 +193,44 @@ class Main extends MY_Controller {
     $this->load->view('layout/footer');
   }
 
+  function roomCharge($room) {
+    $bed = $this->get_model->getPrice('Bed');
+    $person = $this->get_model->getPrice('Person');
+    if ($room['using_formula'] == '1') {
+      [$multiplicand, $multiplier] = explode('x', $room['percentage']);
+      $rate = $room['pricing_type'] / $multiplicand * $multiplier;
+    } else {
+      $rate = $this->percentage($room['pricing_type'], $room['percentage']);
+    }
+    $early = $this->get_model->getEarlyCheckout($room['booked_room_id']);
+    $charge_early = $early ? $rate : 0;
+    $charge_room = $rate * $room['nights'];
+    $charge_person = $person->price * $room['extra_person'];
+    $charge_bed = $bed->price * $room['extra_bed'];
+    $charge_restaurant = $this->get_model->getRoomCharges($room['booked_room_id'], 'Restaurant', TRUE);
+    $charge_coffeeshop = $this->get_model->getRoomCharges($room['booked_room_id'], 'Coffeeshop', TRUE);
+    $charge_amenities = $this->get_model->getRoomAmenities($room['booked_room_id'], TRUE);
+
+    $total = $charge_early + $charge_room + $charge_person + $charge_bed + $charge_restaurant->total + $charge_coffeeshop->total + $charge_amenities->total;
+    return $total;
+  }
+
+  function getCharges($booking_id) {
+    $total = 0;
+    $rooms = $this->get_model->getBookedRooms($booking_id);
+
+    foreach ($rooms as $room) {
+      $total += $this->roomCharge($room);
+    }
+
+    return $total;
+  }
+
   function bookings() {
     $data['active'] = 'bookings';
     $data['bookings'] = $this->get_model->getBookingsByStatus([0, -1, 6]);
+    $data['charged'] = $this->get_model->getChargedBookings();
+    $total_collectable = 0;
 
     foreach ($data['bookings'] as $i => $booking) {
       $data['bookings'][$i]['rooms'] = $this->get_model->getBookedRooms($booking['booking_id']);
@@ -191,6 +239,19 @@ class Main extends MY_Controller {
       $data['bookings'][$i]['refund'] = $this->get_model->getRefundTotal($booking['booking_id']);
       $data['bookings'][$i]['refunds'] = $this->get_model->getRefunds($booking['booking_id']);
     }
+
+    foreach ($data['charged'] as $i => $booking) {
+      $data['charged'][$i]['rooms'] = $this->get_model->getBookedRooms($booking['booking_id']);
+      $data['charged'][$i]['payment'] = $this->get_model->getPaymentTotal($booking['booking_id']);
+      $data['charged'][$i]['payments'] = $this->get_model->getPayments($booking['booking_id']);
+      $data['charged'][$i]['refund'] = $this->get_model->getRefundTotal($booking['booking_id']);
+      $data['charged'][$i]['refunds'] = $this->get_model->getRefunds($booking['booking_id']);
+      $booking_collectable = $this->getCharges($booking['booking_id']);
+      $data['charged'][$i]['collectable'] = $booking_collectable - $data['charged'][$i]['payment']->amount;
+      $total_collectable += $data['charged'][$i]['collectable'];
+    }
+
+    $data['total_collectable'] = $total_collectable;
 
     $this->load->view('layout/header', $data);
     $this->load->view('body/frontdesk/bookings');
@@ -324,9 +385,7 @@ class Main extends MY_Controller {
         [$hour] = explode(':', $time);
         if ($hour <= 12) {
           $hotel_sales_am += $row['amount'];
-          // array_push($test, $row);
         } else {
-          // array_push($test, $row);
           $hotel_sales_pm += $row['amount'];
         }
       }
@@ -759,9 +818,6 @@ class Main extends MY_Controller {
     } else {
     }
 
-
-
-
     [$arrival, $departure] = $this->getMinMax($booked_room->booking_id);
     $_POST['booking_id'] = $booked_room->booking_id;
     $this->update_model->processRoom($booked_room_id, 2);
@@ -824,8 +880,7 @@ class Main extends MY_Controller {
     $this->redirect();
   }
 
-  function processPayment($room) {
-    $amount = $_POST['amount'];
+  function processPayment($room, $amount) {
     $bed = $this->get_model->getPrice('Bed');
     $person = $this->get_model->getPrice('Person');
     if ($room['using_formula'] == '1') {
@@ -860,6 +915,7 @@ class Main extends MY_Controller {
       $amount = $this->loopPay($amount, 'coffeeshop', $payable_coffeeshop, $room['booked_room_id']);
       $amount = $this->loopPay($amount, 'addons', $payable_addons, $room['booked_room_id']);
     }
+    return $amount;
   }
 
   function pay($payment_for, $amount, $booked_room_id) {
@@ -897,14 +953,16 @@ class Main extends MY_Controller {
     if ($_POST['booked_room_id'] == 'All Rooms') {
       $data['booking'] = $this->get_model->getBookingByBookingNumber($_POST['booking_number']);
       $data['booked_rooms'] = $this->get_model->getBookedRooms($data['booking']->booking_id);
+      $amount = $_POST['amount'];
       foreach ($data['booked_rooms'] as $room) {
-        $this->processPayment($room);
+        $amount = $this->processPayment($room, $amount);
       }
     } else {
       if ($_POST['payment_for'] == 'All Types') {
         $room = $this->get_model->getBookedRoomById($_POST['booked_room_id']);
         $room = json_decode(json_encode($room), true);
-        $this->processPayment($room);
+        $amount = $_POST['amount'];
+        $this->processPayment($room, $amount);
       } else {
         $this->pay($_POST['payment_for'], $_POST['amount'], $_POST['booked_room_id']);
       }

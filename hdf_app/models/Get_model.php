@@ -138,6 +138,7 @@ class Get_model extends CI_Model {
   function getBookingsByStatus($status = [0, -1]) {
     return $this->db->join('guests', 'guests.guest_id=bookings.guest_id')
       ->where_in('reservation_status', $status)
+      ->where('charged_to', 0)
       ->get('bookings')->result_array();
   }
 
@@ -516,12 +517,15 @@ class Get_model extends CI_Model {
     return $this->db->where_in('expense_type', ['Event'])->like('expense_added', $date)->get('expenses')->result_array();
   }
 
-  function getCollectables($guest_id) {
-    return $this->db->join('booked_rooms', 'booked_rooms.booking_id=bookings.booking_id')
-      ->join('rooms', 'rooms.id=booked_rooms.room_id')
-      ->join('guests', 'guests.guest_id=bookings.guest_id')
-      ->where('bookings.charged_to', $guest_id)
-      ->group_by('booking_number')
-      ->get('bookings')->result_array();
+  function getChargedBookings($guest_id = null) {
+    if (!$guest_id) {
+      return $this->db->join('guests', 'guests.guest_id=bookings.guest_id')
+        ->where('charged_to !=', 0)
+        ->get('bookings')->result_array();
+    } else {
+      return $this->db->join('guests', 'guests.guest_id=bookings.guest_id')
+        ->where('charged_to', $guest_id)
+        ->get('bookings')->result_array();
+    }
   }
 }

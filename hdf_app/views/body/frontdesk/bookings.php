@@ -13,6 +13,11 @@
                   </a>
                 </li>
                 <li class="nav-item">
+                  <a class="nav-link" href="#collectables" data-toggle="tab" role="tab" aria-controls="collectables" aria-selected="false">
+                    <i class="fa fa-money"></i> Collectables
+                  </a>
+                </li>
+                <li class="nav-item">
                   <a class="nav-link" href="#locked" data-toggle="tab" role="tab" aria-controls="locked" aria-selected="false">
                     <i class="fa fa-lock"></i> Locked
                   </a>
@@ -42,6 +47,43 @@
                   </thead>
                   <tbody>
                     <?php foreach ($bookings as $row) { ?>
+                      <?php if ($row['reservation_status'] == 0) { ?>
+                        <tr>
+                          <?php $data['row'] = $row ?>
+                          <?php $this->load->view('body/frontdesk/components/booking_table_data', $data) ?>
+                          <td class="action">
+                            <a href="<?= base_url('index.php/main/booking/' . $row['booking_number']) ?>" class="btn btn-sm" data-placement="top" title="View Booking" rel="tooltip">
+                              <span class="fa fa-address-book"></span>
+                            </a>
+                            <a href="<?= base_url('index.php/main/receipt/' . $row['booking_id']) ?>" class="btn btn-sm btn-info receipt" data-placement="top" title="View Receipt" rel="tooltip">
+                              <i class="fa-solid fa-receipt"></i>
+                            </a>
+                            <a href="javascript:" id="<?= $row['booking_id'] ?>" class="btn btn-sm btn-danger cancelBooking" data-placement="top" title="Cancel Booking" rel="tooltip">
+                              <span class="fa fa-ban"></span>
+                            </a>
+                          </td>
+                        </tr>
+                    <?php }
+                    } ?>
+                  </tbody>
+                </table>
+              </div>
+              <div class="tab-pane show" id="collectables">
+                <h5 class="pl-3">Total Collectables: ₱ <?= number_format($total_collectable, 2) ?></h5>
+                <table class="table table-striped table-bordered tbl_booking">
+                  <thead>
+                    <tr>
+                      <th>Booking No.</th>
+                      <th>Guest Name</th>
+                      <th>Contact Details</th>
+                      <th>Room Details</th>
+                      <th>Payment Details</th>
+                      <th>Date(s)</th>
+                      <th class="disabled-sorting">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <?php foreach ($charged as $row) { ?>
                       <?php if ($row['reservation_status'] == 0) { ?>
                         <tr>
                           <?php $data['row'] = $row ?>

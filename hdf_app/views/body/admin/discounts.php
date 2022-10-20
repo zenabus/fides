@@ -41,7 +41,7 @@
               ?>
                   <tr>
                     <td class="border-left-0 pl-4"><?= $row['discount_type'] ?></td>
-                    <td><?= $row['percentage'] ?><?= $row['using_formula'] ? '' : '%' ?> </td>
+                    <td><?= $row['percentage'] ?><?= $row['using_formula'] ? '' : '%' ?></td>
                     <td><?= $row['using_formula'] ? '✔️' : '' ?></td>
                     <td class="border-right-0 action">
                       <a href="javascript:" class="btn btn-success btn-sm updateDiscount" id='<?= json_encode($row) ?>' data-placement="top" title="Update Discount" rel="tooltip">

@@ -62,6 +62,7 @@
                 </table>
               </div>
               <div class="tab-pane show" id="collectables">
+                <h5 class="pl-3">Total Collectables: ₱ <?= number_format($total_collectable, 2) ?></h5>
                 <table class="table table-striped table-bordered tbl_booking">
                   <thead>
                     <tr>
@@ -75,11 +76,18 @@
                     </tr>
                   </thead>
                   <tbody>
-                    <?php foreach ($collectables as $row) { ?>
+                    <?php foreach ($charged as $row) { ?>
                       <tr>
                         <?php $data['row'] = $row ?>
                         <?php $this->load->view('body/frontdesk/components/booking_table_data', $data) ?>
-                        <td class="action"></td>
+                        <td class="action">
+                          <a href="<?= base_url('index.php/main/booking/' . $row['booking_number']) ?>" class="btn btn-sm" data-placement="top" title="View Booking" rel="tooltip">
+                            <span class="fa fa-address-book"></span>
+                          </a>
+                          <a href="<?= base_url('index.php/main/receipt/' . $row['booking_id']) ?>" class="btn btn-sm btn-info receipt" data-placement="top" title="View Receipt" rel="tooltip">
+                            <i class="fa-solid fa-receipt"></i>
+                          </a>
+                        </td>
                       </tr>
                     <?php } ?>
                   </tbody>

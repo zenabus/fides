@@ -39,7 +39,7 @@
                     <?php foreach ($guests_active as $row) { ?>
                       <tr>
                         <td>
-                          <?= $row['last_name'] ?>, <?= $row['first_name'] ?> <?= $row['middle_name'] ?><br>
+                          <?= $row['last_name'] ?>, <?= $row['first_name'] ?> <?= $row['middle_name'] ?> <?= $row['suffix'] ?><br>
                           <small><?= $row['address'] ?></small>
                         </td>
                         <td>
@@ -65,7 +65,7 @@
                           <?php } ?>
                         </td>
                         <td class="action">
-                          <a href="<?=base_url('index.php/main/guest/'.$row['guest_id']) ?>" class="btn btn-sm mb-1" data-placement="top" title="View Guest" rel="tooltip">
+                          <a href="<?= base_url('index.php/main/guest/' . $row['guest_id']) ?>" class="btn btn-sm mb-1" data-placement="top" title="View Guest" rel="tooltip">
                             <span class="fa fa-eye"></span>
                           </a>
                           <button class="btn btn-success btn-sm updateGuest mb-1" data='<?= json_encode($row) ?>' data-placement="top" title="Update Guest" rel="tooltip">
@@ -122,7 +122,7 @@
                           <?php } ?>
                         </td>
                         <td class="action">
-                          <a href="<?=base_url('index.php/main/guest/'.$row['guest_id']) ?>" class="btn btn-sm mb-1" data-placement="top" title="View Guest" rel="tooltip">
+                          <a href="<?= base_url('index.php/main/guest/' . $row['guest_id']) ?>" class="btn btn-sm mb-1" data-placement="top" title="View Guest" rel="tooltip">
                             <span class="fa fa-eye"></span>
                           </a>
                           <a href="javascript:" class="btn mb-1 btn-success btn-sm updateGuest" data='<?= json_encode($row) ?>' data-placement="top" title="Update Guest" rel="tooltip">
