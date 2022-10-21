@@ -5,7 +5,8 @@
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <i class="nc-icon nc-simple-remove"></i>
         </button>
-        <h4 class="title title-up titleBooking">Booking Details</h4>
+        <h4 class="title title-up titleBooking mb-0">Booking Details</h4>
+        <p id="booking_number"></p>
       </div>
       <div class="modal-body">
         <?= form_open('main/book', ['id' => 'frmBook']) ?>

@@ -138,7 +138,6 @@ class Get_model extends CI_Model {
   function getBookingsByStatus($status = [0, -1]) {
     return $this->db->join('guests', 'guests.guest_id=bookings.guest_id')
       ->where_in('reservation_status', $status)
-      ->where('charged_to', 0)
       ->get('bookings')->result_array();
   }
 

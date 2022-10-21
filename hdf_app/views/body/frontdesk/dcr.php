@@ -136,7 +136,7 @@
         <h4 class="title title-up">Payments</h4>
       </div>
       <div class="modal-body px-4">
-        <table class="table table-bordered">
+        <table class="table table-bordered mb-0">
           <thead>
             <th>Booking No.</th>
             <th>Room</th>
@@ -244,7 +244,7 @@
         <h4 class="title title-up">Expenses</h4>
       </div>
       <div class="modal-body px-4">
-        <table class="table table-bordered">
+        <table class="table table-bordered mb-0">
           <thead>
             <th>Type</th>
             <th>Amount</th>
@@ -273,7 +273,7 @@
         <h4 class="title title-up">Sales</h4>
       </div>
       <div class="modal-body px-4">
-        <table class="table table-bordered">
+        <table class="table table-bordered mb-0">
           <thead>
             <th>Type</th>
             <th>Amount</th>

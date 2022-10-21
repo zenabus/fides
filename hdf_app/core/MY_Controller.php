@@ -159,4 +159,21 @@ class MY_Controller extends CI_Controller {
   function percentage($num, $percentage) {
     return $num - ($num * $percentage / 100);
   }
+
+  function getMissingDates($dates) {
+    $missingDates = [];
+    $dateStart = new DateTime(min($dates));
+    $dateEnd = new DateTime(date('Y-m-d'));
+    $dateEnd = $dateEnd->modify('+1 day');
+
+    $interval = new DateInterval('P1D');
+    $period = new DatePeriod($dateStart, $interval, $dateEnd);
+
+    foreach ($period as $day) {
+      $formatted = $day->format("Y-m-d");
+      if (!in_array($formatted, $dates)) $missingDates[] = $formatted;
+    }
+
+    return $missingDates;
+  }
 }

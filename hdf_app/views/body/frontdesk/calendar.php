@@ -471,6 +471,8 @@
     const room = JSON.parse($(this).attr('data'));
     const booking = JSON.parse($(this).attr('booking'));
 
+    console.log(booking)
+
     $('#returning_guest').hide();
     $('[name=guest_id]').val(booking.guest_id);
     $('[name=first_name]').val(booking.first_name).attr('disabled', true);
@@ -480,7 +482,7 @@
     $('[name=contact]').val(booking.contact).attr('disabled', true);
 
     if (booking.reservation_status == 0 || booking.reservation_status == -1) {
-      modalBooking(this, 'Check In', 0);
+      modalBooking(this, 'Check In', 0, booking.booking_number);
       $('.form-control').attr('disabled', true);
       $('textarea').attr('disabled', false).attr('readonly', true);
       $('.action-div').addClass('d-none');
@@ -490,7 +492,7 @@
     } else if (booking.reservation_status == 1) {
       const [month, day, year] = booking.check_in.split('/')
       const checkin = `${year}-${month}-${day}`;
-      modalBooking(this, 'Reservation', 0);
+      modalBooking(this, 'Reservation', 0, booking.booking_number);
       $('[name=remarks]').removeAttr('readonly');
       if (checkin == today) {
         if (hour >= 6 && hour <= 12) {
@@ -541,7 +543,7 @@
         $(".advanced-div").show();
       }
     } else {
-      modalBooking(this, 'Check In', 0);
+      modalBooking(this, 'Check In', 0, booking.booking_number);
       $('.action-div').addClass('d-none');
       $('#btnBooking').hide();
       $('#btnRedirect').removeClass('d-none');

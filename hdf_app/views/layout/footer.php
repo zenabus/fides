@@ -16,6 +16,8 @@
       <script src="<?= base_url() ?>assets/js/plugins/jquery.validate.min.js"></script>
       <script src="<?= base_url() ?>assets/js/plugins/jquery.bootstrap-wizard.js"></script>
       <script src="<?= base_url() ?>assets/js/plugins/jquery.dataTables.min.js"></script>
+      <script src="https://cdn.datatables.net/buttons/2.2.3/js/dataTables.buttons.min.js"></script>
+      <script src="https://cdn.datatables.net/buttons/2.2.3/js/buttons.print.min.js"></script>
       <script src="<?= base_url() ?>assets/js/plugins/bootstrap-selectpicker.js"></script>
       <script src="<?= base_url() ?>assets/js/plugins/bootstrap-tagsinput.js"></script>
       <script src="<?= base_url() ?>assets/js/plugins/bootstrap-notify.js"></script>

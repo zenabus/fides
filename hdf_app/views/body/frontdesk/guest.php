@@ -62,7 +62,7 @@
                 </table>
               </div>
               <div class="tab-pane show" id="collectables">
-                <h5 class="pl-3">Total Collectables: ₱ <?= number_format($total_collectable, 2) ?></h5>
+                <h5 class="pl-3 mb-4">Total Collectables: ₱ <?= number_format($total_collectable, 2) ?></h5>
                 <table class="table table-striped table-bordered tbl_booking">
                   <thead>
                     <tr>

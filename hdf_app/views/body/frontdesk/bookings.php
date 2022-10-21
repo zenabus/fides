@@ -47,7 +47,7 @@
                   </thead>
                   <tbody>
                     <?php foreach ($bookings as $row) { ?>
-                      <?php if ($row['reservation_status'] == 0) { ?>
+                      <?php if ($row['reservation_status'] == 0 && $row['charged_to'] == 0) { ?>
                         <tr>
                           <?php $data['row'] = $row ?>
                           <?php $this->load->view('body/frontdesk/components/booking_table_data', $data) ?>
@@ -69,7 +69,7 @@
                 </table>
               </div>
               <div class="tab-pane show" id="collectables">
-                <h5 class="pl-3">Total Collectables: ₱ <?= number_format($total_collectable, 2) ?></h5>
+                <h5 class="pl-3 mb-4">Total Collectables: ₱ <?= number_format($total_collectable, 2) ?></h5>
                 <table class="table table-striped table-bordered tbl_booking">
                   <thead>
                     <tr>

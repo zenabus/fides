@@ -134,3 +134,5 @@ add revert checkout
 // discount
 
 // pay all
+
+missing cancelled booking

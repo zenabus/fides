@@ -133,7 +133,14 @@
 <script>
   $(document).ready(function() {
     demo.initWizard();
-    $('.tbl_booking').dataTable();
+    $('.tbl_booking').DataTable({
+      dom: 'Bfrtip',
+      buttons: [
+        'print'
+      ]
+    });
+
+    $('.dt-button').addClass('btn');
   });
 
   $(document).on('click', '.receipt', function(e) {

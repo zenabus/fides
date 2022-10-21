@@ -4,6 +4,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
 require 'vendor/autoload.php';
 
 use Dompdf\Dompdf;
+use Dompdf\Options;
 
 class Main extends MY_Controller {
 
@@ -241,14 +242,17 @@ class Main extends MY_Controller {
     }
 
     foreach ($data['charged'] as $i => $booking) {
-      $data['charged'][$i]['rooms'] = $this->get_model->getBookedRooms($booking['booking_id']);
-      $data['charged'][$i]['payment'] = $this->get_model->getPaymentTotal($booking['booking_id']);
-      $data['charged'][$i]['payments'] = $this->get_model->getPayments($booking['booking_id']);
-      $data['charged'][$i]['refund'] = $this->get_model->getRefundTotal($booking['booking_id']);
-      $data['charged'][$i]['refunds'] = $this->get_model->getRefunds($booking['booking_id']);
-      $booking_collectable = $this->getCharges($booking['booking_id']);
-      $data['charged'][$i]['collectable'] = $booking_collectable - $data['charged'][$i]['payment']->amount;
-      $total_collectable += $data['charged'][$i]['collectable'];
+      if ($data['charged'][$i]['reservation_status'] != 6) {
+        $data['charged'][$i]['charged_guest'] = $this->get_model->getGuest($booking['charged_to']);
+        $data['charged'][$i]['rooms'] = $this->get_model->getBookedRooms($booking['booking_id']);
+        $data['charged'][$i]['payment'] = $this->get_model->getPaymentTotal($booking['booking_id']);
+        $data['charged'][$i]['payments'] = $this->get_model->getPayments($booking['booking_id']);
+        $data['charged'][$i]['refund'] = $this->get_model->getRefundTotal($booking['booking_id']);
+        $data['charged'][$i]['refunds'] = $this->get_model->getRefunds($booking['booking_id']);
+        $booking_collectable = $this->getCharges($booking['booking_id']);
+        $data['charged'][$i]['collectable'] = $booking_collectable - $data['charged'][$i]['payment']->amount;
+        $total_collectable += $data['charged'][$i]['collectable'];
+      }
     }
 
     $data['total_collectable'] = $total_collectable;
@@ -311,12 +315,77 @@ class Main extends MY_Controller {
     $this->load->view('layout/footer');
   }
 
+  function getHotelSales($date) {
+    $hotel_sales = $this->get_model->getHotelSales($date);
+    $hotel_expense = $this->get_model->getHotelExpense($date);
+    $hotel_sales_am = 0;
+    $hotel_sales_pm = 0;
+    $hotel_expense_am = 0;
+    $hotel_expense_pm = 0;
+
+    foreach ($hotel_sales as $row) {
+      [, $time] = explode(' ', $row['booking_payment_added']);
+      [$hour] = explode(':', $time);
+      if ($hour <= 12) {
+        $hotel_sales_am += $row['amount'];
+      } else {
+        $hotel_sales_pm += $row['amount'];
+      }
+    }
+
+    foreach ($hotel_expense as $row) {
+      [, $time] = explode(' ', $row['expense_added']);
+      [$hour] = explode(':', $time);
+      if ($hour <= 12) {
+        $hotel_expense_am += $row['expense_amount'];
+      } else {
+        $hotel_expense_pm += $row['expense_amount'];
+      }
+    }
+
+    return [$hotel_sales_am - $hotel_expense_am, $hotel_sales_pm - $hotel_expense_pm];
+  }
+
+  function getEventSales($date) {
+    $event_sales = $this->get_model->getEventSales($date);
+    $event_expense = $this->get_model->getEventExpense($date);
+    $event_sales_am = 0;
+    $event_sales_pm = 0;
+    $event_expense_am = 0;
+    $event_expense_pm = 0;
+
+    foreach ($event_sales as $row) {
+      [, $time] = explode(' ', $row['sales_added']);
+      [$hour] = explode(':', $time);
+      if ($hour <= 12) {
+        $event_sales_am += $row['sales_amount'];
+      } else {
+        $event_sales_pm += $row['sales_amount'];
+      }
+    }
+
+    foreach ($event_expense as $row) {
+      [, $time] = explode(' ', $row['expense_added']);
+      [$hour] = explode(':', $time);
+      if ($hour <= 12) {
+        $event_expense_am += $row['expense_amount'];
+      } else {
+        $event_expense_pm += $row['expense_amount'];
+      }
+    }
+
+    return [$event_sales_am - $event_expense_am, $event_sales_pm - $event_expense_pm];
+  }
+
   function dcr($date = NULL) {
     if (!$date) {
+      $dates = [];
       $data['active'] = 'dcr';
       $data['dcr'] = $this->get_model->getDCR();
+
       $cash = $this->get_model->getDCRTotal(['Cash']);
       $card = $this->get_model->getDCRTotal(['Card', 'Check', 'Bank Transfer']);
+
       foreach ($data['dcr'] as $i => $row) {
         foreach ($cash as $c) {
           if ($c['payment_added'] == $row['payment_added']) {
@@ -333,7 +402,28 @@ class Main extends MY_Controller {
         $data['dcr'][$i]['expense_total']  = $this->get_model->getExpenses($row['payment_added'], TRUE);
         $data['dcr'][$i]['sales']  = $this->get_model->getSales($row['payment_added']);
         $data['dcr'][$i]['sales_total']  = $this->get_model->getSales($row['payment_added'], TRUE);
+        array_push($dates, $row['payment_added']);
       }
+
+      foreach ($this->getMissingDates($dates) as $date) {
+        $dummy_dcr = [
+          'sales' => $this->get_model->getSales($date),
+          'expenses' => $this->get_model->getExpenses($date),
+          'sum' => 0,
+          'count' => 0,
+          'remitted' => $this->get_model->getRemitted($date),
+          'sales_total' => $this->get_model->getSales($date, TRUE),
+          'expense_total' => $this->get_model->getExpenses($date, TRUE),
+          'payment_added' => $date,
+        ];
+
+        array_push($data['dcr'], $dummy_dcr);
+      }
+
+      usort($data['dcr'], function ($item1, $item2) {
+        return $item2['payment_added'] <=> $item1['payment_added'];
+      });
+
       $this->load->view('layout/header', $data);
       $this->load->view('body/frontdesk/dcr');
       $this->load->view('layout/footer');
@@ -364,71 +454,19 @@ class Main extends MY_Controller {
         $data['payments'][$i]['card_reservation'] = $this->get_model->getPaymentByType($row['booked_room_id'], 'advance', 'Card', $date);
       }
 
-      $hotel_sales = $this->get_model->getHotelSales($date);
-      $event_sales = $this->get_model->getEventSales($date);
-      $hotel_sales_am = 0;
-      $hotel_sales_pm = 0;
-      $event_sales_am = 0;
-      $event_sales_pm = 0;
+      [$hotel_sales_am, $hotel_sales_pm] = $this->getHotelSales($date);
+      [$event_sales_am, $event_sales_pm] = $this->getEventSales($date);
 
-      $hotel_expense = $this->get_model->getHotelExpense($date);
-      $event_expense = $this->get_model->getEventExpense($date);
-      $hotel_expense_am = 0;
-      $hotel_expense_pm = 0;
-      $event_expense_am = 0;
-      $event_expense_pm = 0;
-
-      $test = [];
-
-      foreach ($hotel_sales as $row) {
-        [, $time] = explode(' ', $row['booking_payment_added']);
-        [$hour] = explode(':', $time);
-        if ($hour <= 12) {
-          $hotel_sales_am += $row['amount'];
-        } else {
-          $hotel_sales_pm += $row['amount'];
-        }
-      }
-
-      foreach ($event_sales as $row) {
-        [, $time] = explode(' ', $row['sales_added']);
-        [$hour] = explode(':', $time);
-        if ($hour <= 12) {
-          $event_sales_am += $row['sales_amount'];
-        } else {
-          $event_sales_pm += $row['sales_amount'];
-        }
-      }
-
-      foreach ($hotel_expense as $row) {
-        [, $time] = explode(' ', $row['expense_added']);
-        [$hour] = explode(':', $time);
-        if ($hour <= 12) {
-          $hotel_expense_am += $row['expense_amount'];
-        } else {
-          $hotel_expense_pm += $row['expense_amount'];
-        }
-      }
-
-      foreach ($event_expense as $row) {
-        [, $time] = explode(' ', $row['expense_added']);
-        [$hour] = explode(':', $time);
-        if ($hour <= 12) {
-          $event_expense_am += $row['expense_amount'];
-        } else {
-          $event_expense_pm += $row['expense_amount'];
-        }
-      }
-
-      $data['hotel_sales_am'] = $hotel_sales_am - $hotel_expense_am;
-      $data['hotel_sales_pm'] = $hotel_sales_pm - $hotel_expense_pm;
-      $data['event_sales_am'] = $event_sales_am - $event_expense_am;
-      $data['event_sales_pm'] = $event_sales_pm - $event_expense_pm;
+      $data['hotel_sales_am'] = $hotel_sales_am;
+      $data['hotel_sales_pm'] = $hotel_sales_pm;
+      $data['event_sales_am'] = $event_sales_am;
+      $data['event_sales_pm'] = $event_sales_pm;
 
       $view = $this->load->view('body/frontdesk/components/dcr', $data, TRUE);
-      $dompdf = new Dompdf();
-      $dompdf->set_option('dpi', 300);
-      $dompdf->set_paper('letter', 'landscape');
+      $options = new Options();
+      $options->set('dpi', 300);
+      $options->set('defaultPaperOrientation', 'landscape');
+      $dompdf = new Dompdf($options);
       $dompdf->loadHtml($view);
       $dompdf->render();
       $dompdf->stream('Statement of Account', ['Attachment' => FALSE]);
@@ -453,8 +491,9 @@ class Main extends MY_Controller {
     $data['booking'] = $this->get_model->getBooking($booking_id);
     $data['booked_rooms'] = $this->get_model->getBookedRooms($booking_id);
     $view = $this->load->view('body/frontdesk/components/registration_form', $data, TRUE);
-    $dompdf = new Dompdf();
-    $dompdf->set_option('dpi', 300);
+    $options = new Options();
+    $options->set('dpi', 300);
+    $dompdf = new Dompdf($options);
     $dompdf->loadHtml($view);
     $dompdf->render();
     $middle = isset($data['booking']->middle_name[0]) ? $data['booking']->middle_name[0] : '';
@@ -480,8 +519,9 @@ class Main extends MY_Controller {
     }
 
     $view = $this->load->view('body/frontdesk/components/receipt', $data, TRUE);
-    $dompdf = new Dompdf();
-    $dompdf->set_option('dpi', 300);
+    $options = new Options();
+    $options->set('dpi', 300);
+    $dompdf = new Dompdf($options);
     $dompdf->loadHtml($view);
     $dompdf->render();
     $middle = isset($data['booking']->middle_name[0]) ? $data['booking']->middle_name[0] : '';
@@ -510,8 +550,9 @@ class Main extends MY_Controller {
     }
 
     $view = $this->load->view('body/frontdesk/components/receipt', $data, TRUE);
-    $dompdf = new Dompdf();
-    $dompdf->set_option('dpi', 300);
+    $options = new Options();
+    $options->set('dpi', 300);
+    $dompdf = new Dompdf($options);
     $dompdf->loadHtml($view);
     $dompdf->render();
     $middle = isset($data['booking']->middle_name[0]) ? $data['booking']->middle_name[0] : '';

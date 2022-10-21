@@ -138,11 +138,12 @@ $("[name=check_out]").on("dp.change", function (e) {
   $("[name=nights]").val(nights);
 });
 
-const modalBooking = (obj, booking_type, minDate = 0) => {
+const modalBooking = (obj, booking_type, minDate = 0, booking_number = "") => {
   let date = $(obj).attr("date") ?? new Date();
   const data = JSON.parse($(obj).attr("data"));
-  const now = new Date();
 
+  // automatic early check-in
+  // const now = new Date();
   // if(now.getHours() < 10) {
   //   date = moment(date).subtract(1, 'days');
   // }
@@ -162,21 +163,13 @@ const modalBooking = (obj, booking_type, minDate = 0) => {
     $(".reservation-div").show();
   }
   $(".titleBooking").text(`${booking_type} Details`);
+  $("#booking_number").text(booking_number);
   $("#btnBooking").val(booking_type == "Check In" ? booking_type : "Reserve");
   setTimeout(() => {
     $("#title").text(`Room Calendar [ROOM: ${data.room_number} - ${date}]`);
   });
   $("#modalBooking").modal("show");
 };
-
-// $("[name=card_number]").on("input", function () {
-//   const value = $(this).val();
-//   const newValue = value
-//     .replace(/[^\dA-Z]/g, "")
-//     .replace(/(.{4})/g, "$1 ")
-//     .trim();
-//   $(this).val(newValue);
-// });
 
 $("[name=action]").change(function () {
   if ($(this).val() == "Update") {

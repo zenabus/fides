@@ -155,6 +155,15 @@ if (!$this->session->userdata('connect')) {
 <?php endif; ?>
 
 <body class="">
+  <div class="position-absolute bg-white loader" style="height:100%; width:100%;z-index:999999">
+    <div class="d-flex justify-content-center align-items-center" style="height: 100%;">
+      <div class="text-center">
+        <img src="<?= base_url('assets/img/logo.jpg') ?>" alt="logo.jpg" height="128">
+        <h3 class="mt-2 mb-0">Hotel de Fides</h3>
+        <p class="text-muted">iHotelier by WSM IT Services</p>
+      </div>
+    </div>
+  </div>
   <div class="wrapper ">
     <div class="sidebar" data-color="brown" data-active-color="danger">
       <div class="sidebar-wrapper">
@@ -357,13 +366,15 @@ if (!$this->session->userdata('connect')) {
             </div>
           </div>
 
-          <h3 class="mb-0" data-placement="bottom" title="(Beginning Balance + Total Sales of the day)" rel="tooltip">₱ <?= number_format($cash->cash_amount, 2) ?>
-            <?php if ($remitted) { ?>
-              <span class="fa fa-check-circle text-success"></span>
-            <?php } else { ?>
-              <a href="<?= base_url('index.php/main/dcr') ?>"> <span class="fa fa-info-circle text-danger heart"></span></a>
-            <?php } ?>
-          </h3>
+          <?php if (isset($cash)) { ?>
+            <h3 class="mb-0" data-placement="bottom" title="(Beginning Balance + Total Sales of the day)" rel="tooltip">₱ <?= number_format($cash->cash_amount, 2) ?>
+              <?php if ($remitted) { ?>
+                <span class="fa fa-check-circle text-success"></span>
+              <?php } else { ?>
+                <a href="<?= base_url('index.php/main/dcr') ?>"> <span class="fa fa-info-circle text-danger heart"></span></a>
+              <?php } ?>
+            </h3>
+          <?php } ?>
 
           <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navigation" aria-controls="navigation-index" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-bar navbar-kebab"></span>
@@ -398,3 +409,11 @@ if (!$this->session->userdata('connect')) {
           </div>
         </div>
       </nav>
+
+      <script>
+        $(document).ready(function() {
+          setTimeout(() => {
+            $('.loader').fadeOut();
+          }, 500);
+        });
+      </script>
