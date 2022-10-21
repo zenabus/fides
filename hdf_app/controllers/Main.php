@@ -278,6 +278,7 @@ class Main extends MY_Controller {
     $data['payments'] = $this->get_model->getPayments($data['booking']->booking_id);
     $data['logs'] = $this->get_model->getBookingLogs($data['booking']->booking_id);
     $data['guests'] = $this->get_model->getGuests();
+
     if ($data['booking']->charged_to) {
       $data['charged_to'] = $this->get_model->getGuest($data['booking']->charged_to);
     }
@@ -377,48 +378,58 @@ class Main extends MY_Controller {
     return [$event_sales_am - $event_expense_am, $event_sales_pm - $event_expense_pm];
   }
 
+  function getDummyDCR($dates) {
+    $dummy_dcrs = [];
+    foreach ($this->getMissingDates($dates) as $date) {
+      $dummy_dcr = [
+        'sum' => 0,
+        'count' => 0,
+        'sales' => $this->get_model->getSales($date),
+        'expenses' => $this->get_model->getExpenses($date),
+        'collectables' => $this->get_model->getCollectables($date),
+        'sales_total' => $this->get_model->getSales($date, TRUE),
+        'expense_total' => $this->get_model->getExpenses($date, TRUE),
+        'collectable_total' => $this->get_model->getCollectables($date, TRUE),
+        'remitted' => $this->get_model->getRemitted($date),
+        'payment_added' => $date,
+      ];
+      array_push($dummy_dcrs, $dummy_dcr);
+    }
+    return $dummy_dcrs;
+  }
+
   function dcr($date = NULL) {
     if (!$date) {
       $dates = [];
       $data['active'] = 'dcr';
-      $data['dcr'] = $this->get_model->getDCR();
+      $dcrs = $this->get_model->getDCR();
 
       $cash = $this->get_model->getDCRTotal(['Cash']);
       $card = $this->get_model->getDCRTotal(['Card', 'Check', 'Bank Transfer']);
 
-      foreach ($data['dcr'] as $i => $row) {
+      foreach ($dcrs as $i => $row) {
         foreach ($cash as $c) {
           if ($c['payment_added'] == $row['payment_added']) {
-            $data['dcr'][$i]['cash'] = $c['sum'];
+            $dcrs[$i]['cash'] = $c['sum'];
           }
         }
         foreach ($card as $c) {
           if ($c['payment_added'] == $row['payment_added']) {
-            $data['dcr'][$i]['card'] = $c['sum'];
+            $dcrs[$i]['card'] = $c['sum'];
           }
         }
-        $data['dcr'][$i]['remitted'] = $this->get_model->getRemitted($row['payment_added']);
-        $data['dcr'][$i]['expenses']  = $this->get_model->getExpenses($row['payment_added']);
-        $data['dcr'][$i]['expense_total']  = $this->get_model->getExpenses($row['payment_added'], TRUE);
-        $data['dcr'][$i]['sales']  = $this->get_model->getSales($row['payment_added']);
-        $data['dcr'][$i]['sales_total']  = $this->get_model->getSales($row['payment_added'], TRUE);
+        $dcrs[$i]['remitted'] = $this->get_model->getRemitted($row['payment_added']);
+        $dcrs[$i]['sales']  = $this->get_model->getSales($row['payment_added']);
+        $dcrs[$i]['sales_total']  = $this->get_model->getSales($row['payment_added'], TRUE);
+        $dcrs[$i]['collectables']  = $this->get_model->getCollectables($row['payment_added']);
+        $dcrs[$i]['collectable_total']  = $this->get_model->getCollectables($row['payment_added'], TRUE);
+        $dcrs[$i]['expenses']  = $this->get_model->getExpenses($row['payment_added']);
+        $dcrs[$i]['expense_total']  = $this->get_model->getExpenses($row['payment_added'], TRUE);
         array_push($dates, $row['payment_added']);
       }
 
-      foreach ($this->getMissingDates($dates) as $date) {
-        $dummy_dcr = [
-          'sales' => $this->get_model->getSales($date),
-          'expenses' => $this->get_model->getExpenses($date),
-          'sum' => 0,
-          'count' => 0,
-          'remitted' => $this->get_model->getRemitted($date),
-          'sales_total' => $this->get_model->getSales($date, TRUE),
-          'expense_total' => $this->get_model->getExpenses($date, TRUE),
-          'payment_added' => $date,
-        ];
-
-        array_push($data['dcr'], $dummy_dcr);
-      }
+      $dummy_dcrs = $this->getDummyDCR($dates);
+      $data['dcr'] = array_merge($dcrs, $dummy_dcrs);
 
       usort($data['dcr'], function ($item1, $item2) {
         return $item2['payment_added'] <=> $item1['payment_added'];
@@ -439,6 +450,8 @@ class Main extends MY_Controller {
 
       $data['sales_event']  = $this->get_model->getSalesByDateAndType($date, 'Event');
       $data['sales_pool']  = $this->get_model->getSalesByDateAndType($date, 'Pool');
+
+      $data['remitted'] = $this->get_model->getRemitted($date);
 
       foreach ($data['payments'] as $i => $row) {
         $data['payments'][$i]['cash_room'] = $this->get_model->getPaymentByType($row['booked_room_id'], 'room', 'Cash', $date);
@@ -461,6 +474,21 @@ class Main extends MY_Controller {
       $data['hotel_sales_pm'] = $hotel_sales_pm;
       $data['event_sales_am'] = $event_sales_am;
       $data['event_sales_pm'] = $event_sales_pm;
+
+      $data['charged'] = $this->get_model->getChargedBookings();
+
+      foreach ($data['charged'] as $i => $row) {
+        $payment = $this->get_model->getRoomPaymentTotal($row['booked_room_id']);
+        $charges = $this->roomCharge($row);
+        $collectables = $charges - $payment->amount;
+        $data['charged'][$i]['charged_guest'] = $this->get_model->getGuest($row['charged_to']);
+        $data['charged'][$i]['collectables'] = $collectables;
+        if (!$collectables) {
+          unset($data['charged'][$i]);
+        }
+      }
+
+      $data['collectables'] = $this->get_model->getCollectablesByDate($date);
 
       $view = $this->load->view('body/frontdesk/components/dcr', $data, TRUE);
       $options = new Options();
@@ -1153,27 +1181,39 @@ class Main extends MY_Controller {
     echo json_encode($payments);
   }
 
-  function getExpensesByDate($date) {
-    $expenses = $this->get_model->getExpensesByDate($date);
-    echo json_encode($expenses);
-  }
-
   function getSalesByDate($date) {
     $sales = $this->get_model->getSalesByDate($date);
     echo json_encode($sales);
   }
 
-  function addExpense() {
-    $this->insert_model->addExpense();
-    $this->insert_model->log("{$_POST['expense_type']} expense added on <b>{$_POST['expense_date']}</b> amounting <b>{$_POST['expense_amount']}</b>", 2);
-    $this->session->set_flashdata('success', 'Expense successfully added!');
-    $this->redirect();
+  function getExpensesByDate($date) {
+    $expenses = $this->get_model->getExpensesByDate($date);
+    echo json_encode($expenses);
+  }
+
+  function getCollectablesByDate($date) {
+    $collectables = $this->get_model->getCollectablesByDate($date);
+    echo json_encode($collectables);
   }
 
   function addSales() {
     $this->insert_model->addSales();
     $this->insert_model->log("{$_POST['sales_type']} sales added on <b>{$_POST['sales_date']}</b> amounting <b>{$_POST['sales_amount']}</b>", 2);
     $this->session->set_flashdata('success', 'Sales successfully added!');
+    $this->redirect();
+  }
+
+  function addCollectable() {
+    $this->insert_model->addCollectable();
+    $this->insert_model->log("{$_POST['collectable_type']} collectable added on <b>{$_POST['collectable_date']}</b> amounting <b>{$_POST['collectable_amount']}</b>", 2);
+    $this->session->set_flashdata('success', 'Collectable successfully added!');
+    $this->redirect();
+  }
+
+  function addExpense() {
+    $this->insert_model->addExpense();
+    $this->insert_model->log("{$_POST['expense_type']} expense added on <b>{$_POST['expense_date']}</b> amounting <b>{$_POST['expense_amount']}</b>", 2);
+    $this->session->set_flashdata('success', 'Expense successfully added!');
     $this->redirect();
   }
 

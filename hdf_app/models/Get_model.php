@@ -468,20 +468,16 @@ class Get_model extends CI_Model {
       ->get('booking_payment')->result_array();
   }
 
-  function getExpensesByDate($date) {
-    return $this->db->where('expense_date', $date)->get('expenses')->result_array();
-  }
-
   function getSalesByDate($date) {
     return $this->db->where('sales_date', $date)->get('sales')->result_array();
   }
 
-  function getExpenses($date, $total = FALSE) {
-    if ($total) {
-      return $this->db->select_sum('expense_amount')->where('expense_date', $date)->get('expenses')->row();
-    } else {
-      return $this->db->where('expense_date', $date)->get('expenses')->result_array();
-    }
+  function getCollectablesByDate($date) {
+    return $this->db->where('collectable_date', $date)->get('collectables')->result_array();
+  }
+
+  function getExpensesByDate($date) {
+    return $this->db->where('expense_date', $date)->get('expenses')->result_array();
   }
 
   function getSales($date, $total = FALSE) {
@@ -489,6 +485,22 @@ class Get_model extends CI_Model {
       return $this->db->select_sum('sales_amount')->where('sales_date', $date)->get('sales')->row();
     } else {
       return $this->db->where('sales_date', $date)->get('sales')->result_array();
+    }
+  }
+
+  function getCollectables($date, $total = FALSE) {
+    if ($total) {
+      return $this->db->select_sum('collectable_amount')->where('collectable_date', $date)->get('collectables')->row();
+    } else {
+      return $this->db->where('collectable_date', $date)->get('collectables')->result_array();
+    }
+  }
+
+  function getExpenses($date, $total = FALSE) {
+    if ($total) {
+      return $this->db->select_sum('expense_amount')->where('expense_date', $date)->get('expenses')->row();
+    } else {
+      return $this->db->where('expense_date', $date)->get('expenses')->result_array();
     }
   }
 
@@ -519,6 +531,11 @@ class Get_model extends CI_Model {
   function getChargedBookings($guest_id = null) {
     if (!$guest_id) {
       return $this->db->join('guests', 'guests.guest_id=bookings.guest_id')
+        ->join('booked_rooms', 'booked_rooms.booking_id=bookings.booking_id')
+        ->join('rooms', 'rooms.id=booked_rooms.room_id')
+        ->join('room_type', 'room_type.id=rooms.room_type_id')
+        ->join('discounts', 'discounts.discount_id=booked_rooms.discount_id')
+        ->order_by('room_number', 'ASC')
         ->where('charged_to !=', 0)
         ->get('bookings')->result_array();
     } else {

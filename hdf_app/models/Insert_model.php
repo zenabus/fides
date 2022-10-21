@@ -194,11 +194,11 @@ class Insert_model extends CI_Model {
     $this->db->insert('remittances', $_POST);
   }
 
-  function addExpense() {
-    $this->db->insert('expenses', $_POST);
-  }
-
   function addSales() {
     $this->db->insert('sales', $_POST);
+  }
+
+  function addCollectable() {
+    $this->db->insert('collectables', $_POST);
   }
 }

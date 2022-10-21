@@ -16,6 +16,7 @@
                 <th>Card</th>
                 <th>Sales</th>
                 <th>Expense</th>
+                <th>Event Collectables</th>
                 <th>Total</th>
                 <th>Remitted By</th>
                 <th>Action</th>
@@ -45,6 +46,10 @@
                     ₱ <?= number_format($row['expense_total']->expense_amount) ?><br>
                     <small><a href="javascript:" class="<?= count($row['expenses']) == 0 ? '' : 'expenses' ?> font-weight-bold text-danger" date="<?= $row['payment_added'] ?>"><?= count($row['expenses']) ?> expense<?= count($row['expenses']) == 0 || count($row['expenses']) == 1 ? '' : 's' ?></a></small>
                   </td>
+                  <td>
+                    ₱ <?= number_format($row['collectable_total']->collectable_amount) ?><br>
+                    <small><a href="javascript:" class="<?= count($row['collectables']) == 0 ? '' : 'collectables' ?> font-weight-bold text-danger" date="<?= $row['payment_added'] ?>"><?= count($row['collectables']) ?> collectable<?= count($row['collectables']) == 0 || count($row['collectables']) == 1 ? '' : 's' ?></a></small>
+                  </td>
                   <td><b>₱ <?= number_format($row['sum'] + $row['sales_total']->sales_amount - $row['expense_total']->expense_amount) ?></b></td>
                   <td>
                     <?php if ($row['remitted']) { ?>
@@ -57,27 +62,35 @@
                     <?php } ?>
                   </td>
                   <td class="action">
-                    <a href="<?= base_url('index.php/main/dcr/' . $row['payment_added']) ?>" class="btn btn-sm btn-primary dcr" target="_blank" data-placement="top" title="View DCR" rel="tooltip">
+                    <a href="<?= base_url('index.php/main/dcr/' . $row['payment_added']) ?>" class="btn btn-sm mb-1 btn-primary dcr" target="_blank" data-placement="top" title="View DCR" rel="tooltip">
                       <i class="fa-solid fa-eye"></i>
                     </a>
                     <?php if (date('Y-m-d') == $row['payment_added']) { ?>
-                      <a href="javascript:" class="btn btn-sm btn-success sale" data-placement="top" title="Add Sales" rel="tooltip" date="<?= $row['payment_added'] ?>">
+                      <a href="javascript:" class="btn btn-sm mb-1 btn-success sale" data-placement="top" title="Add Sales" rel="tooltip" date="<?= $row['payment_added'] ?>">
                         <i class="fa-solid fa-sack-dollar"></i>
                       </a>
-                      <a href="javascript:" class="btn btn-danger btn-sm expense" data-placement="top" title="Add Expense" rel="tooltip" date="<?= $row['payment_added'] ?>">
+                      <a href="javascript:" class="btn btn-info mb-1 btn-sm collectable" data-placement="top" title="Add Event Collectable" rel="tooltip" date="<?= $row['payment_added'] ?>">
                         <i class="fa-solid fa-hand-holding-dollar"></i>
+                      </a>
+                      <a href="javascript:" class="btn btn-danger mb-1 btn-sm expense" data-placement="top" title="Add Expense" rel="tooltip" date="<?= $row['payment_added'] ?>">
+                        <i class="fa-solid fa-comment-dollar"></i>
                       </a>
                     <?php } ?>
                     <?php if (!$row['remitted']) { ?>
                       <?php if (date_create()->modify('-1 days')->format('Y-m-d') == $row['payment_added']) { ?>
-                        <a href="javascript:" class="btn btn-sm btn-success sale" data-placement="top" title="Add Sales" rel="tooltip" date="<?= $row['payment_added'] ?>">
+                        <a href="javascript:" class="btn btn-sm mb-1 btn-success sale" data-placement="top" title="Add Sales" rel="tooltip" date="<?= $row['payment_added'] ?>">
                           <i class="fa-solid fa-sack-dollar"></i>
                         </a>
-                        <a href="javascript:" class="btn btn-danger btn-sm expense" data-placement="top" title="Add Expense" rel="tooltip" date="<?= $row['payment_added'] ?>">
+                        <a href="javascript:" class="btn btn-info mb-1 btn-sm collectable" data-placement="top" title="Add Event Collectable" rel="tooltip" date="<?= $row['payment_added'] ?>">
                           <i class="fa-solid fa-hand-holding-dollar"></i>
                         </a>
-                        <?php if ($row['sales_total']) { ?>
-                          <a href="javascript:" class="btn btn-sm remit" data-placement="top" title="Remit" rel="tooltip" cash="<?= $row['cash'] + $row['sales_total']->sales_amount - $row['expense_total']->expense_amount ?>">
+                        <a href="javascript:" class="btn btn-danger mb-1 btn-sm expense" data-placement="top" title="Add Expense" rel="tooltip" date="<?= $row['payment_added'] ?>">
+                          <i class="fa-solid fa-comment-dollar"></i>
+                        </a>
+                        <?php if ($row['sales_total']) {
+                          $cash = $row['cash'] ? $row['cash'] : 0;
+                        ?>
+                          <a href="javascript:" class="btn btn-sm mb-1 remit" data-placement="top" title="Remit" rel="tooltip" cash="<?= $cash + $row['sales_total']->sales_amount - $row['expense_total']->expense_amount ?>">
                             <i class="fa-solid fa-money-bill-transfer"></i>
                           </a>
                         <?php } ?>
@@ -118,7 +131,7 @@
       </div>
       <div class="modal-footer">
         <div class="left-side">
-          <button type="submit" class="btn btn-link btnRemit" form="frmRemit">Confirm</button>
+          <button type="submit" class="btn btn-link btnRemit" form="frmRemit">Add</button>
         </div>
         <div class="divider"></div>
         <div class="right-side">
@@ -183,7 +196,39 @@
       </div>
       <div class="modal-footer">
         <div class="right-side">
-          <button type="submit" class="btn btn-link" form="frmSales">Confirm</button>
+          <button type="submit" class="btn btn-link" form="frmSales">Add</button>
+        </div>
+        <div class="divider"></div>
+        <div class="right-side">
+          <button type="button" class="btn btn-link" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="modalCollectable" tabindex="-1" role="dialog">
+  <div class="modal-dialog pt-0 modal-sm" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="title title-up">Event Collectable</h4>
+      </div>
+      <div class="modal-body px-4">
+        <?= form_open('main/addCollectable', ['id' => 'frmCollectable']) ?>
+        <input type="hidden" name="collectable_date">
+        <div class="form-group">
+          <label>Amount</label>
+          <input type="number" class="form-control" name="collectable_amount" required>
+        </div>
+        <div class="form-group">
+          <label>Remarks</label>
+          <textarea name="collectable_remarks" rows="1" class="form-control"></textarea>
+        </div>
+        <?= form_close() ?>
+      </div>
+      <div class="modal-footer">
+        <div class="right-side">
+          <button type="submit" class="btn btn-link" form="frmCollectable">Add</button>
         </div>
         <div class="divider"></div>
         <div class="right-side">
@@ -237,6 +282,34 @@
   </div>
 </div>
 
+<div class="modal fade" id="modalSales" tabindex="-1" role="dialog">
+  <div class="modal-dialog pt-0" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="title title-up">Sales</h4>
+      </div>
+      <div class="modal-body px-4">
+        <table class="table table-bordered mb-0">
+          <thead>
+            <th>Type</th>
+            <th>Amount</th>
+            <th>Date</th>
+          </thead>
+          <tbody class="sales-tbody">
+            <!-- javascript -->
+          </tbody>
+        </table>
+      </div>
+      <div class="modal-footer">
+        <div class="divider"></div>
+        <div class="right-side">
+          <button type="button" class="btn btn-link" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="modal fade" id="modalExpenses" tabindex="-1" role="dialog">
   <div class="modal-dialog pt-0" role="document">
     <div class="modal-content">
@@ -266,20 +339,22 @@
   </div>
 </div>
 
-<div class="modal fade" id="modalSales" tabindex="-1" role="dialog">
+
+<div class="modal fade" id="modalCollectables" tabindex="-1" role="dialog">
   <div class="modal-dialog pt-0" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h4 class="title title-up">Sales</h4>
+        <h4 class="title title-up">Event Collectables</h4>
       </div>
       <div class="modal-body px-4">
         <table class="table table-bordered mb-0">
           <thead>
             <th>Type</th>
             <th>Amount</th>
+            <th>Remarks</th>
             <th>Date</th>
           </thead>
-          <tbody class="sales-tbody">
+          <tbody class="collectables-tbody">
             <!-- javascript -->
           </tbody>
         </table>
@@ -293,6 +368,7 @@
     </div>
   </div>
 </div>
+
 
 <script>
   const base_url = '<?= base_url() ?>';
@@ -365,12 +441,6 @@
 
   $('.expenses').click(function() {
     const date = $(this).attr('date');
-    const icon = {
-      hotel: 'fa fa-bed',
-      resto: 'fa-solid fa-utensils',
-      otillas: 'fa-solid fa-mug-saucer',
-    };
-
     $('.expenses-tbody').html('');
 
     fetch(base_url + 'index.php/main/getExpensesByDate/' + date)
@@ -388,6 +458,29 @@
         });
 
         $('#modalExpenses').modal('show');
+      });
+  });
+
+  $('.collectables').click(function() {
+    const date = $(this).attr('date');
+
+    $('.collectables-tbody').html('');
+
+    fetch(base_url + 'index.php/main/getCollectablesByDate/' + date)
+      .then(response => response.json())
+      .then(data => {
+        data.forEach(row => {
+          const html = `<tr>
+             <td>${row.collectable_type}</td>
+             <td>₱ ${row.collectable_amount}</td>
+             <td>${row.collectable_remarks}</td>
+             <td>${ampm(row.collectable_added)}</td>
+            </tr>
+          `;
+          $('.collectables-tbody').append(html);
+        });
+
+        $('#modalCollectables').modal('show');
       });
   });
 
@@ -416,6 +509,12 @@
     const date = $(this).attr('date');
     $('[name=sales_date]').val(date);
     $('#modalSale').modal('show');
+  });
+
+  $('.collectable').click(function() {
+    const date = $(this).attr('date');
+    $('[name=collectable_date]').val(date);
+    $('#modalCollectable').modal('show');
   });
 
   $('.expense').click(function() {
