@@ -175,6 +175,7 @@
           <div class="form-group col-md-5">
             <label>Contact Number</label>
             <input type="text" class="form-control" name="contact" required>
+            <small class="text-muted" id="txt-contact"></small>
           </div>
           <div class="form-group col-md-7">
             <label>Email <small>(optional)</small></label>
@@ -279,6 +280,7 @@
     $('[name=address]').val(data.address);
     $('[name=birthday]').val(data.birthday);
     $('[name=nationality]').val(data.nationality);
+    $("#txt-contact").text(`${data.contact.length} digits`);
     $('#frmGuest').attr('action', 'updateGuest');
     $('#btnGuest').text('Update Guest');
     $('#modalGuest').modal('show');
@@ -289,5 +291,9 @@
     $('#frmGuest').trigger('reset');
     $('#btnGuest').text('Add Guest');
     $('#modalGuest').modal('show');
+  });
+
+  $("#modalGuest").on("hide.bs.modal", function(e) {
+    $("#txt-contact").text("");
   });
 </script>

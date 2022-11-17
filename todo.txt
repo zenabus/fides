@@ -130,9 +130,9 @@ add revert checkout
 - Backup (checkout print button)
 
 // beginning balance
-
 // discount
-
 // pay all
+// missing cancelled booking
 
-missing cancelled booking
+total rooms Occupied
+pm checkin

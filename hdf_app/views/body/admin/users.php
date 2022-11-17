@@ -109,6 +109,7 @@
         <div class="form-group">
           <label>Contact Number</label>
           <input type="text" class="form-control" required name="contact">
+          <small class="text-muted" id="txt-contact"></small>
         </div>
         <div class="form-group">
           <label>Email</label>
@@ -156,8 +157,13 @@
     $('[name=email]').val(data.email);
     $('[name=password]').removeAttr('required').parent().hide();
     $('#frmUser').attr('action', `${base_url}index.php/admin/updateUser`);
+    $("#txt-contact").text(`${data.contact.length} digits`);
     $('.title-user').text('Update User');
     $('.btn-user').text('Update User');
     $('#modalUser').modal('show');
+  });
+
+  $("#modalUser").on("hide.bs.modal", function(e) {
+    $("#txt-contact").text("");
   });
 </script>

@@ -105,6 +105,7 @@ $(document).on("click", ".choose", function () {
   $("[name=contact]").val(guest.contact);
   $("[name=email]").val(guest.email);
   $("[name=company_name]").val(guest.company_name);
+  $("#txt-contact").text(`${guest.contact.length} digits`);
   $("#modalGuest").modal("hide");
   $("#returning_guest").hide();
   $("#new_guest").show();
@@ -224,6 +225,8 @@ $("#modalBooking").on("hide.bs.modal", function (e) {
   $("[name=amount]").removeAttr("disabled");
   $("[name=card_number]").removeAttr("disabled");
   $("[name=payment_option]").removeAttr("disabled");
+
+  $("#txt-contact").text("");
 });
 
 $("[name=payment_option]").change(function () {

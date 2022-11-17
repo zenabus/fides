@@ -32,7 +32,22 @@
                     </td>
                   <?php } ?>
                   <td>
-                    <?= $row['content'] ?><br>
+                    <?php
+                    $content = explode('→', $row['content']);
+                    if (isset($content[1])) {
+                      $booking_id = explode(' ', $content[0]);
+                      $booking_id = strip_tags($booking_id[0]);
+                      if (strpos($booking_id, 'HDF') !== false) {
+                        $url = base_url('index.php/main/booking/' . $booking_id);
+                        $booking_id = "<a href='{$url}' class='text-dark'>{$content[0]}</a>";
+                      }
+                      $i = isset($content[2]) ? 2 : 1;
+                      $content = "{$booking_id} → {$content[$i]}";
+                    } else {
+                      $content = $content[0];
+                    }
+                    ?>
+                    <?= $content ?><br>
                     <small><?= LOG_TYPE[$row['log_type']] ?></small>
                   </td>
                   <td>

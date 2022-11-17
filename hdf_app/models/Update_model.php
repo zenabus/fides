@@ -35,6 +35,17 @@ class Update_model extends CI_Model {
     $this->db->where('guest_id', $guest_id)->update('guests', $_POST);
   }
 
+  function updateGuestName() {
+    $data = [
+      'first_name' => $_POST['first_name'],
+      'middle_name' => $_POST['middle_name'],
+      'last_name' => $_POST['last_name'],
+      'suffix' => $_POST['suffix'],
+      'contact' => $_POST['contact']
+    ];
+    $this->db->where('guest_id', $_POST['guest_id'])->update('guests', $data);
+  }
+
   function updateGuestFromReservation() {
     $data = [
       'first_name' => $_POST['first_name'],
@@ -183,12 +194,15 @@ class Update_model extends CI_Model {
       ->update('booked_rooms', $data);
   }
 
-  function processRoom($booked_room_id, $archive) {
+  function processRoom($booked_room_id, $archive, $early = FALSE) {
     $data = [
       'booked_room_archived' => $archive,
       'process_reason' => $_POST['process_reason'],
       'processed_by' => $_SESSION['name']
     ];
+    if ($early) {
+      $data['early_check_out'] = $_POST['today'];
+    }
     $this->db->where('booked_room_id', $booked_room_id)->update('booked_rooms', $data);
     if ($archive != 2) {
       $this->db->where('booked_room_id', $booked_room_id)->delete('charges_food');

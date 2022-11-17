@@ -181,7 +181,21 @@
               <?php foreach ($logs as $row) { ?>
                 <tr>
                   <td style="white-space: pre;"><?= $row['name'] ?><br><small><?= $row['user_type'] ?></small></td>
-                  <td><?= $row['activity'] ?></td>
+                  <td>
+                    <?php
+                    $content = explode('→', $row['activity']);
+                    if (count($content) >= 2) {
+                      if (count($content) == 2) {
+                        $content = $content[1];
+                      } else {
+                        $content = $content[2];
+                      }
+                    } else {
+                      $content = $content[0];
+                    }
+                    ?>
+                    <?= $content ?>
+                  </td>
                   <?php
                   $date_time = date_create($row['booking_log_added']);
                   $date_time = date_format($date_time, "M d, Y h:i a");
@@ -363,8 +377,8 @@
   if (reservation_status == -1) {
     $('.hidable').attr('disabled', true).hide();
     $('.form-control').attr('readonly', true);
-    $('[type=search], [name=refund], [name=refund_reason]').removeAttr('readonly');
-    $('[name=datatable_length]').removeAttr('readonly');
+    $('[type=search], [name=refund], [name=refund_reason], [name=datatable_length]').removeAttr('readonly');
+    $('.removeReadOnly').removeAttr('readonly');
   } else if (reservation_status == 6) {
     $('.btn').attr('disabled', true).hide();
   }

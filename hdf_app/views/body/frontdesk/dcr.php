@@ -88,7 +88,7 @@
                           <i class="fa-solid fa-comment-dollar"></i>
                         </a>
                         <?php if ($row['sales_total']) {
-                          $cash = $row['cash'] ? $row['cash'] : 0;
+                          $cash = isset($row['cash']) ? $row['cash'] : 0;
                         ?>
                           <a href="javascript:" class="btn btn-sm mb-1 remit" data-placement="top" title="Remit" rel="tooltip" cash="<?= $cash + $row['sales_total']->sales_amount - $row['expense_total']->expense_amount ?>">
                             <i class="fa-solid fa-money-bill-transfer"></i>
@@ -192,6 +192,10 @@
           <input type="number" class="form-control" name="sales_amount" required>
           <small>Sales will add up.</small>
         </div>
+        <div class="form-group">
+          <label>Remarks</label>
+          <textarea name="sales_remarks" rows="1" class="form-control"></textarea>
+        </div>
         <?= form_close() ?>
       </div>
       <div class="modal-footer">
@@ -293,6 +297,7 @@
           <thead>
             <th>Type</th>
             <th>Amount</th>
+            <th>Remarks</th>
             <th>Date</th>
           </thead>
           <tbody class="sales-tbody">
@@ -425,7 +430,7 @@
                 <small><span class="${icon[row.payment_for]}"></span> ${capitalize(row.payment_for)}</small>
               </td>
               <td>
-                ₱ ${row.amount}
+                ₱ ${formatNumber(row.amount)}
                 <span class="fa fa-credit-card text-info ${row['payment_option'] != 'Card' ? 'd-none' : ''}" data-placement="top" title="XXXX XXXX XXXX ${row['card_number']}" rel="tooltip"></span>
                 <br>
                 <small>${row.name}</small>
@@ -449,7 +454,7 @@
         data.forEach(row => {
           const html = `<tr>
              <td>${row.expense_type}</td>
-             <td>₱ ${row.expense_amount}</td>
+             <td>₱ ${formatNumber(row.expense_amount)}</td>
              <td>${row.expense_remarks}</td>
              <td>${ampm(row.expense_added)}</td>
             </tr>
@@ -472,7 +477,7 @@
         data.forEach(row => {
           const html = `<tr>
              <td>${row.collectable_type}</td>
-             <td>₱ ${row.collectable_amount}</td>
+             <td>₱ ${formatNumber(row.collectable_amount)}</td>
              <td>${row.collectable_remarks}</td>
              <td>${ampm(row.collectable_added)}</td>
             </tr>
@@ -494,7 +499,8 @@
         data.forEach(row => {
           const html = `<tr>
              <td>${row.sales_type}</td>
-             <td>₱ ${row.sales_amount}</td>
+             <td>₱ ${formatNumber(row.sales_amount)}</td>
+             <td>${row.sales_remarks}</td>
              <td>${ampm(row.sales_added)}</td>
             </tr>
           `;

@@ -23,20 +23,26 @@
                 <small style="font-style:italic">(Change room - <?= $row['change_reason'] ?>)</small>
               <?php } ?>
             </td>
-            <td>
+            <td class="action">
               <?= $row['nights'] ?> night<?= $row['nights'] == 1 ? '' : 's' ?><br>
-              <small><?= $row['check_in'] ?> - <?= $row['check_out'] ?></small>
+              <small class="px-0"><?= $row['check_in'] ?> - <?= $row['check_out'] ?></small>
               <?php if ($row['check_out'] == date('m/d/Y')) { ?>
-                <i class="fa-solid fa-calendar-day heart"></i>
+                <i class="fa-solid fa-calendar-day heart px-0"></i>
+              <?php } ?>
+              <?php if ($row['booked_room_archived'] == 2) { ?>
+                <br>
+                <button class="btn btn-success btn-sm change mt-2" id='<?= json_encode($row) ?>' data-placement="top" title="Update Room" rel="tooltip">
+                  <span class=" fa fa-refresh"></span>
+                </button>
               <?php } ?>
             </td>
             <td>
               <?php [$name, $contact, $email] = explode(' / ', $row['occupant']) ?>
               <?= $name ?><br><small><?= $email ?><br><?= $contact ?></small>
             </td>
-            <td class="border-right-0 action hidable">
+            <td class="border-right-0 action">
               <?php if ($row['booked_room_archived'] == 2) { ?>
-                <small><b>THIS ROOM WAS CHECKED OUT</b></small> <br>
+                <small class="<?= $row['early_check_out'] ? 'text-danger' : '' ?>"><b>THIS ROOM WAS CHECKED OUT <?= $row['early_check_out'] ? 'EARLY' : '' ?></b></small> <br>
                 <small>Note: <?= $row['process_reason'] ?></small><br>
                 <small>Processed: <?= $row['processed_by'] ?></small><br>
                 <?php
@@ -260,7 +266,7 @@
           </div>
           <div class="form-group col-md-6">
             <label>Nights</label>
-            <input type="number" class="form-control" name="nights" required autocomplete="off" min="1" value="1">
+            <input type="number" class="form-control" name="nights" required autocomplete="off" min="1" value="1" readonly>
           </div>
         </div>
         <div class="form-row">
@@ -331,14 +337,6 @@
           <label>Unit Cost</label>
           <input type="number" class="form-control" name="charges_food_amount" min="1" value="1">
         </div>
-        <!-- <div class="form-group col-md-4">
-            <label>Quantity</label>
-            <input type="number" class="form-control" name="charges_food_quantity" min="1" value="1" required>
-          </div> -->
-        <!-- <div class="form-group col-md-6">
-            <label>Subtotal</label>
-            <input type="text" class="form-control" id="charges_food_total" value="₱ 1" readonly>
-          </div> -->
         <?= form_close() ?>
       </div>
       <div class="modal-footer">
@@ -667,7 +665,7 @@
     $('[name=check_out]').val(data.check_out).removeAttr('readonly');
     $('.room_type').val(data.room_type);
     $('.room_number').val(data.room_number);
-    $('[name=nights]').val(data.nights).removeAttr('readonly');
+    $('[name=nights]').val(data.nights);
     $('#frmRoom').attr('action', `${base_url}index.php/main/changeRoom`);
     $('.room-title').text('Change Room');
     $('.btn-room').val('Update');

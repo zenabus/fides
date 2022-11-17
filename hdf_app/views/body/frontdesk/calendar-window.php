@@ -216,6 +216,9 @@
                 } else {
                   $color = 'warning';
                 }
+                if($data['booked_room_archived']==2) {
+                  $color = 'danger';  
+                }
                 ?>
                 <td class="with-data bg-<?= $color ?>" room_id="<?= $row['room_id'] ?>" date="<?= $date ?>" data='<?= json_encode($row) ?>'></td>
               <?php } else { ?>

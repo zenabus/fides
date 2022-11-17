@@ -38,6 +38,11 @@
 
           $('.datatable').DataTable();
         });
+
+        $('[name=contact]').on('input', function() {
+          const contact = $(this).val();
+          $('#txt-contact').text(`${contact.length} digits`);
+        });
       </script>
       </body>
 

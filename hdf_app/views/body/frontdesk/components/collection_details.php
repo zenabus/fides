@@ -383,7 +383,7 @@ function round_format($num) {
 
   <div class="card-footer mb-2 mt-0 border-top px-4 d-flex justify-content-between align-items-start">
     <div>
-      <a href="<?= base_url('index.php/main/completeOrder/' . $booking->booking_id . '/' . $booking->booking_number) ?>" class="btn btn-sm confirm hidable" <?= $balance_total > 0.01 ? 'disabled' : '' ?>>Complete Order</a>
+      <a href="<?= base_url('index.php/main/completeOrder/' . $booking->booking_id . '/' . $booking->booking_number) ?>" class="btn btn-sm confirm <?= $balance_total > 0.01 ? '' : 'hidable' ?>" <?= $balance_total > 0.01 ? 'disabled' : '' ?>>Complete Order</a>
       <button type="button" class="btn btn-sm mt-0 btn-success hidable" data-toggle="modal" data-target="#modalPayment">Payment</button>
       <button type="button" class="btn btn-sm mt-0 btn-danger" data-toggle="modal" data-target="#modalRefund">Refund</button>
       <?php if (!$booking->charged_to) { ?>
@@ -453,7 +453,7 @@ function round_format($num) {
         <div class="form-row">
           <div class="form-group col-md-12">
             <label>Payment Option</label>
-            <select name="payment_option" class="form-control" required>
+            <select name="payment_option" class="form-control removeReadOnly" required>
               <option value="">- payment option -</option>
               <option value="Cash">Cash</option>
               <option value="Card">Card</option>
@@ -465,7 +465,7 @@ function round_format($num) {
         <div class="form-row">
           <div class="form-group col-md-4">
             <label>Room</label>
-            <select name="booked_room_id" class="form-control" required>
+            <select name="booked_room_id" class="form-control removeReadOnly" required>
               <option value="">-</option>
               <option value="All Rooms">All</option>
               <?php foreach ($booked_rooms as $room) { ?>
@@ -475,7 +475,7 @@ function round_format($num) {
           </div>
           <div class="form-group col-md-8">
             <label>Payment For</label>
-            <select name="payment_for" class="form-control" required>
+            <select name="payment_for" class="form-control removeReadOnly" required>
               <option value="">-</option>
               <option value="All Types">All</option>
               <option value="room">Room Rate</option>
@@ -487,43 +487,43 @@ function round_format($num) {
         </div>
         <div class="form-group">
           <label>Amount</label>
-          <input type="number" class="form-control" name="amount" required value="0" min="0" step="0.01">
+          <input type="number" class="form-control removeReadOnly" name="amount" required value="0" min="0" step="0.01">
         </div>
         <div class="form-group card-div all-div d-none mb-0">
           <label>Account Number</label>
-          <input type="number" class="form-control" name="card_number" placeholder="XXXX" maxlength="4">
+          <input type="number" class="form-control removeReadOnly" name="card_number" placeholder="XXXX" maxlength="4">
           <small>Last 4 digit only.</small>
         </div>
         <div class="check-div all-div d-none">
           <div class="form-group">
             <label>Account Name</label>
-            <input type="text" class="form-control" name="check_name">
+            <input type="text" class="form-control removeReadOnly" name="check_name">
           </div>
           <div class="form-group">
             <label>Account Number</label>
-            <input type="text" class="form-control" name="check_number">
+            <input type="text" class="form-control removeReadOnly" name="check_number">
           </div>
           <div class="form-group">
             <label>Branch</label>
-            <input type="text" class="form-control" name="check_branch">
+            <input type="text" class="form-control removeReadOnly" name="check_branch">
           </div>
           <div class="form-group">
             <label>Date</label>
-            <input type="date" class="form-control" name="check_date">
+            <input type="date" class="form-control removeReadOnly" name="check_date">
           </div>
         </div>
         <div class="bank-div all-div d-none">
           <div class="form-group">
             <label>Bank Name</label>
-            <input type="text" class="form-control" name="bank_name">
+            <input type="text" class="form-control removeReadOnly" name="bank_name">
           </div>
           <div class="form-group">
             <label>Account Number</label>
-            <input type="text" class="form-control" name="bank_number">
+            <input type="text" class="form-control removeReadOnly" name="bank_number">
           </div>
           <div class="form-group">
             <label>Date</label>
-            <input type="date" class="form-control" name="bank_date">
+            <input type="date" class="form-control removeReadOnly" name="bank_date">
           </div>
         </div>
         <?= form_close() ?>

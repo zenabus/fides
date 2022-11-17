@@ -174,7 +174,6 @@
         $coffeeshop = 0;
         $addons = 0;
         $reservation = 0;
-        $event = 0;
 
         $room_rate_card = 0;
         $restaurant_card = 0;
@@ -247,13 +246,43 @@
         <?php } ?>
 
         <?php
+        $event_sales = 0;
+        foreach ($sales as $row) {
+          if ($row['sales_type'] == 'Event') {
+            $event_sales += $row['sales_amount'];
+        ?>
+            <tr>
+              <td class="bl"></td>
+              <td>EVENT PAYMENT / <?= $row['sales_remarks'] ?></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td><?= number_format($row['sales_amount'], 2) ?></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+            </tr>
+        <?php }
+        } ?>
+
+        <?php
         $event_collectables = 0;
         foreach ($collectables as $row) {
           $event_collectables += $row['collectable_amount'];
         ?>
           <tr>
             <td class="bl"></td>
-            <td><?= $row['collectable_remarks'] ?></td>
+            <td>EVENT COLLECTABLE / <?= $row['collectable_remarks'] ?></td>
             <td></td>
             <td></td>
             <td></td>
@@ -281,7 +310,7 @@
           <td class="bgw nb"><?= number_format($coffeeshop, 2) ?></td>
           <td class="bgw nb"><?= number_format($addons, 2) ?></td>
           <td class="bgw nb"><?= number_format($reservation, 2) ?></td>
-          <td class="bgw nb"><?= number_format($event, 2) ?></td>
+          <td class="bgw nb"><?= number_format($event_sales, 2) ?></td>
           <td class="bgw nb"><?= number_format($room_rate_card, 2) ?></td>
           <td class="bgw nb"><?= number_format($restaurant_card, 2) ?></td>
           <td class="bgw nb"><?= number_format($coffeeshop_card, 2) ?></td>
@@ -298,7 +327,7 @@
         <tr>
           <td class="bgw nb" colspan="2"></td>
           <td class="bgw nb">TOTAL:</td>
-          <td class="bgy nb" colspan="5"><?= number_format($room_rate + $restaurant + $coffeeshop + $addons + $reservation + $event, 2) ?></td>
+          <td class="bgy nb" colspan="5"><?= number_format($room_rate + $restaurant + $coffeeshop + $addons + $reservation + $event_sales, 2) ?></td>
           <td class="bgw nb">TOTAL:</td>
           <td class="bgy nb" colspan="5"><?= number_format($room_rate_card + $restaurant_card + $coffeeshop_card + $addons_card + $reservation_card + $event_card, 2) ?></td>
           <td class="bgw nb" colspan="5"></td>

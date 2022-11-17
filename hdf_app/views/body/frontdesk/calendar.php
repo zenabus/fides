@@ -239,6 +239,9 @@
                         } else {
                           $color = 'warning';
                         }
+                        if ($data['booked_room_archived'] == 2) {
+                          $color = 'danger';
+                        }
                         $occupant = explode(' / ', $data['occupant'])[0];
                         $name = "{$data['first_name']} {$data['middle_name']} {$data['last_name']} {$data['suffix']}";
                         $guest = $occupant ? $name . ' / ' . $occupant : $name;
@@ -249,8 +252,8 @@
                         <td class="with-data bg-<?= $color ?> <?= $min ?>" date="<?= $date ?>" data='<?= json_encode($row) ?>' booking='<?= json_encode($data) ?>'><?= character_limiter($guest, 15) ?></td>
                         <td class="with-data bg-<?= $color ?> <?= $max ?>" date="<?= $date ?>" data='<?= json_encode($row) ?>' booking='<?= json_encode($data) ?>'><?= character_limiter($data['remarks'], 15) ?></td>
                       <?php } else { ?>
-                        <td class="no-data first" date="<?= $date ?>" date="<?= $date ?>" data='<?= json_encode($row) ?>' type="<?= $type ?>" <?= $disabled ?>><?= $text ?></td>
-                        <td class="no-data second" date="<?= $date ?>" date="<?= $date ?>" data='<?= json_encode($row) ?>' type="<?= $type ?>" <?= $disabled ?>><?= $text ?></td>
+                        <td class="<?= $checkout ? '' : 'no-data' ?> first" date="<?= $date ?>" date="<?= $date ?>" data='<?= json_encode($row) ?>' type="<?= $type ?>" <?= $disabled ?>><?= $text ?></td>
+                        <td class="<?= $checkout ? '' : 'no-data' ?> second" date="<?= $date ?>" date="<?= $date ?>" data='<?= json_encode($row) ?>' type="<?= $type ?>" <?= $disabled ?>><?= $text ?></td>
                     <?php }
                     } ?>
                   </tr>
@@ -448,6 +451,12 @@
     $('.form-control').val('').removeAttr('disabled');
     modalBooking(this, type, 1);
 
+    if (type == 'Reservation') {
+      $("#rdo_reservation").prop("checked", true);
+    } else {
+      $("#rdo_checkin").prop("checked", true);
+    }
+
     $('#frmBook').attr('action', `${base_url}index.php/main/book`);
     $('.action-div').addClass('d-none');
     $('[name=check_in]').attr('readonly', true);
@@ -461,7 +470,7 @@
       if (hour >= 6 && hour <= 12) {
         $('.reservation-div').hide();
         $('[name=booking_type]').val('Check In');
-        $('#btnBooking').val('Check In')
+        $('#btnBooking').val('Check In');
       }
       $('.type-div').removeClass('d-none');
     }
@@ -471,8 +480,6 @@
     const room = JSON.parse($(this).attr('data'));
     const booking = JSON.parse($(this).attr('booking'));
 
-    console.log(booking)
-
     $('#returning_guest').hide();
     $('[name=guest_id]').val(booking.guest_id);
     $('[name=first_name]').val(booking.first_name).attr('disabled', true);
@@ -480,11 +487,23 @@
     $('[name=last_name]').val(booking.last_name).attr('disabled', true);
     $('[name=suffix]').val(booking.suffix).attr('disabled', true);
     $('[name=contact]').val(booking.contact).attr('disabled', true);
+    $("#txt-contact").text(`${booking.contact.length} digits`);
 
     if (booking.reservation_status == 0 || booking.reservation_status == -1) {
       modalBooking(this, 'Check In', 0, booking.booking_number);
-      $('.form-control').attr('disabled', true);
-      $('textarea').attr('disabled', false).attr('readonly', true);
+      $('#frmBook').attr('action', `${base_url}index.php/main/updateBooking`);
+      $('[name=booking_id]').val(booking.booking_id);
+      $('[name=booked_room_id]').val(booking.booked_room_id);
+      if (booking.booked_room_archived == 0) {
+        $('.form-control').attr('disabled', false);
+        $('[name=nights]').attr('readonly', true);
+        $('textarea').attr('disabled', false).attr('readonly', false);
+        $('#btnUpdate').removeClass('d-none');
+      } else {
+        $('.form-control').attr('disabled', true);
+        $('textarea').attr('disabled', false).attr('readonly', true);
+        $('#btnUpdate').addClass('d-none');
+      }
       $('.action-div').addClass('d-none');
       $('#btnBooking').hide();
       $('#btnRedirect').removeClass('d-none').attr('href', `${base_url}index.php/main/booking/${booking.booking_number}`);
@@ -513,10 +532,6 @@
           $('#btnBooking').show().val('Update');
         }
       } else {
-        // $('#frmBook').attr('action', `${base_url}index.php/main/updateReservation`);
-        // $('.action-div').addClass('d-none');
-        // $('#btnBooking').show().val('Update');
-
         $("#rdo_check").prop("checked", true);
         $('.action-div').removeClass('d-none');
         $('#frmBook').attr('action', `${base_url}index.php/main/checkIn`);
@@ -533,7 +548,6 @@
       $('#btnCancel').removeClass('d-none');
 
       if (booking.reservation_type == 'Confirmed') {
-        // console.log(booking.payments.payment_option)
         if (booking.payments) {
           $("[name=payment_option][value=" + booking.payments.payment_option + "]").prop('checked', true).trigger('change');
           $('[name=amount]').val(booking.payments.amount).attr('disabled', true);

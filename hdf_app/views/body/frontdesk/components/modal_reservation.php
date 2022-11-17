@@ -14,6 +14,7 @@
         <input type="hidden" name="guest_id">
         <input type="hidden" name="booking_type">
         <input type="hidden" name="booking_id">
+        <input type="hidden" name="booked_room_id">
         <div class="form-group type-div d-none">
           <label>Booking Type</label>
           <div class="d-flex justify-content-around">
@@ -117,6 +118,7 @@
           <div class="form-group col-md-8">
             <label>Contact No.</label>
             <input type="text" class="form-control guest_details" name="contact" required>
+            <small class="text-muted" id="txt-contact"></small>
           </div>
           <div class="form-group col-md-4">
             <label>Suffix</label>
@@ -163,7 +165,8 @@
             <small>Last 4 digit only.</small>
           </div>
         </div>
-        <a href="javascript:" class="btn btn-danger my-0 d-none" id="btnCancel">Cancel Reservation</a>
+        <a href="javascript:" class="btn btn-danger my-0 d-none btn-block" id="btnCancel">Cancel Reservation</a>
+        <a href="javascript:" class="btn my-0 d-none btn-block" id="btnUpdate">Update Booking</a>
         <?= form_close() ?>
       </div>
       <div class="modal-footer">
@@ -237,3 +240,9 @@
     </div>
   </div>
 </div>
+
+<script>
+  $('#btnUpdate').click(function() {
+    $('#frmBook').submit();
+  });
+</script>

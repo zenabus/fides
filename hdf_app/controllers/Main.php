@@ -61,6 +61,7 @@ class Main extends MY_Controller {
   function calendar($year, $month, $window = FALSE) {
     $this->load->helper('text');
     $data = $this->calendarData($year, $month);
+    $data['checkout'] = FALSE;
     if ($window) {
       $this->load->view('body/frontdesk/calendar-window', $data);
     } else {
@@ -483,11 +484,12 @@ class Main extends MY_Controller {
         $collectables = $charges - $payment->amount;
         $data['charged'][$i]['charged_guest'] = $this->get_model->getGuest($row['charged_to']);
         $data['charged'][$i]['collectables'] = $collectables;
-        if (!$collectables) {
+        if (!$collectables || $row['reservation_status'] == 6) {
           unset($data['charged'][$i]);
         }
       }
 
+      $data['sales'] = $this->get_model->getSales($date);
       $data['collectables'] = $this->get_model->getCollectablesByDate($date);
 
       $view = $this->load->view('body/frontdesk/components/dcr', $data, TRUE);
@@ -527,6 +529,82 @@ class Main extends MY_Controller {
     $middle = isset($data['booking']->middle_name[0]) ? $data['booking']->middle_name[0] : '';
     $name = $data['booking']->first_name[0] . $middle . $data['booking']->last_name[0];
     $dompdf->stream($data['booking']->booking_number . ' - ' . $name . ' - Guest Registration Form', ['Attachment' => FALSE]);
+  }
+
+  function bookingasd($booking_number) {
+    $data['active'] = 'bookings';
+    $data['booking'] = $this->get_model->getBookingByBookingNumber($booking_number);
+    $data['booked_rooms'] = $this->get_model->getBookedRooms($data['booking']->booking_id);
+    $data['archived_rooms'] = $this->get_model->getBookedRooms($data['booking']->booking_id, [1]);
+    $data['bed'] = $this->get_model->getPrice('Bed');
+    $data['person'] = $this->get_model->getPrice('Person');
+    $data['discounts'] = $this->get_model->getDiscounts();
+    $data['categories'] = $this->get_model->getCategories();
+    $data['charges'] = $this->get_model->getCharges();
+    $data['refund'] = $this->get_model->getRefundTotal($data['booking']->booking_id);
+    $data['refunds'] = $this->get_model->getRefunds($data['booking']->booking_id);
+    $data['payment'] = $this->get_model->getPaymentTotal($data['booking']->booking_id);
+    $data['payments'] = $this->get_model->getPayments($data['booking']->booking_id);
+    $data['logs'] = $this->get_model->getBookingLogs($data['booking']->booking_id);
+    $data['guests'] = $this->get_model->getGuests();
+
+    if ($data['booking']->charged_to) {
+      $data['charged_to'] = $this->get_model->getGuest($data['booking']->charged_to);
+    }
+
+    foreach ($data['logs'] as $i => $log) {
+      $data['logs'][$i]['ago'] = $this->timeAgo($log['booking_log_added']);
+    }
+
+    foreach ($data['booked_rooms'] as $i => $room) {
+      $payment_room  = $this->get_model->getPaymentByType($room['booked_room_id'], 'room');
+      $payment_advance  = $this->get_model->getPaymentByType($room['booked_room_id'], 'advance');
+      $data['booked_rooms'][$i]['restaurant'] = $this->get_model->getRoomCharges($room['booked_room_id'], 'Restaurant');
+      $data['booked_rooms'][$i]['coffeeshop'] = $this->get_model->getRoomCharges($room['booked_room_id'], 'Coffeeshop');
+      $data['booked_rooms'][$i]['amenities'] = $this->get_model->getRoomAmenities($room['booked_room_id']);
+      $data['booked_rooms'][$i]['payment_room'] = $payment_room->amount + $payment_advance->amount;
+      $data['booked_rooms'][$i]['payment_restaurant'] = $this->get_model->getPaymentByType($room['booked_room_id'], 'restaurant');
+      $data['booked_rooms'][$i]['payment_coffeeshop'] = $this->get_model->getPaymentByType($room['booked_room_id'], 'coffeeshop');
+      $data['booked_rooms'][$i]['payment_addons'] = $this->get_model->getPaymentByType($room['booked_room_id'], 'addons');
+      $data['booked_rooms'][$i]['refund'] = $this->get_model->getRefundByBookedRoom($room['booked_room_id']);
+    }
+
+    $this->load->view('layout/header', $data);
+    $this->load->view('body/frontdesk/booking');
+    $this->load->view('layout/footer');
+  }
+
+  function receiptv2($booking_id) {
+    $image = file_get_contents(base_url('assets/img/acknowledgement_receipt.jpg'));
+    $data['image'] = 'data:image/jpg;base64,' . base64_encode($image);
+    $data['booking'] = $this->get_model->getBooking($booking_id);
+
+    $dates = $this->getDaysInBetween($data['booking']->arrival, $data['booking']->departure);
+    $soa = [];
+
+    foreach ($dates as $i => $date) {
+      $rooms = $this->get_model->getBookedRoomsGroupedByDate($booking_id, $this->toSlashedDate($date));
+      foreach ($rooms as $room) {
+        $particular = [
+          'date' => $date,
+          'particulars' => "Room Accommodation ({$room['room_type_abbr']} {$room['room_number']})",
+          'charges' => $room['pricing_type']
+        ];
+        array_push($soa, $particular);
+      }
+    }
+
+    $data['soa'] = $soa;
+
+    $view = $this->load->view('body/frontdesk/components/receiptv2', $data, TRUE);
+    $options = new Options();
+    $options->set('dpi', 300);
+    $dompdf = new Dompdf($options);
+    $dompdf->loadHtml($view);
+    $dompdf->render();
+    $middle = isset($data['booking']->middle_name[0]) ? $data['booking']->middle_name[0] : '';
+    $name = $data['booking']->first_name[0] . $middle . $data['booking']->last_name[0];
+    $dompdf->stream($data['booking']->booking_number . ' - ' . $name . ' - Acknowledgment Receipt', ['Attachment' => FALSE]);
   }
 
   function receipt($booking_id, $room = FALSE) {
@@ -613,6 +691,7 @@ class Main extends MY_Controller {
   }
 
   function book() {
+    unset($_POST['booked_room_id']);
     unset($_POST['booking_id']);
     if (!$_POST['guest_id']) {
       $_POST['guest_id'] = $this->insert_model->addGuest($_POST, TRUE);
@@ -710,7 +789,58 @@ class Main extends MY_Controller {
     $this->redirect();
   }
 
+  function updateBooking() {
+    // $this->dd($_POST);
+    $booking_number = 'HDF' . str_pad($_POST['booking_id'], 5, '0', STR_PAD_LEFT);
+    $booking = $this->get_model->getBooking($_POST['booking_id']);
+    $room = $this->get_model->getBookedRoom($_POST['booked_room_id']);
+    [$arrival, $departure] = $this->getMinMax($_POST['booking_id']);
+
+    $old_name = "{$booking->first_name} {$booking->middle_name} {$booking->last_name} {$booking->suffix}";
+    $new_name = "{$_POST['first_name']} {$_POST['middle_name']} {$_POST['last_name']} {$_POST['suffix']}";
+
+    if ($room->check_in != $_POST['check_in'] || $room->check_out != $_POST['check_out']) {
+      $s1 = $room->nights > 1 ? 's' : '';
+      $s2 = $_POST['nights'] > 1 ? 's' : '';
+      $log = "<b>{$booking_number}</b> → <b>{$room->room_number} {$room->room_type_abbr}</b> → Changed room dates from <b>{$room->check_in} - {$room->check_out}</b> (<b>{$room->nights}</b> night{$s1}) to <b>{$_POST['check_in']} - {$_POST['check_out']}</b> (<b>{$_POST['nights']}</b> night{$s2})";
+      $this->insert_model->addBookingLog($log);
+      $this->insert_model->log($log);
+    }
+
+    if ($booking->request != $_POST['request']) {
+      $log = "<b>{$booking_number}</b> → Updated request from <b>{$booking->request}</b> to <b>{$_POST['request']}</b>";
+      $this->insert_model->addBookingLog($log);
+      $this->insert_model->log($log);
+    }
+
+    if ($booking->remarks != $_POST['remarks']) {
+      $log = "<b>{$booking_number}</b> → Updated remarks from <b>{$booking->remarks}</b> to <b>{$_POST['remarks']}</b>";
+      $this->insert_model->addBookingLog($log);
+      $this->insert_model->log($log);
+    }
+
+    if ($old_name != $new_name) {
+      $log = "<b>{$booking_number}</b> → Updated guest name from <b>{$old_name}</b> to <b>{$new_name}</b>";
+      $this->insert_model->addBookingLog($log);
+      $this->insert_model->log($log);
+    }
+
+    if ($booking->contact != $_POST['contact']) {
+      $log = "<b>{$booking_number}</b> → Updated contact number from <b>{$booking->contact}</b> to <b>{$_POST['contact']}</b>";
+      $this->insert_model->addBookingLog($log);
+      $this->insert_model->log($log);
+    }
+
+    $this->update_model->updateBookedRoomNights();
+    $this->update_model->updateBooking($arrival, $departure, $_POST['booking_id']);
+    $this->update_model->updateReservation();
+    $this->update_model->updateGuestName();
+    $this->session->set_flashdata('success', 'Booking successfully updated.');
+    $this->redirect();
+  }
+
   function updateReservation() {
+    unset($_POST['booked_room_id']);
     unset($_POST['action']);
     unset($_POST['rdo_booking_type']);
     unset($_POST['booking_type']);
@@ -743,6 +873,7 @@ class Main extends MY_Controller {
   }
 
   function checkIn($booking_id = NULL) {
+    unset($_POST['booked_room_id']);
     if (!$booking_id) {
       $booking_id = $_POST['booking_id'];
     }
@@ -793,11 +924,12 @@ class Main extends MY_Controller {
   }
 
   function updateExtras() {
+    $booking_number = 'HDF' . str_pad($_POST['booking_id'], 5, '0', STR_PAD_LEFT);
     $room = $this->get_model->getBookedRoom($_POST['booked_room_id']);
     $this->update_model->updateExtras();
     $beds = $_POST['extra_bed'] == 1 ? '' : 's';
     $persons = $_POST['extra_person'] == 1 ? '' : 's';
-    $log = "<b>{$room->room_number} {$room->room_type_abbr}</b> → Updated extras: <b>{$_POST['extra_bed']} extra bed{$beds}</b> and <b>{$_POST['extra_person']} extra person{$persons}</b>";
+    $log = "<b>{$booking_number}</b> → <b>{$room->room_number} {$room->room_type_abbr}</b> → Updated extras: <b>{$_POST['extra_bed']} extra bed{$beds}</b> and <b>{$_POST['extra_person']} extra person{$persons}</b>";
     $this->insert_model->addBookingLog($log);
     $this->insert_model->log($log);
     $this->session->set_flashdata('success', 'Extra bed/person successfully updated!');
@@ -805,10 +937,11 @@ class Main extends MY_Controller {
   }
 
   function updateDiscount() {
+    $booking_number = 'HDF' . str_pad($_POST['booking_id'], 5, '0', STR_PAD_LEFT);
     $this->update_model->updateDiscount();
     $booked_room = $this->get_model->getBookedRoom($_POST['booked_room_id']);
     $discount = $this->get_model->getDiscount($_POST['discount_id']);
-    $log = "<b>{$booked_room->room_number} {$booked_room->room_type_abbr}</b> → Set room discount of <b>{$discount->percentage}% ({$discount->discount_type})</b>";
+    $log = "<b>{$booking_number}</b> → <b>{$booked_room->room_number} {$booked_room->room_type_abbr}</b> → Set room discount of <b>{$discount->percentage}% ({$discount->discount_type})</b>";
     $this->insert_model->addBookingLog($log);
     $this->insert_model->log($log);
     $this->session->set_flashdata('success', 'Discount successfully updated!');
@@ -816,10 +949,11 @@ class Main extends MY_Controller {
   }
 
   function bookRoom() {
+    $booking_number = 'HDF' . str_pad($_POST['booking_id'], 5, '0', STR_PAD_LEFT);
     $this->insert_model->bookRoom();
     $room = $this->get_model->getRoom($_POST['room_id']);
     $s = $_POST['nights'] == 1 ? '' : 's';
-    $log = "<b>{$room->room_number} {$room->room_type_abbr}</b> → Booked room for <b>{$_POST['nights']} night{$s}</b> from <b>{$_POST['check_in']}</b> to <b>{$_POST['check_out']}</b>";
+    $log = "<b>{$booking_number}</b> → <b>{$booking_number} {$room->room_number} {$room->room_type_abbr}</b> → Booked room for <b>{$_POST['nights']} night{$s}</b> from <b>{$_POST['check_in']}</b> to <b>{$_POST['check_out']}</b>";
     [$arrival, $departure] = $this->getMinMax($_POST['booking_id']);
     $this->insert_model->addBookingLog($log);
     $this->insert_model->log($log);
@@ -846,39 +980,42 @@ class Main extends MY_Controller {
   function checkoutRoom() {
     $booked_room_id = $_POST['booked_room_id'];
     $booked_room = $this->get_model->getBookedRoom($booked_room_id);
-    [$arrival, $departure] = $this->getMinMax($booked_room->booking_id);
+    $today = date('Y-m-d');
+    $checkout = $this->toDashedDate($booked_room->check_out);
+    $early = $today < $checkout ? TRUE : FALSE;
     $_POST['booking_id'] = $booked_room->booking_id;
-    $this->update_model->processRoom($booked_room_id, 2);
+    $_POST['today'] = $this->toSlashedDate($today);
+    $this->update_model->processRoom($booked_room_id, 2, $early);
+    $booking_number = 'HDF' . str_pad($_POST['booking_id'], 5, '0', STR_PAD_LEFT);
     $s = $booked_room->nights == 1 ? '' : 's';
-    $log = "<b>{$booked_room->room_number} {$booked_room->room_type_abbr}</b> → Checked out room <b>{$booked_room->nights} night{$s}</b> from <b>{$booked_room->check_in}</b> to <b>{$booked_room->check_out}</b>";
+    $log = "<b>{$booking_number}</b> → Checked out room <b>{$booked_room->room_number} {$booked_room->room_type_abbr} {$booked_room->nights} night{$s}</b> from <b>{$booked_room->check_in}</b> to <b>{$booked_room->check_out}</b>";
     $this->insert_model->addBookingLog($log);
     $this->insert_model->log($log);
-    $this->update_model->updateBooking($arrival, $departure, $booked_room->booking_id);
     $this->session->set_flashdata('success', 'Room successfully checked out!');
     $this->redirect();
   }
 
-  function processRoom($archive) {
-    $booked_room_id = $_POST['booked_room_id'];
-    $booked_room = $this->get_model->getBookedRoom($booked_room_id);
-    [$arrival, $departure] = $this->getMinMax($booked_room->booking_id);
-    $_POST['booking_id'] = $booked_room->booking_id;
-    $this->update_model->processRoom($booked_room_id, $archive);
-    $s = $booked_room->nights == 1 ? '' : 's';
-    if ($archive == 2) {
-      $log = "<b>{$booked_room->room_number} {$booked_room->room_type_abbr}</b> → Checked out room <b>{$booked_room->nights} night{$s}</b> from <b>{$booked_room->check_in}</b> to <b>{$booked_room->check_out}</b>";
-      $message = 'Room successfully checked out!';
-    } else {
-      $log = "<b>{$booked_room->room_number} {$booked_room->room_type_abbr}</b> → Removed room <b>{$booked_room->nights} night{$s}</b> from <b>{$booked_room->check_in}</b> to <b>{$booked_room->check_out}</b>";
-      $message = 'Room successfully removed!';
-    }
-    $this->insert_model->addBookingLog($log);
-    $this->insert_model->log($log);
-    $this->update_model->updateBooking($arrival, $departure, $booked_room->booking_id);
-    $this->session->set_flashdata('success', $message);
-    $this->redirect();
-  }
-
+  // function processRoom($archive) {
+  //   $booked_room_id = $_POST['booked_room_id'];
+  //   $booked_room = $this->get_model->getBookedRoom($booked_room_id);
+  //   [$arrival, $departure] = $this->getMinMax($booked_room->booking_id);
+  //   $_POST['booking_id'] = $booked_room->booking_id;
+  //   $booking_number = 'HDF' . str_pad($_POST['booking_id'], 5, '0', STR_PAD_LEFT);
+  //   $this->update_model->processRoom($booked_room_id, $archive);
+  //   $s = $booked_room->nights == 1 ? '' : 's';
+  //   if ($archive == 2) {
+  //     $log = "<b>{$booking_number}</b> → Checked out room <b>{$booked_room->room_number} {$booked_room->room_type_abbr} {$booked_room->nights} night{$s}</b> from <b>{$booked_room->check_in}</b> to <b>{$booked_room->check_out}</b>";
+  //     $message = 'Room successfully checked out!';
+  //   } else {
+  //     $log = "<b>{$booking_number}</b> → Removed room <b>{$booked_room->room_number} {$booked_room->room_type_abbr} {$booked_room->nights} night{$s}</b> from <b>{$booked_room->check_in}</b> to <b>{$booked_room->check_out}</b>";
+  //     $message = 'Room successfully removed!';
+  //   }
+  //   $this->insert_model->addBookingLog($log);
+  //   $this->insert_model->log($log);
+  //   $this->update_model->updateBooking($arrival, $departure, $booked_room->booking_id);
+  //   $this->session->set_flashdata('success', $message);
+  //   $this->redirect();
+  // }
 
   function revert($type, $booked_room_id) {
     $booked_room = $this->get_model->getBookedRoom($booked_room_id);
@@ -911,13 +1048,14 @@ class Main extends MY_Controller {
   }
 
   function changeRoom() {
+    $booking_number = 'HDF' . str_pad($_POST['booking_id'], 5, '0', STR_PAD_LEFT);
     $room_from = $this->get_model->getBookedRoom($_POST['booked_room_id']);
     $this->update_model->changeRoom();
     [$arrival, $departure] = $this->getMinMax($_POST['booking_id']);
     $room_to = $this->get_model->getRoom($_POST['room_id']);
     $s1 = $room_from->nights == 1 ? '' : 's';
     $s2 = $_POST['nights'] == 1 ? '' : 's';
-    $log = "<b>{$room_to->room_number} {$room_to->room_type_abbr}</b> → Changed room from <b>{$room_from->room_type_abbr} {$room_from->room_number}</b> {$room_from->nights} night{$s1} {$room_from->check_in} - {$room_from->check_out} to <b>{$room_to->room_number} {$room_to->room_type_abbr}</b> {$_POST['nights']} night{$s2} {$_POST['check_in']} - {$_POST['check_out']}";
+    $log = "<b>{$booking_number}</b> → <b>{$room_to->room_number} {$room_to->room_type_abbr}</b> → Changed room from <b>{$room_from->room_type_abbr} {$room_from->room_number}</b> {$room_from->nights} night{$s1} {$room_from->check_in} - {$room_from->check_out} to <b>{$room_to->room_number} {$room_to->room_type_abbr}</b> {$_POST['nights']} night{$s2} {$_POST['check_in']} - {$_POST['check_out']}";
     $this->insert_model->addBookingLog($log);
     $this->insert_model->log($log);
     $this->update_model->updateBooking($arrival, $departure, $_POST['booked_room_id']);
@@ -926,10 +1064,11 @@ class Main extends MY_Controller {
   }
 
   function addCharges() {
+    $booking_number = 'HDF' . str_pad($_POST['booking_id'], 5, '0', STR_PAD_LEFT);
     $booked_room = $this->get_model->getBookedRoom($_POST['booked_room_id']);
     $amount = number_format($_POST['charges_food_amount']);
     $s = $_POST['charges_food_quantity'] == 1 ? '' : 's';
-    $log = "<b>{$booked_room->room_number} {$booked_room->room_type_abbr}</b> → Added <b>{$_POST['charge_type']}</b> charge: <b>Ref. {$_POST['reference']} {$_POST['particulars']} {$_POST['charges_food_quantity']}</b> pc{$s} for ₱<b>{$amount}</b> each";
+    $log = "<b>{$booking_number}</b> → <b>{$booked_room->room_number} {$booked_room->room_type_abbr}</b> → Added <b>{$_POST['charge_type']}</b> charge: <b>Ref. {$_POST['reference']} {$_POST['particulars']} {$_POST['charges_food_quantity']}</b> pc{$s} for ₱<b>{$amount}</b> each";
     $this->insert_model->addBookingLog($log);
     $this->insert_model->log($log);
     $this->insert_model->addCharges();
@@ -938,10 +1077,11 @@ class Main extends MY_Controller {
   }
 
   function addOtherCharges() {
+    $booking_number = 'HDF' . str_pad($_POST['booking_id'], 5, '0', STR_PAD_LEFT);
     $charge = $this->get_model->getCharge($_POST['charge_id']);
     $booked_room = $this->get_model->getBookedRoom($_POST['booked_room_id']);
     $cost = number_format($charge->charge_amount);
-    $log = "<b>{$booked_room->room_number} {$booked_room->room_type_abbr}</b> → Added <b>{$_POST['charge_quantity']} {$charge->category}</b> - <b>{$charge->charge}</b> amounting ₱<b>{$cost}</b> each";
+    $log = "<b>{$booking_number}</b> → <b>{$booked_room->room_number} {$booked_room->room_type_abbr}</b> → Added <b>{$_POST['charge_quantity']} {$charge->category}</b> - <b>{$charge->charge}</b> amounting ₱<b>{$cost}</b> each";
     $this->insert_model->addBookingLog($log);
     $this->insert_model->log($log);
     $this->insert_model->addOtherCharges();
@@ -992,7 +1132,7 @@ class Main extends MY_Controller {
     $room = $room->room_number . ' ' . $room->room_type_abbr;
     $formatted_amount = number_format($amount);
     $option = strtolower($_POST['payment_option']);
-    $log = "<b>{$_POST['booking_number']}</b> → Added <b>{$payment_for}</b> payment to <b>{$room}</b> using <b>{$option}</b> amounting ₱<b>{$formatted_amount}</b>";
+    $log = "<b>{$_POST['booking_number']}</b> → Added <b>{$payment_for} payment</b> to <b>{$room}</b> using <b>{$option}</b> amounting ₱<b>{$formatted_amount}</b>";
 
     if ($_POST['payment_option'] == 'Cash') {
       $_POST['payment_details'] = '';
@@ -1056,6 +1196,12 @@ class Main extends MY_Controller {
   function completeOrder($booking_id, $booking_number) {
     $log = "<b>{$booking_number}</b> → Successfully completed order!";
     $_POST['booking_id'] = $booking_id;
+    $booked_rooms = $this->get_model->getBookedRooms($booking_id, [0]);
+
+    foreach ($booked_rooms as $row) {
+      $_POST['process_reason'] = 'Complete Order';
+      $this->update_model->processRoom($row['booked_room_id'], 2);
+    }
     $this->insert_model->addBookingLog($log);
     $this->insert_model->log($log);
     $this->update_model->updateReservationStatus(-1, $booking_id);
@@ -1097,10 +1243,11 @@ class Main extends MY_Controller {
   }
 
   function updateOccupant() {
+    $booking_number = 'HDF' . str_pad($_POST['booking_id'], 5, '0', STR_PAD_LEFT);
     $occupant = "{$_POST['guest']} / {$_POST['contact']} / {$_POST['email']}";
     $this->update_model->updateOccupant($occupant);
     $booked_room = $this->get_model->getBookedRoom($_POST['booked_room_id']);
-    $log = "<b>{$booked_room->room_number} {$booked_room->room_type_abbr}</b> → Set <b>{$_POST['guest']}</b> / {$_POST['contact']} / {$_POST['email']} as occupant";
+    $log = "<b>{$booking_number}</b> → <b>{$booked_room->room_number} {$booked_room->room_type_abbr}</b> → Set <b>{$_POST['guest']}</b> / {$_POST['contact']} / {$_POST['email']} as occupant";
     $this->insert_model->addBookingLog($log);
     $this->insert_model->log($log);
     $this->session->set_flashdata('success', 'Occupant successfully updated!');
@@ -1163,7 +1310,7 @@ class Main extends MY_Controller {
     $old_status = $this->get_model->getRoomStatuses($room->room_status_id);
     $room_status = $this->get_model->getRoomStatuses($_POST['room_status_id']);
     $this->update_model->updateRoomStatus();
-    $this->insert_model->log("Updated room status of <b>{$room->room_number} {$room->room_type_abbr}</b> from <b>{$old_status->description}</b> to <b>{$room_status->description}</b>", 4);
+    $this->insert_model->log("Updated room status of <b>{$booking_number}</b> → <b>{$room->room_number} {$room->room_type_abbr}</b> from <b>{$old_status->description}</b> to <b>{$room_status->description}</b>", 4);
     $this->session->set_flashdata('success', 'Room status successfully updated!');
     $this->redirect();
   }

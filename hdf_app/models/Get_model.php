@@ -67,12 +67,12 @@ class Get_model extends CI_Model {
       ->get('guests')->row();
   }
 
-  function getBookings() {
+  function getBookings($booked_room_archived = [0, 2]) {
     return $this->db->join('booked_rooms', 'booked_rooms.booking_id=bookings.booking_id')
       ->join('rooms', 'rooms.id=booked_rooms.room_id')
       ->join('guests', 'guests.guest_id=bookings.guest_id')
       ->where_in('reservation_status', [-1, 0, 1, 2])
-      ->where('booked_room_archived', 0)
+      ->where_in('booked_room_archived', $booked_room_archived)
       ->get('bookings')->result_array();
   }
 
@@ -155,6 +155,17 @@ class Get_model extends CI_Model {
 
   function getRoomCountByRoomType($room_type_id) {
     return $this->db->where('room_type_id', $room_type_id)->count_all_results('rooms');
+  }
+
+  function getBookedRoomsGroupedByDate($booking_id, $check_in = NULL) {
+    return $this->db->where('booking_id', $booking_id)
+      ->join('rooms', 'rooms.id=booked_rooms.room_id')
+      ->join('room_type', 'room_type.id=rooms.room_type_id')
+      ->join('discounts', 'discounts.discount_id=booked_rooms.discount_id')
+      ->order_by('booked_room_id', 'DESC')
+      ->where_in('booked_room_archived', [0, 2])
+      ->where('check_in', $check_in)
+      ->get('booked_rooms')->result_array();
   }
 
   function getBookedRooms($booking_id, $booked_room_archived = [0, 2]) {
