@@ -52,7 +52,8 @@ class Main extends MY_Controller {
     $data['y'] = $year;
     $data['guests'] = $this->get_model->getGuests();
     foreach ($data['bookings'] as $i => $booking) {
-      $data['bookings'][$i]['dates_between'] = $this->datesBetween($booking['check_in'], $booking['check_out']);
+      $check_out = $booking['early_check_out'] != NULL ? $booking['early_check_out'] : $booking['check_out'];
+      $data['bookings'][$i]['dates_between'] = $this->datesBetween($booking['check_in'], $check_out);
       $data['bookings'][$i]['payments'] = $this->get_model->getAdvanceByBookedRoom($booking['booked_room_id']);
     }
     return $data;
@@ -1067,8 +1068,7 @@ class Main extends MY_Controller {
     $booking_number = 'HDF' . str_pad($_POST['booking_id'], 5, '0', STR_PAD_LEFT);
     $booked_room = $this->get_model->getBookedRoom($_POST['booked_room_id']);
     $amount = number_format($_POST['charges_food_amount']);
-    $s = $_POST['charges_food_quantity'] == 1 ? '' : 's';
-    $log = "<b>{$booking_number}</b> → <b>{$booked_room->room_number} {$booked_room->room_type_abbr}</b> → Added <b>{$_POST['charge_type']}</b> charge: <b>Ref. {$_POST['reference']} {$_POST['particulars']} {$_POST['charges_food_quantity']}</b> pc{$s} for ₱<b>{$amount}</b> each";
+    $log = "<b>{$booking_number}</b> → <b>{$booked_room->room_number} {$booked_room->room_type_abbr}</b> → Added <b>{$_POST['charge_type']}</b> charge: <b>Ref. {$_POST['reference']} {$_POST['particulars']}</b> for ₱<b>{$amount}</b> each";
     $this->insert_model->addBookingLog($log);
     $this->insert_model->log($log);
     $this->insert_model->addCharges();

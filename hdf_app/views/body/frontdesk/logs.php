@@ -21,12 +21,12 @@
             <tbody>
               <?php foreach ($logs as $row) { ?>
                 <tr>
-                  <td>
+                  <td style="white-space: nowrap">
                     <?= $row['name'] ?><br>
                     <small><?= ucfirst(strtolower($row['user_type'])) ?></small>
                   </td>
                   <?php if ($_SESSION['user_type'] == 'Superadmin') { ?>
-                    <td>
+                    <td style="white-space: nowrap">
                       <?= array_key_exists($row['ip_address'], IP) ? IP[$row['ip_address']] : 'Unknown' ?><br>
                       <small><?= $row['ip_address'] ?></small>
                     </td>
