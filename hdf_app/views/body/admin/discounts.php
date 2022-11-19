@@ -23,16 +23,9 @@
               ?>
                   <tr>
                     <td class="border-left-0 pl-4"><?= $row['discount_type'] ?></td>
-                    <td><?= $row['percentage'] ?>%</td>
-                    <td><?= $row['using_formula'] ? '✔️' : '' ?></td>
-                    <td class="border-right-0 action">
-                      <a href="javascript:" class="btn btn-success btn-sm updateDiscount" id='<?= json_encode($row) ?>' data-placement="top" title="Update Discount" rel="tooltip">
-                        <span class="fa fa-edit"></span>
-                      </a>
-                      <a href="<?= base_url('index.php/admin/deleteDiscount/' . $row['discount_id']) ?>" class="btn btn-danger btn-sm confirm" data-placement="top" title="Delete Discount" rel="tooltip">
-                        <span class="fa fa-trash"></span>
-                      </a>
-                    </td>
+                    <td>0</td>
+                    <td></td>
+                    <td class="border-right-0"></td>
                   </tr>
               <?php }
               } ?>
@@ -44,12 +37,23 @@
                     <td><?= $row['percentage'] ?><?= $row['using_formula'] ? '' : '%' ?></td>
                     <td><?= $row['using_formula'] ? '✔️' : '' ?></td>
                     <td class="border-right-0 action">
-                      <a href="javascript:" class="btn btn-success btn-sm updateDiscount" id='<?= json_encode($row) ?>' data-placement="top" title="Update Discount" rel="tooltip">
-                        <span class="fa fa-edit"></span>
-                      </a>
-                      <a href="<?= base_url('index.php/admin/deleteDiscount/' . $row['discount_id']) ?>" class="btn btn-danger btn-sm confirm" data-placement="top" title="Delete Discount" rel="tooltip">
-                        <span class="fa fa-trash"></span>
-                      </a>
+                      <?php if ($row['using_formula']) { ?>
+                        <?php if ($_SESSION['user_type'] == 'Superadmin') { ?>
+                          <a href="javascript:" class="btn btn-success btn-sm updateDiscount" id='<?= json_encode($row) ?>' data-placement="top" title="Update Discount" rel="tooltip">
+                            <span class="fa fa-edit"></span>
+                          </a>
+                          <a href="<?= base_url('index.php/admin/deleteDiscount/' . $row['discount_id']) ?>" class="btn btn-danger btn-sm confirm" data-placement="top" title="Delete Discount" rel="tooltip">
+                            <span class="fa fa-trash"></span>
+                          </a>
+                        <?php }
+                      } else { ?>
+                        <a href="javascript:" class="btn btn-success btn-sm updateDiscount" id='<?= json_encode($row) ?>' data-placement="top" title="Update Discount" rel="tooltip">
+                          <span class="fa fa-edit"></span>
+                        </a>
+                        <a href="<?= base_url('index.php/admin/deleteDiscount/' . $row['discount_id']) ?>" class="btn btn-danger btn-sm confirm" data-placement="top" title="Delete Discount" rel="tooltip">
+                          <span class="fa fa-trash"></span>
+                        </a>
+                      <?php } ?>
                     </td>
                   </tr>
               <?php }

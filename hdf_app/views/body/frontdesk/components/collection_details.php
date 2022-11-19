@@ -49,7 +49,11 @@ function round_format($num) {
 
           if ($row['using_formula'] == 1) {
             [$multiplicand, $multiplier] = explode('x', $row['percentage']);
-            $subtotal = $total / $multiplicand * $multiplier;
+            if ($multiplicand == 1.12) {
+              $subtotal = $total / $multiplicand * $multiplier;
+            } else {
+              $subtotal = $total - ($total / $multiplicand * $multiplier);
+            }
           } else {
             $discount = $total * ($row['percentage'] / 100);
             $subtotal = $total - $discount;

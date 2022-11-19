@@ -208,9 +208,16 @@
               <?php } ?>
             <?php } ?>
             <?php foreach ($discounts as $row) { ?>
-              <?php if ($row['discount_type'] != 'N/A') { ?>
-                <option value="<?= $row['discount_id'] ?>" using_formula="<?= $row['using_formula'] ?>" percentage="<?= $row['percentage'] ?>"><?= $row['discount_type'] ?> (<?= $row['percentage'] ?><?= $row['using_formula'] ? '' : '%' ?>)</option>
-              <?php } ?>
+              <?php if ($row['discount_type'] != 'N/A') {
+                [$id, $label, $occupants] = explode(' ', $row['discount_type']);
+                if ($row['using_formula'] == 0) { ?>
+                  <option value="<?= $row['discount_id'] ?>" using_formula="<?= $row['using_formula'] ?>" percentage="<?= $row['percentage'] ?>"><?= $row['using_formula'] ? 'SC/PWD (' . $id . ' ' . $label . ')' : $row['discount_type'] ?> (<?= $row['percentage'] ?>%)</option>
+                <?php } else { ?>
+                  <?php if ($occupants) { ?>
+                    <option class="<?= $row['using_formula'] == 1 ? 'using_formula' : '' ?> id<?= $id ?> occupants<?= $occupants ?>" value="<?= $row['discount_id'] ?>" using_formula="<?= $row['using_formula'] ?>" percentage="<?= $row['percentage'] ?>"><?= $row['using_formula'] ? 'SC/PWD (' . $id . ' ' . $label . ')' : $row['discount_type'] ?></option>
+                  <?php } ?>
+              <?php }
+              } ?>
             <?php } ?>
           </select>
         </div>
@@ -571,12 +578,27 @@
     let value = data.percentage
     let discounted = 0;
 
+    console.log(data.max_persons);
+    console.log(data.room_type_abbr);
+
+    if (data.max_persons == 2) {
+      $('.occupants3').hide();
+    } else {
+      $('.occupants3').show();
+    }
+
+    if (data.max_persons == 3) {
+      $('.occupants2').hide();
+    } else {
+      $('.occupants2').show();
+    }
+
     room_rate = data.pricing_type;
     nights = data.nights;
 
     if (data.using_formula == '1') {
       const [multiplicand, multiplier] = value.split('x');
-      discounted = parseFloat(room_rate / parseFloat(multiplicand) * parseFloat(multiplier)).toFixed(2);
+      discounted = parseFloat(room_rate - (room_rate / parseFloat(multiplicand) * parseFloat(multiplier))).toFixed(2);
     } else {
       value = value / 100;
       discounted = room_rate - room_rate * value;
@@ -613,7 +635,7 @@
 
     if (using_formula) {
       const [multiplicand, multiplier] = value.split('x');
-      discounted = parseFloat(room_rate / parseFloat(multiplicand) * parseFloat(multiplier)).toFixed(2);
+      discounted = parseFloat(room_rate - (room_rate / parseFloat(multiplicand) * parseFloat(multiplier))).toFixed(2);
     } else {
       value = value / 100;
       discounted = room_rate - room_rate * value

@@ -201,7 +201,11 @@ class Main extends MY_Controller {
     $person = $this->get_model->getPrice('Person');
     if ($room['using_formula'] == '1') {
       [$multiplicand, $multiplier] = explode('x', $room['percentage']);
-      $rate = $room['pricing_type'] / $multiplicand * $multiplier;
+      if ($multiplicand == 1.12) {
+        $rate = $room['pricing_type'] / $multiplicand * $multiplier;
+      } else {
+        $rate = $room['pricing_type'] - ($room['pricing_type'] / $multiplicand * $multiplier);
+      }
     } else {
       $rate = $this->percentage($room['pricing_type'], $room['percentage']);
     }
@@ -942,7 +946,7 @@ class Main extends MY_Controller {
     $this->update_model->updateDiscount();
     $booked_room = $this->get_model->getBookedRoom($_POST['booked_room_id']);
     $discount = $this->get_model->getDiscount($_POST['discount_id']);
-    $log = "<b>{$booking_number}</b> → <b>{$booked_room->room_number} {$booked_room->room_type_abbr}</b> → Set room discount of <b>{$discount->percentage}% ({$discount->discount_type})</b>";
+    $log = "<b>{$booking_number}</b> → <b>{$booked_room->room_number} {$booked_room->room_type_abbr}</b> → Set room discount for <b>{$discount->discount_type}</b>";
     $this->insert_model->addBookingLog($log);
     $this->insert_model->log($log);
     $this->session->set_flashdata('success', 'Discount successfully updated!');
@@ -1094,7 +1098,11 @@ class Main extends MY_Controller {
     $person = $this->get_model->getPrice('Person');
     if ($room['using_formula'] == '1') {
       [$multiplicand, $multiplier] = explode('x', $room['percentage']);
-      $rate = $room['pricing_type'] / $multiplicand * $multiplier;
+      if ($multiplicand == 1.12) {
+        $rate = $room['pricing_type'] / $multiplicand * $multiplier;
+      } else {
+        $rate = $room['pricing_type'] - ($room['pricing_type'] / $multiplicand * $multiplier);
+      }
     } else {
       $rate = $this->percentage($room['pricing_type'], $room['percentage']);
     }
