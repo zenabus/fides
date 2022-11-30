@@ -63,6 +63,45 @@ class Insert_model extends CI_Model {
     return [$booking_number, $booked_room_id];
   }
 
+  // 0 - checkin 
+  // 1 - walkin 
+  // 2 - online 
+  // 3 - verified 
+  // 4 - cancelled reservation 
+  // 5 - confirmed 
+  // 6 - cancelled booking 
+
+  function massBook() {
+    $data = [
+      'guest_id' => $_POST['guest_id'],
+      'booking_type' => $_POST['rdo_booking_type'],
+      'arrival' => $_POST['check_in_mass'],
+      'departure' => $_POST['check_out_mass'],
+      'reservation_status' => $_POST['rdo_booking_type'] == 'Check In' ? 0 : 1
+    ];
+    if ($_POST['rdo_booking_type'] == 'reservation') {
+      $data['reservation_type'] = 'Arrival/Tentative';
+    }
+    $this->db->insert('bookings', $data);
+    $booking_id = $this->db->insert_id();
+    $booking_number = 'HDF' . str_pad($booking_id, 5, '0', STR_PAD_LEFT);
+    $this->db->where('booking_id', $booking_id)->update('bookings', ['booking_number' => $booking_number]);
+
+    foreach (json_decode($_POST['room_ids']) as $room_id) {
+      $room_data = [
+        'booking_id' => $booking_id,
+        'room_id' => $room_id,
+        'check_in' => $_POST['check_in_mass'],
+        'check_out' => $_POST['check_out_mass'],
+        'nights' => $_POST['nights'],
+      ];
+
+      $this->db->insert('booked_rooms', $room_data);
+    }
+
+    return [$booking_id, $booking_number];
+  }
+
   function addGuest($guest, $post = FALSE) {
     if ($post) {
       $data = [

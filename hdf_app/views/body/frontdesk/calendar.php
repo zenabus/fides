@@ -123,28 +123,36 @@
   }
 </style>
 
+<?php
+
+$yesterday = date('Y-m-d', strtotime('-1 day'));
+$todate = date('Y-m-d');
+$now = date('H');
+
+?>
+
 <div class="content pb-0">
   <div class="row">
     <div class="col-md-12">
       <div class="d-flex justify-content-between">
         <h5 id="title">Room Calendar</h5>
         <div>
-          <a href="<?= base_url('index.php/main/calendar/' . $y . '/' . str_pad(($m - 1), 2, '0', STR_PAD_LEFT)) ?>" class="btn btn-primary btn-sm" title="Previous Month" <?= $m == '01' ? 'disabled' : '' ?>>
+          <a href="<?= base_url('index.php/main/calendar/' . $y . '/' . str_pad(($m - 1), 2, '0', STR_PAD_LEFT)) ?>" class="btn btn-primary btn-sm" title="Previous Month" <?= $m == '01' ? 'disabled' : '' ?> data-placement="top" rel="tooltip">
             <span class="fa fa-arrow-left"></span>
           </a>
           <?php if ($y == date('Y') && $m == date('m')) { ?>
-            <a href="javascript:" class="btn btn-success btn-sm" title="Go to Current" id="current">
+            <a href="javascript:" class="btn btn-success btn-sm" title="Go to Current" id="current" data-placement="top" rel="tooltip">
               <span class="fa fa-undo"></span>
             </a>
           <?php } else { ?>
-            <a href="<?= base_url('index.php/main/calendar/' . date('Y') . '/' . date('m')) ?>" class="btn btn-success btn-sm" title="Go to Current">
+            <a href="<?= base_url('index.php/main/calendar/' . date('Y') . '/' . date('m')) ?>" class="btn btn-success btn-sm" title="Go to Current" data-placement="top" rel="tooltip">
               <span class="fa fa-undo"></span>
             </a>
           <?php } ?>
-          <a href="javascript:" class="btn btn-success btn-sm" title="Select Month" data-toggle="modal" data-target="#modalMonth">
+          <a href="javascript:" class="btn btn-success btn-sm" title="Select Month" data-toggle="modal" data-target="#modalMonth" data-placement="top" rel="tooltip">
             <span class="fa fa-calendar"></span>
           </a>
-          <a href="<?= base_url('index.php/main/calendar/' . $y . '/' . str_pad(($m + 1), 2, '0', STR_PAD_LEFT)) ?>" class="btn btn-primary btn-sm" title="Next Month" <?= $m == '12' ? 'disabled' : '' ?>>
+          <a href="<?= base_url('index.php/main/calendar/' . $y . '/' . str_pad(($m + 1), 2, '0', STR_PAD_LEFT)) ?>" class="btn btn-primary btn-sm" title="Next Month" <?= $m == '12' ? 'disabled' : '' ?> data-placement="top" rel="tooltip">
             <span class="fa fa-arrow-right"></span>
           </a>
         </div>
@@ -161,17 +169,42 @@
                     $icon = '';
                     $today = '';
                     $bg = '';
+
+                    if ($i % 2) {
+                      $bg = 'bg-light';
+                    }
                     if (date('Y-m-d') == $y . '-' . $m . '-' . str_pad($i, 2, '0', STR_PAD_LEFT)) {
-                      $icon = '<i class="fa-regular fa-calendar-check"></i> ';
                       $bg = 'bg-default text-white';
                     }
+
                     if (date('Y-m-d') == $y . '-' . $m . '-' . str_pad($i + 1, 2, '0', STR_PAD_LEFT)) {
                       $today = 'today';
                     } elseif (date('Y-m-d') == $y . '-' . $m . '-' . str_pad($i, 2, '0', STR_PAD_LEFT)) {
                       $today = 'today';
                     }
+
+                    $disabled = FALSE;
+                    $checkin = '';
+                    $type = 'Reservation';
+                    $date_dash = $y . '-' .  $m . '-' . str_pad($i, 2, '0', STR_PAD_LEFT);
+                    if ($yesterday > $date_dash) {
+                      $disabled = TRUE;
+                    } elseif ($yesterday == $date_dash) {
+                      if ($now >= 10) {
+                        $disabled = TRUE;
+                      } else {
+                        $type = 'Check In';
+                      }
+                    } elseif ($todate == $date_dash) {
+                      if ($now >= 10) {
+                        $type = 'Check In';
+                      }
+                    }
+
                     ?>
-                    <th colspan="2" class="text-center sticky-top border-shadow<?= $i % 2 ? ' bg-light' : '' ?> <?= $bg ?>" id="<?= $today ?>"><?= $icon ?><?= $i ?>-<?= substr($month, 0, 3) ?></th>
+                    <th colspan="2" class="text-center sticky-top border-shadow <?= $disabled ? '' : 'mass' ?> <?= $bg ?>" id="<?= $today ?>" date="<?= $date_dash ?>" type="<?= $type ?>">
+                      <?= $i ?>-<?= substr($month, 0, 3) ?>
+                    </th>
                   <?php } ?>
                 </tr>
               </thead>
@@ -197,11 +230,6 @@
                         <div class="d-inline-block" style="width:50px;"><?= $row['name'] ?></div>
                       </div>
                     </td>
-                    <?php
-                    $yesterday = date('Y-m-d', strtotime('-1 day'));
-                    $today = date('Y-m-d');
-                    $now = date('H');
-                    ?>
                     <?php for ($i = 1; $i <= $days; $i++) { ?>
                       <?php
                       $disabled = '';
@@ -219,7 +247,7 @@
                         } else {
                           $type = 'Check In';
                         }
-                      } elseif ($today == $date_dash) {
+                      } elseif ($todate == $date_dash) {
                         if ($now >= 10) {
                           $type = 'Check In';
                         }

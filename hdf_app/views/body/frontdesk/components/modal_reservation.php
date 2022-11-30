@@ -93,7 +93,7 @@
           </div>
           <div class="form-group col-md-4">
             <label>Night(s)</label>
-            <input type="number" class="form-control text-center" name="nights" value="1" min="0" autocomplete="off">
+            <input type="number" class="form-control text-center" name="nights" value="1" min="0" autocomplete="off" readonly>
           </div>
         </div>
         <div class="form-group text-center">

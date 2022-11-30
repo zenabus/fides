@@ -1,3 +1,5 @@
+let modalGuestType = "Single";
+
 const minDate = new Date();
 minDate.setDate(minDate.getDate() - 2);
 $(".datepicker").datetimepicker({
@@ -29,6 +31,7 @@ $(document).ready(function () {
 });
 
 $("#returning_guest").click(function () {
+  modalGuestType = "Single";
   $("#modalGuest").modal("show");
 });
 
@@ -98,18 +101,28 @@ $("#search").on("input", function () {
 
 $(document).on("click", ".choose", function () {
   const guest = JSON.parse($(this).attr("guest"));
-  $("[name=guest_id]").val(guest.guest_id);
-  $("[name=first_name]").val(guest.first_name);
-  $("[name=middle_name]").val(guest.middle_name);
-  $("[name=last_name]").val(guest.last_name);
-  $("[name=contact]").val(guest.contact);
-  $("[name=email]").val(guest.email);
-  $("[name=company_name]").val(guest.company_name);
-  $("#txt-contact").text(`${guest.contact.length} digits`);
-  $("#modalGuest").modal("hide");
-  $("#returning_guest").hide();
-  $("#new_guest").show();
-  $(".guest_details").prop("readonly", true);
+
+  if (modalGuestType == "Single") {
+    $("[name=guest_id]").val(guest.guest_id);
+    $("[name=first_name]").val(guest.first_name);
+    $("[name=middle_name]").val(guest.middle_name);
+    $("[name=last_name]").val(guest.last_name);
+    $("[name=contact]").val(guest.contact);
+    $("[name=email]").val(guest.email);
+    $("[name=company_name]").val(guest.company_name);
+    $("#txt-contact").text(`${guest.contact.length} digits`);
+    $("#modalGuest").modal("hide");
+    $("#returning_guest").hide();
+    $("#new_guest").show();
+    $(".guest_details").prop("readonly", true);
+  } else {
+    const guest_name = `${guest.first_name} ${guest.middle_name} ${guest.last_name} ${guest.suffix}`;
+    $("#modalGuest").modal("hide");
+    $("[name=guest_id]").val(guest.guest_id);
+    $("#select-guest").hide();
+    $("#guest-name").text(guest_name).show();
+    $(".guest-close").show();
+  }
 });
 
 $("#new_guest").click(function () {
@@ -227,6 +240,7 @@ $("#modalBooking").on("hide.bs.modal", function (e) {
   $("[name=payment_option]").removeAttr("disabled");
 
   $("#txt-contact").text("");
+  $("#btnUpdate").hide();
 });
 
 $("[name=payment_option]").change(function () {

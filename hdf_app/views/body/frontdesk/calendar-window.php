@@ -216,8 +216,8 @@
                 } else {
                   $color = 'warning';
                 }
-                if($data['booked_room_archived']==2) {
-                  $color = 'danger';  
+                if ($data['booked_room_archived'] == 2) {
+                  $color = 'danger';
                 }
                 ?>
                 <td class="with-data bg-<?= $color ?>" room_id="<?= $row['room_id'] ?>" date="<?= $date ?>" data='<?= json_encode($row) ?>'></td>
@@ -246,17 +246,6 @@
   let end = 0;
   let data = null;
 
-  $('#current').click(function() {
-    const today = document.getElementById("today");
-    if (today) {
-      today.scrollIntoView({
-        behavior: "smooth",
-        block: "end",
-        inline: "start"
-      });
-    }
-  });
-
   $(document).ready(function() {
     const today = document.getElementById("today");
     if (today) {
@@ -272,18 +261,6 @@
     for (const date of dates_between) {
       $(`[room_id="${localStorage.getItem('highlight_room_id')}"][date="${$.escapeSelector(date)}"]`).css('opacity', 1);
     }
-  });
-
-  $('#month').change(function() {
-    const month = $(this).val();
-    const year = $('#year').val();
-    $('#selectMonth').attr('href', `${base_url}index.php/main/calendar/${year}/${month}`)
-  });
-
-  $('#year').change(function() {
-    const year = $('#year').val();
-    const month = $('#month').val();
-    $('#selectMonth').attr('href', `${base_url}index.php/main/calendar/${year}/${month}`)
   });
 
   function clearAll() {

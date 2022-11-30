@@ -82,7 +82,7 @@ if (!$this->session->userdata('connect')) {
     }
 
     th {
-      white-space: pre;
+      white-space: nowrap;
     }
 
     td {

@@ -69,6 +69,7 @@ class Main extends MY_Controller {
       $this->load->view('layout/header', $data);
       $this->load->view('body/frontdesk/calendar');
       $this->load->view('body/frontdesk/components/modal_reservation');
+      $this->load->view('body/frontdesk/components/modal_mass');
       $this->load->view('layout/footer');
     }
   }
@@ -731,6 +732,16 @@ class Main extends MY_Controller {
       }
       $this->redirect();
     }
+  }
+
+  function massBooking() {
+    [$booking_id, $booking_number] = $this->insert_model->massBook();
+    $log = "Mass {$_POST['rdo_booking_type']}: {$booking_number}";
+    $_POST['booking_id'] = $booking_id;
+    $this->insert_model->log($log);
+    $this->insert_model->addBookingLog($log);
+    $this->session->set_flashdata('success', "Successfully booked multiple rooms");
+    $this->redirect();
   }
 
   function addGuest() {
