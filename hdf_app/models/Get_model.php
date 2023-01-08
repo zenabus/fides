@@ -281,6 +281,11 @@ class Get_model extends CI_Model {
     }
   }
 
+  function getRoomChargesv2($booked_room_id) {
+    $this->db->where('booked_room_id', $booked_room_id);
+    return $this->db->get('charges_food')->result_array();
+  }
+
   function getRoomAmenitiesByRoomId($booked_room_id) {
     return $this->db->select_sum('(charge_quantity * charge_amount)', 'total')
       ->join('charges', 'charges.charge_id=charges_other.charge_id')

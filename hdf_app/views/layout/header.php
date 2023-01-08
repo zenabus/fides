@@ -367,13 +367,13 @@ if (!$this->session->userdata('connect')) {
           </div>
 
           <?php if (isset($cash)) { ?>
-            <h3 class="mb-0" data-placement="bottom" title="(Beginning Balance + Total Sales of the day)" rel="tooltip">₱ <?= number_format($cash->cash_amount, 2) ?>
+            <!-- <h3 class="mb-0" data-placement="bottom" title="(Beginning Balance + Total Sales of the day)" rel="tooltip">₱ <?= number_format($cash->cash_amount, 2) ?>
               <?php if ($remitted) { ?>
                 <span class="fa fa-check-circle text-success"></span>
               <?php } else { ?>
                 <a href="<?= base_url('index.php/main/dcr') ?>"> <span class="fa fa-info-circle text-danger heart"></span></a>
               <?php } ?>
-            </h3>
+            </h3> -->
           <?php } ?>
 
           <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navigation" aria-controls="navigation-index" aria-expanded="false" aria-label="Toggle navigation">

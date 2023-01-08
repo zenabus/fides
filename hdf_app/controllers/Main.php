@@ -584,24 +584,107 @@ class Main extends MY_Controller {
     $image = file_get_contents(base_url('assets/img/acknowledgement_receipt.jpg'));
     $data['image'] = 'data:image/jpg;base64,' . base64_encode($image);
     $data['booking'] = $this->get_model->getBooking($booking_id);
-
-    $dates = $this->getDaysInBetween($data['booking']->arrival, $data['booking']->departure);
+    $booked_rooms = $this->get_model->getBookedRooms($booking_id);
     $soa = [];
 
-    foreach ($dates as $i => $date) {
-      $rooms = $this->get_model->getBookedRoomsGroupedByDate($booking_id, $this->toSlashedDate($date));
-      foreach ($rooms as $room) {
+    foreach ($booked_rooms as $booked_room) {
+      $room_dates = $this->datesBetween($booked_room['check_in'], $booked_room['check_out']);
+      foreach ($room_dates as $room_date) {
+        if ($booked_room['using_formula'] == '1') {
+          [$multiplicand, $multiplier] = explode('x', $booked_room['percentage']);
+          if ($multiplicand == 1.12) {
+            $rate = $booked_room['pricing_type'] / $multiplicand * $multiplier;
+          } else {
+            $rate = $booked_room['pricing_type'] - ($booked_room['pricing_type'] / $multiplicand * $multiplier);
+          }
+        } else {
+          $rate = $this->percentage($booked_room['pricing_type'], $booked_room['percentage']);
+        }
+
         $particular = [
-          'date' => $date,
-          'particulars' => "Room Accommodation ({$room['room_type_abbr']} {$room['room_number']})",
-          'charges' => $room['pricing_type']
+          'added' => $booked_room['booked_room_added'],
+          'date' => $room_date,
+          'particulars' => "Room Accommodation ({$booked_room['room_type_abbr']} {$booked_room['room_number']})",
+          'charges' => $rate,
+          'reference' => '',
+          'payment' => FALSE
+        ];
+        array_push($soa, $particular);
+      }
+
+      $room_charges = $this->get_model->getRoomChargesv2($booked_room['booked_room_id']);
+      foreach ($room_charges as $room_charge) {
+        $charge_date = date_create($room_charge['charges_food_added']);
+        $charge_date = date_format($charge_date, "m/d/Y");
+        $particular = [
+          'added' => $room_charge['charges_food_added'],
+          'date' => $charge_date,
+          'particulars' => preg_replace("/\([^)]+\)/", "", $room_charge['charge_type']) . " Charge ({$booked_room['room_type_abbr']} {$booked_room['room_number']})",
+          'charges' => $room_charge['charges_food_amount'] * $room_charge['charges_food_quantity'],
+          'reference' => $room_charge['reference'],
+          'payment' => FALSE
+        ];
+        array_push($soa, $particular);
+      }
+
+      $amenities = $this->get_model->getRoomAmenities($booked_room['booked_room_id']);
+      foreach ($amenities as $amenity) {
+        $charge_date = date_create($amenity['charges_other_added']);
+        $charge_date = date_format($charge_date, "m/d/Y");
+        $qty = $amenity['charge_quantity'] != 1 ? $amenity['charge_quantity'] : '';
+        $charge = preg_replace("/\([^)]+\)/", "", $amenity['charge']);
+
+        if ($amenity['charge_id'] == 39) {
+          if ($booked_room['using_formula'] == 1) {
+            [$multiplicand, $multiplier] = explode('x', $booked_room['percentage']);
+            if ($multiplicand == 1.12) {
+              $amount = $booked_room['pricing_type'] / $multiplicand * $multiplier;
+            } else {
+              $amount = $booked_room['pricing_type'] - ($booked_room['pricing_type'] / $multiplicand * $multiplier);
+            }
+          } else {
+            $discount = $booked_room['pricing_type'] * ($booked_room['percentage'] / 100);
+            $amount = $booked_room['pricing_type'] - $discount;
+          }
+        } else {
+          $amount = $amenity['charge_amount'];
+        }
+
+
+        $particular = [
+          'added' => $amenity['charges_other_added'],
+          'date' => $charge_date,
+          'particulars' => "{$qty} {$charge} ({$booked_room['room_type_abbr']} {$booked_room['room_number']})",
+          'charges' => $amount * $amenity['charge_quantity'],
+          'reference' => '',
+          'payment' => FALSE
         ];
         array_push($soa, $particular);
       }
     }
 
-    $data['soa'] = $soa;
+    $payments = $this->get_model->getPayments($booking_id);
+    foreach ($payments as $payment) {
+      $payment_date = date_create($payment['booking_payment_added']);
+      $payment_date = date_format($payment_date, "m/d/Y");
+      $particular = [
+        'added' => $payment['booking_payment_added'],
+        'date' => $payment_date,
+        'particulars' => ucfirst($payment['payment_for']) . " Payment ({$payment['room_type_abbr']} {$payment['room_number']})",
+        'charges' => $payment['amount'],
+        'reference' => '',
+        'payment' => TRUE
+      ];
+      array_push($soa, $particular);
+    }
 
+    usort($soa, function ($item1, $item2) {
+      return $item1['added'] <=> $item2['added'];
+    });
+    usort($soa, function ($item1, $item2) {
+      return $item1['date'] <=> $item2['date'];
+    });
+    $data['soa'] = $soa;
     $view = $this->load->view('body/frontdesk/components/receiptv2', $data, TRUE);
     $options = new Options();
     $options->set('dpi', 300);

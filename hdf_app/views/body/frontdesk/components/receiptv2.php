@@ -196,43 +196,60 @@
         <?php
         $balance = 0;
         $charges = 0;
+        $payment = 0;
         $date_holder = '';
         foreach ($soa as $row) {
-          $balance += $row['charges'];
-          $charges += $row['charges'];
+
         ?>
           <tr class="bb bl br">
             <?php
             $date = date_create($row['date']);
             $date = date_format($date, "M d, Y");
-
             ?>
             <?php if ($date != $date_holder) { ?>
-              <td class="br ts"><?= $date ?></td>
+              <td class="br ts"><?= strtoupper($date) ?></td>
             <?php } else { ?>
               <td class="br ts"></td>
             <?php } ?>
             <?php $date_holder = $date; ?>
-            <td class="br ts"><?= $row['particulars'] ?></td>
-            <td class="br ts"></td>
-            <td class="br ts">₱ <?= number_format($row['charges'], 2) ?></td>
-            <td class="br ts"></td>
+            <td class="br ts"><?= strtoupper($row['particulars']) ?></td>
+            <td class="br ts"><?= $row['reference'] ?></td>
+            <td class="br ts">
+              <?php
+              if (!$row['payment']) {
+                echo '₱ ';
+                echo number_format($row['charges'], 2);
+                $charges += $row['charges'];
+                $balance += $row['charges'];
+              }
+              ?>
+            </td>
+            <td class="br ts">
+              <?php
+              if ($row['payment']) {
+                echo '₱ ';
+                echo number_format($row['charges'], 2);
+                $payment += $row['charges'];
+                $balance -= $row['charges'];
+              }
+              ?>
+            </td>
             <td class="ts">₱ <?= number_format($balance, 2) ?></td>
           </tr>
         <?php } ?>
-        <tr class="bb bl br">
+        <!-- <tr class="bb bl br">
           <td class="br"></td>
           <td class="br ts bg-apricot">PAYMENT</td>
           <td class="br bg-apricot"></td>
           <td class="br bg-apricot"></td>
           <td class="br bg-apricot"></td>
           <td></td>
-        </tr>
+        </tr> -->
         <tr class="bb bl br">
           <td colspan="2"></td>
           <td class="br tr b">TOTAL</td>
           <td class="br ts b">₱ <?= number_format($charges, 2) ?></td>
-          <td class="br ts">₱ 0.00</td>
+          <td class="br ts">₱ <?= number_format($payment, 2) ?></td>
           <td class="ts">₱ <?= number_format($balance, 2) ?></td>
         </tr>
         <tr>

@@ -45,18 +45,18 @@ function round_format($num) {
           $room_balance = 0;
           $room_paid = 0;
 
-          $total = $row['pricing_type'] * $row['nights'];
+          $room_subtotal = $row['pricing_type'] * $row['nights'];
 
           if ($row['using_formula'] == 1) {
             [$multiplicand, $multiplier] = explode('x', $row['percentage']);
             if ($multiplicand == 1.12) {
-              $subtotal = $total / $multiplicand * $multiplier;
+              $subtotal = $room_subtotal / $multiplicand * $multiplier;
             } else {
-              $subtotal = $total - ($total / $multiplicand * $multiplier);
+              $subtotal = $room_subtotal - ($room_subtotal / $multiplicand * $multiplier);
             }
           } else {
-            $discount = $total * ($row['percentage'] / 100);
-            $subtotal = $total - $discount;
+            $discount = $room_subtotal * ($row['percentage'] / 100);
+            $subtotal = $room_subtotal - $discount;
           }
 
           $balance = $subtotal - $row['payment_room'];
@@ -78,7 +78,7 @@ function round_format($num) {
             <td>
               ₱ <?= round_format($subtotal) ?> <br>
               <?php if ($row['discount_type'] != 'N/A') { ?>
-                <small data-placement="left" title="Less ₱ <?= round_format($subtotal - $total) ?>" rel="tooltip" data-html="true"><?= $row['discount_type'] ?> (<?= $row['percentage'] ?><?= $row['using_formula'] ? '' : '%' ?>)</small>
+                <small data-placement="left" title="Less ₱ <?= round_format($subtotal - $room_subtotal) ?>" rel="tooltip" data-html="true"><?= $row['discount_type'] ?> (<?= $row['percentage'] ?><?= $row['using_formula'] ? '' : '%' ?>)</small>
               <?php } else { ?>
                 <small>No discount</small>
               <?php } ?>
@@ -285,8 +285,18 @@ function round_format($num) {
               </td>
               <?php
               if ($charges['charge_id'] == 39) {
-                $discount = $charge_price * ($row['percentage'] / 100);
-                $total = $charge_price - $discount;
+                if ($row['using_formula'] == 1) {
+                  [$multiplicand, $multiplier] = explode('x', $row['percentage']);
+                  if ($multiplicand == 1.12) {
+                    $total = $row['pricing_type'] / $multiplicand * $multiplier;
+                  } else {
+                    $total = $row['pricing_type'] - ($row['pricing_type'] / $multiplicand * $multiplier);
+                  }
+                  $discount = $row['pricing_type'] - $total;
+                } else {
+                  $discount = $row['pricing_type'] * ($row['percentage'] / 100);
+                  $total = $row['pricing_type'] - $discount;
+                }
               ?>
                 <td>
                   ₱ <?= round_format($total) ?><br>
@@ -315,7 +325,7 @@ function round_format($num) {
               $room_balance += $balance;
               $room_paid += $paid;
               ?>
-              <td class="<?= $balance <= 0.01 ? 'paid balance' : 'balance' ?>" balance="<?= $balance >= 0.01 ?>">
+              <td class="<?= $balance <= 0.01 ? 'paid balance' : 'balance' ?>" balance="<?= $balance ?>">
                 <?php if ($balance == $total) { ?>
                   <a href="<?= base_url('index.php/main/removeCharge/charges_other/' . $charges['charges_other_id']) ?>" class="float-right mt-1 text-danger confirm hidable" data-placement="left" title="Remove Amenity / Charge" rel="tooltip">
                     <span class="fa fa-times"></span>
@@ -398,7 +408,8 @@ function round_format($num) {
         </div>
       <?php } ?>
     </div>
-    <a href="<?= base_url('index.php/main/receipt/' . $booking->booking_id) ?>" class="btn btn-sm mt-0 btn-info receipt">Print Receipt</a>
+    <!-- <a href="<?= base_url('index.php/main/receipt/' . $booking->booking_id) ?>" class="btn btn-sm mt-0 btn-info receipt">Print Receipt</a> -->
+    <a href="<?= base_url('index.php/main/receiptv2/' . $booking->booking_id) ?>" class="btn btn-sm mt-0 btn-info receipt">Print Receipt</a>
   </div>
 </div>
 
@@ -635,9 +646,11 @@ function round_format($num) {
       $('[name=payment_for]').val(payment_for);
       $('#modalPayment').modal('show');
       if (booked_room_id == 'All Rooms') {
+        console.log('1');
         $('[name=payment_for]').attr('readonly', true).css('pointer-events', 'none').val('All Types');
         $('[name=amount]').val(amount);
       } else {
+        console.log('2', amount);
         $('[name=payment_for]').removeAttr('readonly').css('pointer-events', '');
         $('[name=amount]').val(amount);
       }
