@@ -126,6 +126,10 @@ if (!$this->session->userdata('connect')) {
     input[type=number] {
       -moz-appearance: textfield;
     }
+
+    select {
+      font-family: "Helvetica Neue", Arial, sans-serif !important;
+    }
   </style>
 
   <script>

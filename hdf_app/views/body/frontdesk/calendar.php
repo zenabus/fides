@@ -325,7 +325,11 @@ $now = date('H');
         </div>
         <div class="form-group">
           <label>Year</label>
-          <input type="number" class="form-control" id="year" value="<?= $y ?>" min="2021">
+          <select name="" id="year" class="form-control">
+            <?php for ($i = 2021; $i <= date('Y'); $i++) {  ?>
+              <option value="<?= $i ?>" <?= $y == $i ? 'selected' : '' ?>><?= $i ?></option>
+            <?php  } ?>
+          </select>
         </div>
       </div>
       <div class="modal-footer">

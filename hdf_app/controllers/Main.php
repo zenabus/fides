@@ -650,7 +650,6 @@ class Main extends MY_Controller {
           $amount = $amenity['charge_amount'];
         }
 
-
         $particular = [
           'added' => $amenity['charges_other_added'],
           'date' => $charge_date,
@@ -1411,6 +1410,7 @@ class Main extends MY_Controller {
     $room = $this->get_model->getRoom($_POST['room_id']);
     $old_status = $this->get_model->getRoomStatuses($room->room_status_id);
     $room_status = $this->get_model->getRoomStatuses($_POST['room_status_id']);
+    $booking_number = 'HDF' . str_pad($room->booking_id, 5, '0', STR_PAD_LEFT);
     $this->update_model->updateRoomStatus();
     $this->insert_model->log("Updated room status of <b>{$booking_number}</b> → <b>{$room->room_number} {$room->room_type_abbr}</b> from <b>{$old_status->description}</b> to <b>{$room_status->description}</b>", 4);
     $this->session->set_flashdata('success', 'Room status successfully updated!');
