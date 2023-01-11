@@ -140,7 +140,7 @@ class MY_Controller extends CI_Controller {
     return $array;
   }
 
-  function getDaysInBetween($check_in, $check_out) {
+  function getDaysInBetween($check_in, $check_out, $format = 'Y-m-d') {
     $days = [];
     $start = new DateTime($check_in);
     $end = new DateTime($check_out);
@@ -150,7 +150,7 @@ class MY_Controller extends CI_Controller {
     $dates = new DatePeriod($start, $interval, $end);
 
     foreach ($dates as $date) {
-      array_push($days, $date->format("Y-m-d"));
+      array_push($days, $date->format($format));
     }
 
     return $days;

@@ -816,13 +816,59 @@ class Main extends MY_Controller {
     }
   }
 
+  function flatten(array $array) {
+    $return = array();
+    array_walk_recursive($array, function ($a) use (&$return) {
+      $return[] = $a;
+    });
+    return $return;
+  }
+
+  function checkAvailableRooms($check_in, $check_out) {
+    $conflicts = [];
+    $occupied = [];
+    $check_dates = $this->datesBetween($check_in, $check_out, 'Y-m-d');
+
+    foreach ($check_dates as $date) {
+      $conflict = $this->get_model->checkAvailableRooms($date);
+      if ($conflict) {
+        array_push($conflicts, $conflict);
+      }
+    }
+
+    foreach ($conflicts as $conflict) {
+      foreach ($conflict as $row) {
+        if (!in_array($row['room_id'], $occupied)) {
+          if ($row['c_out'] != $check_in) {
+            array_push($occupied, $row['room_id']);
+          }
+        }
+      }
+    }
+
+    echo json_encode($occupied);
+  }
+
   function massBooking() {
-    [$booking_id, $booking_number] = $this->insert_model->massBook();
-    $log = "Mass {$_POST['rdo_booking_type']}: {$booking_number}";
-    $_POST['booking_id'] = $booking_id;
-    $this->insert_model->log($log);
-    $this->insert_model->addBookingLog($log);
-    $this->session->set_flashdata('success', "Successfully booked multiple rooms");
+    $conflicts = [];
+    $check_dates = $this->getDaysInBetween($_POST['check_in_mass'], $_POST['check_out_mass']);
+    foreach ($check_dates as $date) {
+      $conflict = $this->get_model->checkConflict($date);
+      if ($conflict) {
+        array_push($conflicts, $conflict);
+      }
+    }
+
+    if (count($conflicts)) {
+      $this->session->set_flashdata('error', "Conflict with existing booking detected");
+    } else {
+      [$booking_id, $booking_number] = $this->insert_model->massBook();
+      $log = "Mass {$_POST['rdo_booking_type']}: {$booking_number}";
+      $_POST['booking_id'] = $booking_id;
+      $this->insert_model->log($log);
+      $this->insert_model->addBookingLog($log);
+      $this->session->set_flashdata('success', "Successfully booked multiple rooms");
+    }
     $this->redirect();
   }
 
@@ -1474,5 +1520,18 @@ class Main extends MY_Controller {
     $this->insert_model->addBookingLog($log);
     $this->session->set_flashdata('success', "Booking successfully charged to {$guest->first_name} {$guest->middle_name} {$guest->last_name} {$guest->suffix}!");
     $this->redirect();
+  }
+
+  function getAllBookedRooms() {
+    $all = $this->get_model->getAllBookedRooms();
+    foreach ($all as $row) {
+      if ($row['check_in'] || $row['check_out']) {
+        $data = [
+          'c_in' => $this->toDashedDate($row['check_in']),
+          'c_out' => $this->toDashedDate($row['check_out']),
+        ];
+        $this->update_model->updateBookedRoomDates($row['booked_room_id'], $data);
+      }
+    }
   }
 }

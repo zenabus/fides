@@ -88,7 +88,7 @@
         <div class="d-flex flex-wrap justify-content-between">
           <?php $prev = 0; ?>
           <?php foreach ($rooms as $room) { ?>
-            <div class="room" id="<?= $room['room_id'] ?>"><?= $room['room_number'] ?> <?= $room['room_type_abbr'] ?></div>
+            <div class="room r<?= $room['room_id'] ?>" id="<?= $room['room_id'] ?>"><?= $room['room_number'] ?> <?= $room['room_type_abbr'] ?></div>
             <?php $prev = $room['room_number'] ?>
           <?php } ?>
         </div>
@@ -149,23 +149,52 @@
     $(".guest-close").hide();
   });
 
+  const updateAvailableRooms = (check_in, check_out) => {
+    fetch(`${base_url}index.php/main/checkAvailableRooms/${check_in}/${check_out}`)
+      .then((response) => response.json())
+      .then((data) => {
+        $('.room').removeAttr('disabled');
+        data.map(room => {
+          $('.r' + room).attr('disabled', true);
+        });
+      });
+  }
+
   $('.mass').click(function() {
+    const base_url = '<?= base_url() ?>';
     const date = $(this).attr('date');
     const type = $(this).attr('type');
 
     $("[name=check_in_mass]").data("DateTimePicker").date(moment(date));
-    $("[name=check_out_mass]").data("DateTimePicker").date(moment(date).add(1, "days"));
     $("[name=check_out_mass]").data("DateTimePicker").minDate(moment(date).add(1, "days"));
+    $("[name=check_out_mass]").data("DateTimePicker").date(moment(date).add(1, "days"));
     $("input[name=rdo_booking_type][value='" + type + "']").prop("checked", true);
+
+    const check_in = moment(date).format('YYYY-MM-DD');
+    const check_out = moment(date).add(1, "days").format('YYYY-MM-DD');
+    updateAvailableRooms(check_in, check_out);
 
     $('#modalMass').modal('show');
   });
 
-  $("[name=check_out_mass]").on("dp.change", function(e) {
-    const checkout = moment($(this).val());
-    const checkin = moment($("[name=check_in_mass]").val());
-    const nights = checkout.diff(checkin, "days");
+  $("[name=check_in_mass], [name=check_out_mass]").on("dp.change", function(e) {
+    let check_in = moment($("[name=check_in_mass]").val());
+    let check_out = moment($("[name=check_out_mass]").val());
+    const nights = check_out.diff(check_in, "days");
     $("[name=nights]").val(nights);
+
+    check_in = moment(check_in).format('YYYY-MM-DD');
+    check_out = moment(check_out).format('YYYY-MM-DD');
+
+    if (check_in != 'Invalid date' && check_out != 'Invalid date') {
+      updateAvailableRooms(check_in, check_out);
+    }
+  });
+
+  $('#modalMass').on('hide.bs.modal', function() {
+    selected = 0;
+    $('#selected').text(0);
+    $('.room').removeClass('room-active');
   });
 
   $('#frmMass').submit(function(e) {

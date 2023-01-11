@@ -86,9 +86,16 @@ class Update_model extends CI_Model {
     $this->db->where('booked_room_id', $_POST['booked_room_id'])->update('booked_rooms', ['discount_id' => $_POST['discount_id']]);
   }
 
+  function toDashedDate($date) {
+    [$month, $day, $year] = explode('/', $date);
+    return $year . '-' . $month . '-' . $day;
+  }
+
   function changeRoom() {
     $booked_room_id = $_POST['booked_room_id'];
     unset($_POST['booked_room_id']);
+    $_POST['c_in'] = $this->toDashedDate($_POST['check_in']);
+    $_POST['c_out'] = $this->toDashedDate($_POST['check_out']);
     $this->db->where('booked_room_id', $booked_room_id)->update('booked_rooms', $_POST);
   }
 
@@ -188,6 +195,8 @@ class Update_model extends CI_Model {
       'nights' => $_POST['nights'],
       'check_in' => $_POST['check_in'],
       'check_out' => $_POST['check_out'],
+      'c_in' => $this->toDashedDate($_POST['check_in']),
+      'c_out' => $this->toDashedDate($_POST['check_out']),
     ];
     $this->db->where('room_id', $_POST['room_id'])
       ->where('booking_id', $_POST['booking_id'])
@@ -220,5 +229,9 @@ class Update_model extends CI_Model {
 
   function chargeTo() {
     $this->db->where('booking_id', $_POST['booking_id'])->update('bookings', ['charged_to' => $_POST['guest_id']]);
+  }
+
+  function updateBookedRoomDates($booked_room_id, $data) {
+    $this->db->where('booked_room_id', $booked_room_id)->update('booked_rooms', $data);
   }
 }

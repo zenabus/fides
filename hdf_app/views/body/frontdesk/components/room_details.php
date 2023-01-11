@@ -512,7 +512,7 @@
   const base_url = '<?= base_url() ?>';
   const price_bed = '<?= $bed->price ?>';
   const price_person = '<?= $person->price ?>';
-  const charges = JSON.parse('<?= json_encode($charges) ?>');
+  const charges = JSON.parse(`<?= json_encode($charges) ?>`);
   const reservation_status = '<?= $booking->reservation_status ?>';
   let charge_amount = 0;
   let quantity = 1;

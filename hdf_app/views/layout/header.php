@@ -130,6 +130,11 @@ if (!$this->session->userdata('connect')) {
     select {
       font-family: "Helvetica Neue", Arial, sans-serif !important;
     }
+
+    .room[disabled] {
+      color: #ccc;
+      border-color: #ccc;
+    }
   </style>
 
   <script>

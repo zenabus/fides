@@ -382,7 +382,7 @@
   </div>
 
   <script>
-    const guests = JSON.parse('<?= json_encode($guests) ?>');
+    const guests = JSON.parse(`<?= json_encode($guests) ?>`);
   </script>
   <script defer src="<?= base_url('assets/js/modal-reservation.js') ?>"></script>
   <script>

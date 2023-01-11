@@ -48,6 +48,8 @@ class Insert_model extends CI_Model {
       'room_id' => $_POST['room_id'],
       'check_in' => $_POST['check_in'],
       'check_out' => $_POST['check_out'],
+      'c_in' => $this->toDashedDate($_POST['check_in']),
+      'c_out' => $this->toDashedDate($_POST['check_out']),
       'nights' => $_POST['nights'],
     ];
   }
@@ -93,6 +95,8 @@ class Insert_model extends CI_Model {
         'room_id' => $room_id,
         'check_in' => $_POST['check_in_mass'],
         'check_out' => $_POST['check_out_mass'],
+        'c_in' => $this->toDashedDate($_POST['check_in_mass']),
+        'c_out' => $this->toDashedDate($_POST['check_out_mass']),
         'nights' => $_POST['nights'],
       ];
 
@@ -100,6 +104,11 @@ class Insert_model extends CI_Model {
     }
 
     return [$booking_id, $booking_number];
+  }
+
+  function toDashedDate($date) {
+    [$month, $day, $year] = explode('/', $date);
+    return $year . '-' . $month . '-' . $day;
   }
 
   function addGuest($guest, $post = FALSE) {
@@ -125,7 +134,8 @@ class Insert_model extends CI_Model {
   }
 
   function bookRoom() {
-    unset($_POST['booked_room_id']);
+    $_POST['c_in'] = $this->toDashedDate($_POST['check_in']);
+    $_POST['c_out'] = $this->toDashedDate($_POST['check_out']);
     $this->db->insert('booked_rooms', $_POST);
     return $this->db->insert_id();
   }

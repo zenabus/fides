@@ -560,4 +560,19 @@ class Get_model extends CI_Model {
         ->get('bookings')->result_array();
     }
   }
+
+  function checkConflict($date) {
+    return $this->db->where_in('room_id', json_decode($_POST['room_ids']))
+      ->where('"' . $date . '" BETWEEN c_in and c_out', NULL, FALSE)
+      ->get('booked_rooms')->result_array();
+  }
+
+  function checkAvailableRooms($date) {
+    return $this->db->where('"' . $date . '" BETWEEN c_in and c_out', NULL, FALSE)
+      ->get('booked_rooms')->result_array();
+  }
+
+  function getAllBookedRooms() {
+    return $this->db->get('booked_rooms')->result_array();
+  }
 }
