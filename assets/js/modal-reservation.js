@@ -1,4 +1,5 @@
 let modalGuestType = "Single";
+let room_id;
 
 const minDate = new Date();
 minDate.setDate(minDate.getDate() - 2);
@@ -17,17 +18,6 @@ $(".datepicker").datetimepicker({
   format: "L",
   defaultDate: new Date(),
   minDate,
-});
-
-$(document).ready(function () {
-  $("[name=check_in]").on("dp.change", function (e) {
-    const checkin = moment($(this).val());
-    const checkout = moment($("[name=check_out]").val());
-    const nights = checkout.diff(checkin, "days");
-    $("[name=check_out]").data("DateTimePicker").date(moment(checkin).add(1, "days"));
-    $("[name=check_out]").data("DateTimePicker").minDate(moment(checkin).add(1, "days"));
-    $("[name=nights]").val(nights);
-  });
 });
 
 $("#returning_guest").click(function () {
@@ -145,10 +135,34 @@ $("[name=nights]").on("input", function () {
   $("[name=check_out]").data("DateTimePicker").date(checkout);
 });
 
-$("[name=check_out]").on("dp.change", function (e) {
-  const checkout = moment($(this).val());
-  const checkin = moment($("[name=check_in]").val());
+const updateAvailableRoom = (check_in, check_out) => {
+  fetch(`${base_url}index.php/main/checkAvailableDates/${check_in}/${check_out}/${room_id}`)
+    .then(response => response.json())
+    .then(data => {
+      console.log(data);
+      if (data.length) {
+        $("#btnBooking").addClass("disabled");
+      } else {
+        $("#btnBooking").removeClass("disabled");
+      }
+    });
+};
+$("[name=check_in]").on("dp.change", function (e) {
+  let checkin = moment($("[name=check_in]").val());
+  let checkout = moment($("[name=check_out]").val());
   const nights = checkout.diff(checkin, "days");
+  $("[name=check_out]").data("DateTimePicker").minDate(moment(checkin).add(1, "days"));
+  $("[name=check_out]").data("DateTimePicker").date(moment(checkin).add(1, "days"));
+  $("[name=nights]").val(nights);
+});
+
+$("[name=check_out]").on("dp.change", function (e) {
+  let checkin = moment($("[name=check_in]").val());
+  let checkout = moment($("[name=check_out]").val());
+  const nights = checkout.diff(checkin, "days");
+  checkin = moment(checkin).format("YYYY-MM-DD");
+  checkout = moment(checkout).format("YYYY-MM-DD");
+  updateAvailableRoom(checkin, checkout);
   $("[name=nights]").val(nights);
 });
 
@@ -162,13 +176,13 @@ const modalBooking = (obj, booking_type, minDate = 0, booking_number = "") => {
   //   date = moment(date).subtract(1, 'days');
   // }
   // console.log(date);
-
+  room_id = data.room_id;
   $("#room_type").val(data.room_type);
   $("#room_number").val(data.room_number);
   $("[name=room_id]").val(data.room_id);
   $("[name=check_in]").data("DateTimePicker").date(date);
-  $("[name=check_out]").data("DateTimePicker").date(moment(date).add(1, "days"));
   $("[name=check_out]").data("DateTimePicker").minDate(moment(date).add(minDate, "days"));
+  $("[name=check_out]").data("DateTimePicker").date(moment(date).add(1, "days"));
   $("[name=nights]").val(1);
   $("[name=booking_type]").val(booking_type);
   if (booking_type == "Check In") {
@@ -182,6 +196,10 @@ const modalBooking = (obj, booking_type, minDate = 0, booking_number = "") => {
   setTimeout(() => {
     $("#title").text(`Room Calendar [ROOM: ${data.room_number} - ${date}]`);
   });
+
+  let checkin = moment(date).format("YYYY-MM-DD");
+  let checkout = moment(date).add(1, "days").format("YYYY-MM-DD");
+  updateAvailableRoom(checkin, checkout);
   $("#modalBooking").modal("show");
 };
 

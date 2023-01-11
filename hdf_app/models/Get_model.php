@@ -572,6 +572,12 @@ class Get_model extends CI_Model {
       ->get('booked_rooms')->result_array();
   }
 
+  function checkAvailableDates($date, $room_id) {
+    return $this->db->where('room_id', $room_id)
+      ->where('"' . $date . '" BETWEEN c_in and c_out', NULL, FALSE)
+      ->get('booked_rooms')->result_array();
+  }
+
   function getAllBookedRooms() {
     return $this->db->get('booked_rooms')->result_array();
   }

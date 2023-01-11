@@ -430,37 +430,6 @@ $now = date('H');
     }, 1000);
   });
 
-  // $.contextMenu({
-  //   selector: '.no-data',
-  //   events: {
-  //     show: function() {
-  //       const date = $(this).attr('date');
-  //       const data = JSON.parse($(this).attr('data'));
-  //       setTimeout(() => {
-  //         $('#title').text(`Room Calendar [ROOM: ${data.room_number} - ${date}]`);
-  //         toggleHovered(this);
-  //       });
-  //     },
-  //     hide: function() {
-  //       toggleHovered(this, false);
-  //     }
-  //   },
-  //   callback: function(key) {
-  //     console.log(key);
-  //     modalBooking(this, key == 'Check In' ? key : 'Reservation');
-  //   },
-  //   items: {
-  //     "Check In": {
-  //       name: "Check In",
-  //       icon: "fa-check"
-  //     },
-  //     "Reservation": {
-  //       name: "Reserve",
-  //       icon: "fa-hourglass"
-  //     },
-  //   }
-  // });
-
   $('#month').change(function() {
     const month = $(this).val();
     const year = $('#year').val();

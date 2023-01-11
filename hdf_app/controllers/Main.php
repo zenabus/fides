@@ -824,6 +824,22 @@ class Main extends MY_Controller {
     return $return;
   }
 
+  function checkAvailableDates($check_in, $check_out, $room_id) {
+    $occupied = [];
+    $check_dates = $this->datesBetween($check_in, $check_out, 'Y-m-d');
+
+    foreach ($check_dates as $date) {
+      $conflict = $this->get_model->checkAvailableDates($date, $room_id);
+      if ($conflict) {
+        if ($conflict[0]['c_out'] != $check_in) {
+          array_push($occupied, $conflict);
+        }
+      }
+    }
+
+    echo json_encode($occupied);
+  }
+
   function checkAvailableRooms($check_in, $check_out) {
     $conflicts = [];
     $occupied = [];
@@ -851,7 +867,7 @@ class Main extends MY_Controller {
 
   function massBooking() {
     $conflicts = [];
-    $check_dates = $this->getDaysInBetween($_POST['check_in_mass'], $_POST['check_out_mass']);
+    $check_dates = $this->datesBetween($_POST['check_in_mass'], $_POST['check_out_mass']);
     foreach ($check_dates as $date) {
       $conflict = $this->get_model->checkConflict($date);
       if ($conflict) {
