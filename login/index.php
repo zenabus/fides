@@ -1,0 +1,1 @@
+<?php header("location:https://testbooking.hoteldefides.com/index.php/user") ?>

@@ -1,0 +1,60 @@
+1. Direct booking
+2. Change Room 
+3. Change Room with reason
+4. Notes not showing on pdf
+5. Refund with reason
+6. Extra Person charges specific dates
+7. Extra Bed charges specific dates
+8. Reservation (who transacted)
+9. Forecasting (bookings, reservations)
+10. Sort by room number in bookings
+
+Room Status (Bookings & Reservations)
+- Yellow (Arrival/Tentative)
+- Green (In-House/checked-in)
+- Blue (Confirmed booking)
+- Red (Out of order/service)
+
+Dashboard
+- Occupied Rooms
+- Vacant Clean Rooms
+- VCI Rooms
+- Available Rooms
+- Unavailable Rooms
+- Arrival (Reservations)
+- Check-out
+
+Franz
+// Merge active bookings and locked bookings to dropdown
+// Disable button unless terms and conditions checkbox is checked
+// Add reservation amount validation 25% of total room cost
+// Adjust payment method on booking modal
+// Send email
+// Add confirmation message
+// Add code confirmation after reservation
+// Add download confirmation
+// Ask for the complete the room description
+// Filter rooms that are not vacant on that date on online booking
+// Change booking status after verifying
+// Insert number of nights to database in online booking
+// Add "All" checkbox on Dashboard
+// Pad booking number to 5 digits
+// Delete charges, extras, discount when deleting booked room
+// Change booked_room_id when change room
+// Test online booking
+// Test reservation and booking
+// Complete order
+// Add remove button on collection details
+// Remove extra if zero on update
+// Adjust arrival and departure dates depending on the booked rooms
+// Add checkin function on reservations
+// Fix locked bookings datatable width
+// Change worded buttons to icons on tables
+// Fix checkin dates cannot be 1 night
+// Delete images when updating image or deleting data
+Div to image not working
+Calendar following month
+Ask if extras are per day
+Request room delete to admin
+Add last checkin
+Time-based login
