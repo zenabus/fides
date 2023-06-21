@@ -10,9 +10,10 @@ class Main extends MY_Controller {
 
   function __construct() {
     parent::__construct();
+
     $this->load->vars([
       'cash' => $this->get_model->getCurrentCash(),
-      'remitted' => $this->get_model->getRemitted(date_create()->modify('-1 days')->format('Y-m-d'))
+      'remitted' => $this->get_model->getRemitted(date_create()->modify('-1 days')->format('Y-m-d'), NULL)
     ]);
   }
 
@@ -323,9 +324,9 @@ class Main extends MY_Controller {
     $this->load->view('layout/footer');
   }
 
-  function getHotelSales($date) {
-    $hotel_sales = $this->get_model->getHotelSales($date);
-    $hotel_expense = $this->get_model->getHotelExpense($date);
+  function getHotelSales($date, $period) {
+    $hotel_sales = $this->get_model->getHotelSales($date, $period);
+    $hotel_expense = $this->get_model->getHotelExpense($date, $period);
     $hotel_sales_am = 0;
     $hotel_sales_pm = 0;
     $hotel_expense_am = 0;
@@ -354,9 +355,9 @@ class Main extends MY_Controller {
     return [$hotel_sales_am - $hotel_expense_am, $hotel_sales_pm - $hotel_expense_pm];
   }
 
-  function getEventSales($date) {
-    $event_sales = $this->get_model->getEventSales($date);
-    $event_expense = $this->get_model->getEventExpense($date);
+  function getEventSales($date, $period) {
+    $event_sales = $this->get_model->getEventSales($date, $period);
+    $event_expense = $this->get_model->getEventExpense($date, $period);
     $event_sales_am = 0;
     $event_sales_pm = 0;
     $event_expense_am = 0;
@@ -391,13 +392,13 @@ class Main extends MY_Controller {
       $dummy_dcr = [
         'sum' => 0,
         'count' => 0,
-        'sales' => $this->get_model->getSales($date),
+        'sales' => $this->get_model->getSales($date, NULL),
         'expenses' => $this->get_model->getExpenses($date),
-        'collectables' => $this->get_model->getCollectables($date),
-        'sales_total' => $this->get_model->getSales($date, TRUE),
+        'collectables' => $this->get_model->getCollectables($date, NULL),
+        'sales_total' => $this->get_model->getSales($date, NULL, TRUE),
         'expense_total' => $this->get_model->getExpenses($date, TRUE),
-        'collectable_total' => $this->get_model->getCollectables($date, TRUE),
-        'remitted' => $this->get_model->getRemitted($date),
+        'collectable_total' => $this->get_model->getCollectables($date, NULL, TRUE),
+        'remitted' => $this->get_model->getRemitted($date, NULL),
         'payment_added' => $date,
       ];
       array_push($dummy_dcrs, $dummy_dcr);
@@ -405,14 +406,14 @@ class Main extends MY_Controller {
     return $dummy_dcrs;
   }
 
-  function dcr($date = NULL) {
+  function dcr($date = NULL, $type = NULL) {
     if (!$date) {
       $dates = [];
       $data['active'] = 'dcr';
-      $dcrs = $this->get_model->getDCR();
+      $dcrs = $this->get_model->getCustomDCR();
 
-      $cash = $this->get_model->getDCRTotal(['Cash']);
-      $card = $this->get_model->getDCRTotal(['Card', 'Check', 'Bank Transfer']);
+      $cash = $this->get_model->getCustomDCRTotal(['Cash']);
+      $card = $this->get_model->getCustomDCRTotal(['Card', 'Check', 'Bank Transfer']);
 
       foreach ($dcrs as $i => $row) {
         foreach ($cash as $c) {
@@ -425,11 +426,11 @@ class Main extends MY_Controller {
             $dcrs[$i]['card'] = $c['sum'];
           }
         }
-        $dcrs[$i]['remitted'] = $this->get_model->getRemitted($row['payment_added']);
-        $dcrs[$i]['sales']  = $this->get_model->getSales($row['payment_added']);
-        $dcrs[$i]['sales_total']  = $this->get_model->getSales($row['payment_added'], TRUE);
-        $dcrs[$i]['collectables']  = $this->get_model->getCollectables($row['payment_added']);
-        $dcrs[$i]['collectable_total']  = $this->get_model->getCollectables($row['payment_added'], TRUE);
+        $dcrs[$i]['remitted'] = $this->get_model->getRemitted($row['payment_added'], NULL);
+        $dcrs[$i]['sales']  = $this->get_model->getSales($row['payment_added'], NULL);
+        $dcrs[$i]['sales_total']  = $this->get_model->getSales($row['payment_added'], NULL, TRUE);
+        $dcrs[$i]['collectables']  = $this->get_model->getCollectables($row['payment_added'], NULL);
+        $dcrs[$i]['collectable_total']  = $this->get_model->getCollectables($row['payment_added'], NULL, TRUE);
         $dcrs[$i]['expenses']  = $this->get_model->getExpenses($row['payment_added']);
         $dcrs[$i]['expense_total']  = $this->get_model->getExpenses($row['payment_added'], TRUE);
         array_push($dates, $row['payment_added']);
@@ -447,36 +448,37 @@ class Main extends MY_Controller {
       $this->load->view('layout/footer');
     } else {
       $data['date'] = $date;
+      $data['type'] = $type;
       $data['occupied'] = $this->get_model->getOccupiedRooms($date);
-      $data['payments'] = $this->get_model->getPaymentsByDateGrouped($date);
+      $data['payments'] = $this->get_model->getPaymentsByDateGrouped($date, $type);
 
-      $data['expenses_hotel'] = $this->get_model->getExpenseByDateAndType($date, 'Hotel');
-      $data['expenses_event'] = $this->get_model->getExpenseByDateAndType($date, 'Event');
-      $data['expenses_pool'] = $this->get_model->getExpenseByDateAndType($date, 'Pool');
-      $data['expenses_resto'] = $this->get_model->getExpenseByDateAndType($date, 'Resto');
-      $data['expenses_otillas'] = $this->get_model->getExpenseByDateAndType($date, "Otilla's");
+      $data['expenses_hotel'] = $this->get_model->getExpenseByDateAndType($date, 'Hotel', $type);
+      $data['expenses_event'] = $this->get_model->getExpenseByDateAndType($date, 'Event', $type);
+      $data['expenses_pool'] = $this->get_model->getExpenseByDateAndType($date, 'Pool', $type);
+      $data['expenses_resto'] = $this->get_model->getExpenseByDateAndType($date, 'Resto', $type);
+      $data['expenses_otillas'] = $this->get_model->getExpenseByDateAndType($date, "Otilla's", $type);
 
-      $data['sales_event']  = $this->get_model->getSalesByDateAndType($date, 'Event');
-      $data['sales_pool']  = $this->get_model->getSalesByDateAndType($date, 'Pool');
+      $data['sales_event']  = $this->get_model->getSalesByDateAndType($date, 'Event', $type);
+      $data['sales_pool']  = $this->get_model->getSalesByDateAndType($date, 'Pool', $type);
 
-      $data['remitted'] = $this->get_model->getRemitted($date);
+      $data['remitted'] = $this->get_model->getRemitted($date, $type);
 
       foreach ($data['payments'] as $i => $row) {
-        $data['payments'][$i]['cash_room'] = $this->get_model->getPaymentByType($row['booked_room_id'], 'room', 'Cash', $date);
-        $data['payments'][$i]['cash_restaurant'] = $this->get_model->getPaymentByType($row['booked_room_id'], 'restaurant', 'Cash', $date);
-        $data['payments'][$i]['cash_coffeeshop'] = $this->get_model->getPaymentByType($row['booked_room_id'], 'coffeeshop', 'Cash', $date);
-        $data['payments'][$i]['cash_addons'] = $this->get_model->getPaymentByType($row['booked_room_id'], 'addons', 'Cash', $date);
-        $data['payments'][$i]['cash_reservation'] = $this->get_model->getPaymentByType($row['booked_room_id'], 'advance', 'Cash', $date);
+        $data['payments'][$i]['cash_room'] = $this->get_model->getPaymentByType($row['booked_room_id'], 'room', 'Cash', $date, $type);
+        $data['payments'][$i]['cash_restaurant'] = $this->get_model->getPaymentByType($row['booked_room_id'], 'restaurant', 'Cash', $date, $type);
+        $data['payments'][$i]['cash_coffeeshop'] = $this->get_model->getPaymentByType($row['booked_room_id'], 'coffeeshop', 'Cash', $date, $type);
+        $data['payments'][$i]['cash_addons'] = $this->get_model->getPaymentByType($row['booked_room_id'], 'addons', 'Cash', $date, $type);
+        $data['payments'][$i]['cash_reservation'] = $this->get_model->getPaymentByType($row['booked_room_id'], 'advance', 'Cash', $date, $type);
 
-        $data['payments'][$i]['card_room'] = $this->get_model->getPaymentByType($row['booked_room_id'], 'room', 'Card', $date);
-        $data['payments'][$i]['card_restaurant'] = $this->get_model->getPaymentByType($row['booked_room_id'], 'restaurant', 'Card', $date);
-        $data['payments'][$i]['card_coffeeshop'] = $this->get_model->getPaymentByType($row['booked_room_id'], 'coffeeshop', 'Card', $date);
-        $data['payments'][$i]['card_addons'] = $this->get_model->getPaymentByType($row['booked_room_id'], 'addons', 'Card', $date);
-        $data['payments'][$i]['card_reservation'] = $this->get_model->getPaymentByType($row['booked_room_id'], 'advance', 'Card', $date);
+        $data['payments'][$i]['card_room'] = $this->get_model->getPaymentByType($row['booked_room_id'], 'room', 'Card', $date, $type);
+        $data['payments'][$i]['card_restaurant'] = $this->get_model->getPaymentByType($row['booked_room_id'], 'restaurant', 'Card', $date, $type);
+        $data['payments'][$i]['card_coffeeshop'] = $this->get_model->getPaymentByType($row['booked_room_id'], 'coffeeshop', 'Card', $date, $type);
+        $data['payments'][$i]['card_addons'] = $this->get_model->getPaymentByType($row['booked_room_id'], 'addons', 'Card', $date, $type);
+        $data['payments'][$i]['card_reservation'] = $this->get_model->getPaymentByType($row['booked_room_id'], 'advance', 'Card', $date, $type);
       }
 
-      [$hotel_sales_am, $hotel_sales_pm] = $this->getHotelSales($date);
-      [$event_sales_am, $event_sales_pm] = $this->getEventSales($date);
+      [$hotel_sales_am, $hotel_sales_pm] = $this->getHotelSales($date, $type);
+      [$event_sales_am, $event_sales_pm] = $this->getEventSales($date, $type);
 
       $data['hotel_sales_am'] = $hotel_sales_am;
       $data['hotel_sales_pm'] = $hotel_sales_pm;
@@ -496,8 +498,8 @@ class Main extends MY_Controller {
         }
       }
 
-      $data['sales'] = $this->get_model->getSales($date);
-      $data['collectables'] = $this->get_model->getCollectablesByDate($date);
+      $data['sales'] = $this->get_model->getSales($date, $type);
+      $data['collectables'] = $this->get_model->getCollectablesByDate($date, $type);
 
       $view = $this->load->view('body/frontdesk/components/dcr', $data, TRUE);
       $options = new Options();
@@ -506,7 +508,7 @@ class Main extends MY_Controller {
       $dompdf = new Dompdf($options);
       $dompdf->loadHtml($view);
       $dompdf->render();
-      $dompdf->stream('Statement of Account', ['Attachment' => FALSE]);
+      $dompdf->stream('HDF-DCR-' . date('Ymd') . '-' . $type, ['Attachment' => FALSE]);
     }
   }
 
@@ -1006,7 +1008,6 @@ class Main extends MY_Controller {
   }
 
   function updateBooking() {
-    // $this->dd($_POST);
     $booking_number = 'HDF' . str_pad($_POST['booking_id'], 5, '0', STR_PAD_LEFT);
     $booking = $this->get_model->getBooking($_POST['booking_id']);
     $room = $this->get_model->getBookedRoom($_POST['booked_room_id']);
@@ -1056,7 +1057,6 @@ class Main extends MY_Controller {
   }
 
   function updateReservation() {
-    $this->dd($_POST);
     if ($_POST['amount']) {
       if ($_POST['payment_option'] == 'Cash') {
         $_POST['payment_details'] = '';
@@ -1576,7 +1576,7 @@ class Main extends MY_Controller {
   }
 
   function getPaymentsByDate($date) {
-    $payments = $this->get_model->getPaymentsBydate($date);
+    $payments = $this->get_model->getCustomPaymentsByDate($date);
     echo json_encode($payments);
   }
 

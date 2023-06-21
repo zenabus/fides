@@ -2,7 +2,7 @@
 <html>
 
 <head>
-  <title><?= TITLE ?> - Daily Collection Report</title>
+  <title><?= TITLE ?> - Daily Collection Report (<?= $type ?>)</title>
   <style type="text/css">
     * {
       font-family: 'DejaVu Serif' !important;
@@ -131,7 +131,7 @@
     Document generated: <?= date('F d, Y h:ia'); ?>
   </footer>
   <div class="page">
-    <h1 class="tc title">Daily Collection Report</h1>
+    <h1 class="tc title">Daily Collection Report (<?= $type ?>)</h1>
     <table class="table">
       <thead>
         <tr class="bgw">
@@ -326,7 +326,7 @@
         <tr>
           <td class="bgw nb" colspan="19">&nbsp;</td>
         </tr>
-        <tr >
+        <tr>
           <td class="bgw nb" colspan="2"></td>
           <td class="bgw nb">TOTAL:</td>
           <td class="bgy nb" colspan="5"><?= number_format($room_rate + $restaurant + $coffeeshop + $addons + $reservation + $event_sales, 2) ?></td>
@@ -357,8 +357,8 @@
           <td class="bt bgw bl">CASH</td>
           <?php $hotel = $room_rate + $addons + $reservation ?>
           <td class="bt bgw"><?= number_format($hotel, 2) ?></td>
-          <td class="bt bgw"><?= number_format($sales_event->sales_amount, 2) ?></td>
-          <td class="bt bgw"><?= number_format($sales_pool->sales_amount, 2) ?></td>
+          <td class="bt bgw"><?= number_format(floatval($sales_event->sales_amount), 2) ?></td>
+          <td class="bt bgw"><?= number_format(floatval($sales_pool->sales_amount), 2) ?></td>
           <td class="bt bgw"><?= number_format($restaurant, 2) ?></td>
           <td class="bt bgw"><?= number_format($coffeeshop, 2) ?></td>
           <?php $event = $sales_event->sales_amount; ?>
@@ -369,7 +369,7 @@
         <tr>
           <td class="nb bgw"></td>
           <td class="nw bl bgw">TOTAL ROOMS OCCUPIED</td>
-          <td class="bgw"><?= count($occupied, 2) ?></td>
+          <td class="bgw"><?= count($occupied) ?></td>
           <td class="nb bgw" colspan="9"></td>
           <td class="bgw bl">CARD</td>
           <?php $hotel_card = $room_rate_card + $addons_card + $reservation_card ?>
@@ -394,11 +394,11 @@
         <tr>
           <td class="nb bgw" colspan="12"></td>
           <td class="bgw bl">EXPENSES</td>
-          <td class="bgw"><?= number_format($expenses_hotel->expense_amount, 2) ?></td>
-          <td class="bgw"><?= number_format($expenses_event->expense_amount, 2) ?></td>
-          <td class="bgw"><?= number_format($expenses_pool->expense_amount, 2) ?></td>
-          <td class="bgw"><?= number_format($expenses_resto->expense_amount, 2) ?></td>
-          <td class="bgw"><?= number_format($expenses_otillas->expense_amount, 2) ?></td>
+          <td class="bgw"><?= number_format(floatval($expenses_hotel->expense_amount), 2) ?></td>
+          <td class="bgw"><?= number_format(floatval($expenses_event->expense_amount), 2) ?></td>
+          <td class="bgw"><?= number_format(floatval($expenses_pool->expense_amount), 2) ?></td>
+          <td class="bgw"><?= number_format(floatval($expenses_resto->expense_amount), 2) ?></td>
+          <td class="bgw"><?= number_format(floatval($expenses_otillas->expense_amount), 2) ?></td>
           <?php $total_expense = $expenses_hotel->expense_amount + $expenses_event->expense_amount + $expenses_pool->expense_amount + $expenses_resto->expense_amount + $expenses_otillas->expense_amount ?>
           <td class="bgw"><?= number_format($total_expense, 2) ?></td>
         </tr>

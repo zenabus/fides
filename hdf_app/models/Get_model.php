@@ -422,13 +422,16 @@ class Get_model extends CI_Model {
     }
   }
 
-  function getPaymentByType($booked_room_id, $payment_for, $payment_option = NULL, $date = NULL) {
+  function getPaymentByType($booked_room_id, $payment_for, $payment_option = NULL, $date = NULL, $period = NULL) {
+
     if ($payment_option) {
+      [$startDate, $endDate] = $this->getTime($date, $period);
       return $this->db->select_sum('amount')
         ->where('booked_room_id', $booked_room_id)
         ->where('payment_for', $payment_for)
         ->where('payment_option', $payment_option)
-        ->like('booking_payment_added', $date)
+        ->where('booking_payment_added >=', $startDate)
+        ->where('booking_payment_added <=', $endDate)
         ->get('booking_payment')->row();
     } else {
       return $this->db->select_sum('amount')
@@ -438,51 +441,158 @@ class Get_model extends CI_Model {
     }
   }
 
-  function getDCR() {
-    return $this->db->select('booking_payment_id, CAST(booking_payment_added as DATE) as payment_added, count(*) as count, sum(amount) as sum')
+  // function getDCR() {
+  //   return $this->db->select('booking_payment_id, CAST(booking_payment_added as DATE) as payment_added, count(*) as count, sum(amount) as sum')
+  //     ->group_by('payment_added')
+  //     ->order_by('payment_added', 'DESC')
+  //     ->get('booking_payment')->result_array();
+  // }
+
+  function getCustomDCR() {
+    return $this->db->select('booking_payment_id, DATE(DATE_SUB(booking_payment_added, INTERVAL 10 HOUR)) as payment_added, count(*) as count, sum(amount) as sum')
       ->group_by('payment_added')
       ->order_by('payment_added', 'DESC')
       ->get('booking_payment')->result_array();
   }
 
-  function getDCRTotal($payment_option) {
-    return $this->db->select('booking_payment_id, CAST(booking_payment_added as DATE) as payment_added, sum(amount) as sum')
+  function getCustomDCRTotal($payment_option) {
+    return $this->db->select('booking_payment_id, DATE(DATE_SUB(booking_payment_added, INTERVAL 10 HOUR)) as payment_added, sum(amount) as sum')
       ->where_in('payment_option', $payment_option)
       ->group_by('payment_added')
       ->order_by('payment_added', 'DESC')
       ->get('booking_payment')->result_array();
   }
 
-  function getPaymentsByDateGrouped($date) {
+
+
+  // function getDCRTotal($payment_option) {
+  //   return $this->db->select('booking_payment_id, CAST(booking_payment_added as DATE) as payment_added, sum(amount) as sum')
+  //     ->where_in('payment_option', $payment_option)
+  //     ->group_by('payment_added')
+  //     ->order_by('payment_added', 'DESC')
+  //     ->get('booking_payment')->result_array();
+  // }
+
+  // function getPaymentsByDateGrouped($date) {
+  //   return $this->db->join('booked_rooms', 'booked_rooms.booked_room_id=booking_payment.booked_room_id')
+  //     ->join('rooms', 'rooms.id=booked_rooms.room_id')
+  //     ->join('room_type', 'room_type.id=rooms.room_type_id')
+  //     ->join('bookings', 'bookings.booking_id=booked_rooms.booking_id')
+  //     ->join('guests', 'guests.guest_id=bookings.guest_id')
+  //     ->like('booking_payment_added', $date)
+  //     ->group_by('booking_payment.booked_room_id')
+  //     ->get('booking_payment')->result_array();
+  // }
+
+  // function getPaymentsByDateGrouped($date) {
+  //   $startDate = $date . ' 22:00:00';
+  //   $endDate = date('Y-m-d', strtotime('+1 day', strtotime($date))) . ' 12:00:00';
+
+  //   return $this->db->join('booked_rooms', 'booked_rooms.booked_room_id=booking_payment.booked_room_id')
+  //     ->join('rooms', 'rooms.id=booked_rooms.room_id')
+  //     ->join('room_type', 'room_type.id=rooms.room_type_id')
+  //     ->join('bookings', 'bookings.booking_id=booked_rooms.booking_id')
+  //     ->join('guests', 'guests.guest_id=bookings.guest_id')
+  //     ->where('booking_payment_added >=', $startDate)
+  //     ->where('booking_payment_added <=', $endDate)
+  //     ->group_by('booking_payment.booked_room_id')
+  //     ->get('booking_payment')->result_array();
+  // }
+
+  // function getPaymentsByDateGrouped($date, $type) {
+  //   if ($type == 'AM') {
+  //     $startDate = $date . ' 22:00:00';
+  //     $endDate = date('Y-m-d', strtotime('+1 day', strtotime($date))) . ' 12:00:00';
+  //   } else {
+  //     $startDate = $date . ' 12:00:00';
+  //     $endDate = $date . ' 22:00:00';
+  //   }
+
+  //   return $this->db->join('booked_rooms', 'booked_rooms.booked_room_id=booking_payment.booked_room_id')
+  //     ->join('rooms', 'rooms.id=booked_rooms.room_id')
+  //     ->join('room_type', 'room_type.id=rooms.room_type_id')
+  //     ->join('bookings', 'bookings.booking_id=booked_rooms.booking_id')
+  //     ->join('guests', 'guests.guest_id=bookings.guest_id')
+  //     ->where('booking_payment_added >=', $startDate)
+  //     ->where('booking_payment_added <=', $endDate)
+  //     ->group_by('booking_payment.booked_room_id')
+  //     ->get('booking_payment')->result_array();
+  // }
+
+  function getTime($date, $period) {
+    if ($period == 'AM') {
+      $previousDate = date('Y-m-d', strtotime('-1 day', strtotime($date)));
+      $startDate = $previousDate . ' 22:00:00';
+      $endDate = $date . ' 12:00:00';
+    } else {
+      $startDate = $date . ' 12:00:00';
+      $endDate = $date . ' 22:00:00';
+    }
+    return [$startDate, $endDate];
+  }
+
+  function getPaymentsByDateGrouped($date, $type) {
+    [$startDate, $endDate] = $this->getTime($date, $type);
+
     return $this->db->join('booked_rooms', 'booked_rooms.booked_room_id=booking_payment.booked_room_id')
       ->join('rooms', 'rooms.id=booked_rooms.room_id')
       ->join('room_type', 'room_type.id=rooms.room_type_id')
       ->join('bookings', 'bookings.booking_id=booked_rooms.booking_id')
       ->join('guests', 'guests.guest_id=bookings.guest_id')
-      ->like('booking_payment_added', $date)
+      ->where('booking_payment_added >=', $startDate)
+      ->where('booking_payment_added <=', $endDate)
       ->group_by('booking_payment.booked_room_id')
       ->get('booking_payment')->result_array();
   }
+
 
   function getCurrentCash() {
     return $this->db->order_by('cash_id', 'DESC')->limit(1)->get('cash')->row();
   }
 
-  function getRemitted($date) {
-    return $this->db->join('users', 'users.id=remittances.user_id')->where('remittance_date', $date)->get('remittances')->row();
+  function getRemitted($date, $period) {
+    if ($period) {
+      [$startDate, $endDate] = $this->getTime($date, $period);
+      return $this->db->join('users', 'users.id=remittances.user_id')
+        ->where('remittance_date >=', $startDate)
+        ->where('remittance_date <=', $endDate)
+        ->get('remittances')->row();
+    } else {
+
+      return $this->db->join('users', 'users.id=remittances.user_id')
+        ->where('remittance_date >=', $date)
+        ->get('remittances')->row();
+    }
   }
 
-  function getPaymentsByDate($date) {
+  // function getPaymentsByDate($date) {
+  //   return $this->db->join('booked_rooms', 'booked_rooms.booked_room_id=booking_payment.booked_room_id')
+  //     ->join('rooms', 'rooms.id=booked_rooms.room_id')
+  //     ->join('room_type', 'room_type.id=rooms.room_type_id')
+  //     ->join('bookings', 'bookings.booking_id=booked_rooms.booking_id')
+  //     ->join('guests', 'guests.guest_id=bookings.guest_id')
+  //     ->join('users', 'users.id=booking_payment.user_id')
+  //     ->like('booking_payment_added', $date)
+  //     ->order_by('booking_payment_id', 'DESC')
+  //     ->get('booking_payment')->result_array();
+  // }
+
+  function getCustomPaymentsByDate($date) {
+    $startDate = date('Y-m-d', strtotime('-1 day', strtotime($date))) . ' 22:00:00';
+    $endDate = $date . ' 22:00:00';
+
     return $this->db->join('booked_rooms', 'booked_rooms.booked_room_id=booking_payment.booked_room_id')
       ->join('rooms', 'rooms.id=booked_rooms.room_id')
       ->join('room_type', 'room_type.id=rooms.room_type_id')
       ->join('bookings', 'bookings.booking_id=booked_rooms.booking_id')
       ->join('guests', 'guests.guest_id=bookings.guest_id')
       ->join('users', 'users.id=booking_payment.user_id')
-      ->like('booking_payment_added', $date)
+      ->where('booking_payment_added >=', $startDate)
+      ->where('booking_payment_added <', $endDate)
       ->order_by('booking_payment_id', 'DESC')
       ->get('booking_payment')->result_array();
   }
+
 
   function getSalesByDate($date) {
     return $this->db->where('sales_date', $date)->get('sales')->result_array();
@@ -496,19 +606,32 @@ class Get_model extends CI_Model {
     return $this->db->where('expense_date', $date)->get('expenses')->result_array();
   }
 
-  function getSales($date, $total = FALSE) {
+  function getSales($date, $period = NULL, $total = FALSE) {
+    [$startDate, $endDate] = $this->getTime($date, $period);
     if ($total) {
-      return $this->db->select_sum('sales_amount')->where('sales_date', $date)->get('sales')->row();
+      return $this->db->select_sum('sales_amount')
+        ->where('sales_date >=', $startDate)
+        ->where('sales_date <=', $endDate)
+        ->get('sales')->row();
     } else {
-      return $this->db->where('sales_date', $date)->get('sales')->result_array();
+      return $this->db->where('sales_date >=', $startDate)
+        ->where('sales_date <=', $endDate)
+        ->get('sales')
+        ->result_array();
     }
   }
 
-  function getCollectables($date, $total = FALSE) {
+  function getCollectables($date, $period = NULL, $total = FALSE) {
+    [$startDate, $endDate] = $this->getTime($date, $period);
     if ($total) {
-      return $this->db->select_sum('collectable_amount')->where('collectable_date', $date)->get('collectables')->row();
+      return $this->db->select_sum('collectable_amount')
+        ->where('collectable_date >=', $startDate)
+        ->where('collectable_date <=', $endDate)
+        ->get('collectables')->row();
     } else {
-      return $this->db->where('collectable_date', $date)->get('collectables')->result_array();
+      return $this->db->where('collectable_date >=', $startDate)
+        ->where('collectable_date <=', $endDate)
+        ->get('collectables')->result_array();
     }
   }
 
@@ -520,28 +643,56 @@ class Get_model extends CI_Model {
     }
   }
 
-  function getExpenseByDateAndType($date, $type) {
-    return $this->db->select_sum('expense_amount')->where('expense_type', $type)->where('expense_date', $date)->get('expenses')->row();
+  function getExpenseByDateAndType($date, $type, $period) {
+    [$startDate, $endDate] = $this->getTime($date, $period);
+
+    return $this->db->select_sum('expense_amount')
+      ->where('expense_type', $type)
+      ->where('expense_date >=', $startDate)
+      ->where('expense_date <=', $endDate)
+      ->get('expenses')->row();
   }
 
-  function getSalesByDateAndType($date, $type) {
-    return $this->db->select_sum('sales_amount')->where('sales_type', $type)->where('sales_date', $date)->get('sales')->row();
+  function getSalesByDateAndType($date, $type, $period) {
+    [$startDate, $endDate] = $this->getTime($date, $period);
+
+    return $this->db->select_sum('sales_amount')
+      ->where('sales_type', $type)
+      ->where('sales_date >=', $startDate)
+      ->where('sales_date <=', $endDate)
+      ->get('sales')->row();
   }
 
-  function getHotelSales($date) {
-    return $this->db->where_in('payment_for', ['room', 'advance', 'addons'])->like('booking_payment_added', $date)->get('booking_payment')->result_array();
+  function getHotelSales($date, $period) {
+    [$startDate, $endDate] = $this->getTime($date, $period);
+    return $this->db->where_in('payment_for', ['room', 'advance', 'addons'])
+      ->where('booking_payment_added >=', $startDate)
+      ->where('booking_payment_added <=', $endDate)
+      ->get('booking_payment')->result_array();
   }
 
-  function getEventSales($date) {
-    return $this->db->where_in('sales_type', ['Event', 'Pool'])->like('sales_added', $date)->get('sales')->result_array();
+  function getEventSales($date, $period) {
+    [$startDate, $endDate] = $this->getTime($date, $period);
+    return $this->db->where_in('sales_type', ['Event', 'Pool'])
+      ->where('sales_added >=', $startDate)
+      ->where('sales_added <=', $endDate)
+      ->get('sales')->result_array();
   }
 
-  function getHotelExpense($date) {
-    return $this->db->where_in('expense_type', ['Hotel', 'Pool'])->like('expense_added', $date)->get('expenses')->result_array();
+  function getHotelExpense($date, $period) {
+    [$startDate, $endDate] = $this->getTime($date, $period);
+    return $this->db->where_in('expense_type', ['Hotel', 'Pool'])
+      ->where('expense_added >=', $startDate)
+      ->where('expense_added <=', $endDate)
+      ->get('expenses')->result_array();
   }
 
-  function getEventExpense($date) {
-    return $this->db->where_in('expense_type', ['Event'])->like('expense_added', $date)->get('expenses')->result_array();
+  function getEventExpense($date, $period) {
+    [$startDate, $endDate] = $this->getTime($date, $period);
+    return $this->db->where_in('expense_type', ['Event'])
+      ->where('expense_added >=', $startDate)
+      ->where('expense_added <=', $endDate)
+      ->get('expenses')->result_array();
   }
 
   function getChargedBookings($guest_id = null) {
@@ -584,9 +735,9 @@ class Get_model extends CI_Model {
 
   function getOccupiedRooms($date) {
     return $this->db->join('bookings', 'bookings.booking_id=booked_rooms.booking_id')
-                    ->like('dates', $date)
-                    ->where('booked_room_archived', 0)
-                    ->where('reservation_status', 0)
-                    ->get('booked_rooms')->result_array();
+      ->like('dates', $date)
+      ->where('booked_room_archived', 0)
+      ->where('reservation_status', 0)
+      ->get('booked_rooms')->result_array();
   }
 }

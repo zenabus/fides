@@ -62,8 +62,11 @@
                     <?php } ?>
                   </td>
                   <td class="action">
-                    <a href="<?= base_url('index.php/main/dcr/' . $row['payment_added']) ?>" class="btn btn-sm mb-1 btn-primary dcr" target="_blank" data-placement="top" title="View DCR" rel="tooltip">
-                      <i class="fa-solid fa-eye"></i>
+                    <a href="<?= base_url('index.php/main/dcr/' . $row['payment_added'] . '/AM') ?>" class="btn btn-sm mb-1 btn-primary dcr" target="_blank" data-placement="top" title="View DCR" rel="tooltip">
+                      AM
+                    </a>
+                    <a href="<?= base_url('index.php/main/dcr/' . $row['payment_added'] . '/PM') ?>" class="btn btn-sm mb-1 btn-primary dcr" target="_blank" data-placement="top" title="View DCR" rel="tooltip">
+                      PM
                     </a>
                     <?php if (date('Y-m-d') == $row['payment_added']) { ?>
                       <a href="javascript:" class="btn btn-sm mb-1 btn-success sale" data-placement="top" title="Add Sales" rel="tooltip" date="<?= $row['payment_added'] ?>">
@@ -419,6 +422,7 @@
     fetch(base_url + 'index.php/main/getPaymentsByDate/' + date)
       .then(response => response.json())
       .then(data => {
+        console.log(data);
         data.forEach(row => {
           const html = `<tr>
               <td>
