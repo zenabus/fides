@@ -242,6 +242,10 @@ class Get_model extends CI_Model {
     return $this->db->where('booked_room_id', $booked_room_id)->get('booking_payment')->row();
   }
 
+  function getAdvancedPaymentTotal($booked_room_id) {
+    return $this->db->select_sum('amount')->where('booked_room_id', $booked_room_id)->get('booking_payment')->row();
+  }
+
   function getPayments($booking_id) {
     return $this->db->join('booked_rooms', 'booked_rooms.booked_room_id=booking_payment.booked_room_id')
       ->join('rooms', 'rooms.id=booked_rooms.room_id')
@@ -533,12 +537,12 @@ class Get_model extends CI_Model {
 
   function getTime($date, $period) {
     if ($period == 'AM') {
-        $previousDate = date('Y-m-d', strtotime('-1 day', strtotime($date)));
-        $startDate = $previousDate . ' 22:00:00';
-        $endDate = $date . ' 14:00:00';
+      $previousDate = date('Y-m-d', strtotime('-1 day', strtotime($date)));
+      $startDate = $previousDate . ' 22:00:00';
+      $endDate = $date . ' 14:00:00';
     } else {
-        $startDate = $date . ' 14:00:00';
-        $endDate = $date . ' 22:00:00';
+      $startDate = $date . ' 14:00:00';
+      $endDate = $date . ' 22:00:00';
     }
     return [$startDate, $endDate];
   }

@@ -29,18 +29,6 @@ $("#modalGuest").on("shown.bs.modal", function () {
   $("#search").focus();
 });
 
-$("[name=payment_option]").change(function () {
-  const option = $(this).val();
-  if (option == "Cash") {
-    $(".card-div").hide();
-    $("[name=card_number]").val("");
-    $("[name=card_number]").removeAttr("required");
-  } else {
-    $("[name=card_number]").attr("required", true);
-    $(".card-div").show();
-  }
-});
-
 $("#search").on("keypress", function (e) {
   if (e.which === 13) {
     $(".guests-tbody tr:first-child td:last-child button:first-child").click();
@@ -314,6 +302,7 @@ $("#modalBooking").on("hide.bs.modal", function (e) {
   $("[name=amount]").removeAttr("disabled");
   $("[name=card_number]").removeAttr("disabled");
   $("[name=payment_option]").removeAttr("disabled");
+  $(".card-div").addClass("d-none").hide();
 
   $("#txt-contact").text("");
   $("#btnUpdate").hide();
@@ -324,10 +313,110 @@ $("[name=payment_option]").change(function () {
   $("[name=amount]").focus();
   if (option == "Cash") {
     $(".card-div").addClass("d-none");
+    $(".card-div").hide();
     $("[name=card_number]").val("");
     $("[name=card_number]").removeAttr("required");
   } else {
     $("[name=card_number]").attr("required", true);
     $(".card-div").removeClass("d-none");
+    $(".card-div").show();
   }
+});
+
+$("[name=payment_payment_option]").change(function () {
+  const option = $(this).val();
+  $("[name=amount]").focus();
+  if (option == "Cash") {
+    $(".payment-card-div").addClass("d-none");
+    $("[name=payment_card_number]").val("");
+    $("[name=payment_card_number]").removeAttr("required");
+  } else {
+    $("[name=payment_card_number]").attr("required", true);
+    $(".payment-card-div").removeClass("d-none");
+  }
+});
+
+// $("[name=payment_option]").change(function () {
+//   const option = $(this).val();
+//   if (option == "Cash") {
+//     $(".card-div").hide();
+//     $("[name=card_number]").val("");
+//     $("[name=card_number]").removeAttr("required");
+//   } else {
+//     $("[name=card_number]").attr("required", true);
+//     $(".card-div").show();
+//   }
+// });
+
+$("#btnPay").click(function () {
+  $("#modalPay").modal("show");
+});
+
+$("#btnPayments").click(function () {
+  const booking_id = $("[name=booking_id]").val();
+  $("#payments-tbody").html(`
+    <tr>
+      <td class="text-center" colspan="5">Loading..</td>
+    </tr>
+  `);
+  fetch(`${base_url}index.php/main/getAdvancePayments/${booking_id}`)
+    .then(response => response.json())
+    .then(data => {
+      let tbody = "";
+      data.forEach(payment => {
+        const amount = parseInt(payment.amount).toLocaleString("en-US", { minimumFractionDigits: 2 });
+
+        const timeString = payment.booking_payment_added;
+        const dateTime = new Date(timeString);
+        const formattedDate = dateTime.toLocaleDateString("en-US", {
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        });
+        const formattedTime = dateTime.toLocaleTimeString("en-US", {
+          hour: "numeric",
+          minute: "numeric",
+          hour12: true,
+        });
+
+        tbody += `
+          <tr>
+            <td>
+              ₱${amount}<br/>
+              <small class="text-muted">${payment.payment_option} ${
+          payment.payment_option == "Card" ? `[${payment.payment_details}]` : ""
+        }</small>
+            </td>
+            <td>
+              ${payment.name}<br/>
+              <small class="text-muted">${formattedDate + " " + formattedTime}</small>
+            </td>
+            <td><a href="${base_url}index.php/main/deletePayment/${
+          payment.booking_payment_id
+        }" class="btn btn-sm btn-danger deletePayment px-2"><span class="fa fa-trash"></span></a></td>
+          </tr>`;
+        console.log(payment);
+      });
+      console.log(tbody);
+      $("#payments-tbody").html(tbody);
+    });
+  $("#modalPayments").modal("show");
+});
+
+$(document).on("click", ".deletePayment", function (e) {
+  e.preventDefault();
+  swal({
+    title: "Are you sure?",
+    text: "Please confirm your selected action",
+    type: "warning",
+    buttonsStyling: false,
+    showCancelButton: true,
+    zIndex: 99999999,
+    cancelButtonClass: "btn",
+    confirmButtonClass: "btn btn-primary mr-2",
+  }).then(result => {
+    if (result) {
+      window.location.replace(this.href);
+    }
+  });
 });

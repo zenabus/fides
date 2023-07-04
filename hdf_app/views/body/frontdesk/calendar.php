@@ -121,6 +121,15 @@
     box-shadow: inset 0 1px 0 0 #66615B, inset 0 -1px 0 0 #66615B;
     border-width: 0 !important;
   }
+
+  #modalPay,
+  #modalPayments {
+    z-index: 999999;
+  }
+
+  .swal2-container {
+    z-index: 9999999 !important;
+  }
 </style>
 
 <?php
@@ -345,6 +354,96 @@ $now = date('H');
   </div>
 </div>
 
+
+<div class="modal fade" id="modalPay" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-sm" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="title title-up">Add Payment</h4>
+      </div>
+      <div class="modal-body px-4">
+        <?= form_open('admin/addPayment', ['id' => 'frmPayment']) ?>
+        <input type="hidden" name="payment_booking_id">
+        <input type="hidden" name="payment_booked_room_id">
+
+        <div class="payment-advanced-div">
+          <div class="form-row">
+            <div class="form-group col-md-12">
+              <label>Payment Option</label>
+              <div class="d-flex justify-content-around my-2">
+                <div class="form-check-radio mb-0">
+                  <label class="form-check-label">
+                    <input class="form-check-input" type="radio" name="payment_payment_option" value="Cash" checked>
+                    Cash
+                    <span class="form-check-sign"></span>
+                  </label>
+                </div>
+                <div class="form-check-radio mb-0">
+                  <label class="form-check-label">
+                    <input class="form-check-input" type="radio" name="payment_payment_option" value="Card">
+                    Card
+                    <span class="form-check-sign"></span>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Advance Payment</label>
+            <input type="number" class="form-control" name="payment_amount" min="0" step="0.01" required>
+          </div>
+          <div class="form-group payment-card-div d-none mb-0">
+            <label>Account Number</label>
+            <input type="number" class="form-control" name="payment_card_number" placeholder="XXXX" maxlength="4">
+            <small>Last 4 digit only.</small>
+          </div>
+        </div>
+        <?= form_close() ?>
+      </div>
+      <div class="modal-footer">
+        <div class="left-side">
+          <button type="submit" class="btn btn-link" form="frmPayment">Add Payment</button>
+        </div>
+        <div class="divider"></div>
+        <div class="right-side">
+          <button type="button" class="btn btn-link" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div class="modal fade" id="modalPayments" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="title title-up">Advance Payments</h4>
+      </div>
+      <div class="modal-body px-4">
+        <table class="table table-bordered">
+          <thead>
+            <tr>
+              <th>Amount</th>
+              <th>Processed By</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="payments-tbody">
+            <!-- javascript -->
+          </tbody>
+        </table>
+      </div>
+      <div class="modal-footer">
+        <div class="right-side">
+          <button type="button" class="btn btn-link" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
 <script>
   let guests = JSON.parse(`<?= json_encode($guests) ?>`);
 </script>
@@ -387,12 +486,12 @@ $now = date('H');
     }
   });
 
-  $(".table-container").scroll(function() { 
-      const top = $(this).scrollTop();
-      const left = $(this).scrollLeft();
-      console.log(top, left);
-      localStorage.setItem('top', top);
-      localStorage.setItem('left', left);
+  $(".table-container").scroll(function() {
+    const top = $(this).scrollTop();
+    const left = $(this).scrollLeft();
+    console.log(top, left);
+    localStorage.setItem('top', top);
+    localStorage.setItem('left', left);
   });
 
   $(document).ready(function() {
@@ -478,7 +577,8 @@ $now = date('H');
     $('[name=remarks]').removeAttr('readonly');
     $('#btnBooking').show();
     $('#btnRedirect').addClass('d-none');
-    $('#btnCancel, #btnChange').addClass('d-none');
+    $('#btnCancel, #btnChange, #btnPay, #btnPayments').addClass('d-none');
+    $('.payment_option').show();
     $('.type-div').addClass('d-none');
 
     if (toDashed(date) == today) {
@@ -504,6 +604,9 @@ $now = date('H');
     const booking = JSON.parse($(this).attr('booking'));
     booked_room_id = booking.booked_room_id;
     type_booking = booking.booking_type;
+
+    $('[name=payment_booked_room_id]').val(booked_room_id);
+    $('[name=payment_booking_id]').val(booking.booking_id);
 
     $('#returning_guest').hide();
     $('[name=guest_id]').val(booking.guest_id);
@@ -532,7 +635,8 @@ $now = date('H');
       $('.action-div').addClass('d-none');
       $('#btnBooking').hide();
       $('#btnRedirect').removeClass('d-none').attr('href', `${base_url}index.php/main/booking/${booking.booking_number}`);
-      $('#btnCancel, #btnChange').addClass('d-none');
+      $('#btnCancel, #btnChange, #btnPay, #btnPayments').addClass('d-none');
+      $('.payment_option').show();
     } else if (booking.reservation_status == 1) {
       const [month, day, year] = booking.check_in.split('/')
       const checkin = `${year}-${month}-${day}`;
@@ -570,12 +674,13 @@ $now = date('H');
       $('[name=check_in]').removeAttr('readonly');
       $('.form-control').removeAttr('disabled');
       $('#btnRedirect').addClass('d-none');
-      $('#btnCancel, #btnChange').removeClass('d-none');
+      $('#btnCancel, #btnChange, #btnPay, #btnPayments').removeClass('d-none');
+      $('.payment_option').hide();
 
       if (booking.reservation_type == 'Confirmed') {
         if (booking.payments) {
           $("[name=payment_option][value=" + booking.payments.payment_option + "]").prop('checked', true).trigger('change');
-          $('[name=amount]').val(booking.payments.amount).attr('disabled', true);
+          $('[name=amount]').val(booking.advanced_total).attr('disabled', true);
           $('[name=card_number]').attr('disabled', true);
           $('[name=payment_option]').attr('disabled', true);
         }
@@ -586,7 +691,8 @@ $now = date('H');
       $('.action-div').addClass('d-none');
       $('#btnBooking').hide();
       $('#btnRedirect').removeClass('d-none');
-      $('#btnCancel, #btnChange').removeClass('d-none');
+      $('#btnCancel, #btnChange, #btnPay, #btnPayments').removeClass('d-none');
+      $('.payment_option').hide();
     }
 
     $('[name=check_in]').val(booking.check_in);

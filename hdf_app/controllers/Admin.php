@@ -119,6 +119,24 @@ class Admin extends MY_Controller {
     $this->redirect();
   }
 
+  function addPayment() {
+    $amount = $_POST['payment_amount'];
+    $booked_room_id = $_POST['payment_booked_room_id'];
+    $_POST['booking_id'] = $_POST['payment_booking_id'];
+    $_POST['payment_option'] = $_POST['payment_payment_option'];
+
+    if ($_POST['payment_payment_option'] == 'Cash') {
+      $_POST['payment_details'] = '';
+    } else {
+      $_POST['payment_details'] = $_POST['payment_card_number'];
+    }
+
+    $this->insert_model->addPayment('advance', $amount, $booked_room_id);
+    $this->insert_model->log("Added a new advance payment to {$_POST['category']}", 2);
+    $this->session->set_flashdata('success', 'Advance payment successfully added!');
+    $this->redirect();
+  }
+
   function addCategory() {
     $this->insert_model->addCategory();
     $this->insert_model->log("Added a new category, {$_POST['category']}", 2);

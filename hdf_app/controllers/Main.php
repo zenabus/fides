@@ -56,6 +56,8 @@ class Main extends MY_Controller {
       $check_out = $booking['early_check_out'] != NULL ? $booking['early_check_out'] : $booking['check_out'];
       $data['bookings'][$i]['dates_between'] = $this->datesBetween($booking['check_in'], $check_out);
       $data['bookings'][$i]['payments'] = $this->get_model->getAdvanceByBookedRoom($booking['booked_room_id']);
+      $advanced_total = $this->get_model->getAdvancedPaymentTotal($booking['booked_room_id']);
+      $data['bookings'][$i]['advanced_total'] = $advanced_total->amount;
     }
     return $data;
   }
@@ -1647,5 +1649,10 @@ class Main extends MY_Controller {
   function getGuests() {
     $guests = $this->get_model->getGuests();
     echo json_encode($guests);
+  }
+
+  function getAdvancePayments($booking_id) {
+    $payments = $this->get_model->getPayments($booking_id);
+    echo json_encode($payments);
   }
 }

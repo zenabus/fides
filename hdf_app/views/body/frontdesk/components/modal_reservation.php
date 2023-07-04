@@ -135,7 +135,7 @@
         </div>
         <div class="advanced-div">
           <div class="form-row">
-            <div class="form-group col-md-12">
+            <div class="form-group col-md-12 payment_option">
               <label>Payment Option</label>
               <div class="d-flex justify-content-around my-2">
                 <div class="form-check-radio mb-0">
@@ -165,6 +165,15 @@
             <small>Last 4 digit only.</small>
           </div>
         </div>
+        <div class="row">
+          <div class="col" style="padding-right:2px">
+            <a href="javascript:" class="btn btn-info my-0 btn-block mb-1" id="btnPayments">View Payments</a>
+          </div>
+          <div class="col" style="padding-left:2px">
+            <a href="javascript:" class="btn btn-info my-0 btn-block mb-1" id="btnPay">Add Payment</a>
+          </div>
+        </div>
+
         <a href="javascript:" class="btn my-0 btn-block mb-1" id="btnChange">Change Room</a>
         <a href="javascript:" class="btn btn-danger my-0 d-none btn-block" id="btnCancel">Cancel Reservation</a>
         <a href="javascript:" class="btn my-0 d-none btn-block" id="btnUpdate">Update Booking</a>
@@ -242,6 +251,7 @@
     </div>
   </div>
 </div>
+
 
 <script>
   $('#btnUpdate').click(function() {
