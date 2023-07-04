@@ -519,14 +519,26 @@ class Get_model extends CI_Model {
   //     ->get('booking_payment')->result_array();
   // }
 
+  // function getTime($date, $period) {
+  //   if ($period == 'AM') {
+  //     $previousDate = date('Y-m-d', strtotime('-1 day', strtotime($date)));
+  //     $startDate = $previousDate . ' 22:00:00';
+  //     $endDate = $date . ' 12:00:00';
+  //   } else {
+  //     $startDate = $date . ' 12:00:00';
+  //     $endDate = $date . ' 22:00:00';
+  //   }
+  //   return [$startDate, $endDate];
+  // }
+
   function getTime($date, $period) {
     if ($period == 'AM') {
-      $previousDate = date('Y-m-d', strtotime('-1 day', strtotime($date)));
-      $startDate = $previousDate . ' 22:00:00';
-      $endDate = $date . ' 12:00:00';
+        $previousDate = date('Y-m-d', strtotime('-1 day', strtotime($date)));
+        $startDate = $previousDate . ' 22:00:00';
+        $endDate = $date . ' 14:00:00';
     } else {
-      $startDate = $date . ' 12:00:00';
-      $endDate = $date . ' 22:00:00';
+        $startDate = $date . ' 14:00:00';
+        $endDate = $date . ' 22:00:00';
     }
     return [$startDate, $endDate];
   }
@@ -550,7 +562,7 @@ class Get_model extends CI_Model {
     return $this->db->order_by('cash_id', 'DESC')->limit(1)->get('cash')->row();
   }
 
-  function getRemitted($date, $period) {
+  function getRemitted($date, $period = NULL) {
     if ($period) {
       [$startDate, $endDate] = $this->getTime($date, $period);
       return $this->db->join('users', 'users.id=remittances.user_id')

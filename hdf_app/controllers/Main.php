@@ -501,6 +501,11 @@ class Main extends MY_Controller {
       $data['sales'] = $this->get_model->getSales($date, $type);
       $data['collectables'] = $this->get_model->getCollectablesByDate($date, $type);
 
+      [$y, $m, $d] = explode('-', $date);
+      $data['y'] = $y;
+      $data['m'] = $m;
+      $data['d'] = $d;
+
       $view = $this->load->view('body/frontdesk/components/dcr', $data, TRUE);
       $options = new Options();
       $options->set('dpi', 300);
@@ -508,7 +513,7 @@ class Main extends MY_Controller {
       $dompdf = new Dompdf($options);
       $dompdf->loadHtml($view);
       $dompdf->render();
-      $dompdf->stream('HDF-DCR-' . date('Ymd') . '-' . $type, ['Attachment' => FALSE]);
+      $dompdf->stream('HDF-DCR-' . $y . $m . $d . '-' . $type, ['Attachment' => FALSE]);
     }
   }
 

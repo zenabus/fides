@@ -2,7 +2,7 @@
 <html>
 
 <head>
-  <title><?= TITLE ?> - Daily Collection Report (<?= $type ?>)</title>
+  <title>Daily Collection Report <?= $m ?>/<?= $d ?>/<?= $y ?> <?= $type ?> Shift</title>
   <style type="text/css">
     * {
       font-family: 'DejaVu Serif' !important;
