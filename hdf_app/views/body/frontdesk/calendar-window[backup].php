@@ -126,7 +126,7 @@
     </div>
   </div>
   <div>
-    <button class="btn btn-sm mt-1" id="proceed">Proceed</button>
+    <button class="btn btn-sm mt-1" id="proceed" disabled>Proceed</button>
   </div>
 </div>
 
@@ -258,17 +258,15 @@
 
     $('.with-data').css('opacity', 0.5);
     const dates_between = JSON.parse(localStorage.getItem('highlight_between'));
-    if (dates_between) {
-      for (const date of dates_between) {
-        $(`[room_id="${localStorage.getItem('highlight_room_id')}"][date="${$.escapeSelector(date)}"]`).css('opacity', 1);
-      }
+    for (const date of dates_between) {
+      $(`[room_id="${localStorage.getItem('highlight_room_id')}"][date="${$.escapeSelector(date)}"]`).css('opacity', 1);
     }
   });
 
   function clearAll() {
     $('.no-data').removeClass('bg-default');
     $('#end').text('');
-    // $('#proceed').attr('disabled', true);
+    $('#proceed').attr('disabled', true);
     room_number = null;
     start = 0;
     end = 0;
@@ -278,56 +276,44 @@
     $(that).addClass('bg-default');
     room_number = data.room_number;
     start = this_day;
-    end = start + 1;
     $('#room_number').text(room_number);
     $('#room_type').text(data.room_type);
     $('#start').text(`${getMonth()}, ${start}`);
-    $('#end').text(`${end}`);
-    $('#nights').text('1 night');
   }
 
-  $(document).on('click', '.room', function() {
+  $('.room').click(function() {
     const this_day = parseInt($(this).attr('day'));
     const date = $(this).attr('date');
     data = JSON.parse($(this).attr('data'));
 
     if (data.room_number != room_number) {
-      console.log(0);
       clearAll();
     }
 
     if (start != 0) {
-      console.log(1);
       end = this_day;
-      let nights = end - start + 1;
+      let nights = end - start;
       nights = nights <= 0 ? 0 : nights;
-      // $('#proceed').attr('disabled', nights <= 0);
-      $('#end').text(end + 1);
+      $('#proceed').attr('disabled', nights <= 0);
+      $('#end').text(end);
       $('#nights').text(`${nights} night${nights==1?'':'s'}`);
       if (nights == 0) clearAll();
     }
 
     if (!room_number) {
-      console.log(2);
       setStart(this, this_day, data);
     }
 
     if (data.room_number == room_number && this_day > start) {
-      console.log(3);
       $('.no-data').removeClass('bg-default');
       $(this).addClass('bg-default');
       for (let i = start; i <= this_day; i++) {
         $(`[day=${i}].room${room_number}`).addClass('bg-default');
       }
     } else if (data.room_number == room_number && this_day < start) {
-      console.log(4);
       clearAll();
       setStart(this, this_day, data);
     }
-
-    console.log(' ');
-    console.log(' ');
-
   });
 
   $('#proceed').click(function() {

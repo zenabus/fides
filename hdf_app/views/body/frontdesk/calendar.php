@@ -7,6 +7,10 @@
     pointer-events: none;
   }
 
+  .wait {
+    cursor: wait;
+  }
+
   .table-container {
     overflow-x: auto;
     max-height: calc(100vh - 200px);
@@ -89,10 +93,6 @@
     cursor: pointer;
   }
 
-  .no-data {
-    cursor: pointer;
-  }
-
   .hovered {
     background-color: #dee2e6;
   }
@@ -129,6 +129,17 @@
 
   .swal2-container {
     z-index: 9999999 !important;
+  }
+
+  .draggable {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
 </style>
 
@@ -245,6 +256,7 @@ $now = date('H');
                       $text = '';
                       $checkin = '';
                       $type = 'Reservation';
+                      $both = 0;
                       $date_dash = $y . '-' .  $m . '-' . str_pad($i, 2, '0', STR_PAD_LEFT);
                       if ($yesterday > $date_dash) {
                         $disabled = 'disabled';
@@ -260,6 +272,7 @@ $now = date('H');
                         if ($now >= 10) {
                           $type = 'Check In';
                         }
+                        $both = 1;
                       }
                       $date = $m . '/' . str_pad($i, 2, '0', STR_PAD_LEFT) . '/' . $y;
                       $data = array_filter($bookings, function ($booking) use ($date, $row) {
@@ -286,11 +299,15 @@ $now = date('H');
                         $min = $date == min($data['dates_between']) ? 'min' : 'mid';
                         $max = $date == max($data['dates_between']) ? 'max' : 'mid';
                         ?>
-                        <td class="with-data bg-<?= $color ?> <?= $min ?>" date="<?= $date ?>" data='<?= json_encode($row) ?>' booking='<?= json_encode($data) ?>'><?= character_limiter($guest, 15) ?></td>
-                        <td class="with-data bg-<?= $color ?> <?= $max ?>" date="<?= $date ?>" data='<?= json_encode($row) ?>' booking='<?= json_encode($data) ?>'><?= character_limiter($data['remarks'], 15) ?></td>
+                        <td class="with-data <?= $min ?> bg-<?= $color ?> position-relative first-drag" date="<?= $date ?>" data='<?= json_encode($row) ?>' booking='<?= json_encode($data) ?>' both="<?= $both ?>">
+                          <div draggable="true" class="draggable" id="drag<?= $date_dash ?>-<?= $data['room_id'] ?>"><?= character_limiter($guest, 15) ?></div>
+                        </td>
+                        <td class="with-data <?= $max ?> bg-<?= $color ?> position-relative second-drag" date="<?= $date ?>" data='<?= json_encode($row) ?>' booking='<?= json_encode($data) ?>' both="<?= $both ?>">
+                          <div draggable="true" class="draggable" id="drag<?= $date_dash ?>-<?= $data['room_id'] ?>"><?= character_limiter($data['remarks'], 15) ?></div>
+                        </td>
                       <?php } else { ?>
-                        <td class="<?= $checkout ? '' : 'no-data' ?> first" date="<?= $date ?>" date="<?= $date ?>" data='<?= json_encode($row) ?>' type="<?= $type ?>" <?= $disabled ?>><?= $text ?></td>
-                        <td class="<?= $checkout ? '' : 'no-data' ?> second" date="<?= $date ?>" date="<?= $date ?>" data='<?= json_encode($row) ?>' type="<?= $type ?>" <?= $disabled ?>><?= $text ?></td>
+                        <td class="<?= $checkout ? '' : 'no-data pointer' ?> droppable first" date="<?= $date ?>" data='<?= json_encode($row) ?>' type="<?= $type ?>" both="<?= $both ?>" <?= $disabled ?>><?= $text ?></td>
+                        <td class="<?= $checkout ? '' : 'no-data pointer' ?> droppable second" date="<?= $date ?>" data='<?= json_encode($row) ?>' type="<?= $type ?>" both="<?= $both ?>" <?= $disabled ?>><?= $text ?></td>
                     <?php }
                     } ?>
                   </tr>
@@ -489,7 +506,6 @@ $now = date('H');
   $(".table-container").scroll(function() {
     const top = $(this).scrollTop();
     const left = $(this).scrollLeft();
-    console.log(top, left);
     localStorage.setItem('top', top);
     localStorage.setItem('left', left);
   });
@@ -599,7 +615,7 @@ $now = date('H');
   let type_booking;
   let withdata;
 
-  $('.with-data').click(function() {
+  $(document).on('click', '.with-data', function() {
     const room = JSON.parse($(this).attr('data'));
     const booking = JSON.parse($(this).attr('booking'));
     booked_room_id = booking.booked_room_id;
@@ -705,5 +721,327 @@ $now = date('H');
     let checkin = moment(booking.check_in).format("YYYY-MM-DD");
     let checkout = moment(booking.check_out).format("YYYY-MM-DD");
     updateAvailableRoom(checkin, checkout);
+  });
+
+  let booking_id_drag;
+  let booked_room_id_drag;
+  let nights_drag;
+  let bg_drag;
+  let type_drag;
+  let html_drag;
+  let html_drag2;
+  let booking_drag;
+
+  const addClass = (element, cls) => {
+    if (element.hasClass('no-data')) {
+      element.addClass(`${bg_drag} ${cls}`);
+    }
+  }
+
+  const removeClass = (element, cls) => {
+    if (element.hasClass('no-data')) {
+      element.removeClass(`${bg_drag} ${cls}`);
+    }
+  }
+
+  const toggleDragOver = (obj, add = true) => {
+    let current = $(obj);
+    if (add) {
+      if (nights_drag == 1) {
+        if (current.hasClass('first')) {
+          addClass(current, 'min');
+          addClass(current.next(), 'max');
+        } else if (current.hasClass('second')) {
+          addClass(current, 'max');
+          addClass(current.prev(), 'min');
+        }
+      } else {
+        if (current.hasClass('second')) {
+          current = current.prev();
+        }
+        addClass(current, 'min');
+        current = current.next();
+        for (let i = 1; i <= (nights_drag - 1) * 2; i++) {
+          addClass(current, 'mid');
+          current = current.next();
+        }
+        addClass(current, 'max')
+      }
+    } else {
+      if (nights_drag == 1) {
+        if (current.hasClass('first')) {
+          removeClass(current, 'min');
+          removeClass(current.next(), 'max');
+        } else if (current.hasClass('second')) {
+          removeClass(current, 'max');
+          removeClass(current.prev(), 'min');
+        }
+      } else {
+        if (current.hasClass('second')) {
+          current = current.prev();
+        }
+        removeClass(current, 'min');
+        current = current.next();
+        for (let i = 1; i <= (nights_drag - 1) * 2; i++) {
+          removeClass(current, 'mid');
+          current = current.next();
+        }
+        removeClass(current, 'max');
+      }
+    }
+  }
+
+
+  $(document).on("dragstart", ".draggable", function(e) {
+    e.originalEvent.dataTransfer.setData("text", e.target.id);
+    const parent = $(e.target).parent();
+    const data = JSON.parse(parent.attr('data'));
+    const {
+      booking_id,
+      booked_room_id,
+      nights,
+    } = JSON.parse(parent.attr('booking'));
+
+    const check_in = parent.hasClass('bg-success');
+    const confirmed = parent.hasClass('bg-info');
+    const tentative = parent.hasClass('bg-warning');
+
+    if (check_in) {
+      bg_drag = 'bg-success';
+      type_drag = 'Check In';
+    } else if (confirmed) {
+      bg_drag = 'bg-info';
+      type_drag = 'Reservation';
+    } else if (tentative) {
+      bg_drag = 'bg-warning';
+      type_drag = 'Reservation';
+    }
+
+    booking_id_drag = booking_id;
+    booked_room_id_drag = booked_room_id;
+    nights_drag = nights;
+  });
+
+  $(document).on("dragover", ".droppable", function(e) {
+    e.preventDefault();
+    const type = $(this).attr('type');
+    const both = $(this).attr('both');
+
+    if (type == type_drag || both == 1) {
+      toggleDragOver(this);
+    }
+  });
+
+  $(document).on("dragleave", ".droppable", function(e) {
+    const type = $(this).attr('type');
+    const both = $(this).attr('both');
+
+    if (type == type_drag || both == 1) {
+      toggleDragOver(this, false);
+    }
+  });
+
+  const remove = (draggedParent, ordinal, toRemove) => {
+    draggedParent.addClass(`${ordinal} no-data droppable pointer`);
+    draggedParent.attr('type', type_drag);
+    draggedParent.removeClass(`with-data position-relative ${toRemove} ${bg_drag} ${ordinal}-drag`);
+    draggedParent.removeAttr('booking');
+    draggedParent.html('');
+  }
+
+  const removeNext = (draggedParent, ordinal, toRemove) => {
+    const hasMid = draggedParent.next().hasClass('mid');
+    const hasMax = draggedParent.next().hasClass('max');
+    const newOrdinal = draggedParent.next().hasClass('first-drag') ? 'first' : 'second';
+
+    remove(draggedParent, ordinal, toRemove);
+
+    if (hasMid) {
+      removeNext(draggedParent.next(), newOrdinal, 'mid');
+    } else if (hasMax) {
+      removeNext(draggedParent.next(), newOrdinal, 'max');
+    }
+  }
+
+  const removePrev = (draggedParent, ordinal, toRemove) => {
+    const hasMid = draggedParent.prev().hasClass('mid');
+    const hasMin = draggedParent.prev().hasClass('min');
+    const newOrdinal = draggedParent.prev().hasClass('first-drag') ? 'first' : 'second';
+
+    remove(draggedParent, ordinal, toRemove);
+
+    if (hasMid) {
+      removePrev(draggedParent.prev(), newOrdinal, 'mid');
+    } else if (hasMin) {
+      removePrev(draggedParent.prev(), newOrdinal, 'min');
+    }
+  }
+
+  const removeDragged = (id, check_in, room_id) => {
+    const draggedParent = $('#' + id).parent();
+    booking_drag = JSON.parse(draggedParent.attr('booking'));
+
+    const ordinal = draggedParent.hasClass('first-drag') ? 'first' : 'second';
+    const hasMin = draggedParent.hasClass('min');
+    const hasMid = draggedParent.hasClass('mid');
+    const hasMax = draggedParent.hasClass('max');
+
+    if (ordinal == 'first') {
+      draggedParent.children().first().attr('id', `drag${toDashed(check_in)}-${room_id}`);
+      draggedParent.next().children().first().attr('id', `drag${toDashed(check_in)}-${room_id}`);
+      html_drag = draggedParent.html();
+      html_drag2 = draggedParent.next().html();
+    } else {
+      draggedParent.children().first().attr('id', `drag${toDashed(check_in)}-${room_id}`);
+      draggedParent.prev().children().first().attr('id', `drag${toDashed(check_in)}-${room_id}`);
+      html_drag2 = draggedParent.html();
+      html_drag = draggedParent.prev().html();
+    }
+
+    if (hasMin) {
+      removeNext(draggedParent, ordinal, 'min');
+    } else if (hasMax) {
+      removePrev(draggedParent, ordinal, 'max');
+    } else if (hasMid) {
+      removePrev(draggedParent, ordinal, 'mid');
+      removeNext(draggedParent, ordinal, 'mid');
+    }
+  }
+
+  const addNext = (e) => {
+    const hasMid = e.next().hasClass('mid');
+    const hasMax = e.next().hasClass('max');
+
+    if ($(e).hasClass('first')) {
+      e.removeClass('first no-data droppable pointer').addClass('first-drag with-data position-relative').html(html_drag);
+    } else if ($(e).hasClass('second')) {
+      e.removeClass('second no-data droppable pointer').addClass('second-drag with-data position-relative').html(html_drag2);
+    }
+    e.attr('booking', JSON.stringify(booking_drag));
+
+    if (hasMid || hasMax) {
+      addNext($(e).next());
+    }
+  }
+
+  const addDraggable = (e, check_in, check_out, room_id) => {
+    booking_drag.check_in = check_in;
+    booking_drag.check_out = check_out;
+    booking_drag.nights = nights_drag;
+    booking_drag.room_id = room_id;
+
+    addNext(e);
+  }
+
+  // const addDraggable = (e, check_in, check_out, room_id) => {
+  //   booking_drag.check_in = check_in;
+  //   booking_drag.check_out = check_out;
+  //   booking_drag.nights = nights_drag;
+  //   booking_drag.room_id = room_id;
+
+  //   if (e.hasClass('first')) {
+  //     e.removeClass('first no-data droppable pointer').addClass('first-drag with-data position-relative').html(html_drag);
+  //     e.next().removeClass('second no-data droppable pointer').addClass('second-drag with-data position-relative').html(html_drag2);
+  //     e.attr('booking', JSON.stringify(booking_drag));
+  //     e.next().attr('booking', JSON.stringify(booking_drag));
+  //   } else {
+  //     e.removeClass('second no-data droppable pointer').addClass('second-drag with-data position-relative').html(html_drag2);
+  //     e.prev().removeClass('first no-data droppable pointer').addClass('first-drag with-data position-relative').html(html_drag);
+  //     e.attr('booking', JSON.stringify(booking_drag));
+  //     e.prev().attr('booking', JSON.stringify(booking_drag));
+  //   }
+  // }
+
+  $(document).on("drop", ".droppable", function(e) {
+    e.preventDefault();
+    const id = e.originalEvent.dataTransfer.getData("text");
+
+    let current = $(this);
+    let conflict = false;
+
+    for (let index = 0; index < nights_drag; index++) {
+      if (current.hasClass('with-data')) {
+        conflict = true;
+      }
+      current = current.next();
+    }
+
+    if (conflict) {
+      swal({
+        title: "Already booked.",
+        text: "Please choose another schedule or room for your rescheduled booking.",
+        type: "error",
+        buttonsStyling: false,
+        confirmButtonClass: "btn btn-primary",
+      });
+      $('.hovered').removeClass('hovered');
+      $('body').removeClass('wait');
+      $('.no-data').removeClass('wait');
+      $('.droppable').removeClass('bg-success bg-warning bg-info min max mid')
+      return;
+    }
+
+    const {
+      room_id
+    } = JSON.parse($(this).attr('data'));
+    const check_in = $(this).attr('date');
+    const check_out = addDays(check_in, nights_drag);
+
+    const data = {
+      nights: nights_drag,
+      room_id,
+      check_in,
+      check_out,
+      booking_id: booking_id_drag,
+      booked_room_id: booked_room_id_drag,
+    };
+
+    const success = $(this).hasClass('bg-success');
+    const info = $(this).hasClass('bg-info');
+    const warning = $(this).hasClass('bg-warning');
+
+    if (success || info || warning) {
+      $('body').addClass('wait');
+      $('.no-data').addClass('wait');
+
+      swal({
+        title: "Are you sure?",
+        text: "Please confirm your selected action",
+        type: "warning",
+        buttonsStyling: false,
+        showCancelButton: true,
+        cancelButtonClass: "btn",
+        confirmButtonClass: "btn btn-primary mr-2",
+      }).then((result) => {
+        if (result) {
+          fetch(`${base_url}index.php/main/changeRoomAjax`, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json"
+              },
+              body: JSON.stringify(data),
+            })
+            .then(response => response.json())
+            .then(data => {
+              removeDragged(id, check_in, room_id);
+              addDraggable($(this), check_in, check_out, room_id);
+              $('.hovered').removeClass('hovered');
+              $('body').removeClass('wait');
+              $('.no-data').removeClass('wait');
+            })
+            .catch(error => {
+              console.error("Error:", error);
+            });
+        }
+      }, function(dismiss) {
+        // dismiss can be 'overlay', 'cancel', 'close', 'esc', 'timer'
+        if (dismiss) {
+          $('.hovered').removeClass('hovered');
+          $('body').removeClass('wait');
+          $('.no-data').removeClass('wait');
+          $('.droppable').removeClass('bg-success bg-warning bg-info min max mid')
+        }
+      });
+    }
   });
 </script>

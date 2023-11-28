@@ -241,26 +241,33 @@ $("#btnChange").click(function () {
       booked_room_id,
     };
 
-    fetch(`${base_url}index.php/main/changeRoomAjax`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
-    })
-      .then(response => response.json())
-      .then(data => {
-        console.log("Success:", data);
-        location.reload();
-      })
-      .catch(error => {
-        console.error("Error:", error);
-      });
+    console.log(data);
 
-    localStorage.removeItem("check_in");
-    localStorage.removeItem("check_out");
-    localStorage.removeItem("room_id");
-    localStorage.removeItem("room_type");
-    localStorage.removeItem("room_number");
-    localStorage.removeItem("nights");
+    if (data.room_id) {
+      console.log(1);
+      fetch(`${base_url}index.php/main/changeRoomAjax`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      })
+        .then(response => response.json())
+        .then(data => {
+          console.log("Success:", data);
+          location.reload();
+        })
+        .catch(error => {
+          console.error("Error:", error);
+        });
+
+      localStorage.removeItem("check_in");
+      localStorage.removeItem("check_out");
+      localStorage.removeItem("room_id");
+      localStorage.removeItem("room_type");
+      localStorage.removeItem("room_number");
+      localStorage.removeItem("nights");
+    } else {
+      console.log(2);
+    }
   };
 });
 

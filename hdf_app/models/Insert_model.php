@@ -261,4 +261,7 @@ class Insert_model extends CI_Model {
   function addCollectable() {
     $this->db->insert('collectables', $_POST);
   }
+
+  function addCount() {
+  }
 }

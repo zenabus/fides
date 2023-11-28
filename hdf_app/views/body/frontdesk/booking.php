@@ -279,7 +279,7 @@
               <?php } ?>
               <tr class="bg-default text-white">
                 <th class="pl-4">TOTAL PAYMENT</th>
-                <th>₱ <?= number_format($payment->amount, 2) ?></th>
+                <th>₱ <?= number_format($payment->amount ?? 0, 2) ?></th>
                 <th></th>
                 <th></th>
               </tr>
@@ -335,7 +335,7 @@
               <?php } ?>
               <tr class="bg-default text-white">
                 <th class="pl-4">TOTAL REFUND</th>
-                <th>₱ <?= number_format($refund->booking_refund, 2) ?></th>
+                <th>₱ <?= number_format($refund->booking_refund ?? 0, 2) ?></th>
                 <th></th>
                 <th></th>
               </tr>

@@ -99,29 +99,34 @@ class MY_Controller extends CI_Controller {
     $ago = new DateTime($datetime);
     $diff = $now->diff($ago);
 
-    $diff->w = floor($diff->d / 7);
-    $diff->d -= $diff->w * 7;
+    $diffString = '';
 
-    $string = array(
-      'y' => 'year',
-      'm' => 'month',
-      'w' => 'week',
-      'd' => 'day',
-      'h' => 'hour',
-      'i' => 'minute',
-      's' => 'second',
+    $intervalFormat = array(
+      '%y' => 'year',
+      '%m' => 'month',
+      '%w' => 'week',
+      '%d' => 'day',
+      '%h' => 'hour',
+      '%i' => 'minute',
+      '%s' => 'second',
     );
-    foreach ($string as $k => &$v) {
-      if ($diff->$k) {
-        $v = $diff->$k . ' ' . $v . ($diff->$k > 1 ? 's' : '');
-      } else {
-        unset($string[$k]);
+
+    foreach ($intervalFormat as $format => $unit) {
+      $value = $diff->format($format);
+      if ($value != '0') {
+        $diffString .= $value . ' ' . $unit . ($value > 1 ? 's' : '') . ', ';
       }
     }
 
-    if (!$full) $string = array_slice($string, 0, 1);
-    return $string ? implode(', ', $string) . ' ago' : 'just now';
+    $diffString = rtrim($diffString, ', ');
+
+    if (!$full && $diffString) {
+      $diffString = explode(', ', $diffString, 2)[0];
+    }
+
+    return $diffString ? $diffString . ' ago' : 'just now';
   }
+
 
   function datesBetween($start, $end, $format = 'm/d/Y') {
     $array = array();

@@ -1,6 +1,6 @@
 <?php
 function round_format($num) {
-  return number_format($num, 2);
+  return number_format($num ?? 0, 2);
 }
 ?>
 

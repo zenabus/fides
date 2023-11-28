@@ -10,7 +10,7 @@ function popup(e, title, text, link) {
     confirmButtonClass: "btn btn-primary mr-2",
     confirmButtonText: "Yes",
     cancelButtonText: "No",
-  }).then((result) => {
+  }).then(result => {
     if (result) {
       window.location.replace(link);
     }
@@ -27,7 +27,7 @@ $(document).on("click", ".confirm", function (e) {
     showCancelButton: true,
     cancelButtonClass: "btn",
     confirmButtonClass: "btn btn-primary mr-2",
-  }).then((result) => {
+  }).then(result => {
     if (result) {
       window.location.replace(this.href);
     }
@@ -44,7 +44,7 @@ $(document).on("click", ".reset", function (e) {
     showCancelButton: true,
     cancelButtonClass: "btn",
     confirmButtonClass: "btn btn-primary mr-2",
-  }).then((result) => {
+  }).then(result => {
     if (result) {
       window.location.replace(this.href);
     }
@@ -69,7 +69,20 @@ $(document).ready(function () {
   }
 });
 
-const formatNumber = (num) => num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,");
+const addDays = (checkin, days = 1) => {
+  let date = new Date(checkin);
+
+  // Add days to the date
+  date.setDate(date.getDate() + parseInt(days));
+
+  // Format the new date as MM/DD/YYYY
+  const month = (date.getMonth() + 1).toString().padStart(2, "0");
+  const day = date.getDate().toString().padStart(2, "0");
+  const year = date.getFullYear();
+  return month + "/" + day + "/" + year;
+};
+
+const formatNumber = num => num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,");
 const pad = (num, places = 2) => String(num).padStart(places, "0");
 
 function getMonth() {
@@ -100,12 +113,12 @@ const getDatesBetween = function (start, end) {
   return arr;
 };
 
-const toDashed = (date) => {
+const toDashed = date => {
   const [month, day, year] = date.split("/");
   return `${year}-${month}-${day}`;
 };
 
-const ampm = (date) => {
+const ampm = date => {
   var date = new Date(date);
   let hours = date.getHours();
   let minutes = date.getMinutes();
@@ -116,6 +129,6 @@ const ampm = (date) => {
   return hours + ":" + minutes + " " + ampm;
 };
 
-const capitalize = (str) => {
+const capitalize = str => {
   return str.charAt(0).toUpperCase() + str.slice(1);
 };

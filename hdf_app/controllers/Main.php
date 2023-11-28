@@ -788,6 +788,16 @@ class Main extends MY_Controller {
     redirect('main/profile/');
   }
 
+  function determinePeriod() {
+    $currentTime = date('H:i:s');
+
+    if ($currentTime >= '22:00:00' || $currentTime < '14:00:00') {
+      return 'am';
+    } else {
+      return 'pm';
+    }
+  }
+
   function book() {
     unset($_POST['booked_room_id']);
     unset($_POST['booking_id']);
@@ -811,6 +821,7 @@ class Main extends MY_Controller {
     // }
 
     if ($_POST['booking_type'] == 'Check In') {
+      $this->insert_model->addCount($this->determinePeriod());
       redirect(base_url('index.php/main/booking/' . $booking_number));
     } else {
       if ($_POST['amount']) {
@@ -1314,7 +1325,6 @@ class Main extends MY_Controller {
     $this->insert_model->addBookingLogAjax($log, $post);
     $this->insert_model->log($log);
     $this->update_model->updateBooking($arrival, $departure, $post['booked_room_id']);
-    $this->session->set_flashdata('success', 'Room successfully changed!');
     echo json_encode(TRUE);
   }
 
