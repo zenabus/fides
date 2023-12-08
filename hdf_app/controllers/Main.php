@@ -237,19 +237,35 @@ class Main extends MY_Controller {
     return $total;
   }
 
+  function bookingsAjax() {
+    $start = $this->input->post('start');
+    $length = $this->input->post('length');
+    $search = $this->input->post('search')['value'];
+    $status = $this->input->post('status');
+    // $orderColumn = $this->input->post('order')[0]['column'];
+    // $orderDirection = $this->input->post('order')[0]['dir'];
+
+    $data['data'] = $this->get_model->getBookingsByStatus($start, $length, $search, $status);
+    // $data['data'] = $this->get_model->getBookingsByStatus($start, $length, $search, $orderColumn, $orderDirection, $status);
+    foreach ($data['data'] as $i => $booking) {
+      $data['data'][$i]['rooms'] = $this->get_model->getBookedRooms($booking['booking_id']);
+      $data['data'][$i]['payment'] = $this->get_model->getPaymentTotal($booking['booking_id']);
+      $data['data'][$i]['payments'] = $this->get_model->getPayments($booking['booking_id']);
+      $data['data'][$i]['refund'] = $this->get_model->getRefundTotal($booking['booking_id']);
+      $data['data'][$i]['refunds'] = $this->get_model->getRefunds($booking['booking_id']);
+    }
+
+    $data['recordsTotal'] = count($this->get_model->getBookingsByStatusCount($status));
+    $data['recordsFiltered'] = count($this->get_model->getFilteredRecordsCount($status, $search));
+    // $data['recordsFiltered'] = count($this->get_model->getFilteredRecordsCount($status, $search, $orderColumn, $orderDirection));
+
+    echo json_encode($data);
+  }
+
   function bookings() {
     $data['active'] = 'bookings';
-    $data['bookings'] = $this->get_model->getBookingsByStatus([0, -1, 6]);
     $data['charged'] = $this->get_model->getChargedBookings();
     $total_collectable = 0;
-
-    foreach ($data['bookings'] as $i => $booking) {
-      $data['bookings'][$i]['rooms'] = $this->get_model->getBookedRooms($booking['booking_id']);
-      $data['bookings'][$i]['payment'] = $this->get_model->getPaymentTotal($booking['booking_id']);
-      $data['bookings'][$i]['payments'] = $this->get_model->getPayments($booking['booking_id']);
-      $data['bookings'][$i]['refund'] = $this->get_model->getRefundTotal($booking['booking_id']);
-      $data['bookings'][$i]['refunds'] = $this->get_model->getRefunds($booking['booking_id']);
-    }
 
     foreach ($data['charged'] as $i => $booking) {
       if ($data['charged'][$i]['reservation_status'] != 6) {

@@ -135,10 +135,55 @@ class Get_model extends CI_Model {
       ->get('bookings')->result_array();
   }
 
-  function getBookingsByStatus($status = [0, -1]) {
-    return $this->db->join('guests', 'guests.guest_id=bookings.guest_id')
-      ->where_in('reservation_status', $status)
-      ->get('bookings')->result_array();
+  function getBookingsByStatusCount($status) {
+    return $this->db->where_in('reservation_status', $status)->get('bookings')->result_array();
+  }
+
+
+  function searchable($that, $search) {
+    $that->db->like('guests.first_name', $search);
+    $that->db->or_like('guests.middle_name', $search);
+    $that->db->or_like('guests.last_name', $search);
+    $that->db->or_like('guests.contact', $search);
+    $that->db->or_like('guests.email', $search);
+    $that->db->or_like('bookings.booking_number', $search);
+    // $that->db->or_like('room_type.room_type', $search);
+    return $that;
+  }
+
+  function getFilteredRecordsCount($status, $search) {
+    $this->db->join('guests', 'guests.guest_id=bookings.guest_id')
+      // ->join('booked_rooms', 'booked_rooms.booking_id=bookings.booking_id')
+      // ->join('rooms', 'rooms.id=booked_rooms.room_id')
+      // ->join('room_type', 'room_type.id=rooms.room_type_id')
+      ->where_in('reservation_status', $status);
+
+    if (!empty($search)) {
+      $this->searchable($this, $search);
+    }
+
+    if (!empty($orderColumn) && !empty($orderDirection)) {
+      $this->db->order_by($orderColumn, $orderDirection);
+    }
+
+    return $this->db->get('bookings')->result_array();
+  }
+
+  function getBookingsByStatus($start, $length, $search, $status = [0, -1]) {
+    $this->db->join('guests', 'guests.guest_id=bookings.guest_id');
+    $this->db->join('booked_rooms', 'booked_rooms.booking_id=bookings.booking_id');
+    $this->db->join('rooms', 'rooms.id=booked_rooms.room_id');
+    $this->db->join('room_type', 'room_type.id=rooms.room_type_id');
+    $this->db->where_in('reservation_status', $status);
+    $this->db->limit($length, $start);
+    if (!empty($search)) {
+      $this->searchable($this, $search);
+    }
+    if (!empty($orderColumn) && !empty($orderDirection)) {
+      $this->db->order_by($orderColumn, $orderDirection);
+    }
+    $this->db->order_by('bookings.booking_id', 'DESC');
+    return $this->db->get('bookings')->result_array();
   }
 
   function getRoomTypes() {
