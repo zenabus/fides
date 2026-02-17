@@ -1,7 +1,7 @@
 <div class="content pb-0">
   <h5>Discounts</h5>
   <div class="row">
-    <div class="col-md-8">
+    <div class="col-md-12">
       <div class="card">
         <div class="card-header px-4 pt-4 d-flex justify-content-between align-items-center">
           <h6>Discounts</h6>

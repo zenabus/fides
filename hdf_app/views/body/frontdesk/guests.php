@@ -3,18 +3,19 @@
     <div class="col-md-12">
       <h5 class="mb-0">Guests</h5>
       <button class="btn" id="addGuest">Add New Guest</button>
+      <!-- <a href="<?= base_url('index.php/main/cleanup_guests') ?>" class="btn btn-warning">Cleanup Spaces</a> -->
       <div class="wizard-container">
         <div class="card card-wizard active" data-color="primary" id="wizardProfile">
           <div class="card-header text-center">
             <div class="wizard-navigation">
               <ul>
                 <li class="nav-item">
-                  <a class="nav-link active" href="#available" data-toggle="tab" role="tab" aria-controls="available" aria-selected="true">
+                  <a class="nav-link active" href="#available" data-toggle="tab" role="tab" aria-controls="available" aria-selected="true" onclick="loadGuests(0, '#tbl_active')">
                     <i class="fa fa-check"></i> Active
                   </a>
                 </li>
                 <li class="nav-item">
-                  <a class="nav-link" href="#unavailable" data-toggle="tab" role="tab" aria-controls="unavailable">
+                  <a class="nav-link" href="#unavailable" data-toggle="tab" role="tab" aria-controls="unavailable" onclick="loadGuests(1, '#tbl_inactive')">
                     <i class="fa fa-ban"></i> Inactive
                   </a>
                 </li>
@@ -24,7 +25,7 @@
           <div class="card-body pt-0">
             <div class="tab-content pt-0">
               <div class="tab-pane show active" id="available">
-                <table class="table table-striped table-bordered tbl_guest">
+                <table class="table table-striped table-bordered" id="tbl_active" style="width:100%">
                   <thead>
                     <tr>
                       <th>Guest Name</th>
@@ -36,52 +37,11 @@
                     </tr>
                   </thead>
                   <tbody>
-                    <?php foreach ($guests_active as $row) { ?>
-                      <tr>
-                        <td>
-                          <?= $row['last_name'] ?>, <?= $row['first_name'] ?> <?= $row['middle_name'] ?> <?= $row['suffix'] ?><br>
-                          <small><?= $row['address'] ?></small>
-                        </td>
-                        <td>
-                          <?= $row['contact'] ?><br>
-                          <small><?= $row['email'] ?></small>
-                        </td>
-                        <td>
-                          <?= $row['company_name'] ?><br>
-                          <small><?= $row['company_address'] ?></small>
-                        </td>
-                        <td>
-                          <?= $row['birthday'] ?><br>
-                          <small><?= $row['nationality'] ?></small>
-                        </td>
-                        <td>
-                          <?php
-                          $date_time = date_create($row['last_checkin']);
-                          $date_time = date_format($date_time, "M d, Y h:i a");
-                          ?>
-                          <?php if ($row['last_checkin']) { ?>
-                            <?= ucfirst($row['last_checkin_ago']) ?><br>
-                            <small><?= $date_time ?></small>
-                          <?php } ?>
-                        </td>
-                        <td class="action">
-                          <a href="<?= base_url('index.php/main/guest/' . $row['guest_id']) ?>" class="btn btn-sm mb-1" data-placement="top" title="View Guest" rel="tooltip">
-                            <span class="fa fa-eye"></span>
-                          </a>
-                          <button class="btn btn-success btn-sm updateGuest mb-1" data='<?= json_encode($row) ?>' data-placement="top" title="Update Guest" rel="tooltip">
-                            <i class="fa-solid fa-user-pen"></i>
-                          </button>
-                          <a href="<?= base_url('index.php/main/statusGuest/1/' . $row['guest_id']) ?>" class="btn btn-warning btn-sm confirm mb-1" data-placement="top" title="Disable Guest" rel="tooltip">
-                            <i class="fa-solid fa-user-xmark"></i>
-                          </a>
-                        </td>
-                      </tr>
-                    <?php } ?>
                   </tbody>
                 </table>
               </div>
               <div class="tab-pane" id="unavailable">
-                <table class="table table-striped table-bordered tbl_guest">
+                <table class="table table-striped table-bordered" id="tbl_inactive" style="width:100%">
                   <thead>
                     <tr>
                       <th>Guest Name</th>
@@ -93,47 +53,6 @@
                     </tr>
                   </thead>
                   <tbody>
-                    <?php foreach ($guests_inactive as $row) { ?>
-                      <tr>
-                        <td>
-                          <?= $row['last_name'] ?>, <?= $row['first_name'] ?> <?= $row['middle_name'] ?><br>
-                          <small><?= $row['address'] ?></small>
-                        </td>
-                        <td>
-                          <?= $row['contact'] ?><br>
-                          <small><?= $row['email'] ?></small>
-                        </td>
-                        <td>
-                          <?= $row['company_name'] ?><br>
-                          <small><?= $row['company_address'] ?></small>
-                        </td>
-                        <td>
-                          <?= $row['birthday'] ?><br>
-                          <small><?= $row['nationality'] ?></small>
-                        </td>
-                        <td>
-                          <?php
-                          $date_time = date_create($row['last_checkin']);
-                          $date_time = date_format($date_time, "M d, Y h:i a");
-                          ?>
-                          <?php if ($row['last_checkin']) { ?>
-                            <?= ucfirst($row['last_checkin_ago']) ?><br>
-                            <small><?= $date_time ?></small>
-                          <?php } ?>
-                        </td>
-                        <td class="action">
-                          <a href="<?= base_url('index.php/main/guest/' . $row['guest_id']) ?>" class="btn btn-sm mb-1" data-placement="top" title="View Guest" rel="tooltip">
-                            <span class="fa fa-eye"></span>
-                          </a>
-                          <a href="javascript:" class="btn mb-1 btn-success btn-sm updateGuest" data='<?= json_encode($row) ?>' data-placement="top" title="Update Guest" rel="tooltip">
-                            <i class="fa-solid fa-user-pen"></i>
-                          </a>
-                          <a href="<?= base_url('index.php/main/statusGuest/0/' . $row['guest_id']) ?>" class="btn mb-1 btn-primary btn-sm confirm" data-placement="top" title="Enable Guest" rel="tooltip">
-                            <i class="fa-solid fa-user-check"></i>
-                          </a>
-                        </td>
-                      </tr>
-                    <?php } ?>
                   </tbody>
                 </table>
               </div>
@@ -238,7 +157,27 @@
       },
       format: 'L',
     });
-    $('.tbl_guest').dataTable({
+
+    loadGuests(0, '#tbl_active');
+  });
+
+  function loadGuests(status, tableId) {
+    if ($.fn.DataTable.isDataTable(tableId)) {
+      $(tableId).DataTable().destroy();
+    }
+
+    $(tableId).DataTable({
+      "pageLength": 25,
+      "lengthMenu": [
+        [10, 25, 50, 100, -1],
+        [10, 25, 50, 100, "All"]
+      ],
+      "processing": true,
+      "serverSide": true,
+      "ajax": {
+        "url": "<?= base_url('index.php/main/guests_dt/') ?>" + status,
+        "type": "POST"
+      },
       autoWidth: false,
       columnDefs: [{
           "width": "18%",
@@ -253,7 +192,7 @@
           "targets": 2
         },
         {
-          "width": "18%",
+          "width": "15%",
           "targets": 3
         },
         {
@@ -261,13 +200,14 @@
           "targets": 4
         }, {
           "width": "120px",
-          "targets": 5
+          "targets": 5,
+          "orderable": false
         }
       ]
     });
-  });
+  }
 
-  $('.updateGuest').click(function() {
+  $(document).on('click', '.updateGuest', function() {
     const data = JSON.parse($(this).attr('data'));
     $('[name=guest_id]').val(data.guest_id);
     $('[name=first_name]').val(data.first_name);

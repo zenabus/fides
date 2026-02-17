@@ -1,5 +1,9 @@
 {
     "require": {
         "dompdf/dompdf": "^2.0"
+    },
+    "require-dev": {
+        "kenjis/ci-phpunit-test": "^3.0",
+        "phpunit/phpunit": "^9.0"
     }
 }

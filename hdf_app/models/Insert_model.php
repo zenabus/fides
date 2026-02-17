@@ -116,19 +116,25 @@ class Insert_model extends CI_Model {
   function addGuest($guest, $post = FALSE) {
     if ($post) {
       $data = [
-        'first_name' => $guest['first_name'] ?? '',
-        'middle_name' => $guest['middle_name'] ?? '',
-        'last_name' => $guest['last_name'] ?? '',
-        'contact' => $guest['contact'] ?? '',
-        'email' => $guest['email'] ?? '',
-        'company_name' => $guest['company_name'] ?? '',
-        'suffix' => $guest['suffix'] ?? '',
-        'plate_no' => $guest['plate_no'] ?? '',
-        'birthday' => $guest['birthday'] ?? '',
-        'nationality' => $guest['nationality'] ?? '',
+        'first_name' => trim($guest['first_name'] ?? ''),
+        'middle_name' => trim($guest['middle_name'] ?? ''),
+        'last_name' => trim($guest['last_name'] ?? ''),
+        'contact' => trim($guest['contact'] ?? ''),
+        'email' => trim($guest['email'] ?? ''),
+        'company_name' => trim($guest['company_name'] ?? ''),
+        'suffix' => trim($guest['suffix'] ?? ''),
+        'plate_no' => trim($guest['plate_no'] ?? ''),
+        'birthday' => trim($guest['birthday'] ?? ''),
+        'nationality' => trim($guest['nationality'] ?? ''),
       ];
     } else {
       unset($_POST['guest_id']);
+      // Loop through POST and trim everything
+      foreach ($_POST as $key => $value) {
+        if (is_string($value)) {
+          $_POST[$key] = trim($value);
+        }
+      }
       $data = $_POST;
     }
     $this->db->insert('guests', $data);
@@ -260,8 +266,5 @@ class Insert_model extends CI_Model {
 
   function addCollectable() {
     $this->db->insert('collectables', $_POST);
-  }
-
-  function addCount() {
   }
 }

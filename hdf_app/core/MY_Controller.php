@@ -3,6 +3,11 @@ defined('BASEPATH') or exit('No direct script access allowed');
 
 class MY_Controller extends CI_Controller {
 
+  function __construct() {
+    parent::__construct();
+    $this->load->helper('hdf_utility');
+  }
+
   public function prompt($message, $type = 0) {
     if ($type) {
       $_SESSION['error'] = $message;
@@ -24,25 +29,17 @@ class MY_Controller extends CI_Controller {
   public function sendMail($email, $message, $subject) {
     $this->load->library('email');
 
-    $config = [
-      'protocol' => 'smtp',
-      'smtp_host' => 'ssl://smtp.gmail.com',
-      'smtp_port' => 465,
-      'smtp_user' => 'hoteldefides@gmail.com',
-      'smtp_pass' => 'fwzpyxikagivihlk',
-      'mailtype' => 'html',
-      'charset' => 'utf-8',
-      'wordwrap' => TRUE,
-    ];
-
-    $this->email->initialize($config);
     $this->email->from('hoteldefides@gmail.com', 'The Hotel de Fides');
     $this->email->to($email);
     $this->email->subject($subject);
     $this->email->message($message);
     $this->email->set_newline("\r\n");
-    $this->email->send();
-    log_message('error', $this->email->print_debugger());
+
+    if ($this->email->send()) {
+      // Success
+    } else {
+      log_message('error', $this->email->print_debugger());
+    }
   }
 
   function toDashedDate($date) {
@@ -95,6 +92,9 @@ class MY_Controller extends CI_Controller {
   }
 
   function timeAgo($datetime, $full = false) {
+    if (!$datetime) {
+      return 'Never';
+    }
     $now = new DateTime;
     $ago = new DateTime($datetime);
     $diff = $now->diff($ago);
@@ -104,7 +104,6 @@ class MY_Controller extends CI_Controller {
     $intervalFormat = array(
       '%y' => 'year',
       '%m' => 'month',
-      '%w' => 'week',
       '%d' => 'day',
       '%h' => 'hour',
       '%i' => 'minute',
@@ -125,24 +124,6 @@ class MY_Controller extends CI_Controller {
     }
 
     return $diffString ? $diffString . ' ago' : 'just now';
-  }
-
-
-  function datesBetween($start, $end, $format = 'm/d/Y') {
-    $array = array();
-    $interval = new DateInterval('P1D');
-
-    $realEnd = new DateTime($end);
-    $realEnd = $realEnd->modify('-1 day');
-    $realEnd->add($interval);
-
-    $period = new DatePeriod(new DateTime($start), $interval, $realEnd);
-
-    foreach ($period as $date) {
-      $array[] = $date->format($format);
-    }
-
-    return $array;
   }
 
   function getDaysInBetween($check_in, $check_out, $format = 'Y-m-d') {
@@ -166,6 +147,9 @@ class MY_Controller extends CI_Controller {
   }
 
   function getMissingDates($dates) {
+    if (empty($dates)) {
+      return [];
+    }
     $missingDates = [];
     $dateStart = new DateTime(min($dates));
     $dateEnd = new DateTime(date('Y-m-d'));

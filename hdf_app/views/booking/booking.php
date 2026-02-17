@@ -699,24 +699,18 @@
             <li>A non-refundable payment of 25% of the total room cost is required to reserve your preferred date. If payment of the reservation fee has not been made within 3 days your reservation automatically expires. Remaining balance should be settled upon check-in.</li>
             <li>Check payments must be made payable to JACO and JULS Hotel and Restaurant Corp. Cheques can be deposited to our bank accounts.</li>
             <li>You can pay thru GCash or Bank Deposit with the following details:</li>
-            <strong>For GCash Payment:</strong>
-            <ul>
-              <li>Name: <strong>Carlos Ortiz</strong></li>
-              <li>Number: <strong>0946 346 0194</strong></li>
-            </ul>
-            <strong>For Bank Deposit:</strong>
-            <ol>
-              <li>Banco De Oro (BDO)</li>
-              <ul>
-                <li>Account Name: JACO and JULS HOTEL & RESTAURANT CORP.</li>
-                <li>Account Number: 010588002648</li>
-              </ul>
-              <li>Landbank</li>
-              <ul>
-                <li>Account Name: JACO and JULS HOTEL & RESTAURANT CORP.</li>
-                <li>Account Number: 000182-1227-00</li>
-              </ul>
-            </ol>
+            <?php if (isset($payment_details)): ?>
+              <?php foreach ($payment_details as $type => $details): ?>
+                <strong>For <?= $details['label'] ?>:</strong>
+                <ul>
+                  <li>Account Name: <strong><?= $details['name'] ?></strong></li>
+                  <li>Account Number: <strong><?= $details['number'] ?></strong></li>
+                </ul>
+              <?php endforeach; ?>
+            <?php else: ?>
+              <!-- Fallback if config not loaded (should not happen) -->
+              <p>Please check your email for payment details.</p>
+            <?php endif; ?>
           </ul>
           <h4 class="mt-3">Cancellation Policy</h4>
           <h6>Cancellation charge will apply as below:</h6>
@@ -750,6 +744,7 @@
 <script type="text/javascript">
   const base_url = '<?= base_url() ?>';
   let booking_number;
+  const payment_details = <?= json_encode($payment_details ?? []) ?>;
 
   $(document).ready(function() {
     // ---------------------- CALENDAR ---------------------- //
@@ -1007,22 +1002,13 @@
 
   $('[name=payment_option]').change(function() {
     let method = $(this).val();
-    let name, number;
-    if (method == 'GCash') {
-      name = 'Carlos Ortiz';
-      number = '0946 346 0194';
-    } else if (method == 'BDO') {
-      method = 'Banco De Oro (BDO)';
-      name = 'JACO and JULS HOTEL & RESTAURANT CORP.';
-      number = '010588002648';
-    } else {
-      method = 'Land Bank of the Philippines';
-      name = 'JACO and JULS HOTEL & RESTAURANT CORP.';
-      number = '000182-1227-00';
+
+    let details = payment_details[method];
+    if (details) {
+      $('#method').val(details.label);
+      $('#name').val(details.name);
+      $('#number').val(details.number);
     }
-    $('#method').val(method);
-    $('#name').val(name);
-    $('#number').val(number);
   });
 
   $(document).on("input", ".numeric", function() {

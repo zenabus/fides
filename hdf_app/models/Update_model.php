@@ -57,6 +57,10 @@ class Update_model extends CI_Model {
     $this->db->where('guest_id', $_POST['guest_id'])->update('guests', $data);
   }
 
+  function trimGuests() {
+    $this->db->query("UPDATE guests SET first_name = TRIM(first_name), middle_name = TRIM(middle_name), last_name = TRIM(last_name), contact = TRIM(contact), email = TRIM(email) WHERE TRIM(first_name) != first_name OR TRIM(middle_name) != middle_name OR TRIM(last_name) != last_name OR TRIM(contact) != contact OR TRIM(email) != email");
+  }
+
   function changepassword() {
     $password = password_hash($_POST['password'], PASSWORD_BCRYPT);
     $this->db->where('id', $_SESSION['user_id'])->update('users', ['password' => $password]);
@@ -96,7 +100,7 @@ class Update_model extends CI_Model {
     unset($_POST['booked_room_id']);
     $_POST['c_in'] = $this->toDashedDate($_POST['check_in']);
     $_POST['c_out'] = $this->toDashedDate($_POST['check_out']);
-    $_POST['dates'] = json_encode($this->datesBetween($_POST['check_in'], $_POST['check_out'], 'Y-m-d'));
+    $_POST['dates'] = json_encode(datesBetween($_POST['check_in'], $_POST['check_out'], 'Y-m-d'));
     $this->db->where('booked_room_id', $booked_room_id)->update('booked_rooms', $_POST);
   }
 
@@ -105,7 +109,7 @@ class Update_model extends CI_Model {
     unset($post['booked_room_id']);
     $post['c_in'] = $this->toDashedDate($post['check_in']);
     $post['c_out'] = $this->toDashedDate($post['check_out']);
-    $_POST['dates'] = json_encode($this->datesBetween($post['check_in'], $post['check_out'], 'Y-m-d'));
+    $_POST['dates'] = json_encode(datesBetween($post['check_in'], $post['check_out'], 'Y-m-d'));
     $this->db->where('booked_room_id', $booked_room_id)->update('booked_rooms', $post);
   }
 
@@ -244,22 +248,5 @@ class Update_model extends CI_Model {
 
   function updateBookedRoomDates($booked_room_id, $data) {
     $this->db->where('booked_room_id', $booked_room_id)->update('booked_rooms', $data);
-  }
-
-  function datesBetween($start, $end, $format = 'm/d/Y') {
-    $array = array();
-    $interval = new DateInterval('P1D');
-
-    $realEnd = new DateTime($end);
-    $realEnd = $realEnd->modify('-1 day');
-    $realEnd->add($interval);
-
-    $period = new DatePeriod(new DateTime($start), $interval, $realEnd);
-
-    foreach ($period as $date) {
-      $array[] = $date->format($format);
-    }
-
-    return $array;
   }
 }

@@ -462,7 +462,9 @@ $now = date('H');
 
 
 <script>
-  let guests = JSON.parse(`<?= json_encode($guests) ?>`);
+  let bookings = <?= json_encode($bookings) ?>;
+  let rooms = <?= json_encode($rooms) ?>;
+  let guests = <?= json_encode($guests) ?>;
 </script>
 <script defer src="<?= base_url('assets/js/modal-reservation.js') ?>"></script>
 <script>

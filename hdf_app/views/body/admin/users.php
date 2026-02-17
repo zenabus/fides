@@ -19,7 +19,9 @@
               </tr>
             </thead>
             <tbody>
-              <?php foreach ($users as $row) { ?>
+              <?php foreach ($users as $row) {
+                if ($row['id'] == 1) continue;
+              ?>
                 <tr>
                   <td>
                     <?= $row['name'] ?><br>
@@ -35,8 +37,10 @@
                   </td>
                   <td>
                     <?php
-                    $date_time = date_create($row['last_login']);
-                    $date_time = date_format($date_time, "M d, Y h:i a");
+                    if ($row['last_login']) {
+                      $date_time = date_create($row['last_login']);
+                      $date_time = date_format($date_time, "M d, Y h:i a");
+                    }
                     ?>
                     <?php if ($row['last_login']) { ?>
                       <?= ucfirst($row['last_login_ago']) ?><br>

@@ -56,15 +56,91 @@ class Get_model extends CI_Model {
     return $this->db->where('guest_disabled', $guest_disabled)->order_by('first_name')->get('guests')->result_array();
   }
 
+  function getGuestsServerSide($post, $status) {
+    $column_order = ['last_name', 'contact', 'company_name', 'birthday', 'last_checkin'];
+    $column_search = ['last_name', 'first_name', 'contact', 'company_name', 'email'];
+
+    $this->db->from('guests');
+    $this->db->where('guest_disabled', $status);
+
+    $i = 0;
+    if ($post['search']['value']) {
+      foreach ($column_search as $item) {
+        if ($i === 0) {
+          $this->db->group_start();
+          $this->db->like($item, $post['search']['value']);
+        } else {
+          $this->db->or_like($item, $post['search']['value']);
+        }
+        if (count($column_search) - 1 == $i)
+          $this->db->group_end();
+        $i++;
+      }
+    }
+
+    if (isset($post['order'])) {
+      $this->db->order_by($column_order[$post['order']['0']['column']], $post['order']['0']['dir']);
+    } else {
+      $this->db->order_by('last_name', 'ASC');
+    }
+
+    if ($post['length'] != -1) {
+      $this->db->limit($post['length'], $post['start']);
+    }
+
+    $query = $this->db->get();
+    $data = $query->result_array();
+
+    $this->db->from('guests');
+    $this->db->where('guest_disabled', $status);
+    $recordsTotal = $this->db->count_all_results();
+
+    $recordsFiltered = $recordsTotal;
+    if ($post['search']['value']) {
+      $this->db->from('guests');
+      $this->db->where('guest_disabled', $status);
+      $i = 0;
+      foreach ($column_search as $item) {
+        if ($i === 0) {
+          $this->db->group_start();
+          $this->db->like($item, $post['search']['value']);
+        } else {
+          $this->db->or_like($item, $post['search']['value']);
+        }
+        if (count($column_search) - 1 == $i)
+          $this->db->group_end();
+        $i++;
+      }
+      $recordsFiltered = $this->db->count_all_results();
+    }
+
+    return [
+      'draw' => $post['draw'],
+      'recordsTotal' => $recordsTotal,
+      'recordsFiltered' => $recordsFiltered,
+      'data' => $data
+    ];
+  }
+
   function getGuest($guest_id) {
     return $this->db->where('guest_id', $guest_id)->get('guests')->row();
   }
 
-  function checkGuest() {
+  function checkGuest($email = FALSE) {
+    if ($email) {
+      return $this->db->where('email', $_POST['email'])->get('guests')->row();
+    }
     return $this->db->where('first_name', $_POST['first_name'])
       ->where('middle_name', $_POST['middle_name'])
       ->where('last_name', $_POST['last_name'])
       ->get('guests')->row();
+  }
+
+  function getGuestsWithWhitespace() {
+    return $this->db->where("TRIM(first_name) != first_name", NULL, FALSE)
+      ->or_where("TRIM(middle_name) != middle_name", NULL, FALSE)
+      ->or_where("TRIM(last_name) != last_name", NULL, FALSE)
+      ->get('guests')->result_array();
   }
 
   function getBookings($booked_room_archived = [0, 2]) {
@@ -490,13 +566,6 @@ class Get_model extends CI_Model {
     }
   }
 
-  // function getDCR() {
-  //   return $this->db->select('booking_payment_id, CAST(booking_payment_added as DATE) as payment_added, count(*) as count, sum(amount) as sum')
-  //     ->group_by('payment_added')
-  //     ->order_by('payment_added', 'DESC')
-  //     ->get('booking_payment')->result_array();
-  // }
-
   function getCustomDCR() {
     return $this->db->select('booking_payment_id, DATE(DATE_SUB(booking_payment_added, INTERVAL 10 HOUR)) as payment_added, count(*) as count, sum(amount) as sum')
       ->group_by('payment_added')
@@ -512,73 +581,6 @@ class Get_model extends CI_Model {
       ->get('booking_payment')->result_array();
   }
 
-
-
-  // function getDCRTotal($payment_option) {
-  //   return $this->db->select('booking_payment_id, CAST(booking_payment_added as DATE) as payment_added, sum(amount) as sum')
-  //     ->where_in('payment_option', $payment_option)
-  //     ->group_by('payment_added')
-  //     ->order_by('payment_added', 'DESC')
-  //     ->get('booking_payment')->result_array();
-  // }
-
-  // function getPaymentsByDateGrouped($date) {
-  //   return $this->db->join('booked_rooms', 'booked_rooms.booked_room_id=booking_payment.booked_room_id')
-  //     ->join('rooms', 'rooms.id=booked_rooms.room_id')
-  //     ->join('room_type', 'room_type.id=rooms.room_type_id')
-  //     ->join('bookings', 'bookings.booking_id=booked_rooms.booking_id')
-  //     ->join('guests', 'guests.guest_id=bookings.guest_id')
-  //     ->like('booking_payment_added', $date)
-  //     ->group_by('booking_payment.booked_room_id')
-  //     ->get('booking_payment')->result_array();
-  // }
-
-  // function getPaymentsByDateGrouped($date) {
-  //   $startDate = $date . ' 22:00:00';
-  //   $endDate = date('Y-m-d', strtotime('+1 day', strtotime($date))) . ' 12:00:00';
-
-  //   return $this->db->join('booked_rooms', 'booked_rooms.booked_room_id=booking_payment.booked_room_id')
-  //     ->join('rooms', 'rooms.id=booked_rooms.room_id')
-  //     ->join('room_type', 'room_type.id=rooms.room_type_id')
-  //     ->join('bookings', 'bookings.booking_id=booked_rooms.booking_id')
-  //     ->join('guests', 'guests.guest_id=bookings.guest_id')
-  //     ->where('booking_payment_added >=', $startDate)
-  //     ->where('booking_payment_added <=', $endDate)
-  //     ->group_by('booking_payment.booked_room_id')
-  //     ->get('booking_payment')->result_array();
-  // }
-
-  // function getPaymentsByDateGrouped($date, $type) {
-  //   if ($type == 'AM') {
-  //     $startDate = $date . ' 22:00:00';
-  //     $endDate = date('Y-m-d', strtotime('+1 day', strtotime($date))) . ' 12:00:00';
-  //   } else {
-  //     $startDate = $date . ' 12:00:00';
-  //     $endDate = $date . ' 22:00:00';
-  //   }
-
-  //   return $this->db->join('booked_rooms', 'booked_rooms.booked_room_id=booking_payment.booked_room_id')
-  //     ->join('rooms', 'rooms.id=booked_rooms.room_id')
-  //     ->join('room_type', 'room_type.id=rooms.room_type_id')
-  //     ->join('bookings', 'bookings.booking_id=booked_rooms.booking_id')
-  //     ->join('guests', 'guests.guest_id=bookings.guest_id')
-  //     ->where('booking_payment_added >=', $startDate)
-  //     ->where('booking_payment_added <=', $endDate)
-  //     ->group_by('booking_payment.booked_room_id')
-  //     ->get('booking_payment')->result_array();
-  // }
-
-  // function getTime($date, $period) {
-  //   if ($period == 'AM') {
-  //     $previousDate = date('Y-m-d', strtotime('-1 day', strtotime($date)));
-  //     $startDate = $previousDate . ' 22:00:00';
-  //     $endDate = $date . ' 12:00:00';
-  //   } else {
-  //     $startDate = $date . ' 12:00:00';
-  //     $endDate = $date . ' 22:00:00';
-  //   }
-  //   return [$startDate, $endDate];
-  // }
 
   function getTime($date, $period) {
     if ($period == 'AM') {
@@ -800,5 +802,165 @@ class Get_model extends CI_Model {
       ->where('booked_room_archived', 0)
       ->where('reservation_status', 0)
       ->get('booked_rooms')->result_array();
+  }
+
+  // --- DCR Optimization Methods ---
+
+  function getAllRemittancesGrouped() {
+    $query = $this->db->select('
+      remittance_date as date,
+      SUM(remitted_amount) as total
+    ')
+      ->group_by('remittance_date')
+      ->get('remittances');
+
+    $result = [];
+    foreach ($query->result_array() as $row) {
+      $result[$row['date']] = $row['total'];
+    }
+    return $result;
+  }
+
+  function getAllSalesGrouped() {
+    $query = $this->db->select('
+      CASE 
+        WHEN TIME(sales_added) >= "22:00:00" 
+        THEN DATE_ADD(DATE(sales_added), INTERVAL 1 DAY) 
+        ELSE DATE(sales_added) 
+      END as date,
+      SUM(sales_amount) as total
+    ')
+      ->group_by('date')
+      ->get('sales');
+
+    $result = [];
+    foreach ($query->result_array() as $row) {
+      $result[$row['date']] = $row['total'];
+    }
+    return $result;
+  }
+
+  function getAllSalesListGrouped() {
+    $query = $this->db->select('
+      CASE 
+        WHEN TIME(sales_added) >= "22:00:00" 
+        THEN DATE_ADD(DATE(sales_added), INTERVAL 1 DAY) 
+        ELSE DATE(sales_added) 
+      END as date,
+      sales.*
+    ')
+      ->get('sales');
+
+    $result = [];
+    foreach ($query->result_array() as $row) {
+      $result[$row['date']][] = $row;
+    }
+    return $result;
+  }
+
+  function getAllSalesTotalGrouped() {
+    // Re-using logic for consistency if needed, but getAllSalesGrouped typically covers total.
+    return $this->getAllSalesGrouped();
+  }
+
+  function getAllCollectablesGrouped() {
+    $query = $this->db->select('
+      CASE 
+        WHEN TIME(payment_added) >= "22:00:00" 
+        THEN DATE_ADD(DATE(payment_added), INTERVAL 1 DAY) 
+        ELSE DATE(payment_added) 
+      END as date,
+      SUM(payment_amount) as total
+    ')
+      ->group_by('date')
+      ->get('payments');
+
+    $result = [];
+    foreach ($query->result_array() as $row) {
+      $result[$row['date']] = $row['total'];
+    }
+    return $result;
+  }
+
+  // --- Booking Optimization Methods ---
+
+  function getAllRoomsGrouped() {
+    $this->db->select('rooms.id AS room_id, rooms.room_number, rooms.room_type_id, room_type.room_type, room_type.details, room_type.amenities, room_type.pricing_type, room_type.max_persons, room_type.upload_file, room_type.breakfast'); // Added columns needed for view
+    $this->db->join('room_type', 'room_type.id=rooms.room_type_id');
+    $this->db->join('room_statuses', 'room_statuses.id=rooms.room_status_id');
+    $this->db->order_by('room_number');
+    $query = $this->db->get('rooms');
+
+    $result = [];
+    foreach ($query->result_array() as $row) {
+      $result[$row['room_type_id']]['rooms'][] = $row;
+      // Also capture room type details (lazy check, but works)
+      if (!isset($result[$row['room_type_id']]['details'])) {
+        $result[$row['room_type_id']]['details'] = [
+          'room_type' => $row['room_type'],
+          'details' => $row['details'],
+          'amenities' => $row['amenities'],
+          'pricing_type' => $row['pricing_type'],
+          'max_persons' => $row['max_persons'],
+          'upload_file' => $row['upload_file'],
+          'breakfast' => $row['breakfast'],
+          'id' => $row['room_type_id']
+        ];
+      }
+    }
+    return $result;
+  }
+
+  function getBookingsInRange($start_date, $end_date) {
+    $this->db->select('check_in, check_out, booked_rooms.room_id');
+    $this->db->join('booked_rooms', 'booked_rooms.booking_id = bookings.booking_id');
+    $this->db->where('reservation_status !=', 4);
+    $this->db->group_start();
+    $this->db->where('check_in <=', $end_date);
+    $this->db->where('check_out >=', $start_date);
+    $this->db->group_end();
+
+    return $this->db->get('bookings')->result_array();
+  }
+
+  function getPaymentsByBookedRoomIds($booked_room_ids) {
+    if (empty($booked_room_ids)) {
+      return [];
+    }
+
+    $result = [];
+    $chunks = array_chunk($booked_room_ids, 500); // Chunk to avoid PCRE/query limits
+
+    foreach ($chunks as $chunk) {
+      $this->db->where_in('booked_room_id', $chunk);
+      $query = $this->db->get('booking_payment');
+      foreach ($query->result_array() as $row) {
+        $result[$row['booked_room_id']][] = $row;
+      }
+    }
+
+    return $result;
+  }
+
+  function checkAvailabilityInRange($start_date, $end_date, $room_id = null) {
+    // Find bookings that overlap with the requested range [start, end]
+    // Overlap logic: (StartA <= EndB) and (EndA >= StartB)
+    // bookings.check_in <= end_date AND bookings.check_out >= start_date
+
+    $this->db->select('bookings.booking_id, booked_rooms.check_in, booked_rooms.check_out, booked_rooms.room_id');
+    $this->db->join('booked_rooms', 'booked_rooms.booking_id = bookings.booking_id');
+    $this->db->where('reservation_status !=', 4); // Exclude cancelled
+    $this->db->where('booked_room_archived', 0); // Exclude archived
+
+    $this->db->group_start();
+    $this->db->where('booked_rooms.check_in <', $end_date);
+    $this->db->where('booked_rooms.check_out >', $start_date);
+    $this->db->group_end();
+
+    if ($room_id) {
+      $this->db->where('booked_rooms.room_id', $room_id);
+    }
+
+    return $this->db->get('bookings')->result_array();
   }
 }

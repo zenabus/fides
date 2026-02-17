@@ -52,12 +52,21 @@ class Main extends MY_Controller {
     $data['m'] = str_pad($month, 2, '0', STR_PAD_LEFT);
     $data['y'] = $year;
     $data['guests'] = $this->get_model->getGuests();
+    $booked_room_ids = array_column($data['bookings'], 'booked_room_id');
+    $all_payments = $this->get_model->getPaymentsByBookedRoomIds($booked_room_ids);
+
     foreach ($data['bookings'] as $i => $booking) {
       $check_out = $booking['early_check_out'] != NULL ? $booking['early_check_out'] : $booking['check_out'];
       $data['bookings'][$i]['dates_between'] = $this->datesBetween($booking['check_in'], $check_out);
-      $data['bookings'][$i]['payments'] = $this->get_model->getAdvanceByBookedRoom($booking['booked_room_id']);
-      $advanced_total = $this->get_model->getAdvancedPaymentTotal($booking['booked_room_id']);
-      $data['bookings'][$i]['advanced_total'] = $advanced_total->amount;
+
+      $payments = isset($all_payments[$booking['booked_room_id']]) ? $all_payments[$booking['booked_room_id']] : [];
+      $data['bookings'][$i]['payments'] = $payments;
+
+      $advanced_total = 0;
+      foreach ($payments as $p) {
+        $advanced_total += $p['amount'];
+      }
+      $data['bookings'][$i]['advanced_total'] = $advanced_total;
     }
     return $data;
   }
@@ -92,22 +101,62 @@ class Main extends MY_Controller {
 
   function guests() {
     $data['active'] = 'guests';
-    $data['guests_active'] = $this->get_model->getGuests();
-    $data['guests_inactive'] = $this->get_model->getGuests(1);
     $data['getRoomType'] = $this->get_model->getRoomTypes();
     $data['getRoom'] = $this->get_model->getRooms();
-
-    foreach ($data['guests_active'] as $i => $guest) {
-      $data['guests_active'][$i]['last_checkin_ago'] = $this->timeAgo($guest['last_checkin']);
-    }
-
-    foreach ($data['guests_inactive'] as $i => $guest) {
-      $data['guests_inactive'][$i]['last_checkin_ago'] = $this->timeAgo($guest['last_checkin']);
-    }
-
     $this->load->view('layout/header', $data);
     $this->load->view('body/frontdesk/guests');
     $this->load->view('layout/footer');
+  }
+
+  function guests_dt($status) {
+    $results = $this->get_model->getGuestsServerSide($_POST, $status);
+    $data = [];
+    foreach ($results['data'] as $row) {
+      $sub_array = [];
+      $sub_array[] = $row['last_name'] . ', ' . $row['first_name'] . ' ' . $row['middle_name'] . ' ' . $row['suffix'] . '<br><small>' . $row['address'] . '</small>';
+      $sub_array[] = $row['contact'] . '<br><small>' . $row['email'] . '</small>';
+      $sub_array[] = $row['company_name'] . '<br><small>' . $row['company_address'] . '</small>';
+      $sub_array[] = $row['birthday'] . '<br><small>' . $row['nationality'] . '</small>';
+
+      $ago = '';
+      $date_time = '';
+      if ($row['last_checkin']) {
+        $ago = ucfirst($this->timeAgo($row['last_checkin'])) . '<br>';
+        $date_time = '<small>' . date_format(date_create($row['last_checkin']), "M d, Y h:i a") . '</small>';
+      }
+      $sub_array[] = $ago . $date_time;
+
+      $actions = '<div class="action">';
+      $actions .= '<a href="' . base_url('index.php/main/guest/' . $row['guest_id']) . '" class="btn btn-sm mb-1" data-placement="top" title="View Guest" rel="tooltip"><span class="fa fa-eye"></span></a> ';
+      $actions .= '<button class="btn btn-success btn-sm updateGuest mb-1" data=\'' . json_encode($row) . '\' data-placement="top" title="Update Guest" rel="tooltip"><i class="fa-solid fa-user-pen"></i></button> ';
+
+      if ($status == 0) {
+        $actions .= '<a href="' . base_url('index.php/main/statusGuest/1/' . $row['guest_id']) . '" class="btn btn-warning btn-sm confirm mb-1" data-placement="top" title="Disable Guest" rel="tooltip"><i class="fa-solid fa-user-xmark"></i></a>';
+      } else {
+        $actions .= '<a href="' . base_url('index.php/main/statusGuest/0/' . $row['guest_id']) . '" class="btn mb-1 btn-primary btn-sm confirm" data-placement="top" title="Enable Guest" rel="tooltip"><i class="fa-solid fa-user-check"></i></a>';
+      }
+      $actions .= '</div>';
+
+      $sub_array[] = $actions;
+      $data[] = $sub_array;
+    }
+
+    $results['data'] = $data;
+    echo json_encode($results);
+  }
+
+  function cleanup_guests() {
+    $data['active'] = 'guests';
+    $data['guests'] = $this->get_model->getGuestsWithWhitespace();
+    $this->load->view('layout/header', $data);
+    $this->load->view('body/frontdesk/cleanup_guests');
+    $this->load->view('layout/footer');
+  }
+
+  function trim_guests() {
+    $this->update_model->trimGuests();
+    $this->session->set_flashdata('success', 'Guests successfully cleaned up.');
+    redirect('main/cleanup_guests');
   }
 
   function guest($guest_id) {
@@ -804,26 +853,21 @@ class Main extends MY_Controller {
     redirect('main/profile/');
   }
 
-  function determinePeriod() {
-    $currentTime = date('H:i:s');
-
-    if ($currentTime >= '22:00:00' || $currentTime < '14:00:00') {
-      return 'am';
-    } else {
-      return 'pm';
-    }
-  }
-
   function book() {
     unset($_POST['booked_room_id']);
     unset($_POST['booking_id']);
     if (!$_POST['guest_id']) {
-      $_POST['guest_id'] = $this->insert_model->addGuest($_POST, TRUE);
+      $guest = $this->get_model->checkGuest();
+      if ($guest) {
+        $_POST['guest_id'] = $guest->guest_id;
+      } else {
+        $_POST['guest_id'] = $this->insert_model->addGuest($_POST, TRUE);
+      }
     }
     $room = $this->get_model->getRoom($_POST['room_id']);
     $name = $_POST['first_name'] . ' ' . $_POST['last_name'];
     $type = $_POST['booking_type'] == 'Check In' ? 'booked' : 'reserved';
-    $_POST['dates'] = $this->datesBetween($_POST['check_in'], $_POST['check_out'], 'Y-m-d');
+    $_POST['dates'] = datesBetween($_POST['check_in'], $_POST['check_out'], 'Y-m-d');
     [$booking_number, $booked_room_id] = $this->insert_model->book();
     $log = ucfirst("{$type} {$name} in room {$room->room_number}");
     $this->insert_model->log($log);
@@ -831,13 +875,8 @@ class Main extends MY_Controller {
     $this->update_model->updateCheckIn($_POST['guest_id']);
     $this->session->set_flashdata('success', "Successfully {$type} {$name} in room {$room->room_number}");
 
-    // if ($_POST['check_in'] == date('m/d/Y')) {
-    //   log_message('error', $booked_room_id);
-    //   $this->earlyCheckIn($booked_room_id);
-    // }
-
     if ($_POST['booking_type'] == 'Check In') {
-      $this->insert_model->addCount($this->determinePeriod());
+      // $this->insert_model->addCount(determinePeriod()); // Removed for now, to be implemented in future
       redirect(base_url('index.php/main/booking/' . $booking_number));
     } else {
       if ($_POST['amount']) {
@@ -863,68 +902,31 @@ class Main extends MY_Controller {
   }
 
   function checkAvailableDates($check_in, $check_out, $room_id, $booked_room_id) {
-    $occupied = [];
-    $check_dates = $this->datesBetween($check_in, $check_out, 'Y-m-d');
-    $unique = [];
+    // Efficient range check
+    $conflicts = $this->get_model->checkAvailabilityInRange($check_in, $check_out, $room_id);
 
-    log_message('error', 'null' . json_encode($booked_room_id));
-    log_message('error', 'checkin' . json_encode($check_in));
-
+    // Filter out the current booking if updating
     if ($booked_room_id != 'null') {
-      $booked_room = $this->get_model->getBookingByBookedRoom($booked_room_id);
-      if ($booked_room) {
-        $room_dates = $this->datesBetween($booked_room->c_in, $booked_room->c_out, 'Y-m-d');
-        log_message('error', 'roomcheckin' . json_encode($booked_room->c_in));
-        foreach ($check_dates as $check_date) {
-          if (!in_array($check_date, $room_dates)) {
-            if ($check_date != $booked_room->c_out) {
-              array_push($unique, $check_date);
-            }
-          }
-        }
-        $check_dates = array_diff($check_dates, $room_dates);
-      }
-    } else {
-      $unique = $check_dates;
-    }
-
-    log_message('error', 'merged' . json_encode($unique));
-
-    foreach ($unique as $date) {
-      $conflict = $this->get_model->checkAvailableDates($date, $room_id);
-      if ($conflict) {
-        if ($conflict[0]['c_out'] != $check_in) {
-          array_push($occupied, $conflict);
-        }
+      $current_booking = $this->get_model->getBookingByBookedRoom($booked_room_id);
+      if ($current_booking) {
+        $conflicts = array_filter($conflicts, function ($c) use ($current_booking) {
+          return $c['booking_id'] != $current_booking->booking_id;
+        });
       }
     }
 
-    echo json_encode($occupied);
+    echo json_encode(array_values($conflicts));
   }
 
   function checkAvailableRooms($check_in, $check_out) {
-    $conflicts = [];
-    $occupied = [];
-    $check_dates = $this->datesBetween($check_in, $check_out, 'Y-m-d');
+    // Get all conflicts for all rooms in range
+    $conflicts = $this->get_model->checkAvailabilityInRange($check_in, $check_out);
 
-    foreach ($check_dates as $date) {
-      $conflict = $this->get_model->checkAvailableRooms($date);
-      if ($conflict) {
-        array_push($conflicts, $conflict);
-      }
-    }
+    // Extract unique room_ids from conflicts
+    $occupied_room_ids = array_unique(array_column($conflicts, 'room_id'));
 
-    foreach ($conflicts as $conflict) {
-      foreach ($conflict as $row) {
-        if (!in_array($row['room_id'], $occupied)) {
-          if ($row['c_out'] != $check_in) {
-            array_push($occupied, $row['room_id']);
-          }
-        }
-      }
-    }
-
-    echo json_encode($occupied);
+    // Return simple array of occupied IDs
+    echo json_encode(array_values($occupied_room_ids));
   }
 
   function massBooking() {
@@ -1330,6 +1332,9 @@ class Main extends MY_Controller {
     $content = trim(file_get_contents("php://input"));
     $post = json_decode($content, true);
     log_message('error', json_encode($post));
+
+    $this->db->trans_start();
+
     $booking_number = 'HDF' . str_pad($post['booking_id'], 5, '0', STR_PAD_LEFT);
     $room_from = $this->get_model->getBookedRoom($post['booked_room_id']);
     $this->update_model->changeRoomAjax($post);
@@ -1341,7 +1346,15 @@ class Main extends MY_Controller {
     $this->insert_model->addBookingLogAjax($log, $post);
     $this->insert_model->log($log);
     $this->update_model->updateBooking($arrival, $departure, $post['booked_room_id']);
-    echo json_encode(TRUE);
+
+    $this->db->trans_complete();
+
+    if ($this->db->trans_status() === FALSE) {
+      $this->output->set_status_header(500);
+      echo json_encode(['error' => 'Database transaction failed']);
+    } else {
+      echo json_encode(TRUE);
+    }
   }
 
   function addCharges() {

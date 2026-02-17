@@ -165,6 +165,10 @@ if (!$this->session->userdata('connect')) {
       <span><?= $this->session->flashdata($alert == 'success' ? 'success' : 'error') ?></span>
     </div>
   </div>
+  <?php
+  if ($this->session->flashdata('success')) $this->session->unset_userdata('success');
+  if ($this->session->flashdata('error')) $this->session->unset_userdata('error');
+  ?>
 <?php endif; ?>
 
 <body class="">
@@ -396,7 +400,7 @@ if (!$this->session->userdata('connect')) {
           </button>
           <div class="collapse navbar-collapse justify-content-end" id="navigation">
             <ul class="navbar-nav">
-              <li class="nav-item btn-rotate dropdown">
+              <!-- <li class="nav-item btn-rotate dropdown">
                 <a class="nav-link dropdown-toggle" href="" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                   <i class="nc-icon nc-bell-55"></i>
                 </a>
@@ -404,7 +408,7 @@ if (!$this->session->userdata('connect')) {
                   <a class="dropdown-item" href="#">Content</a>
                   <a class="dropdown-item" href="#">View all</a>
                 </div>
-              </li>
+              </li> -->
 
               <li class="nav-item dropdown">
                 <a href="#paper-kit" class="nav-link" data-toggle="dropdown" width="30" height="30" aria-expanded="false">
