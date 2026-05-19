@@ -9,4 +9,4 @@ $config['smtp_pass'] = 'fwzpyxikagivihlk';
 $config['mailtype'] = 'html';
 $config['charset'] = 'utf-8';
 $config['wordwrap'] = TRUE;
-$config['newline'] = "\r\n"; // Adding newline config here as well to be safe
+$config['newline'] = "\r\n";

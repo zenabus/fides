@@ -57,7 +57,7 @@ class Main extends MY_Controller {
 
     foreach ($data['bookings'] as $i => $booking) {
       $check_out = $booking['early_check_out'] != NULL ? $booking['early_check_out'] : $booking['check_out'];
-      $data['bookings'][$i]['dates_between'] = $this->datesBetween($booking['check_in'], $check_out);
+      $data['bookings'][$i]['dates_between'] = datesBetween($booking['check_in'], $check_out);
 
       $payments = isset($all_payments[$booking['booked_room_id']]) ? $all_payments[$booking['booked_room_id']] : [];
       $data['bookings'][$i]['payments'] = $payments;
@@ -663,7 +663,7 @@ class Main extends MY_Controller {
     $soa = [];
 
     foreach ($booked_rooms as $booked_room) {
-      $room_dates = $this->datesBetween($booked_room['check_in'], $booked_room['check_out']);
+      $room_dates = datesBetween($booked_room['check_in'], $booked_room['check_out']);
       foreach ($room_dates as $room_date) {
         if ($booked_room['using_formula'] == '1') {
           [$multiplicand, $multiplier] = explode('x', $booked_room['percentage']);

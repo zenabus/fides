@@ -211,7 +211,7 @@ class Update_model extends CI_Model {
       'check_out' => $_POST['check_out'],
       'c_in' => $this->toDashedDate($_POST['check_in']),
       'c_out' => $this->toDashedDate($_POST['check_out']),
-      'dates' => json_encode($this->datesBetween($_POST['check_in'], $_POST['check_out'], 'Y-m-d'))
+      'dates' => json_encode(datesBetween($_POST['check_in'], $_POST['check_out'], 'Y-m-d'))
     ];
     $this->db->where('room_id', $_POST['room_id'])
       ->where('booking_id', $_POST['booking_id'])
