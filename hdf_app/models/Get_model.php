@@ -567,14 +567,14 @@ class Get_model extends CI_Model {
   }
 
   function getCustomDCR() {
-    return $this->db->select('booking_payment_id, DATE(DATE_SUB(booking_payment_added, INTERVAL 10 HOUR)) as payment_added, count(*) as count, sum(amount) as sum')
+    return $this->db->select('booking_payment_id, DATE(DATE_ADD(booking_payment_added, INTERVAL 2 HOUR)) as payment_added, count(*) as count, sum(amount) as sum')
       ->group_by('payment_added')
       ->order_by('payment_added', 'DESC')
       ->get('booking_payment')->result_array();
   }
 
   function getCustomDCRTotal($payment_option) {
-    return $this->db->select('booking_payment_id, DATE(DATE_SUB(booking_payment_added, INTERVAL 10 HOUR)) as payment_added, sum(amount) as sum')
+    return $this->db->select('booking_payment_id, DATE(DATE_ADD(booking_payment_added, INTERVAL 2 HOUR)) as payment_added, sum(amount) as sum')
       ->where_in('payment_option', $payment_option)
       ->group_by('payment_added')
       ->order_by('payment_added', 'DESC')
@@ -583,13 +583,14 @@ class Get_model extends CI_Model {
 
 
   function getTime($date, $period) {
+    $cleanDate = date('Y-m-d', strtotime($date));
     if ($period == 'AM') {
-      $previousDate = date('Y-m-d', strtotime('-1 day', strtotime($date)));
+      $previousDate = date('Y-m-d', strtotime('-1 day', strtotime($cleanDate)));
       $startDate = $previousDate . ' 22:00:00';
-      $endDate = $date . ' 14:00:00';
+      $endDate = $cleanDate . ' 13:59:59';
     } else {
-      $startDate = $date . ' 14:00:00';
-      $endDate = $date . ' 22:00:00';
+      $startDate = $cleanDate . ' 14:00:00';
+      $endDate = $cleanDate . ' 21:59:59';
     }
     return [$startDate, $endDate];
   }
@@ -670,30 +671,53 @@ class Get_model extends CI_Model {
   }
 
   function getSales($date, $period = NULL, $total = FALSE) {
+    if ($period === NULL) {
+      if ($total) {
+        return $this->db->select_sum('sales_amount')
+          ->where('sales_date', $date)
+          ->get('sales')->row();
+      } else {
+        return $this->db->where('sales_date', $date)
+          ->get('sales')
+          ->result_array();
+      }
+    }
+
     [$startDate, $endDate] = $this->getTime($date, $period);
     if ($total) {
       return $this->db->select_sum('sales_amount')
-        ->where('sales_date >=', $startDate)
-        ->where('sales_date <=', $endDate)
+        ->where('sales_added >=', $startDate)
+        ->where('sales_added <=', $endDate)
         ->get('sales')->row();
     } else {
-      return $this->db->where('sales_date >=', $startDate)
-        ->where('sales_date <=', $endDate)
+      return $this->db->where('sales_added >=', $startDate)
+        ->where('sales_added <=', $endDate)
         ->get('sales')
         ->result_array();
     }
   }
 
   function getCollectables($date, $period = NULL, $total = FALSE) {
+    if ($period === NULL) {
+      if ($total) {
+        return $this->db->select_sum('collectable_amount')
+          ->where('collectable_date', $date)
+          ->get('collectables')->row();
+      } else {
+        return $this->db->where('collectable_date', $date)
+          ->get('collectables')->result_array();
+      }
+    }
+
     [$startDate, $endDate] = $this->getTime($date, $period);
     if ($total) {
       return $this->db->select_sum('collectable_amount')
-        ->where('collectable_date >=', $startDate)
-        ->where('collectable_date <=', $endDate)
+        ->where('collectable_added >=', $startDate)
+        ->where('collectable_added <=', $endDate)
         ->get('collectables')->row();
     } else {
-      return $this->db->where('collectable_date >=', $startDate)
-        ->where('collectable_date <=', $endDate)
+      return $this->db->where('collectable_added >=', $startDate)
+        ->where('collectable_added <=', $endDate)
         ->get('collectables')->result_array();
     }
   }
@@ -711,8 +735,8 @@ class Get_model extends CI_Model {
 
     return $this->db->select_sum('expense_amount')
       ->where('expense_type', $type)
-      ->where('expense_date >=', $startDate)
-      ->where('expense_date <=', $endDate)
+      ->where('expense_added >=', $startDate)
+      ->where('expense_added <=', $endDate)
       ->get('expenses')->row();
   }
 
@@ -721,8 +745,19 @@ class Get_model extends CI_Model {
 
     return $this->db->select_sum('sales_amount')
       ->where('sales_type', $type)
-      ->where('sales_date >=', $startDate)
-      ->where('sales_date <=', $endDate)
+      ->where('sales_added >=', $startDate)
+      ->where('sales_added <=', $endDate)
+      ->get('sales')->row();
+  }
+
+  function getSalesByMethodAndType($date, $type, $method, $period) {
+    [$startDate, $endDate] = $this->getTime($date, $period);
+
+    return $this->db->select_sum('sales_amount')
+      ->where('sales_type', $type)
+      ->where('sales_method', $method)
+      ->where('sales_added >=', $startDate)
+      ->where('sales_added <=', $endDate)
       ->get('sales')->row();
   }
 
@@ -744,7 +779,7 @@ class Get_model extends CI_Model {
 
   function getHotelExpense($date, $period) {
     [$startDate, $endDate] = $this->getTime($date, $period);
-    return $this->db->where_in('expense_type', ['Hotel', 'Pool'])
+    return $this->db->where_in('expense_type', ['Hotel'])
       ->where('expense_added >=', $startDate)
       ->where('expense_added <=', $endDate)
       ->get('expenses')->result_array();
@@ -752,7 +787,7 @@ class Get_model extends CI_Model {
 
   function getEventExpense($date, $period) {
     [$startDate, $endDate] = $this->getTime($date, $period);
-    return $this->db->where_in('expense_type', ['Event'])
+    return $this->db->where_in('expense_type', ['Event', 'Pool'])
       ->where('expense_added >=', $startDate)
       ->where('expense_added <=', $endDate)
       ->get('expenses')->result_array();
@@ -802,6 +837,23 @@ class Get_model extends CI_Model {
       ->where('booked_room_archived', 0)
       ->where('reservation_status', 0)
       ->get('booked_rooms')->result_array();
+  }
+
+  function getExtendedStayCount($date) {
+    return $this->db->join('bookings', 'bookings.booking_id=booked_rooms.booking_id')
+      ->like('dates', $date)
+      ->where('booked_room_archived', 0)
+      ->where('reservation_status', 0)
+      ->where('nights >', 1)
+      ->count_all_results('booked_rooms');
+  }
+
+  function getCheckInCount($date, $period) {
+    [$startDate, $endDate] = $this->getTime($date, $period);
+    return $this->db->where('booked_room_added >=', $startDate)
+      ->where('booked_room_added <=', $endDate)
+      ->where_in('booked_room_archived', [0, 2])
+      ->count_all_results('booked_rooms');
   }
 
   // --- DCR Optimization Methods ---

@@ -6,6 +6,7 @@ class MY_Controller extends CI_Controller {
   function __construct() {
     parent::__construct();
     $this->load->helper('hdf_utility');
+    $this->db->query("SET time_zone = '+08:00'");
   }
 
   public function prompt($message, $type = 0) {

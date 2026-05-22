@@ -517,6 +517,8 @@ class Main extends MY_Controller {
       $data['date'] = $date;
       $data['type'] = $type;
       $data['occupied'] = $this->get_model->getOccupiedRooms($date);
+      $data['extended_stay_count'] = $this->get_model->getExtendedStayCount($date);
+      $data['checkin_count'] = $this->get_model->getCheckInCount($date, $type);
       $data['payments'] = $this->get_model->getPaymentsByDateGrouped($date, $type);
 
       $data['expenses_hotel'] = $this->get_model->getExpenseByDateAndType($date, 'Hotel', $type);
@@ -525,8 +527,10 @@ class Main extends MY_Controller {
       $data['expenses_resto'] = $this->get_model->getExpenseByDateAndType($date, 'Resto', $type);
       $data['expenses_otillas'] = $this->get_model->getExpenseByDateAndType($date, "Otilla's", $type);
 
-      $data['sales_event']  = $this->get_model->getSalesByDateAndType($date, 'Event', $type);
-      $data['sales_pool']  = $this->get_model->getSalesByDateAndType($date, 'Pool', $type);
+      $data['sales_event_cash'] = $this->get_model->getSalesByMethodAndType($date, 'Event', 'Cash', $type);
+      $data['sales_pool_cash']  = $this->get_model->getSalesByMethodAndType($date, 'Pool', 'Cash', $type);
+      $data['sales_event_card'] = $this->get_model->getSalesByMethodAndType($date, 'Event', 'Card', $type);
+      $data['sales_pool_card']  = $this->get_model->getSalesByMethodAndType($date, 'Pool', 'Card', $type);
 
       $data['remitted'] = $this->get_model->getRemitted($date, $type);
 
@@ -544,8 +548,49 @@ class Main extends MY_Controller {
         $data['payments'][$i]['card_reservation'] = $this->get_model->getPaymentByType($row['booked_room_id'], 'advance', 'Card', $date, $type);
       }
 
-      [$hotel_sales_am, $hotel_sales_pm] = $this->getHotelSales($date, $type);
-      [$event_sales_am, $event_sales_pm] = $this->getEventSales($date, $type);
+      // Compute correct Hotel Sales for AM shift
+      $hotel_sales_am_records = $this->get_model->getHotelSales($date, 'AM');
+      $hotel_expense_am_records = $this->get_model->getHotelExpense($date, 'AM');
+      $hotel_sales_am = 0;
+      foreach ($hotel_sales_am_records as $row) {
+        $hotel_sales_am += $row['amount'];
+      }
+      foreach ($hotel_expense_am_records as $row) {
+        $hotel_sales_am -= $row['expense_amount'];
+      }
+
+      // Compute correct Hotel Sales for PM shift
+      $hotel_sales_pm_records = $this->get_model->getHotelSales($date, 'PM');
+      $hotel_expense_pm_records = $this->get_model->getHotelExpense($date, 'PM');
+      $hotel_sales_pm = 0;
+      foreach ($hotel_sales_pm_records as $row) {
+        $hotel_sales_pm += $row['amount'];
+      }
+      foreach ($hotel_expense_pm_records as $row) {
+        $hotel_sales_pm -= $row['expense_amount'];
+      }
+
+      // Compute correct Event Sales for AM shift
+      $event_sales_am_records = $this->get_model->getEventSales($date, 'AM');
+      $event_expense_am_records = $this->get_model->getEventExpense($date, 'AM');
+      $event_sales_am = 0;
+      foreach ($event_sales_am_records as $row) {
+        $event_sales_am += $row['sales_amount'];
+      }
+      foreach ($event_expense_am_records as $row) {
+        $event_sales_am -= $row['expense_amount'];
+      }
+
+      // Compute correct Event Sales for PM shift
+      $event_sales_pm_records = $this->get_model->getEventSales($date, 'PM');
+      $event_expense_pm_records = $this->get_model->getEventExpense($date, 'PM');
+      $event_sales_pm = 0;
+      foreach ($event_sales_pm_records as $row) {
+        $event_sales_pm += $row['sales_amount'];
+      }
+      foreach ($event_expense_pm_records as $row) {
+        $event_sales_pm -= $row['expense_amount'];
+      }
 
       $data['hotel_sales_am'] = $hotel_sales_am;
       $data['hotel_sales_pm'] = $hotel_sales_pm;
@@ -566,21 +611,25 @@ class Main extends MY_Controller {
       }
 
       $data['sales'] = $this->get_model->getSales($date, $type);
-      $data['collectables'] = $this->get_model->getCollectablesByDate($date, $type);
+      $data['collectables'] = $this->get_model->getCollectables($date, $type);
 
       [$y, $m, $d] = explode('-', $date);
       $data['y'] = $y;
       $data['m'] = $m;
       $data['d'] = $d;
 
-      $view = $this->load->view('body/frontdesk/components/dcr', $data, TRUE);
-      $options = new Options();
-      $options->set('dpi', 300);
-      $options->set('defaultPaperOrientation', 'landscape');
-      $dompdf = new Dompdf($options);
-      $dompdf->loadHtml($view);
-      $dompdf->render();
-      $dompdf->stream('HDF-DCR-' . $y . $m . $d . '-' . $type, ['Attachment' => FALSE]);
+      if ($this->input->get('html') == '1') {
+        $this->load->view('body/frontdesk/components/dcr', $data);
+      } else {
+        $view = $this->load->view('body/frontdesk/components/dcr', $data, TRUE);
+        $options = new Options();
+        $options->set('dpi', 300);
+        $options->set('defaultPaperOrientation', 'landscape');
+        $dompdf = new Dompdf($options);
+        $dompdf->loadHtml($view);
+        $dompdf->render();
+        $dompdf->stream('HDF-DCR-' . $y . $m . $d . '-' . $type, ['Attachment' => FALSE]);
+      }
     }
   }
 
@@ -931,7 +980,7 @@ class Main extends MY_Controller {
 
   function massBooking() {
     $conflicts = [];
-    $check_dates = $this->datesBetween($_POST['check_in_mass'], $_POST['check_out_mass']);
+    $check_dates = datesBetween($_POST['check_in_mass'], $_POST['check_out_mass']);
     foreach ($check_dates as $date) {
       $conflict = $this->get_model->checkConflict($date);
       if ($conflict) {
@@ -944,7 +993,7 @@ class Main extends MY_Controller {
       $this->redirect();
       exit;
     } else {
-      $_POST['dates'] = $this->datesBetween($_POST['check_in'], $_POST['check_out'], 'Y-m-d');
+      $_POST['dates'] = datesBetween($_POST['check_in'], $_POST['check_out'], 'Y-m-d');
       [$booking_id, $booking_number] = $this->insert_model->massBook();
       $log = "Mass {$_POST['rdo_booking_type']}: {$booking_number}";
       $_POST['booking_id'] = $booking_id;
@@ -1214,7 +1263,7 @@ class Main extends MY_Controller {
 
   function bookRoom() {
     $booking_number = 'HDF' . str_pad($_POST['booking_id'], 5, '0', STR_PAD_LEFT);
-    $_POST['dates'] = json_encode($this->datesBetween($_POST['check_in'], $_POST['check_out'], 'Y-m-d'));
+    $_POST['dates'] = json_encode(datesBetween($_POST['check_in'], $_POST['check_out'], 'Y-m-d'));
     $this->insert_model->bookRoom();
     $room = $this->get_model->getRoom($_POST['room_id']);
     $s = $_POST['nights'] == 1 ? '' : 's';

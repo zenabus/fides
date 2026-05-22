@@ -261,10 +261,26 @@ class Insert_model extends CI_Model {
   }
 
   function addSales() {
+    $cleanDate = date('Y-m-d', strtotime($_POST['sales_date']));
+    $targetDateTime = $cleanDate . ' ' . date('H:i:s');
+    $_POST['sales_date'] = $cleanDate;
+    $_POST['sales_added'] = $targetDateTime;
     $this->db->insert('sales', $_POST);
   }
 
   function addCollectable() {
+    $cleanDate = date('Y-m-d', strtotime($_POST['collectable_date']));
+    $targetDateTime = $cleanDate . ' ' . date('H:i:s');
+    $_POST['collectable_date'] = $cleanDate;
+    $_POST['collectable_added'] = $targetDateTime;
     $this->db->insert('collectables', $_POST);
+  }
+
+  function addExpense() {
+    $cleanDate = date('Y-m-d', strtotime($_POST['expense_date']));
+    $targetDateTime = $cleanDate . ' ' . date('H:i:s');
+    $_POST['expense_date'] = $cleanDate;
+    $_POST['expense_added'] = $targetDateTime;
+    $this->db->insert('expenses', $_POST);
   }
 }

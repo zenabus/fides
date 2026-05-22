@@ -298,10 +298,9 @@
       <div class="modal-body px-4">
         <table class="table table-bordered mb-0">
           <thead>
-            <th>Type</th>
             <th>Amount</th>
             <th>Remarks</th>
-            <th>Date</th>
+            <th>Time</th>
           </thead>
           <tbody class="sales-tbody">
             <!-- javascript -->
@@ -327,10 +326,9 @@
       <div class="modal-body px-4">
         <table class="table table-bordered mb-0">
           <thead>
-            <th>Type</th>
             <th>Amount</th>
             <th>Remarks</th>
-            <th>Date</th>
+            <th>Time</th>
           </thead>
           <tbody class="expenses-tbody">
             <!-- javascript -->
@@ -357,10 +355,9 @@
       <div class="modal-body px-4">
         <table class="table table-bordered mb-0">
           <thead>
-            <th>Type</th>
             <th>Amount</th>
             <th>Remarks</th>
-            <th>Date</th>
+            <th>Time</th>
           </thead>
           <tbody class="collectables-tbody">
             <!-- javascript -->
@@ -448,6 +445,47 @@
       });
   });
 
+  function getSalesBadge(type) {
+    const colors = {
+      Event: 'badge-primary',
+      Pool: 'badge-info'
+    };
+    const cls = colors[type] || 'badge-default';
+    return `<span class="badge ${cls} mt-1" style="font-size: 10px; padding: 3px 6px; border-radius: 4px; text-transform: uppercase; display: inline-block;">${type}</span>`;
+  }
+
+  function getExpenseBadge(type) {
+    const colors = {
+      Hotel: 'badge-danger',
+      Event: 'badge-primary',
+      Pool: 'badge-info',
+      Resto: 'badge-success',
+      "Otilla's": 'badge-warning'
+    };
+    const cls = colors[type] || 'badge-default';
+    return `<span class="badge ${cls} mt-1" style="font-size: 10px; padding: 3px 6px; border-radius: 4px; text-transform: uppercase; display: inline-block;">${type}</span>`;
+  }
+
+  function getCollectableBadge(type) {
+    const colors = {
+      Event: 'badge-primary'
+    };
+    const cls = colors[type] || 'badge-default';
+    return `<span class="badge ${cls} mt-1" style="font-size: 10px; padding: 3px 6px; border-radius: 4px; text-transform: uppercase; display: inline-block;">${type}</span>`;
+  }
+
+  function getShiftIndicator(addedString) {
+    if (!addedString) return '';
+    const parts = addedString.split(' ');
+    if (parts.length < 2) return '';
+    const timeParts = parts[1].split(':');
+    if (timeParts.length < 1) return '';
+    const hour = parseInt(timeParts[0]);
+    const shiftText = (hour >= 14 && hour < 22) ? 'PM SHIFT' : 'AM SHIFT';
+    const badgeClass = (hour >= 14 && hour < 22) ? 'badge-warning' : 'badge-primary';
+    return `<span class="badge ${badgeClass} mt-1" style="font-size: 10px; padding: 3px 6px; border-radius: 4px; text-transform: uppercase; display: inline-block;">${shiftText}</span>`;
+  }
+
   $('.expenses').click(function() {
     const date = $(this).attr('date');
     $('.expenses-tbody').html('');
@@ -457,10 +495,15 @@
       .then(data => {
         data.forEach(row => {
           const html = `<tr>
-             <td>${row.expense_type}</td>
-             <td>₱ ${formatNumber(row.expense_amount)}</td>
+             <td style="white-space: nowrap;">
+               ₱&nbsp;${formatNumber(row.expense_amount)}<br>
+               ${getExpenseBadge(row.expense_type)}
+             </td>
              <td>${row.expense_remarks}</td>
-             <td>${ampm(row.expense_added)}</td>
+             <td>
+               ${ampm(row.expense_added)}<br>
+               ${getShiftIndicator(row.expense_added)}
+             </td>
             </tr>
           `;
           $('.expenses-tbody').append(html);
@@ -480,10 +523,15 @@
       .then(data => {
         data.forEach(row => {
           const html = `<tr>
-             <td>${row.collectable_type}</td>
-             <td>₱ ${formatNumber(row.collectable_amount)}</td>
+             <td style="white-space: nowrap;">
+               ₱&nbsp;${formatNumber(row.collectable_amount)}<br>
+               ${getCollectableBadge(row.collectable_type)}
+             </td>
              <td>${row.collectable_remarks}</td>
-             <td>${ampm(row.collectable_added)}</td>
+             <td>
+               ${ampm(row.collectable_added)}<br>
+               ${getShiftIndicator(row.collectable_added)}
+             </td>
             </tr>
           `;
           $('.collectables-tbody').append(html);
@@ -502,10 +550,15 @@
       .then(data => {
         data.forEach(row => {
           const html = `<tr>
-             <td>${row.sales_type}</td>
-             <td>₱ ${formatNumber(row.sales_amount)}</td>
+             <td style="white-space: nowrap;">
+               ₱&nbsp;${formatNumber(row.sales_amount)}<br>
+               ${getSalesBadge(row.sales_type)}
+             </td>
              <td>${row.sales_remarks}</td>
-             <td>${ampm(row.sales_added)}</td>
+             <td>
+               ${ampm(row.sales_added)}<br>
+               ${getShiftIndicator(row.sales_added)}
+             </td>
             </tr>
           `;
           $('.sales-tbody').append(html);

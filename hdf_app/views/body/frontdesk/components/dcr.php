@@ -26,10 +26,14 @@
       left: 32px;
     }
 
-    .table,
+    .table {
+      border-collapse: collapse;
+      width: 99.6%;
+      font-size: 5pt;
+    }
+
     .table thead th {
       border-collapse: collapse;
-      width: 100%;
       font-size: 5pt;
     }
 
@@ -139,7 +143,8 @@
           <th colspan="6" class="bl br">Sales Detail Cash Payment</th>
           <th colspan="6" class="br">Sales Detail Card Payment</th>
           <th colspan="2" class="br">Collectables</th>
-          <td colspan="2"></td>
+          <td colspan="3" class="bb br-0"></td>
+          <td class="nb bgw"></td>
         </tr>
         <tr>
           <th rowspan="2" class="br bl w-150">Room</th>
@@ -148,17 +153,18 @@
           <th colspan="2" class="br">Meal Charge</th>
           <th rowspan="2" class="br nw w-150">Add Ons</th>
           <th rowspan="2" class="br w-150">Reservation</th>
-          <th rowspan="2" class="br w-150">Event</th>
+          <th rowspan="2" class="br w-150">Event/Pool</th>
           <th rowspan="2" class="br w-150">Room Rate</th>
           <th colspan="2" class="br">Meal Charge</th>
           <th rowspan="2" class="br nw w-150">Add Ons</th>
           <th rowspan="2" class="br w-150">Reservation</th>
-          <th rowspan="2" class="br w-150">Event</th>
+          <th rowspan="2" class="br w-150">Event/Pool</th>
           <th rowspan="2" class="br w-150">Hotel</th>
           <th rowspan="2" class="br">Event</th>
           <th rowspan="2" class="br">OR Name</th>
           <th rowspan="2" class="br nw">OR No.</th>
           <th rowspan="2" class="br">Remarks</th>
+          <th rowspan="2" class="nb bgw" style="width: 5px;"></th>
         </tr>
         <tr class="bgw">
           <th class="br w-150">Resto</th>
@@ -215,6 +221,7 @@
             <td></td>
             <td></td>
             <td><?= $row['remarks'] ?></td>
+            <td class="nb bgw"></td>
           </tr>
         <?php } ?>
         <?php
@@ -242,35 +249,43 @@
             <td></td>
             <td></td>
             <td><?= $row['remarks'] ?></td>
+            <td class="nb bgw"></td>
           </tr>
         <?php } ?>
 
         <?php
-        $event_sales = 0;
+        $event_sales_total = 0;
+        $event_card_total = 0;
         foreach ($sales as $row) {
-          if ($row['sales_type'] == 'Event') {
-            $event_sales += $row['sales_amount'];
+          if ($row['sales_type'] == 'Event' || $row['sales_type'] == 'Pool') {
+            $is_cash = ($row['sales_method'] == 'Cash');
+            if ($is_cash) {
+              $event_sales_total += $row['sales_amount'];
+            } else {
+              $event_card_total += $row['sales_amount'];
+            }
         ?>
             <tr>
               <td class="bl"></td>
-              <td>EVENT PAYMENT / <?= $row['sales_remarks'] ?></td>
+              <td><?= strtoupper($row['sales_type']) ?> PAYMENT / <?= $row['sales_remarks'] ?></td>
               <td></td>
               <td></td>
               <td></td>
               <td></td>
               <td></td>
-              <td><?= number_format($row['sales_amount'], 2) ?></td>
+              <td><?= $is_cash ? number_format($row['sales_amount'], 2) : '' ?></td>
               <td></td>
               <td></td>
               <td></td>
               <td></td>
               <td></td>
+              <td><?= !$is_cash ? number_format($row['sales_amount'], 2) : '' ?></td>
               <td></td>
               <td></td>
               <td></td>
               <td></td>
               <td></td>
-              <td></td>
+              <td class="nb bgw"></td>
             </tr>
         <?php }
         } ?>
@@ -300,6 +315,7 @@
             <td></td>
             <td></td>
             <td></td>
+            <td class="nb bgw"></td>
           </tr>
         <?php } ?>
 
@@ -310,37 +326,37 @@
           <td class="bgw nb"><?= number_format($coffeeshop, 2) ?></td>
           <td class="bgw nb"><?= number_format($addons, 2) ?></td>
           <td class="bgw nb"><?= number_format($reservation, 2) ?></td>
-          <td class="bgw nb"><?= number_format($event_sales, 2) ?></td>
+          <td class="bgw nb"><?= number_format($event_sales_total, 2) ?></td>
           <td class="bgw nb"><?= number_format($room_rate_card, 2) ?></td>
           <td class="bgw nb"><?= number_format($restaurant_card, 2) ?></td>
           <td class="bgw nb"><?= number_format($coffeeshop_card, 2) ?></td>
           <td class="bgw nb"><?= number_format($addons_card, 2) ?></td>
           <td class="bgw nb"><?= number_format($reservation_card, 2) ?></td>
-          <td class="bgw nb"><?= number_format($event_card, 2) ?></td>
-          <td class="bgw nb" style="display: none;"><?= number_format($hotel_collectables, 2) ?></td>
-          <td class="bgw nb" style="display: none;"><?= number_format($event_collectables, 2) ?></td>
+          <td class="bgw nb"><?= number_format($event_card_total, 2) ?></td>
           <td class="bgw nb"></td>
           <td class="bgw nb"></td>
-          <td class="bgw nb" colspan="3"></td>
+          <td class="bgw nb"></td>
+          <td class="bgw nb"></td>
+          <td class="bgw nb" colspan="4"></td>
         </tr>
         <tr>
-          <td class="bgw nb" colspan="19">&nbsp;</td>
+          <td class="bgw nb" colspan="20">&nbsp;</td>
         </tr>
         <tr>
           <td class="bgw nb" colspan="2"></td>
           <td class="bgw nb">TOTAL:</td>
-          <td class="bgy nb" colspan="5"><?= number_format($room_rate + $restaurant + $coffeeshop + $addons + $reservation + $event_sales, 2) ?></td>
+          <td class="bgy nb" colspan="5"><?= number_format($room_rate + $restaurant + $coffeeshop + $addons + $reservation + $event_sales_total, 2) ?></td>
           <td class="bgw nb">TOTAL:</td>
-          <td class="bgy nb" colspan="5"><?= number_format($room_rate_card + $restaurant_card + $coffeeshop_card + $addons_card + $reservation_card + $event_card, 2) ?></td>
-          <td class="bgw nb" colspan="5"></td>
+          <td class="bgy nb" colspan="5"><?= number_format($room_rate_card + $restaurant_card + $coffeeshop_card + $addons_card + $reservation_card + $event_card_total, 2) ?></td>
+          <td class="bgw nb" colspan="6"></td>
         </tr>
         <tr>
-          <td class="bgw nb">&nbsp;</td>
+          <td class="bgw nb" colspan="20">&nbsp;</td>
         </tr>
         <tr>
           <td class="bgw nb"></td>
           <td class="nw bt bl bgw">EXTENDED STAY</td>
-          <td class="bt bgw">0</td><!-- extended stay -->
+          <td class="bt bgw"><?= $extended_stay_count ?></td><!-- extended stay -->
           <td class="nb bgw" colspan="10"></td>
           <td class="nb bgy">HOTEL</td>
           <td class="nb bgy">EVENT</td>
@@ -348,23 +364,25 @@
           <td class="nb bgy">RESTO</td>
           <td class="nb bgy">OTILLA'S</td>
           <td class="nb bgy">TOTAL</td>
+          <td class="nb bgw"></td>
         </tr>
         <tr>
           <td class="nb bgw"></td>
-          <td class="nw bt bl bgw">PM CHECK-IN</td>
-          <td class="bgw">0</td><!-- pm check in -->
+          <td class="nw bt bl bgw"><?= $type ?> CHECK-IN</td>
+          <td class="bgw"><?= $checkin_count ?></td><!-- check in count -->
           <td class="nb bgw" colspan="9"></td>
           <td class="bt bgw bl">CASH</td>
           <?php $hotel = $room_rate + $addons + $reservation ?>
           <td class="bt bgw"><?= number_format($hotel, 2) ?></td>
-          <td class="bt bgw"><?= number_format(floatval($sales_event->sales_amount), 2) ?></td>
-          <td class="bt bgw"><?= number_format(floatval($sales_pool->sales_amount), 2) ?></td>
+          <td class="bt bgw"><?= number_format(floatval($sales_event_cash->sales_amount), 2) ?></td>
+          <td class="bt bgw"><?= number_format(floatval($sales_pool_cash->sales_amount), 2) ?></td>
           <td class="bt bgw"><?= number_format($restaurant, 2) ?></td>
           <td class="bt bgw"><?= number_format($coffeeshop, 2) ?></td>
-          <?php $event = $sales_event->sales_amount; ?>
-          <?php $pool = $sales_pool->sales_amount; ?>
+          <?php $event = floatval($sales_event_cash->sales_amount); ?>
+          <?php $pool = floatval($sales_pool_cash->sales_amount); ?>
           <?php $total = $hotel + $event + $pool + $restaurant + $coffeeshop ?>
-          <td class="bt bgw"><?= number_format($total, 2) ?></td>
+          <td class="bt bgw br"><?= number_format($total, 2) ?></td>
+          <td class="nb bgw"></td>
         </tr>
         <tr>
           <td class="nb bgw"></td>
@@ -374,12 +392,13 @@
           <td class="bgw bl">CARD</td>
           <?php $hotel_card = $room_rate_card + $addons_card + $reservation_card ?>
           <td class="bgw"><?= number_format($hotel_card, 2) ?></td>
-          <td class="bgw">0.00</td>
-          <td class="bgw">0.00</td>
+          <td class="bgw"><?= number_format(floatval($sales_event_card->sales_amount), 2) ?></td>
+          <td class="bgw"><?= number_format(floatval($sales_pool_card->sales_amount), 2) ?></td>
           <td class="bt bgw"><?= number_format($restaurant_card, 2) ?></td>
           <td class="bt bgw"><?= number_format($coffeeshop_card, 2) ?></td>
-          <?php $total_card = $hotel_card + $restaurant_card + $coffeeshop_card; ?>
-          <td class="bt bgw"><?= number_format($total_card, 2) ?></td>
+          <?php $total_card = $hotel_card + floatval($sales_event_card->sales_amount) + floatval($sales_pool_card->sales_amount) + $restaurant_card + $coffeeshop_card; ?>
+          <td class="bt bgw br"><?= number_format($total_card, 2) ?></td>
+          <td class="nb bgw"></td>
         </tr>
         <tr>
           <td class="nb bgw" colspan="12"></td>
@@ -389,7 +408,8 @@
           <td class="bgw">0.00</td>
           <td class="bgw">0.00</td>
           <td class="bgw">0.00</td>
-          <td class="bgw"><?= number_format($hotel_collectables + $event_collectables, 2) ?></td>
+          <td class="bgw br"><?= number_format($hotel_collectables + $event_collectables, 2) ?></td>
+          <td class="nb bgw"></td>
         </tr>
         <tr>
           <td class="nb bgw" colspan="12"></td>
@@ -400,7 +420,8 @@
           <td class="bgw"><?= number_format(floatval($expenses_resto->expense_amount), 2) ?></td>
           <td class="bgw"><?= number_format(floatval($expenses_otillas->expense_amount), 2) ?></td>
           <?php $total_expense = $expenses_hotel->expense_amount + $expenses_event->expense_amount + $expenses_pool->expense_amount + $expenses_resto->expense_amount + $expenses_otillas->expense_amount ?>
-          <td class="bgw"><?= number_format($total_expense, 2) ?></td>
+          <td class="bgw br"><?= number_format($total_expense, 2) ?></td>
+          <td class="nb bgw"></td>
         </tr>
         <tr>
           <td class="nb bgw"></td>
@@ -408,44 +429,49 @@
           <td class="nb bgw" colspan="10"></td>
           <td class="bgw bl">TOTAL</td>
           <td class="bgw"><?= number_format($hotel + $hotel_card + $hotel_collectables - $expenses_hotel->expense_amount, 2) ?></td>
-          <td class="bgw"><?= number_format($sales_event->sales_amount + $event_collectables - $expenses_event->expense_amount, 2) ?></td>
-          <td class="bgw"><?= number_format($sales_pool->sales_amount - $expenses_pool->expense_amount, 2) ?></td>
+          <td class="bgw"><?= number_format(floatval($sales_event_cash->sales_amount) + floatval($sales_event_card->sales_amount) + $event_collectables - $expenses_event->expense_amount, 2) ?></td>
+          <td class="bgw"><?= number_format(floatval($sales_pool_cash->sales_amount) + floatval($sales_pool_card->sales_amount) - $expenses_pool->expense_amount, 2) ?></td>
           <td class="bgw nw"><?= number_format($restaurant + $restaurant_card - $expenses_resto->expense_amount, 2) ?></td>
           <td class="bgw"><?= number_format($coffeeshop + $coffeeshop_card - $expenses_otillas->expense_amount, 2) ?></td>
-          <td class="bgy bb-0"><?= number_format($total + $total_card + $hotel_collectables + $event_collectables - $total_expense, 2) ?></td>
+          <td class="bgy bb-0 br"><?= number_format($total + $total_card + $hotel_collectables + $event_collectables - $total_expense, 2) ?></td>
+          <td class="nb bgw"></td>
         </tr>
         <tr>
           <td class="bgw nb" colspan="18">&nbsp;</td>
-          <td class="bgy bb bl nw">GRAND TOTAL</td>
+          <td class="bgy bb bl br nw">GRAND TOTAL</td>
+          <td class="nb bgw"></td>
         </tr>
         <tr>
           <td class="nb bgw"></td>
           <td class="nb bgw"><?= mb_strtoupper(isset($remitted) ? $remitted->name : $_SESSION['name']) ?></td>
-          <td class="nb bgw" colspan="17"></td>
+          <td class="nb bgw" colspan="18"></td>
         </tr>
         <tr>
           <td class="nb bgw"></td>
           <td class="nb bgw"><?= $date ?></td>
+          <td class="nb bgw" colspan="18"></td>
         </tr>
         <tr>
-          <td class="bgw nb" colspan="19">&nbsp;</td>
+          <td class="bgw nb" colspan="20">&nbsp;</td>
         </tr>
         <tr>
-          <td class="bgw nb" colspan="19">&nbsp;</td>
+          <td class="bgw nb" colspan="20">&nbsp;</td>
         </tr>
         <tr>
           <td class="bgw nb" colspan="15">&nbsp;</td>
           <td class="bgy bt bl"></td>
           <td class="bgy bt">AM</td>
           <td class="bgy bt">PM</td>
-          <td class="bgw bt tr">TOTAL</td>
+          <td class="bgw bt tr br">TOTAL</td>
+          <td class="nb bgw"></td>
         </tr>
         <tr>
           <td class="bgw nb" colspan="15">&nbsp;</td>
           <td class="bgw bt bl nw">HOTEL SALES</td>
           <td class="bgw bt"><?= number_format($hotel_sales_am, 2) ?></td>
           <td class="bgw bt"><?= number_format($hotel_sales_pm, 2) ?></td>
-          <td class="bgw bt tr"><?= number_format($hotel_sales_am + $hotel_sales_pm, 2) ?></td>
+          <td class="bgw bt tr br"><?= number_format($hotel_sales_am + $hotel_sales_pm, 2) ?></td>
+          <td class="nb bgw"></td>
         </tr>
         <tr>
           <td class="nb bgw"></td>
@@ -457,14 +483,16 @@
           </td>
           <td class="bgw bt"><?= number_format($event_sales_am, 2) ?></td>
           <td class="bgw bt"><?= number_format($event_sales_pm, 2) ?></td>
-          <td class="bgw bt tr"><?= number_format($event_sales_am + $event_sales_pm, 2) ?></td>
+          <td class="bgw bt tr br"><?= number_format($event_sales_am + $event_sales_pm, 2) ?></td>
+          <td class="nb bgw"></td>
         </tr>
         <tr>
           <td class="nb bgw"></td>
           <td class="nb bgw nw">MS. JOANNE ORTIZ/SIR CARLOS ORTIZ</td>
           <td class="bgw nb" colspan="14">&nbsp;</td>
           <td class="bgy bt bl" colspan="2">GRAND TOTAL</td>
-          <td class="bgw bt tr"><?= number_format($hotel_sales_am + $hotel_sales_pm + $event_sales_am + $event_sales_pm, 2) ?></td>
+          <td class="bgw bt tr br"><?= number_format($hotel_sales_am + $hotel_sales_pm + $event_sales_am + $event_sales_pm, 2) ?></td>
+          <td class="nb bgw"></td>
         </tr>
       </tbody>
     </table>
