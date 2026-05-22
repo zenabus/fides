@@ -551,13 +551,19 @@ class Get_model extends CI_Model {
 
     if ($payment_option) {
       [$startDate, $endDate] = $this->getTime($date, $period);
-      return $this->db->select_sum('amount')
+      $this->db->select_sum('amount')
         ->where('booked_room_id', $booked_room_id)
         ->where('payment_for', $payment_for)
-        ->where('payment_option', $payment_option)
         ->where('booking_payment_added >=', $startDate)
-        ->where('booking_payment_added <=', $endDate)
-        ->get('booking_payment')->row();
+        ->where('booking_payment_added <=', $endDate);
+      
+      if ($payment_option == 'Card') {
+        $this->db->where_in('payment_option', ['Card', 'Check', 'Bank Transfer']);
+      } else {
+        $this->db->where('payment_option', $payment_option);
+      }
+      
+      return $this->db->get('booking_payment')->row();
     } else {
       return $this->db->select_sum('amount')
         ->where('booked_room_id', $booked_room_id)
@@ -753,12 +759,30 @@ class Get_model extends CI_Model {
   function getSalesByMethodAndType($date, $type, $method, $period) {
     [$startDate, $endDate] = $this->getTime($date, $period);
 
-    return $this->db->select_sum('sales_amount')
+    $this->db->select_sum('sales_amount')
       ->where('sales_type', $type)
-      ->where('sales_method', $method)
       ->where('sales_added >=', $startDate)
-      ->where('sales_added <=', $endDate)
-      ->get('sales')->row();
+      ->where('sales_added <=', $endDate);
+
+    if ($method == 'Card') {
+      $this->db->where_in('sales_method', ['Card', 'Check', 'Bank Transfer']);
+    } else {
+      $this->db->where('sales_method', $method);
+    }
+
+    return $this->db->get('sales')->row();
+  }
+
+  function getSaleById($sales_id) {
+    return $this->db->where('sales_id', $sales_id)->get('sales')->row();
+  }
+
+  function getExpenseById($expense_id) {
+    return $this->db->where('expense_id', $expense_id)->get('expenses')->row();
+  }
+
+  function getCollectableById($collectable_id) {
+    return $this->db->where('collectable_id', $collectable_id)->get('collectables')->row();
   }
 
   function getHotelSales($date, $period) {
@@ -848,11 +872,37 @@ class Get_model extends CI_Model {
       ->count_all_results('booked_rooms');
   }
 
+  function getInHouseCount($date) {
+    return $this->db->join('bookings', 'bookings.booking_id=booked_rooms.booking_id')
+      ->where('c_in <', $date)
+      ->where('c_out >', $date)
+      ->where('booked_room_archived', 0)
+      ->where('reservation_status', 0)
+      ->count_all_results('booked_rooms');
+  }
+
   function getCheckInCount($date, $period) {
     [$startDate, $endDate] = $this->getTime($date, $period);
     return $this->db->where('booked_room_added >=', $startDate)
       ->where('booked_room_added <=', $endDate)
       ->where_in('booked_room_archived', [0, 2])
+      ->count_all_results('booked_rooms');
+  }
+
+  function getCheckoutCount($date, $period) {
+    return $this->db->join('bookings', 'bookings.booking_id=booked_rooms.booking_id')
+      ->group_start()
+        ->group_start()
+          ->where('c_out', $date)
+          ->where('booked_room_archived', 0)
+        ->group_end()
+        ->or_group_start()
+          ->where('booked_room_archived', 2)
+          ->where('DATE(booked_room_updated)', $date)
+          ->where('c_out >=', $date)
+        ->group_end()
+      ->group_end()
+      ->where('reservation_status', 0)
       ->count_all_results('booked_rooms');
   }
 
@@ -1014,5 +1064,18 @@ class Get_model extends CI_Model {
     }
 
     return $this->db->get('bookings')->result_array();
+  }
+
+  function getTempDebugReport($date) {
+    return $this->db->select('booked_room_id, room_number, c_in, c_out, occupant, booked_room_archived, booked_room_added, booked_room_updated, reservation_status, first_name, middle_name, last_name, suffix')
+      ->join('rooms', 'rooms.id = booked_rooms.room_id')
+      ->join('bookings', 'bookings.booking_id = booked_rooms.booking_id')
+      ->join('guests', 'guests.guest_id = bookings.guest_id')
+      ->where('c_in <=', $date)
+      ->where('c_out >=', $date)
+      ->where('reservation_status', 0)
+      ->order_by('c_in', 'ASC')
+      ->order_by('room_number', 'ASC')
+      ->get('booked_rooms')->result_array();
   }
 }

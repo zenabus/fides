@@ -68,7 +68,7 @@
                     <a href="<?= base_url('index.php/main/dcr/' . $row['payment_added'] . '/PM') ?>" class="btn btn-sm mb-1 btn-primary dcr" target="_blank" data-placement="top" title="View DCR" rel="tooltip">
                       PM
                     </a>
-                    <?php if (date('Y-m-d') == $row['payment_added']) { ?>
+                    <?php if (getBusinessDate() == $row['payment_added']) { ?>
                       <a href="javascript:" class="btn btn-sm mb-1 btn-success sale" data-placement="top" title="Add Sales" rel="tooltip" date="<?= $row['payment_added'] ?>">
                         <i class="fa-solid fa-sack-dollar"></i>
                       </a>
@@ -80,7 +80,7 @@
                       </a>
                     <?php } ?>
                     <?php if (!$row['remitted']) { ?>
-                      <?php if (date_create()->modify('-1 days')->format('Y-m-d') == $row['payment_added']) { ?>
+                      <?php if (getBusinessDate(-1) == $row['payment_added']) { ?>
                         <a href="javascript:" class="btn btn-sm mb-1 btn-success sale" data-placement="top" title="Add Sales" rel="tooltip" date="<?= $row['payment_added'] ?>">
                           <i class="fa-solid fa-sack-dollar"></i>
                         </a>
@@ -93,7 +93,7 @@
                         <?php if ($row['sales_total']) {
                           $cash = isset($row['cash']) ? $row['cash'] : 0;
                         ?>
-                          <a href="javascript:" class="btn btn-sm mb-1 remit" data-placement="top" title="Remit" rel="tooltip" cash="<?= $cash + $row['sales_total']->sales_amount - $row['expense_total']->expense_amount ?>">
+                          <a href="javascript:" class="btn btn-sm mb-1 remit" data-placement="top" title="Remit" rel="tooltip" date="<?= $row['payment_added'] ?>" cash="<?= $cash + $row['sales_total']->sales_amount - $row['expense_total']->expense_amount ?>">
                             <i class="fa-solid fa-money-bill-transfer"></i>
                           </a>
                         <?php } ?>
@@ -118,6 +118,7 @@
       </div>
       <div class="modal-body px-4">
         <?= form_open('main/remit', ['id' => 'frmRemit']) ?>
+        <input type="hidden" name="remittance_date">
         <div class="form-group">
           <label>Amount remitted</label>
           <input type="number" class="form-control" name="remitted_amount" required>
@@ -189,6 +190,53 @@
             <option value="Event">Event</option>
             <option value="Pool">Swimming Pool</option>
           </select>
+        </div>
+        <div class="form-group">
+          <label>Payment Option</label>
+          <select name="sales_method" class="form-control" required>
+            <option value="">- payment option -</option>
+            <option value="Cash">Cash</option>
+            <option value="Card">Card</option>
+            <option value="Check">Check</option>
+            <option value="Bank Transfer">Bank Transfer</option>
+          </select>
+        </div>
+        <div class="form-group card-div all-div d-none mb-0">
+          <label>Account Number</label>
+          <input type="number" class="form-control" name="card_number" placeholder="XXXX" maxlength="4">
+          <small>Last 4 digit only.</small>
+        </div>
+        <div class="check-div all-div d-none">
+          <div class="form-group">
+            <label>Account Name</label>
+            <input type="text" class="form-control" name="check_name">
+          </div>
+          <div class="form-group">
+            <label>Account Number</label>
+            <input type="text" class="form-control" name="check_number">
+          </div>
+          <div class="form-group">
+            <label>Branch</label>
+            <input type="text" class="form-control" name="check_branch">
+          </div>
+          <div class="form-group">
+            <label>Date</label>
+            <input type="date" class="form-control" name="check_date">
+          </div>
+        </div>
+        <div class="bank-div all-div d-none">
+          <div class="form-group">
+            <label>Bank Name</label>
+            <input type="text" class="form-control" name="bank_name">
+          </div>
+          <div class="form-group">
+            <label>Account Number</label>
+            <input type="text" class="form-control" name="bank_number">
+          </div>
+          <div class="form-group">
+            <label>Date</label>
+            <input type="date" class="form-control" name="bank_date">
+          </div>
         </div>
         <div class="form-group">
           <label>Amount</label>
@@ -301,6 +349,7 @@
             <th>Amount</th>
             <th>Remarks</th>
             <th>Time</th>
+            <th style="width: 50px; text-align: center;">Action</th>
           </thead>
           <tbody class="sales-tbody">
             <!-- javascript -->
@@ -329,6 +378,7 @@
             <th>Amount</th>
             <th>Remarks</th>
             <th>Time</th>
+            <th style="width: 50px; text-align: center;">Action</th>
           </thead>
           <tbody class="expenses-tbody">
             <!-- javascript -->
@@ -358,6 +408,7 @@
             <th>Amount</th>
             <th>Remarks</th>
             <th>Time</th>
+            <th style="width: 50px; text-align: center;">Action</th>
           </thead>
           <tbody class="collectables-tbody">
             <!-- javascript -->
@@ -387,8 +438,10 @@
 
   $('.remit').click(function() {
     const cash = $(this).attr('cash');
+    const date = $(this).attr('date');
     current_cash = cash;
     $('[name=remitted_amount]').val(cash);
+    $('[name=remittance_date]').val(date);
     $('#modalNote').modal('show');
   });
 
@@ -504,6 +557,11 @@
                ${ampm(row.expense_added)}<br>
                ${getShiftIndicator(row.expense_added)}
              </td>
+             <td class="text-center" style="vertical-align: middle !important;">
+               <a href="${base_url}index.php/main/deleteExpense/${row.expense_id}" class="btn btn-sm btn-danger confirm mb-0" title="Remove Expense" rel="tooltip" style="padding: 4px 8px;">
+                 <i class="fa fa-trash"></i>
+               </a>
+             </td>
             </tr>
           `;
           $('.expenses-tbody').append(html);
@@ -532,6 +590,11 @@
                ${ampm(row.collectable_added)}<br>
                ${getShiftIndicator(row.collectable_added)}
              </td>
+             <td class="text-center" style="vertical-align: middle !important;">
+               <a href="${base_url}index.php/main/deleteCollectable/${row.collectable_id}" class="btn btn-sm btn-danger confirm mb-0" title="Remove Collectable" rel="tooltip" style="padding: 4px 8px;">
+                 <i class="fa fa-trash"></i>
+               </a>
+             </td>
             </tr>
           `;
           $('.collectables-tbody').append(html);
@@ -559,6 +622,11 @@
                ${ampm(row.sales_added)}<br>
                ${getShiftIndicator(row.sales_added)}
              </td>
+             <td class="text-center" style="vertical-align: middle !important;">
+               <a href="${base_url}index.php/main/deleteSale/${row.sales_id}" class="btn btn-sm btn-danger confirm mb-0" title="Remove Sale" rel="tooltip" style="padding: 4px 8px;">
+                 <i class="fa fa-trash"></i>
+               </a>
+             </td>
             </tr>
           `;
           $('.sales-tbody').append(html);
@@ -572,6 +640,30 @@
     const date = $(this).attr('date');
     $('[name=sales_date]').val(date);
     $('#modalSale').modal('show');
+  });
+
+  $('[name=sales_method]').change(function() {
+    const option = $(this).val();
+
+    $('.all-div').addClass('d-none');
+    $('.all-div .form-control').removeAttr('required');
+
+    if (option == 'Card') {
+      $('.card-div').removeClass('d-none');
+      $('.card-div .form-control').attr('required', true);
+    } else if (option == 'Check') {
+      $('.check-div').removeClass('d-none');
+      $('.check-div .form-control').attr('required', true);
+    } else if (option == 'Bank Transfer') {
+      $('.bank-div').removeClass('d-none');
+      $('.bank-div .form-control').attr('required', true);
+    }
+  });
+
+  $('#modalSale').on('hidden.bs.modal', function(e) {
+    $('.all-div').addClass('d-none');
+    $('.all-div .form-control').removeAttr('required');
+    $('#frmSales')[0].reset();
   });
 
   $('.collectable').click(function() {

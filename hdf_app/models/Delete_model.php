@@ -41,4 +41,16 @@ class Delete_model extends CI_Model {
   function deleteDiscount($discount_id) {
     $this->db->where('discount_id', $discount_id)->delete('discounts');
   }
+
+  function deleteSale($sales_id) {
+    $this->db->where('sales_id', $sales_id)->delete('sales');
+  }
+
+  function deleteExpense($expense_id) {
+    $this->db->where('expense_id', $expense_id)->delete('expenses');
+  }
+
+  function deleteCollectable($collectable_id) {
+    $this->db->where('collectable_id', $collectable_id)->delete('collectables');
+  }
 }

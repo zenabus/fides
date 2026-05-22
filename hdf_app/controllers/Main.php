@@ -518,7 +518,9 @@ class Main extends MY_Controller {
       $data['type'] = $type;
       $data['occupied'] = $this->get_model->getOccupiedRooms($date);
       $data['extended_stay_count'] = $this->get_model->getExtendedStayCount($date);
+      $data['inhouse_count'] = $this->get_model->getInHouseCount($date);
       $data['checkin_count'] = $this->get_model->getCheckInCount($date, $type);
+      $data['checkout_count'] = $this->get_model->getCheckoutCount($date, $type);
       $data['payments'] = $this->get_model->getPaymentsByDateGrouped($date, $type);
 
       $data['expenses_hotel'] = $this->get_model->getExpenseByDateAndType($date, 'Hotel', $type);
@@ -1637,6 +1639,42 @@ class Main extends MY_Controller {
     $this->redirect();
   }
 
+  function deleteSale($sales_id) {
+    $sale = $this->get_model->getSaleById($sales_id);
+    if ($sale) {
+      $amount = number_format($sale->sales_amount);
+      $log = "Removed <b>{$sale->sales_type}</b> sales amounting to ₱<b>{$amount}</b> (Method: {$sale->sales_method})";
+      $this->insert_model->log($log, 3);
+      $this->delete_model->deleteSale($sales_id);
+      $this->session->set_flashdata('success', 'Sale successfully removed!');
+    }
+    $this->redirect();
+  }
+
+  function deleteExpense($expense_id) {
+    $expense = $this->get_model->getExpenseById($expense_id);
+    if ($expense) {
+      $amount = number_format($expense->expense_amount);
+      $log = "Removed <b>{$expense->expense_type}</b> expense amounting to ₱<b>{$amount}</b>";
+      $this->insert_model->log($log, 3);
+      $this->delete_model->deleteExpense($expense_id);
+      $this->session->set_flashdata('success', 'Expense successfully removed!');
+    }
+    $this->redirect();
+  }
+
+  function deleteCollectable($collectable_id) {
+    $collectable = $this->get_model->getCollectableById($collectable_id);
+    if ($collectable) {
+      $amount = number_format($collectable->collectable_amount);
+      $log = "Removed <b>{$collectable->collectable_type}</b> collectable amounting to ₱<b>{$amount}</b>";
+      $this->insert_model->log($log, 3);
+      $this->delete_model->deleteCollectable($collectable_id);
+      $this->session->set_flashdata('success', 'Collectable successfully removed!');
+    }
+    $this->redirect();
+  }
+
   function deleteRefund($booking_refund_id) {
     $refund = $this->get_model->getRefundById($booking_refund_id);
     $amount = number_format($refund->booking_refund);
@@ -1663,7 +1701,10 @@ class Main extends MY_Controller {
   }
 
   function remit() {
-    $date = date('Y-m-d');
+    $date = $this->input->post('remittance_date');
+    if (!$date) {
+      $date = date_create()->modify('-1 days')->format('Y-m-d');
+    }
     $this->insert_model->remit();
     $this->insert_model->log("Remitted the daily collection for <b>{$date}</b>", 2);
     $this->session->set_flashdata('success', 'Daily collection successfully remitted!');
@@ -1742,5 +1783,446 @@ class Main extends MY_Controller {
   function getAdvancePayments($booking_id) {
     $payments = $this->get_model->getPayments($booking_id);
     echo json_encode($payments);
+  }
+
+  function temp_debug_report() {
+    $date = '2026-05-22';
+    $rooms = $this->get_model->getTempDebugReport($date);
+    
+    // Process records into categorized buckets
+    $stayovers = [];
+    $checkouts = [];
+    $checkins = [];
+    
+    foreach ($rooms as $r) {
+      // Build guest full name dynamically from guests table
+      $guest_name = trim("{$r['first_name']} {$r['middle_name']} {$r['last_name']} {$r['suffix']}");
+      $guest_name = preg_replace('/\s+/', ' ', $guest_name);
+      if (empty($guest_name)) {
+        $parts = explode('/', $r['occupant']);
+        $guest_name = trim($parts[0]);
+        if (empty($guest_name)) {
+          $guest_name = "N/A (No occupant info)";
+        }
+      }
+      $r['guest_name'] = $guest_name;
+      
+      $actual_checkout_date = !empty($r['booked_room_updated']) ? date('Y-m-d', strtotime($r['booked_room_updated'])) : '';
+      
+      if ($r['c_in'] === $date) {
+        $checkins[] = $r;
+      } elseif (($r['c_out'] === $date && $r['booked_room_archived'] == 0) || ($r['booked_room_archived'] == 2 && $actual_checkout_date === $date)) {
+        $checkouts[] = $r;
+      } elseif ($r['booked_room_archived'] != 2) {
+        $stayovers[] = $r;
+      }
+    }
+    
+    // Render the beautiful UI directly!
+    ?>
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>HDF Frontdesk Live Room Activity - May 22, 2026</title>
+      <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+      <style>
+        :root {
+          --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+          --panel-bg: rgba(30, 41, 59, 0.7);
+          --border-color: rgba(255, 255, 255, 0.08);
+          --accent-blue: #3b82f6;
+          --accent-emerald: #10b981;
+          --accent-rose: #f43f5e;
+          --text-primary: #f8fafc;
+          --text-secondary: #94a3b8;
+        }
+        
+        * {
+          box-sizing: border-box;
+          margin: 0;
+          padding: 0;
+        }
+        
+        body {
+          font-family: 'Outfit', sans-serif;
+          background: var(--bg-gradient);
+          color: var(--text-primary);
+          min-height: 100vh;
+          padding: 3rem 1.5rem;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+        }
+        
+        .container {
+          width: 100%;
+          max-width: 1200px;
+        }
+        
+        header {
+          text-align: center;
+          margin-bottom: 3rem;
+          animation: fadeInDown 0.6s ease;
+        }
+        
+        h1 {
+          font-size: 2.5rem;
+          font-weight: 700;
+          letter-spacing: -0.05em;
+          margin-bottom: 0.5rem;
+          background: linear-gradient(to right, #60a5fa, #a78bfa);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+        }
+        
+        .date-badge {
+          display: inline-block;
+          background: rgba(96, 165, 250, 0.15);
+          border: 1px solid rgba(96, 165, 250, 0.3);
+          color: #93c5fd;
+          padding: 0.35rem 1rem;
+          border-radius: 100px;
+          font-size: 0.9rem;
+          font-weight: 600;
+          margin-top: 0.5rem;
+        }
+        
+        /* Stats Grid */
+        .stats-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+          gap: 1.5rem;
+          margin-bottom: 3rem;
+          animation: fadeInUp 0.6s ease 0.1s both;
+        }
+        
+        .stat-card {
+          background: var(--panel-bg);
+          backdrop-filter: blur(16px);
+          border: 1px solid var(--border-color);
+          border-radius: 20px;
+          padding: 1.5rem;
+          display: flex;
+          flex-direction: column;
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .stat-card:hover {
+          transform: translateY(-5px);
+          border-color: rgba(255, 255, 255, 0.15);
+          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .stat-title {
+          font-size: 0.9rem;
+          font-weight: 600;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+          color: var(--text-secondary);
+          margin-bottom: 0.75rem;
+        }
+        
+        .stat-value {
+          font-size: 2.75rem;
+          font-weight: 700;
+          line-height: 1;
+        }
+        
+        .stat-desc {
+          margin-top: 0.5rem;
+          font-size: 0.85rem;
+          color: var(--text-secondary);
+        }
+        
+        /* Section Cards */
+        .section-card {
+          background: var(--panel-bg);
+          backdrop-filter: blur(16px);
+          border: 1px solid var(--border-color);
+          border-radius: 24px;
+          padding: 2rem;
+          margin-bottom: 2.5rem;
+          box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+          animation: fadeInUp 0.6s ease 0.2s both;
+        }
+        
+        .section-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 1.5rem;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+          padding-bottom: 1rem;
+        }
+        
+        .section-title {
+          font-size: 1.25rem;
+          font-weight: 600;
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
+        }
+        
+        .section-title::before {
+          content: '';
+          display: inline-block;
+          width: 8px;
+          height: 18px;
+          border-radius: 4px;
+        }
+        
+        .title-inhouse::before { background: var(--accent-emerald); }
+        .title-checkout::before { background: var(--accent-rose); }
+        .title-checkin::before { background: var(--accent-blue); }
+        
+        .section-count {
+          background: rgba(255, 255, 255, 0.06);
+          padding: 0.25rem 0.75rem;
+          border-radius: 100px;
+          font-size: 0.85rem;
+          font-weight: 600;
+        }
+        
+        /* Table Styling */
+        table {
+          width: 100%;
+          border-collapse: collapse;
+          text-align: left;
+        }
+        
+        th {
+          padding: 1rem;
+          font-size: 0.85rem;
+          font-weight: 600;
+          color: var(--text-secondary);
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        td {
+          padding: 1.25rem 1rem;
+          font-size: 0.95rem;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+        }
+        
+        tr:last-child td {
+          border-bottom: none;
+        }
+        
+        .room-number {
+          font-weight: 700;
+          color: var(--text-primary);
+          background: rgba(255, 255, 255, 0.05);
+          padding: 0.35rem 0.75rem;
+          border-radius: 8px;
+          display: inline-block;
+        }
+        
+        .guest-name {
+          font-weight: 600;
+        }
+        
+        .badge {
+          display: inline-flex;
+          align-items: center;
+          padding: 0.35rem 0.85rem;
+          border-radius: 100px;
+          font-size: 0.8rem;
+          font-weight: 600;
+          letter-spacing: -0.02em;
+        }
+        
+        .badge-active {
+          background: rgba(16, 185, 129, 0.12);
+          border: 1px solid rgba(16, 185, 129, 0.2);
+          color: #34d399;
+        }
+        
+        .badge-archived {
+          background: rgba(244, 63, 94, 0.12);
+          border: 1px solid rgba(244, 63, 94, 0.2);
+          color: #f87171;
+        }
+        
+        .empty-state {
+          text-align: center;
+          padding: 3rem 0;
+          color: var(--text-secondary);
+          font-style: italic;
+        }
+        
+        /* Animations */
+        @keyframes fadeInDown {
+          from { opacity: 0; transform: translateY(-20px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeInUp {
+          from { opacity: 0; transform: translateY(20px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <header>
+          <h1>HDF Live Room Activity</h1>
+          <span class="date-badge">📅 Report Date: May 22, 2026</span>
+        </header>
+        
+        <!-- Summary Stats Card -->
+        <div class="stats-grid">
+          <div class="stat-card" style="border-left: 4px solid var(--accent-emerald);">
+            <span class="stat-title">In-House Stayovers</span>
+            <span class="stat-value" style="color: #34d399;"><?= count($stayovers) ?></span>
+            <span class="stat-desc">Checked in before May 22, checkout is after today.</span>
+          </div>
+          
+          <div class="stat-card" style="border-left: 4px solid var(--accent-blue);">
+            <span class="stat-title">New Check-ins</span>
+            <span class="stat-value" style="color: #60a5fa;"><?= count($checkins) ?></span>
+            <span class="stat-desc">Bookings with arrival scheduled today.</span>
+          </div>
+          
+          <div class="stat-card" style="border-left: 4px solid var(--accent-rose);">
+            <span class="stat-title">Scheduled Checkout</span>
+            <span class="stat-value" style="color: #fb7185;"><?= count($checkouts) ?></span>
+            <span class="stat-desc">Bookings with departure scheduled today.</span>
+          </div>
+          
+          <div class="stat-card" style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.25) 0%, rgba(168, 85, 247, 0.25) 100%);">
+            <span class="stat-title" style="color: #e2e8f0;">Total Rooms Occupied</span>
+            <span class="stat-value" style="background: linear-gradient(to right, #a78bfa, #f472b6); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+              <?= count($stayovers) + count($checkins) ?>
+            </span>
+            <span class="stat-desc" style="color: #cbd5e1;">Sum of in-house stayovers and new check-ins today.</span>
+          </div>
+        </div>
+        
+        <!-- 1. Stayovers Section -->
+        <div class="section-card">
+          <div class="section-header">
+            <h2 class="section-title title-inhouse">Stayovers In-House (Checked in before today)</h2>
+            <span class="section-count"><?= count($stayovers) ?> Rooms</span>
+          </div>
+          <?php if (empty($stayovers)): ?>
+            <div class="empty-state">No stayover bookings found.</div>
+          <?php else: ?>
+            <table>
+              <thead>
+                <tr>
+                  <th style="width: 120px;">Room</th>
+                  <th>Guest Name</th>
+                  <th>Check-In Date</th>
+                  <th>Check-Out Date</th>
+                  <th style="width: 150px;">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <?php foreach ($stayovers as $r): ?>
+                  <tr>
+                    <td><span class="room-number"><?= $r['room_number'] ?></span></td>
+                    <td><span class="guest-name"><?= $r['guest_name'] ?></span></td>
+                    <td><?= $r['c_in'] ?></td>
+                    <td><?= $r['c_out'] ?></td>
+                    <td>
+                      <?php if ($r['booked_room_archived'] == 0): ?>
+                        <span class="badge badge-active">🟢 Active Stay</span>
+                      <?php else: ?>
+                        <span class="badge badge-archived">🔴 Checked Out</span>
+                      <?php endif; ?>
+                    </td>
+                  </tr>
+                <?php endforeach; ?>
+              </tbody>
+            </table>
+          <?php endif; ?>
+        </div>
+        
+        <!-- 2. Checkouts Section -->
+        <div class="section-card">
+          <div class="section-header">
+            <h2 class="section-title title-checkout">Scheduled Checkouts Today</h2>
+            <span class="section-count"><?= count($checkouts) ?> Rooms</span>
+          </div>
+          <?php if (empty($checkouts)): ?>
+            <div class="empty-state">No checkouts scheduled today.</div>
+          <?php else: ?>
+            <table>
+              <thead>
+                <tr>
+                  <th style="width: 120px;">Room</th>
+                  <th>Guest Name</th>
+                  <th>Check-In Date</th>
+                  <th>Check-Out Date</th>
+                  <th style="width: 150px;">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <?php foreach ($checkouts as $r): ?>
+                  <tr>
+                    <td><span class="room-number"><?= $r['room_number'] ?></span></td>
+                    <td><span class="guest-name"><?= $r['guest_name'] ?></span></td>
+                    <td><?= $r['c_in'] ?></td>
+                    <td><?= $r['c_out'] ?></td>
+                    <td>
+                      <?php if ($r['booked_room_archived'] == 0): ?>
+                        <span class="badge badge-active" style="background: rgba(245, 158, 11, 0.12); border: 1px solid rgba(245, 158, 11, 0.20); color: #fbbf24;">🟠 Pending</span>
+                      <?php else: ?>
+                        <span class="badge badge-archived">🔴 Checked Out</span>
+                      <?php endif; ?>
+                    </td>
+                  </tr>
+                <?php endforeach; ?>
+              </tbody>
+            </table>
+          <?php endif; ?>
+        </div>
+        
+        <!-- 3. Checkins Section -->
+        <div class="section-card">
+          <div class="section-header">
+            <h2 class="section-title title-checkin">New Check-ins Scheduled Today</h2>
+            <span class="section-count"><?= count($checkins) ?> Rooms</span>
+          </div>
+          <?php if (empty($checkins)): ?>
+            <div class="empty-state">No new check-ins scheduled for today.</div>
+          <?php else: ?>
+            <table>
+              <thead>
+                <tr>
+                  <th style="width: 120px;">Room</th>
+                  <th>Guest Name</th>
+                  <th>Check-In Date</th>
+                  <th>Check-Out Date</th>
+                  <th style="width: 150px;">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <?php foreach ($checkins as $r): ?>
+                  <tr>
+                    <td><span class="room-number"><?= $r['room_number'] ?></span></td>
+                    <td><span class="guest-name"><?= $r['guest_name'] ?></span></td>
+                    <td><?= $r['c_in'] ?></td>
+                    <td><?= $r['c_out'] ?></td>
+                    <td>
+                      <?php if ($r['booked_room_archived'] == 0): ?>
+                        <span class="badge badge-active">🟢 Active Stay</span>
+                      <?php else: ?>
+                        <span class="badge badge-archived">🔴 Checked Out</span>
+                      <?php endif; ?>
+                    </td>
+                  </tr>
+                <?php endforeach; ?>
+              </tbody>
+            </table>
+          <?php endif; ?>
+        </div>
+      </div>
+    </body>
+    </html>
+    <?php
   }
 }

@@ -20,38 +20,44 @@ class Insert_model extends CI_Model {
   }
 
   function getBookingData() {
-    if ($_POST['booking_type'] == 'Check In') {
+    $booking_type = $_POST['booking_type'] ?? '';
+    if ($booking_type == 'Check In') {
       $_POST['reservation_type'] = NULL;
       $_POST['reservation_status'] = 0;
-      if ($_POST['check_in'] == date('m/d/Y')) {
+      if (isset($_POST['check_in']) && $_POST['check_in'] == date('m/d/Y')) {
         $this->db->where('id', $_POST['room_id'])->update('rooms', ['room_status_id' => 8]);
       }
     } else {
-      $_POST['reservation_status'] = $_POST['reservation_type'] == 'Online' ? 2 : 1;
+      $_POST['reservation_status'] = ($_POST['reservation_type'] ?? '') == 'Online' ? 2 : 1;
     }
 
     return [
-      'guest_id' => $_POST['guest_id'],
-      'booking_type' => $_POST['booking_type'],
-      'arrival' => $_POST['check_in'],
-      'departure' => $_POST['check_out'],
-      'request' => $_POST['request'],
-      'remarks' => $_POST['remarks'],
-      'reservation_type' => $_POST['reservation_type'],
-      'reservation_status' => $_POST['reservation_status']
+      'guest_id' => $_POST['guest_id'] ?? NULL,
+      'booking_type' => $booking_type,
+      'arrival' => $_POST['check_in'] ?? '',
+      'departure' => $_POST['check_out'] ?? '',
+      'request' => $_POST['request'] ?? '',
+      'remarks' => $_POST['remarks'] ?? '',
+      'reservation_type' => $_POST['reservation_type'] ?? NULL,
+      'reservation_status' => $_POST['reservation_status'] ?? 0
     ];
   }
 
   function getBookedRoomData($booking_id) {
+    $dates = $_POST['dates'] ?? NULL;
+    if (empty($dates) && isset($_POST['check_in'], $_POST['check_out'])) {
+      $this->load->helper('hdf_utility');
+      $dates = datesBetween($_POST['check_in'], $_POST['check_out'], 'Y-m-d');
+    }
     return [
       'booking_id' => $booking_id,
-      'room_id' => $_POST['room_id'],
-      'check_in' => $_POST['check_in'],
-      'check_out' => $_POST['check_out'],
-      'c_in' => $this->toDashedDate($_POST['check_in']),
-      'c_out' => $this->toDashedDate($_POST['check_out']),
-      'nights' => $_POST['nights'],
-      'dates' => json_encode($_POST['dates']),
+      'room_id' => $_POST['room_id'] ?? NULL,
+      'check_in' => $_POST['check_in'] ?? '',
+      'check_out' => $_POST['check_out'] ?? '',
+      'c_in' => isset($_POST['check_in']) ? $this->toDashedDate($_POST['check_in']) : '',
+      'c_out' => isset($_POST['check_out']) ? $this->toDashedDate($_POST['check_out']) : '',
+      'nights' => $_POST['nights'] ?? 0,
+      'dates' => json_encode($dates),
     ];
   }
 
@@ -76,13 +82,13 @@ class Insert_model extends CI_Model {
 
   function massBook() {
     $data = [
-      'guest_id' => $_POST['guest_id'],
-      'booking_type' => $_POST['rdo_booking_type'],
-      'arrival' => $_POST['check_in_mass'],
-      'departure' => $_POST['check_out_mass'],
-      'reservation_status' => $_POST['rdo_booking_type'] == 'Check In' ? 0 : 1
+      'guest_id' => $_POST['guest_id'] ?? NULL,
+      'booking_type' => $_POST['rdo_booking_type'] ?? '',
+      'arrival' => $_POST['check_in_mass'] ?? '',
+      'departure' => $_POST['check_out_mass'] ?? '',
+      'reservation_status' => ($_POST['rdo_booking_type'] ?? '') == 'Check In' ? 0 : 1
     ];
-    if ($_POST['rdo_booking_type'] == 'reservation') {
+    if (($_POST['rdo_booking_type'] ?? '') == 'reservation') {
       $data['reservation_type'] = 'Arrival/Tentative';
     }
     $this->db->insert('bookings', $data);
@@ -90,16 +96,22 @@ class Insert_model extends CI_Model {
     $booking_number = 'HDF' . str_pad($booking_id, 5, '0', STR_PAD_LEFT);
     $this->db->where('booking_id', $booking_id)->update('bookings', ['booking_number' => $booking_number]);
 
-    foreach (json_decode($_POST['room_ids']) as $room_id) {
+    $dates = $_POST['dates'] ?? NULL;
+    if (empty($dates) && isset($_POST['check_in_mass'], $_POST['check_out_mass'])) {
+      $this->load->helper('hdf_utility');
+      $dates = datesBetween($_POST['check_in_mass'], $_POST['check_out_mass'], 'Y-m-d');
+    }
+
+    foreach (json_decode($_POST['room_ids'] ?? '[]') as $room_id) {
       $room_data = [
         'booking_id' => $booking_id,
         'room_id' => $room_id,
-        'check_in' => $_POST['check_in_mass'],
-        'check_out' => $_POST['check_out_mass'],
-        'c_in' => $this->toDashedDate($_POST['check_in_mass']),
-        'c_out' => $this->toDashedDate($_POST['check_out_mass']),
-        'nights' => $_POST['nights'],
-        'dates' => json_encode($_POST['dates']),
+        'check_in' => $_POST['check_in_mass'] ?? '',
+        'check_out' => $_POST['check_out_mass'] ?? '',
+        'c_in' => isset($_POST['check_in_mass']) ? $this->toDashedDate($_POST['check_in_mass']) : '',
+        'c_out' => isset($_POST['check_out_mass']) ? $this->toDashedDate($_POST['check_out_mass']) : '',
+        'nights' => $_POST['nights'] ?? 0,
+        'dates' => json_encode($dates),
       ];
 
       $this->db->insert('booked_rooms', $room_data);
@@ -255,7 +267,11 @@ class Insert_model extends CI_Model {
 
   function remit() {
     $_POST['user_id'] = $_SESSION['user_id'];
-    $_POST['remittance_date'] = date_create()->modify('-1 days')->format('Y-m-d');
+    if (!empty($_POST['remittance_date'])) {
+      $_POST['remittance_date'] = date('Y-m-d', strtotime($_POST['remittance_date']));
+    } else {
+      $_POST['remittance_date'] = date_create()->modify('-1 days')->format('Y-m-d');
+    }
     $this->addCash($_POST['remitted_amount'], TRUE);
     $this->db->insert('remittances', $_POST);
   }
@@ -263,9 +279,45 @@ class Insert_model extends CI_Model {
   function addSales() {
     $cleanDate = date('Y-m-d', strtotime($_POST['sales_date']));
     $targetDateTime = $cleanDate . ' ' . date('H:i:s');
-    $_POST['sales_date'] = $cleanDate;
-    $_POST['sales_added'] = $targetDateTime;
-    $this->db->insert('sales', $_POST);
+    
+    $remarks = $_POST['sales_remarks'] ?? '';
+    $method = $_POST['sales_method'] ?? 'Cash';
+    
+    if ($method == 'Card' && !empty($_POST['card_number'])) {
+      $remarks = trim($remarks . " (Card: **** " . $_POST['card_number'] . ")");
+    } else if ($method == 'Check') {
+      $check_details = array_filter([
+        $_POST['check_name'] ?? '',
+        $_POST['check_number'] ?? '',
+        $_POST['check_branch'] ?? '',
+        !empty($_POST['check_date']) ? date('m/d/Y', strtotime($_POST['check_date'])) : ''
+      ]);
+      if (!empty($check_details)) {
+        $remarks = trim($remarks . " (Check: " . implode(' | ', $check_details) . ")");
+      }
+    } else if ($method == 'Bank Transfer') {
+      $bank_details = array_filter([
+        $_POST['bank_name'] ?? '',
+        $_POST['bank_number'] ?? '',
+        !empty($_POST['bank_date']) ? date('m/d/Y', strtotime($_POST['bank_date'])) : ''
+      ]);
+      if (!empty($bank_details)) {
+        $remarks = trim($remarks . " (Bank: " . implode(' | ', $bank_details) . ")");
+      }
+    }
+
+    $data = [
+      'sales_amount' => $_POST['sales_amount'],
+      'sales_method' => $method,
+      'sales_type' => $_POST['sales_type'],
+      'or_name' => $_POST['or_name'] ?? '',
+      'or_no' => $_POST['or_no'] ?? '',
+      'sales_remarks' => $remarks,
+      'sales_date' => $cleanDate,
+      'sales_added' => $targetDateTime
+    ];
+
+    $this->db->insert('sales', $data);
   }
 
   function addCollectable() {

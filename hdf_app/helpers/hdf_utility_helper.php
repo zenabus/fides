@@ -31,3 +31,17 @@ if (!function_exists('determinePeriod')) {
     }
   }
 }
+
+if (!function_exists('getBusinessDate')) {
+  function getBusinessDate($offset_days = 0) {
+    $date = new DateTime();
+    if (intval($date->format('H')) >= 22) {
+      $date->modify('+1 day');
+    }
+    if ($offset_days != 0) {
+      $date->modify($offset_days . ' days');
+    }
+    return $date->format('Y-m-d');
+  }
+}
+

@@ -355,8 +355,8 @@
         </tr>
         <tr>
           <td class="bgw nb"></td>
-          <td class="nw bt bl bgw">EXTENDED STAY</td>
-          <td class="bt bgw"><?= $extended_stay_count ?></td><!-- extended stay -->
+          <td class="nw bt bl bgw">IN-HOUSE</td>
+          <td class="bt bgw"><?= $inhouse_count ?></td><!-- guests checked in from previous days -->
           <td class="nb bgw" colspan="10"></td>
           <td class="nb bgy">HOTEL</td>
           <td class="nb bgy">EVENT</td>
@@ -386,8 +386,8 @@
         </tr>
         <tr>
           <td class="nb bgw"></td>
-          <td class="nw bl bgw">TOTAL ROOMS OCCUPIED</td>
-          <td class="bgw"><?= count($occupied) ?></td>
+          <td class="nw bt bl bgw">CHECK-OUT</td>
+          <td class="bgw"><?= $checkout_count ?></td><!-- checkout count -->
           <td class="nb bgw" colspan="9"></td>
           <td class="bgw bl">CARD</td>
           <?php $hotel_card = $room_rate_card + $addons_card + $reservation_card ?>
@@ -401,7 +401,10 @@
           <td class="nb bgw"></td>
         </tr>
         <tr>
-          <td class="nb bgw" colspan="12"></td>
+          <td class="nb bgw"></td>
+          <td class="nw bt bl bb bgw">TOTAL ROOMS OCCUPIED</td>
+          <td class="bb bgw"><?= $inhouse_count + $checkin_count ?></td><!-- IN-HOUSE + CHECK-IN -->
+          <td class="nb bgw" colspan="9"></td>
           <td class="bgw bl">COLLECTABLE</td>
           <td class="bgw"><?= number_format($hotel_collectables, 2) ?></td>
           <td class="bgw"><?= number_format($event_collectables, 2) ?></td>

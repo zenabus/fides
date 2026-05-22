@@ -153,7 +153,7 @@ class MY_Controller extends CI_Controller {
     }
     $missingDates = [];
     $dateStart = new DateTime(min($dates));
-    $dateEnd = new DateTime(date('Y-m-d'));
+    $dateEnd = new DateTime(getBusinessDate());
     $dateEnd = $dateEnd->modify('+1 day');
 
     $interval = new DateInterval('P1D');
