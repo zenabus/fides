@@ -881,6 +881,20 @@ class Get_model extends CI_Model {
       ->count_all_results('booked_rooms');
   }
 
+  function getInHouseGuests($date) {
+    return $this->db->select('booked_rooms.*, rooms.room_number, room_type.room_type_abbr, guests.first_name, guests.middle_name, guests.last_name, guests.suffix')
+      ->join('bookings', 'bookings.booking_id=booked_rooms.booking_id')
+      ->join('rooms', 'rooms.id=booked_rooms.room_id')
+      ->join('room_type', 'room_type.id=rooms.room_type_id')
+      ->join('guests', 'guests.guest_id=bookings.guest_id')
+      ->where('c_in <', $date)
+      ->where('c_out >', $date)
+      ->where('booked_room_archived', 0)
+      ->where('reservation_status', 0)
+      ->order_by('rooms.room_number', 'ASC')
+      ->get('booked_rooms')->result_array();
+  }
+
   function getCheckInCount($date, $period) {
     [$startDate, $endDate] = $this->getTime($date, $period);
     return $this->db->where('booked_room_added >=', $startDate)

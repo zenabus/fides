@@ -519,6 +519,7 @@ class Main extends MY_Controller {
       $data['occupied'] = $this->get_model->getOccupiedRooms($date);
       $data['extended_stay_count'] = $this->get_model->getExtendedStayCount($date);
       $data['inhouse_count'] = $this->get_model->getInHouseCount($date);
+      $data['inhouse_guests'] = $this->get_model->getInHouseGuests($date);
       $data['checkin_count'] = $this->get_model->getCheckInCount($date, $type);
       $data['checkout_count'] = $this->get_model->getCheckoutCount($date, $type);
       $data['payments'] = $this->get_model->getPaymentsByDateGrouped($date, $type);
@@ -832,10 +833,10 @@ class Main extends MY_Controller {
     $payment = $this->get_model->getPaymentTotal($data['booking']->booking_id);
     $data['payment'] = $payment ? $payment->amount : 0;
 
-    foreach ($data['booked_rooms'] as $i => $room) {
-      $data['booked_rooms'][$i]['restaurant'] = $this->get_model->getRoomCharges($room['booked_room_id'], 'Restaurant');
-      $data['booked_rooms'][$i]['coffeeshop'] = $this->get_model->getRoomCharges($room['booked_room_id'], 'Coffeeshop');
-      $data['booked_rooms'][$i]['amenities'] = $this->get_model->getRoomAmenities($room['booked_room_id']);
+    foreach ($data['booked_rooms'] as $i => $booked_room) {
+      $data['booked_rooms'][$i]['restaurant'] = $this->get_model->getRoomCharges($booked_room['booked_room_id'], 'Restaurant');
+      $data['booked_rooms'][$i]['coffeeshop'] = $this->get_model->getRoomCharges($booked_room['booked_room_id'], 'Coffeeshop');
+      $data['booked_rooms'][$i]['amenities'] = $this->get_model->getRoomAmenities($booked_room['booked_room_id']);
     }
 
     $view = $this->load->view('body/frontdesk/components/receipt', $data, TRUE);
@@ -1874,6 +1875,7 @@ class Main extends MY_Controller {
           margin-bottom: 0.5rem;
           background: linear-gradient(to right, #60a5fa, #a78bfa);
           -webkit-background-clip: text;
+          background-clip: text;
           -webkit-text-fill-color: transparent;
         }
         
@@ -2094,7 +2096,7 @@ class Main extends MY_Controller {
           
           <div class="stat-card" style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.25) 0%, rgba(168, 85, 247, 0.25) 100%);">
             <span class="stat-title" style="color: #e2e8f0;">Total Rooms Occupied</span>
-            <span class="stat-value" style="background: linear-gradient(to right, #a78bfa, #f472b6); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+            <span class="stat-value" style="background: linear-gradient(to right, #a78bfa, #f472b6); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">
               <?= count($stayovers) + count($checkins) ?>
             </span>
             <span class="stat-desc" style="color: #cbd5e1;">Sum of in-house stayovers and new check-ins today.</span>

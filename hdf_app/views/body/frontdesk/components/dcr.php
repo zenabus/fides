@@ -225,6 +225,40 @@
           </tr>
         <?php } ?>
         <?php
+        if (isset($inhouse_guests) && !empty($inhouse_guests)) {
+          $paid_room_ids = array_column($payments, 'booked_room_id');
+          foreach ($inhouse_guests as $row) {
+            if (in_array($row['booked_room_id'], $paid_room_ids)) {
+              continue;
+            }
+            ?>
+            <tr>
+              <td class="bl"><?= $row['room_number'] ?> <?= $row['room_type_abbr'] ?></td>
+              <td class="nw"><?= $row['first_name'] ?> <?= $row['middle_name'] ?> <?= $row['last_name'] ?> <?= $row['suffix'] ?></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td>IN-HOUSE</td>
+              <td class="nb bgw"></td>
+            </tr>
+            <?php
+          }
+        }
+        ?>
+        <?php
         $hotel_collectables = 0;
         foreach ($charged as $row) {
           $hotel_collectables += $row['collectables'];
