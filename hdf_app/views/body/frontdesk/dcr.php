@@ -16,7 +16,7 @@
                 <th>Card</th>
                 <th>Sales</th>
                 <th>Expense</th>
-                <th>Event Collectables</th>
+                <th>Collectables</th>
                 <th>Total</th>
                 <th>Remitted By</th>
                 <th>Action</th>
@@ -72,7 +72,7 @@
                       <a href="javascript:" class="btn btn-sm mb-1 btn-success sale" data-placement="top" title="Add Sales" rel="tooltip" date="<?= $row['payment_added'] ?>">
                         <i class="fa-solid fa-sack-dollar"></i>
                       </a>
-                      <a href="javascript:" class="btn btn-info mb-1 btn-sm collectable" data-placement="top" title="Add Event Collectable" rel="tooltip" date="<?= $row['payment_added'] ?>">
+                      <a href="javascript:" class="btn btn-info mb-1 btn-sm collectable" data-placement="top" title="Add Collectable" rel="tooltip" date="<?= $row['payment_added'] ?>">
                         <i class="fa-solid fa-hand-holding-dollar"></i>
                       </a>
                       <a href="javascript:" class="btn btn-danger mb-1 btn-sm expense" data-placement="top" title="Add Expense" rel="tooltip" date="<?= $row['payment_added'] ?>">
@@ -84,7 +84,7 @@
                         <a href="javascript:" class="btn btn-sm mb-1 btn-success sale" data-placement="top" title="Add Sales" rel="tooltip" date="<?= $row['payment_added'] ?>">
                           <i class="fa-solid fa-sack-dollar"></i>
                         </a>
-                        <a href="javascript:" class="btn btn-info mb-1 btn-sm collectable" data-placement="top" title="Add Event Collectable" rel="tooltip" date="<?= $row['payment_added'] ?>">
+                        <a href="javascript:" class="btn btn-info mb-1 btn-sm collectable" data-placement="top" title="Add Collectable" rel="tooltip" date="<?= $row['payment_added'] ?>">
                           <i class="fa-solid fa-hand-holding-dollar"></i>
                         </a>
                         <a href="javascript:" class="btn btn-danger mb-1 btn-sm expense" data-placement="top" title="Add Expense" rel="tooltip" date="<?= $row['payment_added'] ?>">
@@ -187,6 +187,7 @@
           <label>Type</label>
           <select name="sales_type" class="form-control" required>
             <option value="">- select sales type -</option>
+            <option value="Hotel">Hotel</option>
             <option value="Event">Event</option>
             <option value="Pool">Swimming Pool</option>
           </select>
@@ -266,11 +267,19 @@
   <div class="modal-dialog pt-0 modal-sm" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h4 class="title title-up">Event Collectable</h4>
+        <h4 class="title title-up">Add Collectable</h4>
       </div>
       <div class="modal-body px-4">
         <?= form_open('main/addCollectable', ['id' => 'frmCollectable']) ?>
         <input type="hidden" name="collectable_date">
+        <div class="form-group">
+          <label>Type</label>
+          <select name="collectable_type" class="form-control" required>
+            <option value="">- select collectable type -</option>
+            <option value="Hotel">Hotel</option>
+            <option value="Event">Event</option>
+          </select>
+        </div>
         <div class="form-group">
           <label>Amount</label>
           <input type="number" class="form-control" name="collectable_amount" required>
@@ -400,7 +409,7 @@
   <div class="modal-dialog pt-0" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h4 class="title title-up">Event Collectables</h4>
+        <h4 class="title title-up">Collectables</h4>
       </div>
       <div class="modal-body px-4">
         <table class="table table-bordered mb-0">
@@ -501,7 +510,8 @@
   function getSalesBadge(type) {
     const colors = {
       Event: 'badge-primary',
-      Pool: 'badge-info'
+      Pool: 'badge-info',
+      Hotel: 'badge-danger'
     };
     const cls = colors[type] || 'badge-default';
     return `<span class="badge ${cls} mt-1" style="font-size: 10px; padding: 3px 6px; border-radius: 4px; text-transform: uppercase; display: inline-block;">${type}</span>`;
@@ -521,7 +531,8 @@
 
   function getCollectableBadge(type) {
     const colors = {
-      Event: 'badge-primary'
+      Event: 'badge-primary',
+      Hotel: 'badge-danger'
     };
     const cls = colors[type] || 'badge-default';
     return `<span class="badge ${cls} mt-1" style="font-size: 10px; padding: 3px 6px; border-radius: 4px; text-transform: uppercase; display: inline-block;">${type}</span>`;

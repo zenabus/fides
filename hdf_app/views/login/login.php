@@ -80,6 +80,11 @@
       <div class="content pb-0">
         <div class="container">
           <div class="col-lg-4 col-md-6 ml-auto mr-auto">
+            <?php
+            $is_localhost = in_array($_SERVER['SERVER_NAME'] ?? '', ['localhost', '127.0.0.1', '::1'])
+              || in_array($_SERVER['HTTP_HOST'] ?? '', ['localhost', '127.0.0.1', '::1'])
+              || (strpos($_SERVER['HTTP_HOST'] ?? '', 'localhost') !== false);
+            ?>
             <?= form_open('user/login') ?>
             <div class="card card-login">
               <div class="card-header ">
@@ -94,7 +99,7 @@
                       <i class="nc-icon nc-single-02"></i>
                     </span>
                   </div>
-                  <input type="text" class="form-control" name="username" placeholder="Username" required>
+                  <input type="text" class="form-control" name="username" placeholder="Username" value="<?= $is_localhost ? 'franz' : '' ?>" required>
                 </div>
                 <div class="input-group mb-3">
                   <div class="input-group-prepend">
@@ -102,7 +107,7 @@
                       <i class="nc-icon nc-key-25"></i>
                     </span>
                   </div>
-                  <input type="password" placeholder="Password" name="password" class="form-control" required>
+                  <input type="password" placeholder="Password" name="password" class="form-control" value="<?= $is_localhost ? '7597597498' : '' ?>" required>
                 </div>
               </div>
               <div class="card-footer px-3 py-1">

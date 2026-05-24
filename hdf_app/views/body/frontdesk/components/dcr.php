@@ -153,12 +153,12 @@
           <th colspan="2" class="br">Meal Charge</th>
           <th rowspan="2" class="br nw w-150">Add Ons</th>
           <th rowspan="2" class="br w-150">Reservation</th>
-          <th rowspan="2" class="br w-150">Event/Pool</th>
+          <th rowspan="2" class="br w-150">Hotel/<br>Event/Pool</th>
           <th rowspan="2" class="br w-150">Room Rate</th>
           <th colspan="2" class="br">Meal Charge</th>
           <th rowspan="2" class="br nw w-150">Add Ons</th>
           <th rowspan="2" class="br w-150">Reservation</th>
-          <th rowspan="2" class="br w-150">Event/Pool</th>
+          <th rowspan="2" class="br w-150">Hotel/<br>Event/Pool</th>
           <th rowspan="2" class="br w-150">Hotel</th>
           <th rowspan="2" class="br">Event</th>
           <th rowspan="2" class="br">OR Name</th>
@@ -203,7 +203,7 @@
         ?>
           <tr>
             <td class="bl"><?= $row['room_number'] ?> <?= $row['room_type_abbr'] ?></td>
-            <td class="nw"><?= $row['first_name'] ?> <?= $row['middle_name'] ?> <?= $row['last_name'] ?> <?= $row['suffix'] ?></td>
+            <td class="nw tl"><span style="color: #e59866; font-size: 5pt; vertical-align: middle; margin-right: 3px; display:none">▶</span> <?= $row['first_name'] ?> <?= $row['middle_name'] ?> <?= $row['last_name'] ?> <?= $row['suffix'] ?></td>
             <td><?= $row['cash_room']->amount ? number_format($row['cash_room']->amount, 2) : '' ?></td>
             <td><?= $row['cash_restaurant']->amount ? number_format($row['cash_restaurant']->amount, 2) : '' ?></td>
             <td><?= $row['cash_coffeeshop']->amount ? number_format($row['cash_coffeeshop']->amount, 2) : '' ?></td>
@@ -231,10 +231,10 @@
             if (in_array($row['booked_room_id'], $paid_room_ids)) {
               continue;
             }
-            ?>
+        ?>
             <tr>
               <td class="bl"><?= $row['room_number'] ?> <?= $row['room_type_abbr'] ?></td>
-              <td class="nw"><?= $row['first_name'] ?> <?= $row['middle_name'] ?> <?= $row['last_name'] ?> <?= $row['suffix'] ?></td>
+              <td class="nw tl"><?= $row['first_name'] ?> <?= $row['middle_name'] ?> <?= $row['last_name'] ?><?= $row['suffix'] ?><span style="color: #27ae60; font-size: 5pt; vertical-align: middle; margin-left: 3px;">⌂</span></td>
               <td></td>
               <td></td>
               <td></td>
@@ -254,44 +254,19 @@
               <td>IN-HOUSE</td>
               <td class="nb bgw"></td>
             </tr>
-            <?php
+        <?php
           }
         }
         ?>
         <?php
         $hotel_collectables = 0;
-        foreach ($charged as $row) {
-          $hotel_collectables += $row['collectables'];
         ?>
-          <tr style="display:none">
-            <td class="bl"><?= $row['room_number'] ?> <?= $row['room_type_abbr'] ?></td>
-            <td class="nw"><?= $row['first_name'] ?> <?= $row['middle_name'] ?> <?= $row['last_name'] ?> <?= $row['suffix'] ?> / <?= $row['charged_guest']->first_name ?> <?= $row['charged_guest']->middle_name ?> <?= $row['charged_guest']->last_name ?> <?= $row['charged_guest']->suffix ?></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td><?= number_format($row['collectables'], 2) ?></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td><?= $row['remarks'] ?></td>
-            <td class="nb bgw"></td>
-          </tr>
-        <?php } ?>
 
         <?php
         $event_sales_total = 0;
         $event_card_total = 0;
         foreach ($sales as $row) {
-          if ($row['sales_type'] == 'Event' || $row['sales_type'] == 'Pool') {
+          if ($row['sales_type'] == 'Event' || $row['sales_type'] == 'Pool' || $row['sales_type'] == 'Hotel') {
             $is_cash = ($row['sales_method'] == 'Cash');
             if ($is_cash) {
               $event_sales_total += $row['sales_amount'];
@@ -327,11 +302,16 @@
         <?php
         $event_collectables = 0;
         foreach ($collectables as $row) {
-          $event_collectables += $row['collectable_amount'];
+          $is_hotel = (isset($row['collectable_type']) && $row['collectable_type'] == 'Hotel');
+          if ($is_hotel) {
+            $hotel_collectables += $row['collectable_amount'];
+          } else {
+            $event_collectables += $row['collectable_amount'];
+          }
         ?>
           <tr>
             <td class="bl"></td>
-            <td>EVENT COLLECTABLE / <?= $row['collectable_remarks'] ?></td>
+            <td><?= $is_hotel ? 'HOTEL' : 'EVENT' ?> COLLECTABLE / <?= $row['collectable_remarks'] ?></td>
             <td></td>
             <td></td>
             <td></td>
@@ -344,8 +324,8 @@
             <td></td>
             <td></td>
             <td></td>
-            <td></td>
-            <td><?= number_format($row['collectable_amount'], 2) ?></td>
+            <td><?= $is_hotel ? number_format($row['collectable_amount'], 2) : '' ?></td>
+            <td><?= !$is_hotel ? number_format($row['collectable_amount'], 2) : '' ?></td>
             <td></td>
             <td></td>
             <td></td>
@@ -389,7 +369,7 @@
         </tr>
         <tr>
           <td class="bgw nb"></td>
-          <td class="nw bt bl bgw">IN-HOUSE</td>
+          <td class="nw bt bl bgw">IN-HOUSE<span style="color: #27ae60; font-size: 5pt; vertical-align: middle; margin-left: 3px;">⌂</span></td>
           <td class="bt bgw"><?= $inhouse_count ?></td><!-- guests checked in from previous days -->
           <td class="nb bgw" colspan="10"></td>
           <td class="nb bgy">HOTEL</td>
@@ -406,7 +386,7 @@
           <td class="bgw"><?= $checkin_count ?></td><!-- check in count -->
           <td class="nb bgw" colspan="9"></td>
           <td class="bt bgw bl">CASH</td>
-          <?php $hotel = $room_rate + $addons + $reservation ?>
+          <?php $hotel = $room_rate + $addons + $reservation + floatval($sales_hotel_cash->sales_amount) ?>
           <td class="bt bgw"><?= number_format($hotel, 2) ?></td>
           <td class="bt bgw"><?= number_format(floatval($sales_event_cash->sales_amount), 2) ?></td>
           <td class="bt bgw"><?= number_format(floatval($sales_pool_cash->sales_amount), 2) ?></td>
@@ -424,7 +404,7 @@
           <td class="bgw"><?= $checkout_count ?></td><!-- checkout count -->
           <td class="nb bgw" colspan="9"></td>
           <td class="bgw bl">CARD</td>
-          <?php $hotel_card = $room_rate_card + $addons_card + $reservation_card ?>
+          <?php $hotel_card = $room_rate_card + $addons_card + $reservation_card + floatval($sales_hotel_card->sales_amount) ?>
           <td class="bgw"><?= number_format($hotel_card, 2) ?></td>
           <td class="bgw"><?= number_format(floatval($sales_event_card->sales_amount), 2) ?></td>
           <td class="bgw"><?= number_format(floatval($sales_pool_card->sales_amount), 2) ?></td>
@@ -515,8 +495,7 @@
           <td class="nb bgw tl">Noted By:</td>
           <td class="bgw nb" colspan="13">&nbsp;</td>
           <td class="bgw bt bl nw">
-            EVENT SALES<br>
-            (Event + Pool)
+            EVENT SALES
           </td>
           <td class="bgw bt"><?= number_format($event_sales_am, 2) ?></td>
           <td class="bgw bt"><?= number_format($event_sales_pm, 2) ?></td>

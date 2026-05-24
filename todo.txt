@@ -58,3 +58,15 @@ Ask if extras are per day
 Request room delete to admin
 Add last checkin
 Time-based login
+
+
+
+
+
+
+
+
+
+
+
+checkout only on DCR the clicked

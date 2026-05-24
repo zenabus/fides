@@ -795,7 +795,7 @@ class Get_model extends CI_Model {
 
   function getEventSales($date, $period) {
     [$startDate, $endDate] = $this->getTime($date, $period);
-    return $this->db->where_in('sales_type', ['Event', 'Pool'])
+    return $this->db->where_in('sales_type', ['Event', 'Pool', 'Hotel'])
       ->where('sales_added >=', $startDate)
       ->where('sales_added <=', $endDate)
       ->get('sales')->result_array();
@@ -897,25 +897,32 @@ class Get_model extends CI_Model {
 
   function getCheckInCount($date, $period) {
     [$startDate, $endDate] = $this->getTime($date, $period);
-    return $this->db->where('booked_room_added >=', $startDate)
-      ->where('booked_room_added <=', $endDate)
+    return $this->db->join('bookings', 'bookings.booking_id=booked_rooms.booking_id')
+      ->join('booking_logs', "booking_logs.booking_id=bookings.booking_id AND booking_logs.activity LIKE '%Successfully checked in%' AND booking_logs.booking_log_added >= '{$startDate}' AND booking_logs.booking_log_added <= '{$endDate}'", 'left')
+      ->where('c_in', $date)
       ->where_in('booked_room_archived', [0, 2])
+      ->group_start()
+        ->group_start()
+          ->where('booking_type', 'Check In')
+          ->where('booked_room_added >=', $startDate)
+          ->where('booked_room_added <=', $endDate)
+        ->group_end()
+        ->or_group_start()
+          ->where('booking_type', 'Reservation')
+          ->where('booking_logs.booking_log_id IS NOT NULL', NULL, FALSE)
+        ->group_end()
+      ->group_end()
       ->count_all_results('booked_rooms');
   }
 
   function getCheckoutCount($date, $period) {
+    [$startDate, $endDate] = $this->getTime($date, $period);
+
     return $this->db->join('bookings', 'bookings.booking_id=booked_rooms.booking_id')
-      ->group_start()
-        ->group_start()
-          ->where('c_out', $date)
-          ->where('booked_room_archived', 0)
-        ->group_end()
-        ->or_group_start()
-          ->where('booked_room_archived', 2)
-          ->where('DATE(booked_room_updated)', $date)
-          ->where('c_out >=', $date)
-        ->group_end()
-      ->group_end()
+      ->where('booked_room_archived', 2)
+      ->where('booked_room_updated >=', $startDate)
+      ->where('booked_room_updated <=', $endDate)
+      ->where('c_out >=', $date)
       ->where('reservation_status', 0)
       ->count_all_results('booked_rooms');
   }

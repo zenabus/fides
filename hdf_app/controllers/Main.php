@@ -534,6 +534,8 @@ class Main extends MY_Controller {
       $data['sales_pool_cash']  = $this->get_model->getSalesByMethodAndType($date, 'Pool', 'Cash', $type);
       $data['sales_event_card'] = $this->get_model->getSalesByMethodAndType($date, 'Event', 'Card', $type);
       $data['sales_pool_card']  = $this->get_model->getSalesByMethodAndType($date, 'Pool', 'Card', $type);
+      $data['sales_hotel_cash'] = $this->get_model->getSalesByMethodAndType($date, 'Hotel', 'Cash', $type);
+      $data['sales_hotel_card'] = $this->get_model->getSalesByMethodAndType($date, 'Hotel', 'Card', $type);
 
       $data['remitted'] = $this->get_model->getRemitted($date, $type);
 

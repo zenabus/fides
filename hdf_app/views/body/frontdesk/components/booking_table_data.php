@@ -49,7 +49,7 @@
       <small class="ml-3">Check In: <?= $room['check_in'] ?></small><br>
       <small class="ml-3">Check Out: <?= $room['check_out'] ?></small><br>
       <small class="ml-3">No. Nights: <?= $room['nights'] ?> night<?= $room['nights'] ? '' : 's' ?></small><br>
-      <small class="ml-3">Room Price: ₱ <?= number_format($room['pricing_type']) ?></small><br>
+      <small class="ml-3">Room Price: ₱ <?= number_format((float)($room['pricing_type'] ?? 0)) ?></small><br>
       <small class="ml-3">Discount: <?= $room['discount_type'] ?> (<?= $room['percentage'] ?><?= $room['using_formula'] ? '' : '%' ?>)</small>
     </details>
   <?php } ?><br>
@@ -61,7 +61,7 @@
 </td>
 <td>
   <details>
-    <summary>₱ <?= number_format($row['payment']->amount) ?> <small>Payment</small></summary>
+    <summary>₱ <?= number_format((float)($row['payment']->amount ?? 0)) ?> <small>Payment</small></summary>
     <?php foreach ($row['payments'] as $payment) { ?>
       <?php if ($payment['payment_option'] == 'Cash') {
         $icon = 'fa-solid fa-money-bill text-success';
@@ -75,23 +75,23 @@
       $tooltip =  $payment['payment_option'] . '<br>' . $payment['payment_details']; ?>
       <small class="mb-0">
         <span class="<?= $icon ?> mr-1" data-placement="top" title="<?= $tooltip ?>" rel="tooltip" data-html="true"></span>
-        ₱ <?= number_format($payment['amount']) ?> - <?= date_format(date_create($payment['booking_payment_added']), 'm/d/y g:ia') ?>
+        ₱ <?= number_format((float)($payment['amount'] ?? 0)) ?> - <?= date_format(date_create($payment['booking_payment_added']), 'm/d/y g:ia') ?>
       </small><br>
     <?php } ?>
   </details>
 
   <details>
-    <summary>₱ <?= number_format($row['refund']->booking_refund) ?> <small>Refund</small></summary>
+    <summary>₱ <?= number_format((float)($row['refund']->booking_refund ?? 0)) ?> <small>Refund</small></summary>
     <?php foreach ($row['refunds'] as $refund) { ?>
       <small class="mb-0">
         <span class="fa fa-info-circle text-info mr-1" data-placement="top" title="<?= $refund['booking_refund_reason'] ?>" rel="tooltip" data-html="true"></span>
-        ₱ <?= number_format($refund['booking_refund']) ?> - <?= date_format(date_create($payment['booking_payment_added']), 'm/d/y g:ia') ?>
+        ₱ <?= number_format((float)($refund['booking_refund'] ?? 0)) ?> - <?= date_format(date_create($payment['booking_payment_added']), 'm/d/y g:ia') ?>
       </small><br>
     <?php } ?>
   </details>
   <?php if (isset($row['collectable'])) { ?>
     <hr>
-    ₱ <?= number_format($row['collectable']) ?> <small>Collectable</small>
+    ₱ <?= number_format((float)($row['collectable'] ?? 0)) ?> <small>Collectable</small>
   <?php } ?>
 </td>
 <td>

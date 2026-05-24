@@ -4,5 +4,6 @@
       "P1132",
       "P1006"
     ]
-  }
+  },
+  "intelephense.format.braces": "k&r"
 }
