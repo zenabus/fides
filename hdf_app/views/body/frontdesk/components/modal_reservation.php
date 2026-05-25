@@ -175,7 +175,14 @@
         </div>
 
         <a href="javascript:" class="btn my-0 btn-block mb-1" id="btnChange">Change Room</a>
-        <a href="javascript:" class="btn btn-danger my-0 d-none btn-block" id="btnCancel">Cancel Reservation</a>
+        <div class="row">
+          <div class="col" style="padding-right:2px">
+            <a href="javascript:" class="btn btn-danger my-0 d-none btn-block mb-1" id="btnCancel">Cancel Reservation</a>
+          </div>
+          <div class="col" style="padding-left:2px">
+            <a href="javascript:" class="btn btn-success my-0 d-none btn-block mb-1" id="btnConfirm">Confirm Reservation</a>
+          </div>
+        </div>
         <a href="javascript:" class="btn my-0 d-none btn-block" id="btnUpdate">Update Booking</a>
         <?= form_close() ?>
       </div>
@@ -256,5 +263,14 @@
 <script>
   $('#btnUpdate').click(function() {
     $('#frmBook').submit();
+  });
+
+  $('#btnConfirm').click(function() {
+    $('<input>').attr({
+      type: 'hidden',
+      name: 'payment_for',
+      value: 'advance'
+    }).appendTo('#frmBook');
+    $('#frmBook').attr('action', '<?= base_url('index.php/main/confirm') ?>').submit();
   });
 </script>

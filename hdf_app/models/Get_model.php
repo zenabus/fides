@@ -556,13 +556,13 @@ class Get_model extends CI_Model {
         ->where('payment_for', $payment_for)
         ->where('booking_payment_added >=', $startDate)
         ->where('booking_payment_added <=', $endDate);
-      
+
       if ($payment_option == 'Card') {
         $this->db->where_in('payment_option', ['Card', 'Check', 'Bank Transfer']);
       } else {
         $this->db->where('payment_option', $payment_option);
       }
-      
+
       return $this->db->get('booking_payment')->row();
     } else {
       return $this->db->select_sum('amount')
@@ -895,22 +895,67 @@ class Get_model extends CI_Model {
       ->get('booked_rooms')->result_array();
   }
 
+  function getOccupiedRoomIdsForToday() {
+    $date = date('Y-m-d');
+    $results = $this->db->join('bookings', 'bookings.booking_id=booked_rooms.booking_id')
+      ->join('guests', 'guests.guest_id=bookings.guest_id', 'left')
+      ->where('c_in <=', $date)
+      ->where('c_out >=', $date)
+      ->where_not_in('reservation_status', [4, 6])
+      ->where('booked_room_archived', 0)
+      ->select('room_id, first_name, last_name, booking_number')
+      ->get('booked_rooms')
+      ->result_array();
+
+    $room_ids = [];
+    foreach ($results as $r) {
+      $room_ids[$r['room_id']] = [
+        'name' => trim($r['first_name'] . ' ' . $r['last_name']),
+        'booking_number' => $r['booking_number']
+      ];
+    }
+    return $room_ids;
+  }
+
+  function getDashboardArrivals() {
+    $date = date('Y-m-d');
+    return $this->db->join('bookings', 'bookings.booking_id=booked_rooms.booking_id')
+      ->where('c_in', $date)
+      ->where_not_in('reservation_status', [4, 6])
+      ->count_all_results('booked_rooms');
+  }
+
+  function getDashboardCheckouts() {
+    $date = date('Y-m-d');
+    return $this->db->join('bookings', 'bookings.booking_id=booked_rooms.booking_id')
+      ->where_not_in('reservation_status', [4, 6])
+      ->group_start()
+      ->where('c_out', $date)
+      ->or_group_start()
+      ->where('booked_room_archived', 2)
+      ->where('DATE(booked_room_updated)', $date, FALSE)
+      ->group_end()
+      ->group_end()
+      ->count_all_results('booked_rooms');
+  }
+
   function getCheckInCount($date, $period) {
     [$startDate, $endDate] = $this->getTime($date, $period);
     return $this->db->join('bookings', 'bookings.booking_id=booked_rooms.booking_id')
       ->join('booking_logs', "booking_logs.booking_id=bookings.booking_id AND booking_logs.activity LIKE '%Successfully checked in%' AND booking_logs.booking_log_added >= '{$startDate}' AND booking_logs.booking_log_added <= '{$endDate}'", 'left')
       ->where('c_in', $date)
+      ->where_not_in('reservation_status', [4, 6])
       ->where_in('booked_room_archived', [0, 2])
       ->group_start()
-        ->group_start()
-          ->where('booking_type', 'Check In')
-          ->where('booked_room_added >=', $startDate)
-          ->where('booked_room_added <=', $endDate)
-        ->group_end()
-        ->or_group_start()
-          ->where('booking_type', 'Reservation')
-          ->where('booking_logs.booking_log_id IS NOT NULL', NULL, FALSE)
-        ->group_end()
+      ->group_start()
+      ->where('booking_type', 'Check In')
+      ->where('booked_room_added >=', $startDate)
+      ->where('booked_room_added <=', $endDate)
+      ->group_end()
+      ->or_group_start()
+      ->where('booking_type', 'Reservation')
+      ->where('booking_logs.booking_log_id IS NOT NULL', NULL, FALSE)
+      ->group_end()
       ->group_end()
       ->count_all_results('booked_rooms');
   }

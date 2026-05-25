@@ -1,5 +1,8 @@
 let modalGuestType = "Single";
 let room_id;
+let booked_room_id;
+let type_booking;
+let withdata;
 
 const minDate = new Date();
 minDate.setDate(minDate.getDate() - 2);
@@ -161,6 +164,13 @@ $("#modalBooking").on("shown.bs.modal", function () {
 });
 
 const modalBooking = (obj, booking_type, minDate = 0, booking_number = "") => {
+  if (!booking_number) {
+    $("#returning_guest").show();
+    $("#new_guest").hide();
+    $(".guest_details").prop("disabled", false).prop("readonly", false).val("");
+    $("[name=guest_id]").val(0);
+    $("#txt-contact").text("");
+  }
   let date = $(obj).attr("date") ?? new Date();
   const data = JSON.parse($(obj).attr("data"));
   // automatic early check-in
@@ -426,4 +436,117 @@ $(document).on("click", ".deletePayment", function (e) {
       window.location.replace(this.href);
     }
   });
+});
+
+
+
+$(document).on('click', '.with-data', function() {
+    const room = JSON.parse($(this).attr('data'));
+    const booking = JSON.parse($(this).attr('booking'));
+    booked_room_id = booking.booked_room_id;
+    type_booking = booking.booking_type;
+
+    $('[name=payment_booked_room_id]').val(booked_room_id);
+    $('[name=payment_booking_id]').val(booking.booking_id);
+
+    $('#returning_guest').hide();
+    $('[name=guest_id]').val(booking.guest_id);
+    $('[name=first_name]').val(booking.first_name).attr('disabled', true);
+    $('[name=middle_name]').val(booking.middle_name).attr('disabled', true);
+    $('[name=last_name]').val(booking.last_name).attr('disabled', true);
+    $('[name=suffix]').val(booking.suffix).attr('disabled', true);
+    $('[name=contact]').val(booking.contact).attr('disabled', true);
+    $("#txt-contact").text(`${booking.contact.length} digits`);
+    $('[name=booked_room_id]').val(booking.booked_room_id);
+
+    if (booking.reservation_status == 0 || booking.reservation_status == -1) {
+      modalBooking(this, 'Check In', 0, booking.booking_number);
+      $('#frmBook').attr('action', `${base_url}index.php/main/updateBooking`);
+      $('[name=booking_id]').val(booking.booking_id);
+      if (booking.booked_room_archived == 0) {
+        $('.form-control').attr('disabled', false);
+        $('[name=nights]').attr('readonly', true);
+        $('textarea').attr('disabled', false).attr('readonly', false);
+        $('#btnUpdate').removeClass('d-none');
+      } else {
+        $('.form-control').attr('disabled', true);
+        $('textarea').attr('disabled', false).attr('readonly', true);
+        $('#btnUpdate').addClass('d-none');
+      }
+      $('.action-div').addClass('d-none');
+      $('#btnBooking').hide();
+      $('#btnRedirect').removeClass('d-none').attr('href', `${base_url}index.php/main/booking/${booking.booking_number}`);
+      $('#btnCancel, #btnChange, #btnPay, #btnPayments').addClass('d-none');
+      $('.payment_option').show();
+    } else if (booking.reservation_status == 1) {
+      const [month, day, year] = booking.check_in.split('/')
+      const checkin = `${year}-${month}-${day}`;
+      modalBooking(this, 'Reservation', 0, booking.booking_number);
+      $('[name=remarks]').removeAttr('readonly');
+      
+      let hour = new Date().getHours();
+      let todayStr = moment(new Date()).format('YYYY-MM-DD');
+      
+      if (checkin == todayStr) {
+        if (hour >= 6 && hour <= 12) {
+          $("#rdo_check").prop("checked", true);
+          $('.action-div').removeClass('d-none');
+          $('#frmBook').attr('action', `${base_url}index.php/main/checkIn`);
+          $('#btnBooking').show().val('Check In');
+          $(".reservation-div").hide();
+        } else if (hour > 12) {
+          $("#rdo_check").prop("checked", true);
+          $('.action-div').removeClass('d-none');
+          $('#frmBook').attr('action', `${base_url}index.php/main/checkIn`);
+          $('#btnBooking').show().val('Check In');
+          $(".reservation-div").hide();
+        } else {
+          $('#frmBook').attr('action', `${base_url}index.php/main/updateReservation`);
+          $('.action-div').addClass('d-none');
+          $('#btnBooking').show().val('Update');
+        }
+      } else {
+        $("#rdo_check").prop("checked", true);
+        $('.action-div').removeClass('d-none');
+        $('#frmBook').attr('action', `${base_url}index.php/main/checkIn`);
+        $('#btnBooking').show().val('Check In');
+        $(".reservation-div").hide();
+      }
+
+      $(booking.reservation_type == 'Confirmed' ? "#rdo_confirmed" : '#rdo_arrival').prop("checked", true);
+
+      $('[name=booking_id]').val(booking.booking_id);
+      $('[name=check_in]').removeAttr('readonly');
+      $('.form-control').removeAttr('disabled');
+      $('#btnRedirect').addClass('d-none');
+      $('#btnCancel, #btnChange, #btnPay, #btnPayments').removeClass('d-none');
+      $('.payment_option').hide();
+
+      if (booking.reservation_type == 'Confirmed') {
+        if (booking.payments) {
+          $("[name=payment_option][value=" + booking.payments.payment_option + "]").prop('checked', true).trigger('change');
+          $('[name=amount]').val(booking.advanced_total).attr('disabled', true);
+          $('[name=card_number]').attr('disabled', true);
+          $('[name=payment_option]').attr('disabled', true);
+        }
+        $(".advanced-div").show();
+      }
+    } else {
+      modalBooking(this, 'Check In', 0, booking.booking_number);
+      $('.action-div').addClass('d-none');
+      $('#btnBooking').hide();
+      $('#btnRedirect').removeClass('d-none');
+      $('#btnCancel, #btnChange, #btnPay, #btnPayments').removeClass('d-none');
+      $('.payment_option').hide();
+    }
+
+    $('[name=check_in]').val(booking.check_in);
+    $('[name=check_out]').val(booking.check_out);
+    $('[name=nights]').val(booking.nights);
+    $('[name=request]').val(booking.request);
+    $('[name=remarks]').val(booking.remarks);
+
+    let checkin = moment(booking.check_in).format("YYYY-MM-DD");
+    let checkout = moment(booking.check_out).format("YYYY-MM-DD");
+    updateAvailableRoom(checkin, checkout);
 });

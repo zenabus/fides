@@ -23,6 +23,26 @@ class Main extends MY_Controller {
 
   function index() {
     $data['rooms'] = $this->get_model->getRoomsWithRoomType();
+    $data['occupied_room_ids'] = $this->get_model->getOccupiedRoomIdsForToday();
+    $data['arrivals_count'] = $this->get_model->getDashboardArrivals();
+    $data['checkouts_count'] = $this->get_model->getDashboardCheckouts();
+    $data['bookings'] = $this->get_model->getBookings();
+    $booked_room_ids = array_column($data['bookings'], 'booked_room_id');
+    $all_payments = $this->get_model->getPaymentsByBookedRoomIds($booked_room_ids);
+
+    foreach ($data['bookings'] as $i => $booking) {
+      $check_out = $booking['early_check_out'] != NULL ? $booking['early_check_out'] : $booking['check_out'];
+      $data['bookings'][$i]['dates_between'] = datesBetween($booking['check_in'], $check_out);
+
+      $payments = isset($all_payments[$booking['booked_room_id']]) ? $all_payments[$booking['booked_room_id']] : [];
+      $data['bookings'][$i]['payments'] = $payments;
+
+      $advanced_total = 0;
+      foreach ($payments as $p) {
+        $advanced_total += $p['amount'];
+      }
+      $data['bookings'][$i]['advanced_total'] = $advanced_total;
+    }
     $data['available'] = $this->get_model->getFrontDeskRooms();
     $data['unavailable'] = $this->get_model->getFrontDeskRooms(0);
     $data['room_types'] = $this->get_model->getRoomTypes();
@@ -1233,12 +1253,34 @@ class Main extends MY_Controller {
   }
 
   function confirm() {
-    $this->update_model->updateReservationStatus(5, $_POST['booking_id']);
-    $this->insert_model->addPayment($_POST['payment_for'], $_POST['amount'], $_POST['booked_room_id']);
+    $this->update_model->confirmReservation($_POST['booking_id']);
+    
+    if (isset($_POST['payment_option'])) {
+      if ($_POST['payment_option'] == 'Cash') {
+        $_POST['payment_details'] = '';
+      } else {
+        $_POST['payment_details'] = $_POST['card_number'] ?? '';
+      }
+    } else {
+      $_POST['payment_option'] = 'Cash';
+      $_POST['payment_details'] = '';
+    }
+    $payment_for = $_POST['payment_for'] ?? 'advance';
+    $amount = $_POST['amount'] ?? 0;
+    $booked_room_id = $_POST['booked_room_id'] ?? NULL;
+    
+    if (!$booked_room_id) {
+      $rooms = $this->get_model->getBookedRooms($_POST['booking_id']);
+      if (!empty($rooms)) {
+        $booked_room_id = $rooms[0]['booked_room_id'];
+      }
+    }
+
+    $this->insert_model->addPayment($payment_for, $amount, $booked_room_id);
     $booking_number = 'HDF' . str_pad($_POST['booking_id'], 5, '0', STR_PAD_LEFT);
     $this->insert_model->log('Verified a reservation: #' . $booking_number, 4);
     $this->session->set_flashdata('success', 'Reservation successfully verified!');
-    $this->redirect();
+    redirect(base_url('index.php/main/booking/' . $booking_number));
   }
 
   function updateExtras() {

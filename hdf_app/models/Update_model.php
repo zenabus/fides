@@ -70,6 +70,10 @@ class Update_model extends CI_Model {
     $this->db->where('booking_id', $booking_id)->update('bookings', ['reservation_status' => $reservation_status]);
   }
 
+  function confirmReservation($booking_id) {
+    $this->db->where('booking_id', $booking_id)->update('bookings', ['reservation_status' => 5, 'reservation_type' => 'Confirmed']);
+  }
+
   function updateNotes() {
     $data = ['remarks' => $_POST['remarks']];
     $this->db->where('booking_id', $_POST['booking_id'])->update('bookings', $data);
