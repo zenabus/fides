@@ -296,10 +296,102 @@
     </div>
   </div>
 
+<div class="modal fade" id="modalPay" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-sm" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="title title-up">Add Payment</h4>
+      </div>
+      <div class="modal-body px-4">
+        <?= form_open('admin/addPayment', ['id' => 'frmPayment']) ?>
+        <input type="hidden" name="payment_booking_id">
+        <input type="hidden" name="payment_booked_room_id">
+
+        <div class="payment-advanced-div">
+          <div class="form-row">
+            <div class="form-group col-md-12">
+              <label>Payment Option</label>
+              <div class="d-flex justify-content-around my-2">
+                <div class="form-check-radio mb-0">
+                  <label class="form-check-label">
+                    <input class="form-check-input" type="radio" name="payment_payment_option" value="Cash" checked>
+                    Cash
+                    <span class="form-check-sign"></span>
+                  </label>
+                </div>
+                <div class="form-check-radio mb-0">
+                  <label class="form-check-label">
+                    <input class="form-check-input" type="radio" name="payment_payment_option" value="Card">
+                    Card
+                    <span class="form-check-sign"></span>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Advance Payment</label>
+            <input type="number" class="form-control" name="payment_amount" min="0" step="0.01" required>
+          </div>
+          <div class="form-group payment-card-div d-none mb-0">
+            <label>Account Number</label>
+            <input type="number" class="form-control" name="payment_card_number" placeholder="XXXX" maxlength="4">
+            <small>Last 4 digit only.</small>
+          </div>
+        </div>
+        <?= form_close() ?>
+      </div>
+      <div class="modal-footer">
+        <div class="left-side">
+          <button type="submit" class="btn btn-link" form="frmPayment">Add Payment</button>
+        </div>
+        <div class="divider"></div>
+        <div class="right-side">
+          <button type="button" class="btn btn-link" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="modalPayments" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="title title-up">Advance Payments</h4>
+      </div>
+      <div class="modal-body px-4">
+        <table class="table table-bordered">
+          <thead>
+            <tr>
+              <th>Amount</th>
+              <th>Processed By</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="payments-tbody">
+            <!-- javascript -->
+          </tbody>
+        </table>
+      </div>
+      <div class="modal-footer">
+        <div class="right-side">
+          <button type="button" class="btn btn-link" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
   <style>
     .card.room.border-success {
       border-width: 2px !important;
       background-color: #f0fff4 !important;
+    }
+
+    #modalPay,
+    #modalPayments {
+      z-index: 999999;
     }
   </style>
 
@@ -324,8 +416,34 @@
       $(this).addClass('shadow-none');
     });
 
-    $('.room').click(function() {
+    $('.room:not(.with-data)').click(function() {
+      $('#returning_guest').show();
+      $('.form-control').val('').removeAttr('disabled');
       modalBooking(this, 'Check In');
+
+      $("#rdo_checkin").prop("checked", true);
+
+      $('#frmBook').attr('action', `${base_url}index.php/main/book`);
+      $('.action-div').addClass('d-none');
+      $('[name=check_in]').attr('readonly', true);
+      $('[name=remarks]').removeAttr('readonly');
+      $('#btnBooking').show();
+      $('#btnRedirect').addClass('d-none');
+      $('#btnCancel, #btnChange, #btnPay, #btnPayments, #btnConfirm').addClass('d-none');
+      $('.payment_option').show();
+      
+      if (hour >= 6 && hour <= 12) {
+        $('.reservation-div').hide();
+        $('[name=booking_type]').val('Check In');
+        $('#btnBooking').val('Check In');
+      }
+      $('.type-div').removeClass('d-none');
+      
+      let date = new Date();
+      let checkin = moment(date).format("YYYY-MM-DD");
+      let checkout = moment(date).add(1, "days").format("YYYY-MM-DD");
+      booked_room_id = null;
+      updateAvailableRoom(checkin, checkout);
     });
 
     $('.room_types').change(function() {

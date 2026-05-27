@@ -258,10 +258,16 @@ if (!$this->session->userdata('connect')) {
 
           <?php $access = ['Admin', 'Superadmin', 'Front Desk']; ?>
           <?php if (in_array($_SESSION['user_type'], $access)) { ?>
+            <?php 
+              $pending_online = $this->get_model->getPendingOnlineReservationsCount(); 
+              $pending_walkin = $this->get_model->getPendingWalkinReservationsCount(); 
+              $total_pending = $pending_online + $pending_walkin;
+            ?>
             <li>
               <a data-toggle="collapse" href="#collapseReservation" aria-expanded="<?= $active == 'online' || $active == 'walkin' ? 'true' : 'false' ?>">
                 <i class="fa fa-clock"></i>
                 <p>Reservations
+                  <span class="badge badge-danger"><?= $total_pending ?></span>
                   <b class="caret"></b>
                 </p>
               </a>
@@ -270,13 +276,17 @@ if (!$this->session->userdata('connect')) {
                   <li class="<?= $active == 'online' ? 'active' : '' ?>">
                     <a href="<?= base_url('index.php/main/reservations/online') ?>">
                       <span class="sidebar-mini-icon">O</span>
-                      <span class="sidebar-normal">Online</span>
+                      <span class="sidebar-normal">Online
+                        <span class="badge badge-danger"><?= $pending_online ?></span>
+                      </span>
                     </a>
                   </li>
                   <li class="<?= $active == 'walkin' ? 'active' : '' ?>">
                     <a href="<?= base_url('index.php/main/reservations/walkin') ?>">
                       <span class="sidebar-mini-icon">WI</span>
-                      <span class="sidebar-normal">Walk-In</span>
+                      <span class="sidebar-normal">Walk-In
+                        <span class="badge badge-danger"><?= $pending_walkin ?></span>
+                      </span>
                     </a>
                   </li>
                 </ul>

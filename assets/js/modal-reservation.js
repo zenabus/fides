@@ -546,6 +546,19 @@ $(document).on('click', '.with-data', function() {
     $('[name=request]').val(booking.request);
     $('[name=remarks]').val(booking.remarks);
 
+    let indicatorText = '';
+    if (booking.reservation_type) {
+      const resType = booking.reservation_type.toLowerCase();
+      if (resType === 'online') {
+        indicatorText = ' (Online)';
+      } else if (resType === 'arrival/tentative' || resType === 'confirmed') {
+        indicatorText = ' (Walk-In)';
+      }
+    }
+    if (booking.booking_number) {
+      $("#booking_number").text(booking.booking_number + indicatorText);
+    }
+
     let checkin = moment(booking.check_in).format("YYYY-MM-DD");
     let checkout = moment(booking.check_out).format("YYYY-MM-DD");
     updateAvailableRoom(checkin, checkout);

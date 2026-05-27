@@ -35,6 +35,7 @@
   .table-container td {
     padding: 8px 12px !important;
     font-size: 12px;
+    height: 60px;
   }
 
   .sticky,
@@ -140,6 +141,8 @@
     display: flex;
     justify-content: center;
     align-items: center;
+    height: 100%;
+    width: 100%;
   }
 
   .filtered-out {
@@ -250,7 +253,7 @@ $now = date('H');
                     }
 
                     ?>
-                    <th colspan="2" class="text-center sticky-top border-shadow <?= $disabled ? '' : 'mass' ?> <?= $bg ?>" id="<?= $today ?>" date="<?= $date_dash ?>" type="<?= $type ?>">
+                    <th class="text-center sticky-top mw-200 border-shadow <?= $disabled ? '' : 'mass' ?> <?= $bg ?>" id="<?= $today ?>" date="<?= $date_dash ?>" type="<?= $type ?>">
                       <?= $i ?>-<?= substr($month, 0, 3) ?>
                     </th>
                   <?php } ?>
@@ -260,8 +263,7 @@ $now = date('H');
                 <tr class="labels">
                   <th class="wsp text-center sticky">ROOM</th>
                   <?php for ($i = 1; $i <= $days; $i++) { ?>
-                    <th class="text-center mw-200 sticky">GUEST NAME</th>
-                    <th class="text-center mw-200 sticky">REMARKS</th>
+                    <th class="text-center mw-200 sticky">BOOKING DETAILS</th>
                   <?php } ?>
                 </tr>
                 <?php $prev = 0; ?>
@@ -350,18 +352,26 @@ $now = date('H');
                           $icon .= "<span class='mr-1' style='font-size: 10px; font-weight: bold;'>[$ampm]</span>";
                         }
 
-                        $min = $date == min($data['dates_between']) ? 'min' : 'mid';
-                        $max = $date == max($data['dates_between']) ? 'max' : 'mid';
+                        $min_date = min($data['dates_between']);
+                        $max_date = max($data['dates_between']);
+                        
+                        $cls = 'mid';
+                        if ($date == $min_date && $date == $max_date) {
+                            $cls = 'min max';
+                        } elseif ($date == $min_date) {
+                            $cls = 'min';
+                        } elseif ($date == $max_date) {
+                            $cls = 'max';
+                        }
                         ?>
-                        <td class="with-data <?= $min ?> bg-<?= $color ?> position-relative first-drag shift-<?= $ampm ?>" date="<?= $date ?>" data="<?= htmlspecialchars(json_encode($row), ENT_QUOTES, 'UTF-8') ?>" booking="<?= htmlspecialchars(json_encode($data), ENT_QUOTES, 'UTF-8') ?>" both="<?= $both ?>">
-                          <div draggable="true" class="draggable" id="drag<?= $date_dash ?>-<?= $data['room_id'] ?>"><?= $icon ?><?= character_limiter($guest, 15) ?></div>
-                        </td>
-                        <td class="with-data <?= $max ?> bg-<?= $color ?> position-relative second-drag shift-<?= $ampm ?>" date="<?= $date ?>" data="<?= htmlspecialchars(json_encode($row), ENT_QUOTES, 'UTF-8') ?>" booking="<?= htmlspecialchars(json_encode($data), ENT_QUOTES, 'UTF-8') ?>" both="<?= $both ?>">
-                          <div draggable="true" class="draggable" id="drag<?= $date_dash ?>-<?= $data['room_id'] ?>"><?= character_limiter($data['remarks'], 15) ?></div>
+                        <td class="with-data <?= $cls ?> bg-<?= $color ?> position-relative shift-<?= $ampm ?>" date="<?= $date ?>" data='<?= json_encode($row) ?>' booking='<?= json_encode($data) ?>' both="<?= $both ?>">
+                          <div draggable="true" class="draggable flex-column align-items-start p-2 text-left" id="drag<?= $date_dash ?>-<?= $data['room_id'] ?>" style="overflow: hidden; justify-content: center; align-items: flex-start !important;">
+                            <strong class="d-block text-truncate w-100" style="font-size: 13px; color: #333;"><?= $icon ?><?= character_limiter($guest, 30) ?></strong>
+                            <small class="d-block text-truncate w-100 mt-1" style="font-size: 11px; color: #555;"><?= character_limiter($data['remarks'], 40) ?></small>
+                          </div>
                         </td>
                       <?php } else { ?>
-                        <td class="<?= $checkout ? '' : 'no-data pointer' ?> droppable first" date="<?= $date ?>" data="<?= htmlspecialchars(json_encode($row), ENT_QUOTES, 'UTF-8') ?>" type="<?= $type ?>" both="<?= $both ?>" <?= $disabled ?>><?= $text ?></td>
-                        <td class="<?= $checkout ? '' : 'no-data pointer' ?> droppable second" date="<?= $date ?>" data="<?= htmlspecialchars(json_encode($row), ENT_QUOTES, 'UTF-8') ?>" type="<?= $type ?>" both="<?= $both ?>" <?= $disabled ?>><?= $text ?></td>
+                        <td class="<?= $checkout ? '' : 'no-data pointer' ?> droppable" date="<?= $date ?>" data='<?= json_encode($row) ?>' type="<?= $type ?>" both="<?= $both ?>" <?= $disabled ?>><?= $text ?></td>
                     <?php }
                     } ?>
                   </tr>
@@ -530,21 +540,9 @@ $now = date('H');
 
   const toggleHovered = (obj, add = true) => {
     if (add) {
-      if ($(obj).hasClass('first')) {
-        $(obj).addClass('hovered');
-        $(obj).next().addClass('hovered');
-      } else if ($(obj).hasClass('second')) {
-        $(obj).addClass('hovered');
-        $(obj).prev().addClass('hovered');
-      }
+      $(obj).addClass('hovered');
     } else {
-      if ($(obj).hasClass('first')) {
-        $(obj).removeClass('hovered');
-        $(obj).next().removeClass('hovered');
-      } else if ($(obj).hasClass('second')) {
-        $(obj).removeClass('hovered');
-        $(obj).prev().removeClass('hovered');
-      }
+      $(obj).removeClass('hovered');
     }
   }
 
@@ -597,7 +595,7 @@ $now = date('H');
     });
     $('.sidebar .sidebar-wrapper, .main-panel').perfectScrollbar('destroy');
     $('.sidebar .sidebar-wrapper, .main-panel').css('overflow', 'hidden');
-    $('.first, .second, .with-data').hover(function() {
+    $('.droppable, .with-data').hover(function() {
       const date = $(this).attr('date');
       const data = JSON.parse($(this).attr('data'));
       $('#title').text(`Room Calendar [ROOM: ${data.room_number} - ${date}]`);
@@ -711,46 +709,32 @@ $now = date('H');
   const toggleDragOver = (obj, add = true) => {
     let current = $(obj);
     if (add) {
+      addClass(current, 'min');
       if (nights_drag == 1) {
-        if (current.hasClass('first')) {
-          addClass(current, 'min');
-          addClass(current.next(), 'max');
-        } else if (current.hasClass('second')) {
-          addClass(current, 'max');
-          addClass(current.prev(), 'min');
-        }
+        addClass(current, 'max');
       } else {
-        if (current.hasClass('second')) {
-          current = current.prev();
-        }
-        addClass(current, 'min');
-        current = current.next();
-        for (let i = 1; i <= (nights_drag - 1) * 2; i++) {
-          addClass(current, 'mid');
+        for (let i = 1; i < nights_drag; i++) {
           current = current.next();
+          if (i == nights_drag - 1) {
+            addClass(current, 'max');
+          } else {
+            addClass(current, 'mid');
+          }
         }
-        addClass(current, 'max')
       }
     } else {
+      removeClass(current, 'min');
       if (nights_drag == 1) {
-        if (current.hasClass('first')) {
-          removeClass(current, 'min');
-          removeClass(current.next(), 'max');
-        } else if (current.hasClass('second')) {
-          removeClass(current, 'max');
-          removeClass(current.prev(), 'min');
-        }
-      } else {
-        if (current.hasClass('second')) {
-          current = current.prev();
-        }
-        removeClass(current, 'min');
-        current = current.next();
-        for (let i = 1; i <= (nights_drag - 1) * 2; i++) {
-          removeClass(current, 'mid');
-          current = current.next();
-        }
         removeClass(current, 'max');
+      } else {
+        for (let i = 1; i < nights_drag; i++) {
+          current = current.next();
+          if (i == nights_drag - 1) {
+            removeClass(current, 'max');
+          } else {
+            removeClass(current, 'mid');
+          }
+        }
       }
     }
   }
@@ -805,39 +789,37 @@ $now = date('H');
     }
   });
 
-  const remove = (draggedParent, ordinal, toRemove) => {
-    draggedParent.addClass(`${ordinal} no-data droppable pointer`);
+  const remove = (draggedParent, toRemove) => {
+    draggedParent.addClass(`no-data droppable pointer`);
     draggedParent.attr('type', type_drag);
-    draggedParent.removeClass(`with-data position-relative ${toRemove} ${bg_drag} ${ordinal}-drag`);
+    draggedParent.removeClass(`with-data position-relative ${toRemove} ${bg_drag}`);
     draggedParent.removeAttr('booking');
     draggedParent.html('');
   }
 
-  const removeNext = (draggedParent, ordinal, toRemove) => {
+  const removeNext = (draggedParent, toRemove) => {
     const hasMid = draggedParent.next().hasClass('mid');
     const hasMax = draggedParent.next().hasClass('max');
-    const newOrdinal = draggedParent.next().hasClass('first-drag') ? 'first' : 'second';
 
-    remove(draggedParent, ordinal, toRemove);
+    remove(draggedParent, toRemove);
 
     if (hasMid) {
-      removeNext(draggedParent.next(), newOrdinal, 'mid');
+      removeNext(draggedParent.next(), 'mid');
     } else if (hasMax) {
-      removeNext(draggedParent.next(), newOrdinal, 'max');
+      removeNext(draggedParent.next(), 'max');
     }
   }
 
-  const removePrev = (draggedParent, ordinal, toRemove) => {
+  const removePrev = (draggedParent, toRemove) => {
     const hasMid = draggedParent.prev().hasClass('mid');
     const hasMin = draggedParent.prev().hasClass('min');
-    const newOrdinal = draggedParent.prev().hasClass('first-drag') ? 'first' : 'second';
 
-    remove(draggedParent, ordinal, toRemove);
+    remove(draggedParent, toRemove);
 
     if (hasMid) {
-      removePrev(draggedParent.prev(), newOrdinal, 'mid');
+      removePrev(draggedParent.prev(), 'mid');
     } else if (hasMin) {
-      removePrev(draggedParent.prev(), newOrdinal, 'min');
+      removePrev(draggedParent.prev(), 'min');
     }
   }
 
@@ -845,30 +827,22 @@ $now = date('H');
     const draggedParent = $('#' + id).parent();
     booking_drag = JSON.parse(draggedParent.attr('booking'));
 
-    const ordinal = draggedParent.hasClass('first-drag') ? 'first' : 'second';
     const hasMin = draggedParent.hasClass('min');
     const hasMid = draggedParent.hasClass('mid');
     const hasMax = draggedParent.hasClass('max');
 
-    if (ordinal == 'first') {
-      draggedParent.children().first().attr('id', `drag${toDashed(check_in)}-${room_id}`);
-      draggedParent.next().children().first().attr('id', `drag${toDashed(check_in)}-${room_id}`);
-      html_drag = draggedParent.html();
-      html_drag2 = draggedParent.next().html();
-    } else {
-      draggedParent.children().first().attr('id', `drag${toDashed(check_in)}-${room_id}`);
-      draggedParent.prev().children().first().attr('id', `drag${toDashed(check_in)}-${room_id}`);
-      html_drag2 = draggedParent.html();
-      html_drag = draggedParent.prev().html();
-    }
+    draggedParent.children().first().attr('id', `drag${toDashed(check_in)}-${room_id}`);
+    html_drag = draggedParent.html();
 
-    if (hasMin) {
-      removeNext(draggedParent, ordinal, 'min');
-    } else if (hasMax) {
-      removePrev(draggedParent, ordinal, 'max');
+    if (hasMin && !hasMax) {
+      removeNext(draggedParent, 'min');
+    } else if (hasMax && !hasMin) {
+      removePrev(draggedParent, 'max');
     } else if (hasMid) {
-      removePrev(draggedParent, ordinal, 'mid');
-      removeNext(draggedParent, ordinal, 'mid');
+      removePrev(draggedParent, 'mid');
+      removeNext(draggedParent, 'mid');
+    } else if (hasMin && hasMax) {
+      remove(draggedParent, 'min max');
     }
   }
 
@@ -876,15 +850,11 @@ $now = date('H');
     const hasMid = e.next().hasClass('mid');
     const hasMax = e.next().hasClass('max');
 
-    if ($(e).hasClass('first')) {
-      e.removeClass('first no-data droppable pointer').addClass('first-drag with-data position-relative').html(html_drag);
-    } else if ($(e).hasClass('second')) {
-      e.removeClass('second no-data droppable pointer').addClass('second-drag with-data position-relative').html(html_drag2);
-    }
+    e.removeClass('no-data droppable pointer').addClass('with-data position-relative').html(html_drag);
     e.attr('booking', JSON.stringify(booking_drag));
 
     if (hasMid || hasMax) {
-      addNext($(e).next());
+      addNext(e.next());
     }
   }
 
@@ -896,25 +866,6 @@ $now = date('H');
 
     addNext(e);
   }
-
-  // const addDraggable = (e, check_in, check_out, room_id) => {
-  //   booking_drag.check_in = check_in;
-  //   booking_drag.check_out = check_out;
-  //   booking_drag.nights = nights_drag;
-  //   booking_drag.room_id = room_id;
-
-  //   if (e.hasClass('first')) {
-  //     e.removeClass('first no-data droppable pointer').addClass('first-drag with-data position-relative').html(html_drag);
-  //     e.next().removeClass('second no-data droppable pointer').addClass('second-drag with-data position-relative').html(html_drag2);
-  //     e.attr('booking', JSON.stringify(booking_drag));
-  //     e.next().attr('booking', JSON.stringify(booking_drag));
-  //   } else {
-  //     e.removeClass('second no-data droppable pointer').addClass('second-drag with-data position-relative').html(html_drag2);
-  //     e.prev().removeClass('first no-data droppable pointer').addClass('first-drag with-data position-relative').html(html_drag);
-  //     e.attr('booking', JSON.stringify(booking_drag));
-  //     e.prev().attr('booking', JSON.stringify(booking_drag));
-  //   }
-  // }
 
   $(document).on("drop", ".droppable", function(e) {
     e.preventDefault();

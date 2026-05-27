@@ -144,7 +144,8 @@ class Get_model extends CI_Model {
   }
 
   function getBookings($booked_room_archived = [0, 2]) {
-    return $this->db->join('booked_rooms', 'booked_rooms.booking_id=bookings.booking_id')
+    return $this->db->select('bookings.*, booked_rooms.*, rooms.*, guests.*, (SELECT booking_log_added FROM booking_logs WHERE booking_logs.booking_id = bookings.booking_id AND activity LIKE \'%Successfully checked in%\' ORDER BY booking_log_id DESC LIMIT 1) as actual_checkin_time')
+      ->join('booked_rooms', 'booked_rooms.booking_id=bookings.booking_id')
       ->join('rooms', 'rooms.id=booked_rooms.room_id')
       ->join('guests', 'guests.guest_id=bookings.guest_id')
       ->where_in('reservation_status', [-1, 0, 1, 2])
@@ -215,6 +216,17 @@ class Get_model extends CI_Model {
     return $this->db->where_in('reservation_status', $status)->get('bookings')->result_array();
   }
 
+  function getPendingOnlineReservationsCount() {
+    return $this->db->where_in('reservation_status', [2, 3])
+      ->where('reservation_type', 'online')
+      ->count_all_results('bookings');
+  }
+
+  function getPendingWalkinReservationsCount() {
+    return $this->db->where('reservation_status', 1)
+      ->where_in('reservation_type', ['Arrival/Tentative', 'Confirmed'])
+      ->count_all_results('bookings');
+  }
 
   function searchable($that, $search) {
     $that->db->like('guests.first_name', $search);
