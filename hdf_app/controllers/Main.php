@@ -758,6 +758,8 @@ class Main extends MY_Controller {
     $data['image'] = 'data:image/jpg;base64,' . base64_encode($image);
     $data['booking'] = $this->get_model->getBooking($booking_id);
     $booked_rooms = $this->get_model->getBookedRooms($booking_id);
+    $bed = $this->get_model->getPrice('Bed');
+    $person = $this->get_model->getPrice('Person');
     $soa = [];
 
     foreach ($booked_rooms as $booked_room) {
@@ -833,16 +835,41 @@ class Main extends MY_Controller {
         ];
         array_push($soa, $particular);
       }
+
+      if ($booked_room['extra_bed']) {
+        $particular = [
+          'added' => $booked_room['booked_room_added'],
+          'date' => date_format(date_create($booked_room['check_in']), "m/d/Y"),
+          'particulars' => "Extra Bed x{$booked_room['extra_bed']} ({$booked_room['room_type_abbr']} {$booked_room['room_number']})",
+          'charges' => $bed->price * $booked_room['extra_bed'],
+          'reference' => '',
+          'payment' => FALSE
+        ];
+        array_push($soa, $particular);
+      }
+
+      if ($booked_room['extra_person']) {
+        $particular = [
+          'added' => $booked_room['booked_room_added'],
+          'date' => date_format(date_create($booked_room['check_in']), "m/d/Y"),
+          'particulars' => "Extra Person x{$booked_room['extra_person']} ({$booked_room['room_type_abbr']} {$booked_room['room_number']})",
+          'charges' => $person->price * $booked_room['extra_person'],
+          'reference' => '',
+          'payment' => FALSE
+        ];
+        array_push($soa, $particular);
+      }
     }
 
     $payments = $this->get_model->getPayments($booking_id);
     foreach ($payments as $payment) {
       $payment_date = date_create($payment['booking_payment_added']);
       $payment_date = date_format($payment_date, "m/d/Y");
+      $room_info = (!empty($payment['room_number'])) ? " ({$payment['room_type_abbr']} {$payment['room_number']})" : "";
       $particular = [
         'added' => $payment['booking_payment_added'],
         'date' => $payment_date,
-        'particulars' => ucfirst($payment['payment_for']) . " Payment ({$payment['room_type_abbr']} {$payment['room_number']})",
+        'particulars' => ucfirst($payment['payment_for']) . " Payment" . $room_info,
         'charges' => $payment['amount'],
         'reference' => '',
         'payment' => TRUE
@@ -850,11 +877,24 @@ class Main extends MY_Controller {
       array_push($soa, $particular);
     }
 
+    $refunds = $this->get_model->getRefunds($booking_id);
+    foreach ($refunds as $rf) {
+      $refund_date = date_create($rf['booking_refund_added']);
+      $refund_date = date_format($refund_date, "m/d/Y");
+      $room_info = (!empty($rf['room_number'])) ? " ({$rf['room_type_abbr']} {$rf['room_number']})" : "";
+      $particular = [
+        'added' => $rf['booking_refund_added'],
+        'date' => $refund_date,
+        'particulars' => "Refund" . $room_info,
+        'charges' => $rf['booking_refund'],
+        'reference' => $rf['booking_refund_reason'],
+        'payment' => FALSE
+      ];
+      array_push($soa, $particular);
+    }
+
     usort($soa, function ($item1, $item2) {
       return $item1['added'] <=> $item2['added'];
-    });
-    usort($soa, function ($item1, $item2) {
-      return $item1['date'] <=> $item2['date'];
     });
     $data['soa'] = $soa;
     $view = $this->load->view('body/frontdesk/components/receiptv2', $data, TRUE);

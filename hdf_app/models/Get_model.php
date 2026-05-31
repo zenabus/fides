@@ -383,19 +383,19 @@ class Get_model extends CI_Model {
   }
 
   function getPayments($booking_id) {
-    return $this->db->join('booked_rooms', 'booked_rooms.booked_room_id=booking_payment.booked_room_id')
-      ->join('rooms', 'rooms.id=booked_rooms.room_id')
-      ->join('room_type', 'room_type.id=rooms.room_type_id')
-      ->join('users', 'users.id=booking_payment.user_id')
+    return $this->db->join('booked_rooms', 'booked_rooms.booked_room_id=booking_payment.booked_room_id', 'left')
+      ->join('rooms', 'rooms.id=booked_rooms.room_id', 'left')
+      ->join('room_type', 'room_type.id=rooms.room_type_id', 'left')
+      ->join('users', 'users.id=booking_payment.user_id', 'left')
       ->order_by('booking_payment_added', 'DESC')
       ->where('booking_payment.booking_id', $booking_id)->get('booking_payment')->result_array();
   }
 
   function getRefunds($booking_id) {
-    return $this->db->join('booked_rooms', 'booked_rooms.booked_room_id=booking_refund.booked_room_id')
-      ->join('rooms', 'rooms.id=booked_rooms.room_id')
-      ->join('room_type', 'room_type.id=rooms.room_type_id')
-      ->join('users', 'users.id=booking_refund.user_id')
+    return $this->db->join('booked_rooms', 'booked_rooms.booked_room_id=booking_refund.booked_room_id', 'left')
+      ->join('rooms', 'rooms.id=booked_rooms.room_id', 'left')
+      ->join('room_type', 'room_type.id=rooms.room_type_id', 'left')
+      ->join('users', 'users.id=booking_refund.user_id', 'left')
       ->order_by('booking_refund_added', 'DESC')
       ->where('booking_refund.booking_id', $booking_id)->get('booking_refund')->result_array();
   }

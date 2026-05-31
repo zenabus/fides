@@ -214,7 +214,7 @@
             <?php $date_holder = $date; ?>
             <td class="br ts"><?= strtoupper($row['particulars']) ?></td>
             <td class="br ts"><?= $row['reference'] ?></td>
-            <td class="br ts">
+            <td class="br ts wrap">
               <?php
               if (!$row['payment']) {
                 echo '₱ ';
@@ -224,7 +224,7 @@
               }
               ?>
             </td>
-            <td class="br ts">
+            <td class="br ts wrap">
               <?php
               if ($row['payment']) {
                 echo '₱ ';
@@ -234,7 +234,7 @@
               }
               ?>
             </td>
-            <td class="ts">₱ <?= number_format($balance, 2) ?></td>
+            <td class="ts wrap">₱ <?= number_format($balance, 2) ?></td>
           </tr>
         <?php } ?>
         <!-- <tr class="bb bl br">
@@ -248,16 +248,16 @@
         <tr class="bb bl br">
           <td colspan="2"></td>
           <td class="br tr b">TOTAL</td>
-          <td class="br ts b">₱ <?= number_format($charges, 2) ?></td>
-          <td class="br ts">₱ <?= number_format($payment, 2) ?></td>
-          <td class="ts">₱ <?= number_format($balance, 2) ?></td>
+          <td class="br ts b wrap">₱ <?= number_format($charges, 2) ?></td>
+          <td class="br ts wrap">₱ <?= number_format($payment, 2) ?></td>
+          <td class="ts wrap">₱ <?= number_format($balance, 2) ?></td>
         </tr>
         <tr>
           <td colspan="6">&nbsp;</td>
         </tr>
         <tr>
           <td class="tr b" colspan="5">BALANCE</td>
-          <td class="ts bg-apricot underline b">₱ <?= number_format($balance, 2) ?></td>
+          <td class="ts bg-apricot underline b wrap">₱ <?= number_format($balance, 2) ?></td>
         </tr>
     </table>
     <table class="bt-0">
