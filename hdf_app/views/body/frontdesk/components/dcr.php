@@ -151,14 +151,14 @@
           <th rowspan="2" class="br">Guest Name</th>
           <th rowspan="2" class="br w-150">Room Rate</th>
           <th colspan="2" class="br">Meal Charge</th>
-          <th rowspan="2" class="br nw w-150">Add Ons</th>
+          <th rowspan="2" class="br nw w-150">Add-ons</th>
           <th rowspan="2" class="br w-150">Reservation</th>
-          <th rowspan="2" class="br w-150">Hotel/<br>Event/Pool</th>
+          <th rowspan="2" class="br w-150">Hotel/Event/<br>Add-ons</th>
           <th rowspan="2" class="br w-150">Room Rate</th>
           <th colspan="2" class="br">Meal Charge</th>
-          <th rowspan="2" class="br nw w-150">Add Ons</th>
+          <th rowspan="2" class="br nw w-150">Add-ons</th>
           <th rowspan="2" class="br w-150">Reservation</th>
-          <th rowspan="2" class="br w-150">Hotel/<br>Event/Pool</th>
+          <th rowspan="2" class="br w-150">Hotel/Event/<br>Add-ons</th>
           <th rowspan="2" class="br w-150">Hotel</th>
           <th rowspan="2" class="br">Event</th>
           <th rowspan="2" class="br">OR Name</th>
@@ -374,7 +374,7 @@
           <td class="nb bgw" colspan="10"></td>
           <td class="nb bgy">HOTEL</td>
           <td class="nb bgy">EVENT</td>
-          <td class="nb bgy">POOL</td>
+          <td class="nb bgy">ADD-ONS</td>
           <td class="nb bgy">RESTO</td>
           <td class="nb bgy">OTILLA'S</td>
           <td class="nb bgy">TOTAL</td>

@@ -583,6 +583,12 @@ class Main extends MY_Controller {
       foreach ($hotel_expense_am_records as $row) {
         $hotel_sales_am -= $row['expense_amount'];
       }
+      $hotel_collectables_am = $this->get_model->getCollectables($date, 'AM');
+      foreach ($hotel_collectables_am as $row) {
+        if (isset($row['collectable_type']) && $row['collectable_type'] == 'Hotel') {
+          $hotel_sales_am += $row['collectable_amount'];
+        }
+      }
 
       // Compute correct Hotel Sales for PM shift
       $hotel_sales_pm_records = $this->get_model->getHotelSales($date, 'PM');
@@ -593,6 +599,12 @@ class Main extends MY_Controller {
       }
       foreach ($hotel_expense_pm_records as $row) {
         $hotel_sales_pm -= $row['expense_amount'];
+      }
+      $hotel_collectables_pm = $this->get_model->getCollectables($date, 'PM');
+      foreach ($hotel_collectables_pm as $row) {
+        if (isset($row['collectable_type']) && $row['collectable_type'] == 'Hotel') {
+          $hotel_sales_pm += $row['collectable_amount'];
+        }
       }
 
       // Compute correct Event Sales for AM shift
@@ -605,6 +617,12 @@ class Main extends MY_Controller {
       foreach ($event_expense_am_records as $row) {
         $event_sales_am -= $row['expense_amount'];
       }
+      $event_collectables_am = $this->get_model->getCollectables($date, 'AM');
+      foreach ($event_collectables_am as $row) {
+        if (!isset($row['collectable_type']) || $row['collectable_type'] != 'Hotel') {
+          $event_sales_am += $row['collectable_amount'];
+        }
+      }
 
       // Compute correct Event Sales for PM shift
       $event_sales_pm_records = $this->get_model->getEventSales($date, 'PM');
@@ -615,6 +633,12 @@ class Main extends MY_Controller {
       }
       foreach ($event_expense_pm_records as $row) {
         $event_sales_pm -= $row['expense_amount'];
+      }
+      $event_collectables_pm = $this->get_model->getCollectables($date, 'PM');
+      foreach ($event_collectables_pm as $row) {
+        if (!isset($row['collectable_type']) || $row['collectable_type'] != 'Hotel') {
+          $event_sales_pm += $row['collectable_amount'];
+        }
       }
 
       $data['hotel_sales_am'] = $hotel_sales_am;

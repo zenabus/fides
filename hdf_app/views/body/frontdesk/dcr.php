@@ -189,7 +189,7 @@
             <option value="">- select sales type -</option>
             <option value="Hotel">Hotel</option>
             <option value="Event">Event</option>
-            <option value="Pool">Swimming Pool</option>
+            <option value="Pool">Additional Add-ons</option>
           </select>
         </div>
         <div class="form-group">
@@ -318,7 +318,7 @@
             <option value="">- select expense type -</option>
             <option value="Hotel">Hotel</option>
             <option value="Event">Event</option>
-            <option value="Pool">Swimming Pool</option>
+            <option value="Pool">Additional Add-ons</option>
             <option value="Resto">Resto</option>
             <option value="Otilla's">Otilla's</option>
           </select>
@@ -514,7 +514,8 @@
       Hotel: 'badge-danger'
     };
     const cls = colors[type] || 'badge-default';
-    return `<span class="badge ${cls} mt-1" style="font-size: 10px; padding: 3px 6px; border-radius: 4px; text-transform: uppercase; display: inline-block;">${type}</span>`;
+    const displayType = type === 'Pool' ? 'Additional Add-ons' : type;
+    return `<span class="badge ${cls} mt-1" style="font-size: 10px; padding: 3px 6px; border-radius: 4px; text-transform: uppercase; display: inline-block;">${displayType}</span>`;
   }
 
   function getExpenseBadge(type) {
@@ -526,7 +527,8 @@
       "Otilla's": 'badge-warning'
     };
     const cls = colors[type] || 'badge-default';
-    return `<span class="badge ${cls} mt-1" style="font-size: 10px; padding: 3px 6px; border-radius: 4px; text-transform: uppercase; display: inline-block;">${type}</span>`;
+    const displayType = type === 'Pool' ? 'Additional Add-ons' : type;
+    return `<span class="badge ${cls} mt-1" style="font-size: 10px; padding: 3px 6px; border-radius: 4px; text-transform: uppercase; display: inline-block;">${displayType}</span>`;
   }
 
   function getCollectableBadge(type) {

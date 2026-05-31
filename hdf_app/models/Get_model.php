@@ -229,6 +229,7 @@ class Get_model extends CI_Model {
   }
 
   function searchable($that, $search) {
+    $that->db->group_start();
     $that->db->like('guests.first_name', $search);
     $that->db->or_like('guests.middle_name', $search);
     $that->db->or_like('guests.last_name', $search);
@@ -236,6 +237,7 @@ class Get_model extends CI_Model {
     $that->db->or_like('guests.email', $search);
     $that->db->or_like('bookings.booking_number', $search);
     // $that->db->or_like('room_type.room_type', $search);
+    $that->db->group_end();
     return $that;
   }
 
@@ -263,6 +265,7 @@ class Get_model extends CI_Model {
     $this->db->join('rooms', 'rooms.id=booked_rooms.room_id');
     $this->db->join('room_type', 'room_type.id=rooms.room_type_id');
     $this->db->where_in('reservation_status', $status);
+    $this->db->group_by('bookings.booking_id');
     $this->db->limit($length, $start);
     if (!empty($search)) {
       $this->searchable($this, $search);
@@ -836,6 +839,7 @@ class Get_model extends CI_Model {
         ->join('rooms', 'rooms.id=booked_rooms.room_id')
         ->join('room_type', 'room_type.id=rooms.room_type_id')
         ->join('discounts', 'discounts.discount_id=booked_rooms.discount_id')
+        ->group_by('bookings.booking_id')
         ->order_by('room_number', 'ASC')
         ->where('charged_to !=', 0)
         ->get('bookings')->result_array();
@@ -952,24 +956,37 @@ class Get_model extends CI_Model {
   }
 
   function getCheckInCount($date, $period) {
-    [$startDate, $endDate] = $this->getTime($date, $period);
-    return $this->db->join('bookings', 'bookings.booking_id=booked_rooms.booking_id')
-      ->join('booking_logs', "booking_logs.booking_id=bookings.booking_id AND booking_logs.activity LIKE '%Successfully checked in%' AND booking_logs.booking_log_added >= '{$startDate}' AND booking_logs.booking_log_added <= '{$endDate}'", 'left')
-      ->where('c_in', $date)
+    $cleanDate = date('Y-m-d', strtotime($date));
+    $bookings = $this->db->select('bookings.*, booked_rooms.*, (SELECT booking_log_added FROM booking_logs WHERE booking_logs.booking_id = bookings.booking_id AND activity LIKE \'%Successfully checked in%\' ORDER BY booking_log_id DESC LIMIT 1) as actual_checkin_time')
+      ->join('booked_rooms', 'booked_rooms.booking_id=bookings.booking_id')
+      ->where('c_in', $cleanDate)
       ->where_not_in('reservation_status', [4, 6])
       ->where_in('booked_room_archived', [0, 2])
-      ->group_start()
-      ->group_start()
-      ->where('booking_type', 'Check In')
-      ->where('booked_room_added >=', $startDate)
-      ->where('booked_room_added <=', $endDate)
-      ->group_end()
-      ->or_group_start()
-      ->where('booking_type', 'Reservation')
-      ->where('booking_logs.booking_log_id IS NOT NULL', NULL, FALSE)
-      ->group_end()
-      ->group_end()
-      ->count_all_results('booked_rooms');
+      ->get('bookings')->result_array();
+
+    $count = 0;
+    foreach ($bookings as $booking) {
+      $checkin_time = null;
+      if ($booking['booking_type'] == 'Check In') {
+        $checkin_time = $booking['booking_added'];
+      } elseif (in_array($booking['reservation_status'], [0, -1])) {
+        $checkin_time = !empty($booking['actual_checkin_time']) ? $booking['actual_checkin_time'] : $booking['booking_updated'];
+      }
+
+      if ($checkin_time) {
+        $hour = (int)date('G', strtotime($checkin_time));
+        if ($hour >= 14 && $hour < 22) {
+          $ampm = 'PM';
+        } else {
+          $ampm = 'AM';
+        }
+
+        if ($ampm == $period) {
+          $count++;
+        }
+      }
+    }
+    return $count;
   }
 
   function getCheckoutCount($date, $period) {
