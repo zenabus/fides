@@ -911,6 +911,43 @@ class Get_model extends CI_Model {
       ->get('booked_rooms')->result_array();
   }
 
+  function getCheckInGuests($date, $period) {
+    $cleanDate = date('Y-m-d', strtotime($date));
+    $bookings = $this->db->select('bookings.*, booked_rooms.*, rooms.room_number, room_type.room_type_abbr, guests.first_name, guests.middle_name, guests.last_name, guests.suffix, (SELECT booking_log_added FROM booking_logs WHERE booking_logs.booking_id = bookings.booking_id AND activity LIKE \'%Successfully checked in%\' ORDER BY booking_log_id DESC LIMIT 1) as actual_checkin_time')
+      ->join('booked_rooms', 'booked_rooms.booking_id=bookings.booking_id')
+      ->join('rooms', 'rooms.id=booked_rooms.room_id', 'left')
+      ->join('room_type', 'room_type.id=rooms.room_type_id', 'left')
+      ->join('guests', 'guests.guest_id=bookings.guest_id', 'left')
+      ->where('c_in', $cleanDate)
+      ->where_not_in('reservation_status', [4, 6])
+      ->where_in('booked_room_archived', [0, 2])
+      ->get('bookings')->result_array();
+
+    $results = [];
+    foreach ($bookings as $booking) {
+      $checkin_time = null;
+      if ($booking['booking_type'] == 'Check In') {
+        $checkin_time = $booking['booking_added'];
+      } elseif (in_array($booking['reservation_status'], [0, -1])) {
+        $checkin_time = !empty($booking['actual_checkin_time']) ? $booking['actual_checkin_time'] : $booking['booking_updated'];
+      }
+
+      if ($checkin_time) {
+        $hour = (int)date('G', strtotime($checkin_time));
+        if ($hour >= 14 && $hour < 22) {
+          $ampm = 'PM';
+        } else {
+          $ampm = 'AM';
+        }
+
+        if ($ampm == $period) {
+          $results[] = $booking;
+        }
+      }
+    }
+    return $results;
+  }
+
   function getOccupiedRoomIdsForToday() {
     $date = date('Y-m-d');
     $results = $this->db->join('bookings', 'bookings.booking_id=booked_rooms.booking_id')

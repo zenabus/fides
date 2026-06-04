@@ -22,7 +22,7 @@
       position: absolute;
       font-size: 24px;
       font-weight: normal;
-      bottom: 32px;
+      bottom: 12px;
       left: 32px;
     }
 
@@ -35,6 +35,10 @@
     .table thead th {
       border-collapse: collapse;
       font-size: 5pt;
+    }
+
+    thead {
+      display: table-row-group;
     }
 
     th {
@@ -252,6 +256,40 @@
               <td></td>
               <td></td>
               <td>IN-HOUSE</td>
+              <td class="nb bgw"></td>
+            </tr>
+        <?php
+          }
+        }
+        ?>
+        <?php
+        if (isset($checkin_guests) && !empty($checkin_guests)) {
+          $paid_room_ids = array_column($payments, 'booked_room_id');
+          foreach ($checkin_guests as $row) {
+            if (in_array($row['booked_room_id'], $paid_room_ids)) {
+              continue;
+            }
+        ?>
+            <tr>
+              <td class="bl"><?= $row['room_number'] ?> <?= $row['room_type_abbr'] ?></td>
+              <td class="nw tl"><?= $row['first_name'] ?> <?= $row['middle_name'] ?> <?= $row['last_name'] ?><?= $row['suffix'] ?></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td>CHECK-IN</td>
               <td class="nb bgw"></td>
             </tr>
         <?php

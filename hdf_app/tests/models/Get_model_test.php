@@ -92,6 +92,8 @@ class Get_model_test extends TestCase {
       'booking_number' => 'TEST_CI_AM',
       'guest_id' => 1,
       'reservation_status' => 0, // Active
+      'booking_type' => 'Check In',
+      'booking_added' => '2026-05-22 10:00:00',
       'arrival' => '2026-05-22',
       'departure' => '2026-05-23'
     ];
@@ -104,6 +106,8 @@ class Get_model_test extends TestCase {
       'room_id' => 101,
       'check_in' => '2026-05-22',
       'check_out' => '2026-05-23',
+      'c_in' => '2026-05-22',
+      'c_out' => '2026-05-23',
       'booked_room_archived' => 0,
       'booked_room_added' => '2026-05-22 10:00:00'
     ];
@@ -115,6 +119,8 @@ class Get_model_test extends TestCase {
       'room_id' => 102,
       'check_in' => '2026-05-22',
       'check_out' => '2026-05-23',
+      'c_in' => '2026-05-22',
+      'c_out' => '2026-05-23',
       'booked_room_archived' => 2, // Checked-out (should still be counted)
       'booked_room_added' => '2026-05-21 23:00:00'
     ];
@@ -126,6 +132,8 @@ class Get_model_test extends TestCase {
       'room_id' => 103,
       'check_in' => '2026-05-22',
       'check_out' => '2026-05-23',
+      'c_in' => '2026-05-22',
+      'c_out' => '2026-05-23',
       'booked_room_archived' => 0,
       'booked_room_added' => '2026-05-22 15:00:00'
     ];
@@ -148,6 +156,8 @@ class Get_model_test extends TestCase {
       'booking_number' => 'TEST_CI_PM',
       'guest_id' => 1,
       'reservation_status' => 0,
+      'booking_type' => 'Check In',
+      'booking_added' => '2026-05-22 16:00:00',
       'arrival' => '2026-05-22',
       'departure' => '2026-05-23'
     ];
@@ -160,6 +170,8 @@ class Get_model_test extends TestCase {
       'room_id' => 101,
       'check_in' => '2026-05-22',
       'check_out' => '2026-05-23',
+      'c_in' => '2026-05-22',
+      'c_out' => '2026-05-23',
       'booked_room_archived' => 0,
       'booked_room_added' => '2026-05-22 16:00:00'
     ];
@@ -171,6 +183,8 @@ class Get_model_test extends TestCase {
       'room_id' => 102,
       'check_in' => '2026-05-22',
       'check_out' => '2026-05-23',
+      'c_in' => '2026-05-22',
+      'c_out' => '2026-05-23',
       'booked_room_archived' => 0,
       'booked_room_added' => '2026-05-22 09:00:00'
     ];
@@ -181,6 +195,39 @@ class Get_model_test extends TestCase {
 
     // ASSERT
     $this->assertGreaterThanOrEqual(1, $count, 'Should count the PM check-in');
+
+    // CLEANUP
+    $this->CI->db->where('booking_id', $booking_id)->delete('booked_rooms');
+    $this->CI->db->where('booking_id', $booking_id)->delete('bookings');
+  }
+
+  public function test_getCheckInGuests() {
+    $booking_data = [
+      'booking_number' => 'TEST_G_CI',
+      'guest_id' => 1,
+      'reservation_status' => 0,
+      'booking_type' => 'Check In',
+      'booking_added' => '2026-05-22 10:00:00',
+      'arrival' => '2026-05-22',
+      'departure' => '2026-05-23'
+    ];
+    $this->CI->db->insert('bookings', $booking_data);
+    $booking_id = $this->CI->db->insert_id();
+
+    $room_am = [
+      'booking_id' => $booking_id,
+      'room_id' => 1,
+      'check_in' => '2026-05-22',
+      'check_out' => '2026-05-23',
+      'c_in' => '2026-05-22',
+      'c_out' => '2026-05-23',
+      'booked_room_archived' => 0,
+      'booked_room_added' => '2026-05-22 10:00:00'
+    ];
+    $this->CI->db->insert('booked_rooms', $room_am);
+
+    $results = $this->obj->getCheckInGuests('2026-05-22', 'AM');
+    $this->assertNotEmpty($results);
 
     // CLEANUP
     $this->CI->db->where('booking_id', $booking_id)->delete('booked_rooms');

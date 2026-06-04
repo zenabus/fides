@@ -540,6 +540,7 @@ class Main extends MY_Controller {
       $data['extended_stay_count'] = $this->get_model->getExtendedStayCount($date);
       $data['inhouse_count'] = $this->get_model->getInHouseCount($date);
       $data['inhouse_guests'] = $this->get_model->getInHouseGuests($date);
+      $data['checkin_guests'] = $this->get_model->getCheckInGuests($date, $type);
       $data['checkin_count'] = $this->get_model->getCheckInCount($date, $type);
       $data['checkout_count'] = $this->get_model->getCheckoutCount($date, $type);
       $data['payments'] = $this->get_model->getPaymentsByDateGrouped($date, $type);
