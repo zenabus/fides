@@ -1,10 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <testsuites>
-  <testsuite name="Get_model_test" file="C:\xampp\htdocs\fides\hdf_app\tests\models\Get_model_test.php" tests="5" assertions="8" errors="0" warnings="0" failures="0" skipped="0" time="0.245467">
-    <testcase name="test_checkAvailabilityInRange_returns_bookings" class="Get_model_test" classname="Get_model_test" file="C:\xampp\htdocs\fides\hdf_app\tests\models\Get_model_test.php" line="10" assertions="2" time="0.044754"/>
-    <testcase name="test_checkAvailabilityInRange_no_overlap" class="Get_model_test" classname="Get_model_test" file="C:\xampp\htdocs\fides\hdf_app\tests\models\Get_model_test.php" line="46" assertions="1" time="0.038916"/>
-    <testcase name="test_getCheckInCount_AM" class="Get_model_test" classname="Get_model_test" file="C:\xampp\htdocs\fides\hdf_app\tests\models\Get_model_test.php" line="89" assertions="2" time="0.042566"/>
-    <testcase name="test_getCheckInCount_PM" class="Get_model_test" classname="Get_model_test" file="C:\xampp\htdocs\fides\hdf_app\tests\models\Get_model_test.php" line="153" assertions="2" time="0.057767"/>
-    <testcase name="test_getCheckInGuests" class="Get_model_test" classname="Get_model_test" file="C:\xampp\htdocs\fides\hdf_app\tests\models\Get_model_test.php" line="204" assertions="1" time="0.061463"/>
+  <testsuite name="" tests="7" assertions="13" errors="0" warnings="0" failures="0" skipped="0" time="0.305700">
+    <testsuite name="CodeIgniter Application Test Suite" tests="7" assertions="13" errors="0" warnings="0" failures="0" skipped="0" time="0.305700">
+      <testsuite name="Hdf_utility_helper_test" file="C:\xampp\htdocs\fides\hdf_app\tests\helpers\Hdf_utility_helper_test.php" tests="2" assertions="5" errors="0" warnings="0" failures="0" skipped="0" time="0.060851">
+        <testcase name="test_datesBetween_returns_correct_range" class="Hdf_utility_helper_test" classname="Hdf_utility_helper_test" file="C:\xampp\htdocs\fides\hdf_app\tests\helpers\Hdf_utility_helper_test.php" line="9" assertions="4" time="0.036426"/>
+        <testcase name="test_determinePeriod_returns_am_or_pm" class="Hdf_utility_helper_test" classname="Hdf_utility_helper_test" file="C:\xampp\htdocs\fides\hdf_app\tests\helpers\Hdf_utility_helper_test.php" line="22" assertions="1" time="0.024426"/>
+      </testsuite>
+      <testsuite name="Get_model_test" file="C:\xampp\htdocs\fides\hdf_app\tests\models\Get_model_test.php" tests="5" assertions="8" errors="0" warnings="0" failures="0" skipped="0" time="0.244848">
+        <testcase name="test_checkAvailabilityInRange_returns_bookings" class="Get_model_test" classname="Get_model_test" file="C:\xampp\htdocs\fides\hdf_app\tests\models\Get_model_test.php" line="10" assertions="2" time="0.055745"/>
+        <testcase name="test_checkAvailabilityInRange_no_overlap" class="Get_model_test" classname="Get_model_test" file="C:\xampp\htdocs\fides\hdf_app\tests\models\Get_model_test.php" line="48" assertions="1" time="0.029955"/>
+        <testcase name="test_getCheckInCount_AM" class="Get_model_test" classname="Get_model_test" file="C:\xampp\htdocs\fides\hdf_app\tests\models\Get_model_test.php" line="93" assertions="2" time="0.056311"/>
+        <testcase name="test_getCheckInCount_PM" class="Get_model_test" classname="Get_model_test" file="C:\xampp\htdocs\fides\hdf_app\tests\models\Get_model_test.php" line="157" assertions="2" time="0.039376"/>
+        <testcase name="test_getCheckInGuests" class="Get_model_test" classname="Get_model_test" file="C:\xampp\htdocs\fides\hdf_app\tests\models\Get_model_test.php" line="208" assertions="1" time="0.063463"/>
+      </testsuite>
+    </testsuite>
   </testsuite>
 </testsuites>

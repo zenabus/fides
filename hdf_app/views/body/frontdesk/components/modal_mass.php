@@ -23,6 +23,14 @@
     color: white;
   }
 
+  .room[disabled] {
+    background-color: #e9ecef !important;
+    color: #adb5bd !important;
+    border-color: #ced4da !important;
+    cursor: not-allowed !important;
+    pointer-events: none !important;
+  }
+
   #modalGuest {
     z-index: 9999999999 !important;
   }
@@ -43,7 +51,7 @@
         <?= form_open('main/massBooking', ['id' => 'frmMass']) ?>
         <input type="hidden" name="guest_id">
         <input type="hidden" name="room_ids">
-        <div class="form-group d-none">
+        <div class="form-group">
           <label>Booking Type</label>
           <div class="d-flex justify-content-around">
             <div class="form-check-radio">
@@ -166,6 +174,9 @@
   });
 
   $('.room').click(function() {
+    if ($(this).attr('disabled')) {
+      return;
+    }
     const room_id = this.id;
     if ($(this).hasClass('room-active')) {
       room_ids = room_ids.filter(item => item !== room_id)
@@ -196,17 +207,18 @@
     $("#new-guest").show();
     $("#guest-name").hide();
     $(".guest-close").hide();
-    $('[name=guest_id]').val('');
-    $('[name=room_ids]').val('');
+    $('#modalMass [name=guest_id]').val('');
+    $('#modalMass [name=room_ids]').val('');
+    room_ids = [];
   });
 
   $('.guest-close').click(function() {
-    $('[name=guest_id]').val(null)
+    $('#modalMass [name=guest_id]').val(null)
     $("#select-guest").show();
     $("#new-guest").show();
     $("#guest-name").hide();
     $(".guest-close").hide();
-    $('[name=guest_id]').val('');
+    $('#modalMass [name=guest_id]').val('');
   });
 
   const updateAvailableRooms = (check_in, check_out) => {
@@ -240,11 +252,16 @@
     $('#modalMass').modal('show');
   });
 
+  $('input[name=rdo_booking_type]').change(function() {
+    const type = $(this).val();
+    $('#title-mass').text(`MASS ${type.toUpperCase()}`);
+  });
+
   $("[name=check_in_mass], [name=check_out_mass]").on("dp.change", function(e) {
     let check_in = moment($("[name=check_in_mass]").val());
     let check_out = moment($("[name=check_out_mass]").val());
     const nights = check_out.diff(check_in, "days");
-    $("[name=nights]").val(nights);
+    $('#modalMass [name=nights]').val(nights);
 
     check_in = moment(check_in).format('YYYY-MM-DD');
     check_out = moment(check_out).format('YYYY-MM-DD');
@@ -258,6 +275,7 @@
     selected = 0;
     $('#selected').text(0);
     $('.room').removeClass('room-active');
+    room_ids = [];
   });
 
   $('#frmMass').submit(function(e) {
@@ -320,7 +338,7 @@
       .then(response => response.json())
       .then(data => {
         console.log("Success:", data);
-        $('[name=guest_id]').val(data.guest_id);
+        $('#modalMass [name=guest_id]').val(data.guest_id);
         $("#select-guest").hide();
         $("#new-guest").hide();
         $('#guest-name').text(`${data.first_name} ${data.middle_name} ${data.last_name} ${data.suffix}`).show();

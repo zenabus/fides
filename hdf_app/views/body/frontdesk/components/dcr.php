@@ -455,7 +455,7 @@
         <tr>
           <td class="nb bgw"></td>
           <td class="nw bt bl bb bgw">TOTAL ROOMS OCCUPIED</td>
-          <td class="bb bgw"><?= $inhouse_count + $checkin_count ?></td><!-- IN-HOUSE + CHECK-IN -->
+          <td class="bb bgw"><?= $inhouse_count + $checkin_count + (isset($checkin_count_am) ? $checkin_count_am : 0) ?></td><!-- IN-HOUSE + CHECK-IN -->
           <td class="nb bgw" colspan="9"></td>
           <td class="bgw bl">COLLECTABLE</td>
           <td class="bgw"><?= number_format($hotel_collectables, 2) ?></td>

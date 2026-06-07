@@ -808,9 +808,17 @@ class Get_model extends CI_Model {
       ->get('booking_payment')->result_array();
   }
 
+  function getPoolSales($date, $period) {
+    [$startDate, $endDate] = $this->getTime($date, $period);
+    return $this->db->where('sales_type', 'Pool')
+      ->where('sales_added >=', $startDate)
+      ->where('sales_added <=', $endDate)
+      ->get('sales')->result_array();
+  }
+
   function getEventSales($date, $period) {
     [$startDate, $endDate] = $this->getTime($date, $period);
-    return $this->db->where_in('sales_type', ['Event', 'Pool', 'Hotel'])
+    return $this->db->where_in('sales_type', ['Event', 'Hotel'])
       ->where('sales_added >=', $startDate)
       ->where('sales_added <=', $endDate)
       ->get('sales')->result_array();
@@ -818,7 +826,7 @@ class Get_model extends CI_Model {
 
   function getHotelExpense($date, $period) {
     [$startDate, $endDate] = $this->getTime($date, $period);
-    return $this->db->where_in('expense_type', ['Hotel'])
+    return $this->db->where_in('expense_type', ['Hotel', 'Pool'])
       ->where('expense_added >=', $startDate)
       ->where('expense_added <=', $endDate)
       ->get('expenses')->result_array();
@@ -826,7 +834,7 @@ class Get_model extends CI_Model {
 
   function getEventExpense($date, $period) {
     [$startDate, $endDate] = $this->getTime($date, $period);
-    return $this->db->where_in('expense_type', ['Event', 'Pool'])
+    return $this->db->where_in('expense_type', ['Event'])
       ->where('expense_added >=', $startDate)
       ->where('expense_added <=', $endDate)
       ->get('expenses')->result_array();
@@ -1183,12 +1191,12 @@ class Get_model extends CI_Model {
 
     $this->db->select('bookings.booking_id, booked_rooms.check_in, booked_rooms.check_out, booked_rooms.room_id');
     $this->db->join('booked_rooms', 'booked_rooms.booking_id = bookings.booking_id');
-    $this->db->where('reservation_status !=', 4); // Exclude cancelled
+    $this->db->where_not_in('reservation_status', [4, 6]); // Exclude cancelled reservations and bookings
     $this->db->where('booked_room_archived', 0); // Exclude archived
 
     $this->db->group_start();
-    $this->db->where('booked_rooms.check_in <', $end_date);
-    $this->db->where('booked_rooms.check_out >', $start_date);
+    $this->db->where('booked_rooms.c_in <', $end_date);
+    $this->db->where('booked_rooms.c_out >', $start_date);
     $this->db->group_end();
 
     if ($room_id) {

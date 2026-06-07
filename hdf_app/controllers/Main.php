@@ -542,6 +542,7 @@ class Main extends MY_Controller {
       $data['inhouse_guests'] = $this->get_model->getInHouseGuests($date);
       $data['checkin_guests'] = $this->get_model->getCheckInGuests($date, $type);
       $data['checkin_count'] = $this->get_model->getCheckInCount($date, $type);
+      $data['checkin_count_am'] = ($type == 'PM') ? $this->get_model->getCheckInCount($date, 'AM') : 0;
       $data['checkout_count'] = $this->get_model->getCheckoutCount($date, $type);
       $data['payments'] = $this->get_model->getPaymentsByDateGrouped($date, $type);
 
@@ -581,6 +582,10 @@ class Main extends MY_Controller {
       foreach ($hotel_sales_am_records as $row) {
         $hotel_sales_am += $row['amount'];
       }
+      $pool_sales_am = $this->get_model->getPoolSales($date, 'AM');
+      foreach ($pool_sales_am as $row) {
+        $hotel_sales_am += $row['sales_amount'];
+      }
       foreach ($hotel_expense_am_records as $row) {
         $hotel_sales_am -= $row['expense_amount'];
       }
@@ -597,6 +602,10 @@ class Main extends MY_Controller {
       $hotel_sales_pm = 0;
       foreach ($hotel_sales_pm_records as $row) {
         $hotel_sales_pm += $row['amount'];
+      }
+      $pool_sales_pm = $this->get_model->getPoolSales($date, 'PM');
+      foreach ($pool_sales_pm as $row) {
+        $hotel_sales_pm += $row['sales_amount'];
       }
       foreach ($hotel_expense_pm_records as $row) {
         $hotel_sales_pm -= $row['expense_amount'];

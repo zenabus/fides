@@ -139,6 +139,13 @@ if (!$this->session->userdata('connect')) {
     #guest-name {
       text-transform: capitalize;
     }
+
+    @media (max-width: 767.98px) {
+      #time-container-nav {
+        border-left: none !important;
+        padding-left: 0 !important;
+      }
+    }
   </style>
 
   <script>
@@ -150,6 +157,51 @@ if (!$this->session->userdata('connect')) {
       $('.close').click(function() {
         $('.alert').fadeOut();
       });
+
+      function updateNavbarDateTimeAndShift() {
+        const now = new Date();
+        const dateOptions = {
+          weekday: 'long',
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        };
+        const dateString = now.toLocaleDateString('en-US', dateOptions);
+
+        let hours = now.getHours();
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const seconds = String(now.getSeconds()).padStart(2, '0');
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        const displayHours = hours % 12 || 12;
+        const timeString = `${String(displayHours).padStart(2, '0')}:${minutes}:${seconds} ${ampm}`;
+
+        let shiftText = '';
+        let badgeIcon = '';
+        let badgeStyle = '';
+
+        if (hours >= 14 && hours < 22) {
+          shiftText = 'PM Shift';
+          badgeIcon = '<i class="fa fa-moon" style="font-size: 9px; margin-right: 4px;"></i>';
+          badgeStyle = 'background-color: #e0e7ff; color: #4f46e5; border-color: #c7d2fe;';
+        } else {
+          shiftText = 'AM Shift';
+          badgeIcon = '<i class="fa fa-sun" style="font-size: 9px; margin-right: 4px;"></i>';
+          badgeStyle = 'background-color: #fef3c7; color: #d97706; border-color: #fde68a;';
+        }
+
+        const dateEl = document.getElementById('nav-live-date');
+        const timeEl = document.getElementById('nav-live-time');
+        const shiftEl = document.getElementById('nav-live-shift');
+
+        if (dateEl) dateEl.textContent = dateString;
+        if (timeEl) timeEl.textContent = timeString;
+        if (shiftEl) {
+          shiftEl.innerHTML = badgeIcon + shiftText;
+          shiftEl.style.cssText = 'font-size: 10px; padding: 4px 8px; border-radius: 6px; display: inline-flex; align-items: center; font-weight: 600; ' + badgeStyle;
+        }
+      }
+      updateNavbarDateTimeAndShift();
+      setInterval(updateNavbarDateTimeAndShift, 1000);
     });
   </script>
 </head>
@@ -258,10 +310,10 @@ if (!$this->session->userdata('connect')) {
 
           <?php $access = ['Admin', 'Superadmin', 'Front Desk']; ?>
           <?php if (in_array($_SESSION['user_type'], $access)) { ?>
-            <?php 
-              $pending_online = $this->get_model->getPendingOnlineReservationsCount(); 
-              $pending_walkin = $this->get_model->getPendingWalkinReservationsCount(); 
-              $total_pending = $pending_online + $pending_walkin;
+            <?php
+            $pending_online = $this->get_model->getPendingOnlineReservationsCount();
+            $pending_walkin = $this->get_model->getPendingWalkinReservationsCount();
+            $total_pending = $pending_online + $pending_walkin;
             ?>
             <li>
               <a data-toggle="collapse" href="#collapseReservation" aria-expanded="<?= $active == 'online' || $active == 'walkin' ? 'true' : 'false' ?>">
@@ -390,6 +442,33 @@ if (!$this->session->userdata('connect')) {
                 <span class="navbar-toggler-bar bar2"></span>
                 <span class="navbar-toggler-bar bar3"></span>
               </button>
+            </div>
+          </div>
+
+          <!-- Live Date, Time and Shift Display -->
+          <?php
+          $today_date = date('Y-m-d');
+          $checkin_count_am = $this->get_model->getCheckInCount($today_date, 'AM');
+          $checkin_count_pm = $this->get_model->getCheckInCount($today_date, 'PM');
+          ?>
+          <div class="navbar-shift-display d-flex align-items-center ml-2 ml-md-3 px-2 px-md-3 py-1" style="border-radius: 8px; border: 1px solid rgba(0,0,0,0.05); background: rgba(244, 243, 239, 0.7); backdrop-filter: blur(5px);">
+            <div class="d-none d-md-flex align-items-center mr-3">
+              <i class="fa fa-calendar-day text-muted mr-2" style="font-size: 13px;"></i>
+              <span id="nav-live-date" class="font-weight-normal text-secondary" style="font-size: 12px; letter-spacing: 0.2px;"></span>
+            </div>
+            <div class="d-flex align-items-center mr-3 border-left pl-3" style="border-color: rgba(0,0,0,0.1) !important;" id="time-container-nav">
+              <i class="fa fa-clock text-muted mr-2" style="font-size: 13px;"></i>
+              <span id="nav-live-time" class="font-weight-normal text-secondary" style="font-size: 12px; font-family: monospace; letter-spacing: 0.5px;"></span>
+            </div>
+            <div class="d-flex align-items-center border-left pl-3 mr-3" style="border-color: rgba(0,0,0,0.1) !important;">
+              <span id="nav-live-shift" class="badge text-uppercase mb-0" style="font-size: 10px; padding: 3px 6px; border-radius: 4px; display: inline-flex; align-items: center; gap: 4px; border: 1px solid;"></span>
+            </div>
+            <div class="d-none d-sm-flex align-items-center border-left pl-3" style="border-color: rgba(0,0,0,0.1) !important;">
+              <span class="text-secondary mr-2" style="font-size: 11px; font-weight: normal; letter-spacing: 0.2px;">
+                <i class="fa fa-user-check text-muted mr-1"></i> Check-Ins:
+              </span>
+              <span class="badge mb-0" style="font-size: 10px; padding: 3px 6px; border-radius: 4px; display: inline-flex; align-items: center; font-weight: 600; background-color: #fef3c7; color: #d97706; border: 1px solid #fde68a;" title="AM Check-ins today">AM: <?= $checkin_count_am ?></span>
+              <span class="badge ml-1 mb-0" style="font-size: 10px; padding: 3px 6px; border-radius: 4px; display: inline-flex; align-items: center; font-weight: 600; background-color: #e0e7ff; color: #4f46e5; border: 1px solid #c7d2fe;" title="PM Check-ins today">PM: <?= $checkin_count_pm ?></span>
             </div>
           </div>
 

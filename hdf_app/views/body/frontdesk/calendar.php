@@ -805,76 +805,62 @@ $now = date('H');
     }
   });
 
-  const remove = (draggedParent, ordinal, toRemove) => {
-    draggedParent.addClass(`${ordinal} no-data droppable pointer`);
-    draggedParent.attr('type', type_drag);
-    draggedParent.removeClass(`with-data position-relative ${toRemove} ${bg_drag} ${ordinal}-drag`);
-    draggedParent.removeAttr('booking');
-    draggedParent.html('');
-  }
-
-  const removeNext = (draggedParent, ordinal, toRemove) => {
-    const hasMid = draggedParent.next().hasClass('mid');
-    const hasMax = draggedParent.next().hasClass('max');
-    const newOrdinal = draggedParent.next().hasClass('first-drag') ? 'first' : 'second';
-
-    remove(draggedParent, ordinal, toRemove);
-
-    if (hasMid) {
-      removeNext(draggedParent.next(), newOrdinal, 'mid');
-    } else if (hasMax) {
-      removeNext(draggedParent.next(), newOrdinal, 'max');
-    }
-  }
-
-  const removePrev = (draggedParent, ordinal, toRemove) => {
-    const hasMid = draggedParent.prev().hasClass('mid');
-    const hasMin = draggedParent.prev().hasClass('min');
-    const newOrdinal = draggedParent.prev().hasClass('first-drag') ? 'first' : 'second';
-
-    remove(draggedParent, ordinal, toRemove);
-
-    if (hasMid) {
-      removePrev(draggedParent.prev(), newOrdinal, 'mid');
-    } else if (hasMin) {
-      removePrev(draggedParent.prev(), newOrdinal, 'min');
-    }
-  }
-
   const removeDragged = (id, check_in, room_id) => {
+    // Find the dragged parent cell using the dragged element ID
     const draggedParent = $('#' + id).parent();
     booking_drag = JSON.parse(draggedParent.attr('booking'));
+    const booking_id = booking_drag.booking_id;
+    const row = draggedParent.closest('tr');
 
-    const ordinal = draggedParent.hasClass('first-drag') ? 'first' : 'second';
-    const hasMin = draggedParent.hasClass('min');
-    const hasMid = draggedParent.hasClass('mid');
-    const hasMax = draggedParent.hasClass('max');
+    // Find the first cell in this row that belongs to this booking to set the correct starting cell
+    let startCell = null;
+    row.find('td.with-data').each(function() {
+      const bAttr = $(this).attr('booking');
+      if (bAttr) {
+        const b = JSON.parse(bAttr);
+        if (b.booking_id === booking_id) {
+          startCell = $(this);
+          return false; // break loop
+        }
+      }
+    });
 
+    if (!startCell) return;
+
+    // Get the HTML content of the first two cells (for guest name and remarks) for transfer
+    const ordinal = startCell.hasClass('first-drag') ? 'first' : 'second';
     if (ordinal == 'first') {
-      draggedParent.children().first().attr('id', `drag${toDashed(check_in)}-${room_id}`);
-      draggedParent.next().children().first().attr('id', `drag${toDashed(check_in)}-${room_id}`);
-      html_drag = draggedParent.html();
-      html_drag2 = draggedParent.next().html();
+      startCell.children().first().attr('id', `drag${toDashed(check_in)}-${room_id}`);
+      startCell.next().children().first().attr('id', `drag${toDashed(check_in)}-${room_id}`);
+      html_drag = startCell.html();
+      html_drag2 = startCell.next().html();
     } else {
-      draggedParent.children().first().attr('id', `drag${toDashed(check_in)}-${room_id}`);
-      draggedParent.prev().children().first().attr('id', `drag${toDashed(check_in)}-${room_id}`);
-      html_drag2 = draggedParent.html();
-      html_drag = draggedParent.prev().html();
+      startCell.children().first().attr('id', `drag${toDashed(check_in)}-${room_id}`);
+      startCell.prev().children().first().attr('id', `drag${toDashed(check_in)}-${room_id}`);
+      html_drag2 = startCell.html();
+      html_drag = startCell.prev().html();
     }
 
-    if (hasMin) {
-      removeNext(draggedParent, ordinal, 'min');
-    } else if (hasMax) {
-      removePrev(draggedParent, ordinal, 'max');
-    } else if (hasMid) {
-      removePrev(draggedParent, ordinal, 'mid');
-      removeNext(draggedParent, ordinal, 'mid');
+    // Remove exactly nights_drag * 2 cells starting from the startCell
+    let currentCell = startCell;
+    const totalCells = nights_drag * 2;
+    for (let i = 0; i < totalCells; i++) {
+      if (!currentCell || currentCell.length === 0) break;
+      const nextCell = currentCell.next();
+
+      const ord = currentCell.hasClass('first-drag') ? 'first' : 'second';
+      currentCell.addClass(`${ord} no-data droppable pointer`);
+      currentCell.attr('type', type_drag);
+      currentCell.removeClass(`with-data position-relative min mid max bg-success bg-info bg-warning ${bg_drag} ${ord}-drag`);
+      currentCell.removeAttr('booking');
+      currentCell.html('');
+
+      currentCell = nextCell;
     }
   }
 
-  const addNext = (e) => {
-    const hasMid = e.next().hasClass('mid');
-    const hasMax = e.next().hasClass('max');
+  const addNext = (e, cellsRemaining) => {
+    if (cellsRemaining <= 0) return;
 
     if ($(e).hasClass('first')) {
       e.removeClass('first no-data droppable pointer').addClass('first-drag with-data position-relative').html(html_drag);
@@ -883,8 +869,8 @@ $now = date('H');
     }
     e.attr('booking', JSON.stringify(booking_drag));
 
-    if (hasMid || hasMax) {
-      addNext($(e).next());
+    if (cellsRemaining > 1) {
+      addNext($(e).next(), cellsRemaining - 1);
     }
   }
 
@@ -894,7 +880,7 @@ $now = date('H');
     booking_drag.nights = nights_drag;
     booking_drag.room_id = room_id;
 
-    addNext(e);
+    addNext(e, nights_drag * 2);
   }
 
   // const addDraggable = (e, check_in, check_out, room_id) => {
@@ -988,10 +974,15 @@ $now = date('H');
             .then(response => response.json())
             .then(data => {
               removeDragged(id, check_in, room_id);
-              addDraggable($(this), check_in, check_out, room_id);
+              let startCell = $(this);
+              if (startCell.hasClass('second')) {
+                startCell = startCell.prev();
+              }
+              addDraggable(startCell, check_in, check_out, room_id);
               $('.hovered').removeClass('hovered');
               $('body').removeClass('wait');
               $('.no-data').removeClass('wait');
+              $('.droppable').removeClass('bg-success bg-warning bg-info min max mid');
             })
             .catch(error => {
               console.error("Error:", error);

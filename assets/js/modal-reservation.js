@@ -84,7 +84,7 @@ $(document).on("click", ".choose", function () {
   const guest = JSON.parse($(this).attr("guest"));
 
   if (modalGuestType == "Single") {
-    $("[name=guest_id]").val(guest.guest_id);
+    $("#modalBooking [name=guest_id]").val(guest.guest_id);
     $("[name=first_name]").val(guest.first_name);
     $("[name=middle_name]").val(guest.middle_name);
     $("[name=last_name]").val(guest.last_name);
@@ -99,7 +99,7 @@ $(document).on("click", ".choose", function () {
   } else {
     const guest_name = `${guest.first_name} ${guest.middle_name} ${guest.last_name} ${guest.suffix}`;
     $("#modalGuest").modal("hide");
-    $("[name=guest_id]").val(guest.guest_id);
+    $("#modalMass [name=guest_id]").val(guest.guest_id);
     $("#select-guest").hide();
     $("#new-guest").hide();
     $("#new_guest").hide();
@@ -110,13 +110,13 @@ $(document).on("click", ".choose", function () {
 
 $("#new_guest").click(function () {
   $(".guest_details").prop("readonly", false).val("");
-  $("[name=guest_id]").val(0);
+  $("#modalBooking [name=guest_id]").val(0);
   $("[name=first_name]").focus();
   $("#returning_guest").show();
   $("#new_guest").hide();
 });
 
-$("[name=nights]").on("input", function () {
+$("#modalBooking [name=nights]").on("input", function () {
   const nights = parseInt($(this).val());
   const checkin = moment($("[name=check_in]").val());
   const checkout = moment(checkin).add(nights, "days");
@@ -146,7 +146,7 @@ $("[name=check_in]").on("dp.change", function (e) {
   const nights = checkout.diff(checkin, "days");
   $("[name=check_out]").data("DateTimePicker").minDate(moment(checkin).add(1, "days"));
   $("[name=check_out]").data("DateTimePicker").date(moment(checkin).add(1, "days"));
-  $("[name=nights]").val(nights);
+  $("#modalBooking [name=nights]").val(nights);
 });
 
 $("[name=check_out]").on("dp.change", function (e) {
@@ -156,7 +156,7 @@ $("[name=check_out]").on("dp.change", function (e) {
   checkin = moment(checkin).format("YYYY-MM-DD");
   checkout = moment(checkout).format("YYYY-MM-DD");
   updateAvailableRoom(checkin, checkout);
-  $("[name=nights]").val(nights);
+  $("#modalBooking [name=nights]").val(nights);
 });
 
 $("#modalBooking").on("shown.bs.modal", function () {
@@ -168,7 +168,7 @@ const modalBooking = (obj, booking_type, minDate = 0, booking_number = "") => {
     $("#returning_guest").show();
     $("#new_guest").hide();
     $(".guest_details").prop("disabled", false).prop("readonly", false).val("");
-    $("[name=guest_id]").val(0);
+    $("#modalBooking [name=guest_id]").val(0);
     $("#txt-contact").text("");
   }
   let date = $(obj).attr("date") ?? new Date();
@@ -186,7 +186,7 @@ const modalBooking = (obj, booking_type, minDate = 0, booking_number = "") => {
   $("[name=check_in]").data("DateTimePicker").date(date);
   $("[name=check_out]").data("DateTimePicker").minDate(moment(date).add(minDate, "days"));
   $("[name=check_out]").data("DateTimePicker").date(moment(date).add(1, "days"));
-  $("[name=nights]").val(1);
+  $("#modalBooking [name=nights]").val(1);
   $("[name=booking_type]").val(booking_type);
   if (booking_type == "Check In") {
     $(".reservation-div").hide();
@@ -312,7 +312,7 @@ $("[name=reservation_type]").change(function () {
 
 $("#modalBooking").on("hide.bs.modal", function (e) {
   $(".advanced-div").hide();
-  $("[name=guest_id]").removeAttr("value");
+  $("#modalBooking [name=guest_id]").removeAttr("value");
   $("#frmBook").trigger("reset");
   $("[name=booking_id]").val("");
 
@@ -450,7 +450,7 @@ $(document).on('click', '.with-data', function() {
     $('[name=payment_booking_id]').val(booking.booking_id);
 
     $('#returning_guest').hide();
-    $('[name=guest_id]').val(booking.guest_id);
+    $('#modalBooking [name=guest_id]').val(booking.guest_id);
     $('[name=first_name]').val(booking.first_name).attr('disabled', true);
     $('[name=middle_name]').val(booking.middle_name).attr('disabled', true);
     $('[name=last_name]').val(booking.last_name).attr('disabled', true);
@@ -465,7 +465,7 @@ $(document).on('click', '.with-data', function() {
       $('[name=booking_id]').val(booking.booking_id);
       if (booking.booked_room_archived == 0) {
         $('.form-control').attr('disabled', false);
-        $('[name=nights]').attr('readonly', true);
+        $('#modalBooking [name=nights]').attr('readonly', true);
         $('textarea').attr('disabled', false).attr('readonly', false);
         $('#btnUpdate').removeClass('d-none');
       } else {
@@ -542,7 +542,7 @@ $(document).on('click', '.with-data', function() {
 
     $('[name=check_in]').val(booking.check_in);
     $('[name=check_out]').val(booking.check_out);
-    $('[name=nights]').val(booking.nights);
+    $('#modalBooking [name=nights]').val(booking.nights);
     $('[name=request]').val(booking.request);
     $('[name=remarks]').val(booking.remarks);
 

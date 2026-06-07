@@ -24,6 +24,8 @@ class Get_model_test extends TestCase {
       'room_id' => 101, // Assuming room 101 exists or is created
       'check_in' => '2026-05-01',
       'check_out' => '2026-05-05',
+      'c_in' => '2026-05-01',
+      'c_out' => '2026-05-05',
       'booked_room_archived' => 0
     ];
     $this->CI->db->insert('booked_rooms', $booked_room_data);
@@ -60,6 +62,8 @@ class Get_model_test extends TestCase {
       'room_id' => 101,
       'check_in' => '2026-05-01',
       'check_out' => '2026-05-05',
+      'c_in' => '2026-05-01',
+      'c_out' => '2026-05-05',
       'booked_room_archived' => 0
     ];
     $this->CI->db->insert('booked_rooms', $booked_room_data);
