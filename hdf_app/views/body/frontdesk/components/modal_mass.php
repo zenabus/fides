@@ -51,7 +51,7 @@
         <?= form_open('main/massBooking', ['id' => 'frmMass']) ?>
         <input type="hidden" name="guest_id">
         <input type="hidden" name="room_ids">
-        <div class="form-group">
+        <div class="form-group" id="booking-type-group">
           <label>Booking Type</label>
           <div class="d-flex justify-content-around">
             <div class="form-check-radio">
@@ -238,12 +238,29 @@
     const base_url = '<?= base_url() ?>';
     const date = $(this).attr('date');
     const type = $(this).attr('type');
+    const todayStr = moment().format('YYYY-MM-DD');
 
     $("[name=check_in_mass]").data("DateTimePicker").date(moment(date));
     $("[name=check_out_mass]").data("DateTimePicker").minDate(moment(date).add(1, "days"));
     $("[name=check_out_mass]").data("DateTimePicker").date(moment(date).add(1, "days"));
-    $("input[name=rdo_booking_type][value='" + type + "']").prop("checked", true);
-    $('#title-mass').text(`MASS ${type.toUpperCase()}`);
+
+    // Determine booking type visibility based on date
+    if (date === todayStr) {
+      // Today: show both options, respect the server-provided type
+      $('#booking-type-group').show();
+      $("input[name=rdo_booking_type][value='" + type + "']").prop("checked", true);
+      $('#title-mass').text(`MASS ${type.toUpperCase()}`);
+    } else if (date > todayStr) {
+      // Future date: auto-select Reservation, hide options
+      $('#booking-type-group').hide();
+      $('#rdo_reservation_mass').prop('checked', true);
+      $('#title-mass').text('MASS RESERVATION');
+    } else {
+      // Past date: auto-select Check In, hide options
+      $('#booking-type-group').hide();
+      $('#rdo_checkin_mass').prop('checked', true);
+      $('#title-mass').text('MASS CHECK IN');
+    }
 
     const check_in = moment(date).format('YYYY-MM-DD');
     const check_out = moment(date).add(1, "days").format('YYYY-MM-DD');
@@ -276,10 +293,11 @@
     $('#selected').text(0);
     $('.room').removeClass('room-active');
     room_ids = [];
+    $('#booking-type-group').show();
   });
 
   $('#frmMass').submit(function(e) {
-    const guest_id = $('[name=guest_id]').val();
+    const guest_id = $('#modalMass [name=guest_id]').val();
 
     if (!guest_id) {
       swal({
