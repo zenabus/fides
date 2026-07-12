@@ -22,8 +22,8 @@ class Get_model_test extends TestCase {
     $booked_room_data = [
       'booking_id' => $booking_id,
       'room_id' => 101, // Assuming room 101 exists or is created
-      'check_in' => '2026-05-01',
-      'check_out' => '2026-05-05',
+      'c_in' => '2026-05-01',
+      'c_out' => '2026-05-05',
       'booked_room_archived' => 0
     ];
     $this->CI->db->insert('booked_rooms', $booked_room_data);
@@ -58,15 +58,15 @@ class Get_model_test extends TestCase {
     $booked_room_data = [
       'booking_id' => $booking_id,
       'room_id' => 101,
-      'check_in' => '2026-05-01',
-      'check_out' => '2026-05-05',
+      'c_in' => '2026-05-01',
+      'c_out' => '2026-05-05',
       'booked_room_archived' => 0
     ];
     $this->CI->db->insert('booked_rooms', $booked_room_data);
 
     // ACT: Check matching range strictly outside
     // New booking: 2026-05-05 to 2026-05-10
-    // Existing check_out is 2026-05-05. Logic is check_in < end AND check_out > start.
+    // Existing c_out is 2026-05-05. Logic is c_in < end AND c_out > start.
     // 2026-05-01 < 2026-05-10 (True) AND 2026-05-05 > 2026-05-05 (False) -> No overlap
     $result = $this->obj->checkAvailabilityInRange('2026-05-05', '2026-05-10');
 
