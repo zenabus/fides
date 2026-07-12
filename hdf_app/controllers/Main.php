@@ -1092,7 +1092,7 @@ class Main extends MY_Controller {
       $this->redirect();
       exit;
     } else {
-      $_POST['dates'] = datesBetween($_POST['check_in'], $_POST['check_out'], 'Y-m-d');
+      $_POST['dates'] = datesBetween($_POST['check_in_mass'], $_POST['check_out_mass'], 'Y-m-d');
       [$booking_id, $booking_number] = $this->insert_model->massBook();
       $log = "Mass {$_POST['rdo_booking_type']}: {$booking_number}";
       $_POST['booking_id'] = $booking_id;
@@ -1241,7 +1241,7 @@ class Main extends MY_Controller {
   }
 
   function updateReservation() {
-    if ($_POST['amount']) {
+    if (!empty($_POST['amount'])) {
       if ($_POST['payment_option'] == 'Cash') {
         $_POST['payment_details'] = '';
       } else {
@@ -1388,7 +1388,9 @@ class Main extends MY_Controller {
     $this->insert_model->bookRoom();
     $room = $this->get_model->getRoom($_POST['room_id']);
     $s = $_POST['nights'] == 1 ? '' : 's';
-    $log = "<b>{$booking_number}</b> → <b>{$booking_number} {$room->room_number} {$room->room_type_abbr}</b> → Booked room for <b>{$_POST['nights']} night{$s}</b> from <b>{$_POST['check_in']}</b> to <b>{$_POST['check_out']}</b>";
+    $room_number = is_object($room) ? $room->room_number : '';
+    $room_type_abbr = is_object($room) ? $room->room_type_abbr : '';
+    $log = "<b>{$booking_number}</b> → <b>{$booking_number} {$room_number} {$room_type_abbr}</b> → Booked room for <b>{$_POST['nights']} night{$s}</b> from <b>{$_POST['check_in']}</b> to <b>{$_POST['check_out']}</b>";
     [$arrival, $departure] = $this->getMinMax($_POST['booking_id']);
     $this->insert_model->addBookingLog($log);
     $this->insert_model->log($log);
@@ -1484,6 +1486,7 @@ class Main extends MY_Controller {
 
   function changeRoom() {
     $booking_number = 'HDF' . str_pad($_POST['booking_id'], 5, '0', STR_PAD_LEFT);
+    if (empty($_POST['booked_room_id'])) return;
     $room_from = $this->get_model->getBookedRoom($_POST['booked_room_id']);
     $this->update_model->changeRoom();
     [$arrival, $departure] = $this->getMinMax($_POST['booking_id']);
@@ -1543,8 +1546,11 @@ class Main extends MY_Controller {
     $booking_number = 'HDF' . str_pad($_POST['booking_id'], 5, '0', STR_PAD_LEFT);
     $charge = $this->get_model->getCharge($_POST['charge_id']);
     $booked_room = $this->get_model->getBookedRoom($_POST['booked_room_id']);
-    $cost = number_format($charge->charge_amount);
-    $log = "<b>{$booking_number}</b> → <b>{$booked_room->room_number} {$booked_room->room_type_abbr}</b> → Added <b>{$_POST['charge_quantity']} {$charge->category}</b> - <b>{$charge->charge}</b> amounting ₱<b>{$cost}</b> each";
+    $charge_amount = is_object($charge) ? $charge->charge_amount : 0;
+    $charge_category = is_object($charge) ? ($charge->category ?? '') : '';
+    $charge_charge = is_object($charge) ? ($charge->charge ?? '') : '';
+    $cost = number_format($charge_amount);
+    $log = "<b>{$booking_number}</b> → <b>{$booked_room->room_number} {$booked_room->room_type_abbr}</b> → Added <b>{$_POST['charge_quantity']} {$charge_category}</b> - <b>{$charge_charge}</b> amounting ₱<b>{$cost}</b> each";
     $this->insert_model->addBookingLog($log);
     $this->insert_model->log($log);
     $this->insert_model->addOtherCharges();

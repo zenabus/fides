@@ -44,7 +44,9 @@ class MY_Controller extends CI_Controller {
   }
 
   function toDashedDate($date) {
-    [$month, $day, $year] = explode('/', $date);
+    $parts = explode('/', $date);
+    if (count($parts) < 3) return $date;
+    [$month, $day, $year] = $parts;
     return $year . '-' . $month . '-' . $day;
   }
 

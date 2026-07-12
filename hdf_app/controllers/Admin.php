@@ -132,14 +132,14 @@ class Admin extends MY_Controller {
     }
 
     $this->insert_model->addPayment('advance', $amount, $booked_room_id);
-    $this->insert_model->log("Added a new advance payment to {$_POST['category']}", 2);
+    $this->insert_model->log('Added a new advance payment to ' . ($_POST['category'] ?? ''), 2);
     $this->session->set_flashdata('success', 'Advance payment successfully added!');
     $this->redirect();
   }
 
   function addCategory() {
     $this->insert_model->addCategory();
-    $this->insert_model->log("Added a new category, {$_POST['category']}", 2);
+    $this->insert_model->log('Added a new category, ' . ($_POST['category'] ?? ''), 2);
     $this->session->set_flashdata('success', 'Category successfully added!');
     $this->redirect();
   }

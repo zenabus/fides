@@ -11,7 +11,7 @@ class Insert_model extends CI_Model {
 
   function log($content, $log_type = 0) {
     $data = [
-      'user_id' => $_SESSION['user_id'],
+      'user_id' => $_SESSION['user_id'] ?? 0,
       'content' => $content,
       'log_type' => $log_type,
       'ip_address' => $this->input->ip_address()
@@ -121,7 +121,9 @@ class Insert_model extends CI_Model {
   }
 
   function toDashedDate($date) {
-    [$month, $day, $year] = explode('/', $date);
+    $parts = explode('/', $date);
+    if (count($parts) < 3) return $date;
+    [$month, $day, $year] = $parts;
     return $year . '-' . $month . '-' . $day;
   }
 

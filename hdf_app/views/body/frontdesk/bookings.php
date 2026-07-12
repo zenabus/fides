@@ -46,7 +46,7 @@
                     </tr>
                   </thead>
                   <!-- <tbody>
-                    <?php foreach ($active_bookings as $row) { ?>
+                    <?php if (isset($active_bookings)) foreach ($active_bookings as $row) { ?>
                       <?php if ($row['charged_to'] == 0) { ?>
                         <tr>
                           <?php $data['row'] = $row ?>
