@@ -69,7 +69,7 @@
                 </table>
               </div>
               <div class="tab-pane show" id="collectables">
-                <h5 class="pl-3 mb-4">Total Collectables: ₱ <?= number_format($total_collectable, 2) ?></h5>
+                <h5 class="pl-3 mb-4">Total Collectables: ₱ <?= number_format($total_collectable ?? 0, 2) ?></h5>
                 <table class="table table-striped table-bordered tbl_booking">
                   <thead>
                     <tr>
@@ -83,7 +83,7 @@
                     </tr>
                   </thead>
                   <tbody>
-                    <?php foreach ($charged as $row) { ?>
+                    <?php if (isset($charged)) foreach ($charged as $row) { ?>
                       <?php if ($row['reservation_status'] == 0) { ?>
                         <tr>
                           <?php $data['row'] = $row ?>
