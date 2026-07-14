@@ -592,7 +592,7 @@ $now = date('H');
         clear: "fa fa-trash",
         close: "fa fa-remove",
       },
-      format: 'L',
+      format: 'MM/DD/YYYY',
       defaultDate: new Date(),
     });
     $('.sidebar .sidebar-wrapper, .main-panel').perfectScrollbar('destroy');
@@ -679,8 +679,8 @@ $now = date('H');
       }
       $('.type-div').removeClass('d-none');
     }
-    let checkin = moment(date).format("YYYY-MM-DD");
-    let checkout = moment(date).add(1, "days").format("YYYY-MM-DD");
+    let checkin = moment(date, "MM/DD/YYYY").format("YYYY-MM-DD");
+    let checkout = moment(date, "MM/DD/YYYY").add(1, "days").format("YYYY-MM-DD");
     booked_room_id = null;
     updateAvailableRoom(checkin, checkout);
   });

@@ -18,7 +18,7 @@ $(".datepicker").datetimepicker({
     clear: "fa fa-trash",
     close: "fa fa-remove",
   },
-  format: "L",
+  format: "MM/DD/YYYY",
   defaultDate: new Date(),
   minDate,
 });
@@ -118,7 +118,7 @@ $("#new_guest").click(function () {
 
 $("#modalBooking [name=nights]").on("input", function () {
   const nights = parseInt($(this).val());
-  const checkin = moment($("[name=check_in]").val());
+  const checkin = moment($("[name=check_in]").val(), "MM/DD/YYYY");
   const checkout = moment(checkin).add(nights, "days");
 
   if (!nights || nights > 0) {
@@ -141,8 +141,8 @@ const updateAvailableRoom = (check_in, check_out) => {
 };
 
 $("[name=check_in]").on("dp.change", function (e) {
-  let checkin = moment($("[name=check_in]").val());
-  let checkout = moment($("[name=check_out]").val());
+  let checkin = moment($("[name=check_in]").val(), "MM/DD/YYYY");
+  let checkout = moment($("[name=check_out]").val(), "MM/DD/YYYY");
   const nights = checkout.diff(checkin, "days");
   $("[name=check_out]").data("DateTimePicker").minDate(moment(checkin).add(1, "days"));
   $("[name=check_out]").data("DateTimePicker").date(moment(checkin).add(1, "days"));
@@ -150,8 +150,8 @@ $("[name=check_in]").on("dp.change", function (e) {
 });
 
 $("[name=check_out]").on("dp.change", function (e) {
-  let checkin = moment($("[name=check_in]").val());
-  let checkout = moment($("[name=check_out]").val());
+  let checkin = moment($("[name=check_in]").val(), "MM/DD/YYYY");
+  let checkout = moment($("[name=check_out]").val(), "MM/DD/YYYY");
   const nights = checkout.diff(checkin, "days");
   checkin = moment(checkin).format("YYYY-MM-DD");
   checkout = moment(checkout).format("YYYY-MM-DD");
@@ -184,8 +184,8 @@ const modalBooking = (obj, booking_type, minDate = 0, booking_number = "") => {
   $("#room_number").val(data.room_number);
   $("[name=room_id]").val(data.room_id);
   $("[name=check_in]").data("DateTimePicker").date(date);
-  $("[name=check_out]").data("DateTimePicker").minDate(moment(date).add(minDate, "days"));
-  $("[name=check_out]").data("DateTimePicker").date(moment(date).add(1, "days"));
+  $("[name=check_out]").data("DateTimePicker").minDate(moment(date, "MM/DD/YYYY").add(minDate, "days"));
+  $("[name=check_out]").data("DateTimePicker").date(moment(date, "MM/DD/YYYY").add(1, "days"));
   $("#modalBooking [name=nights]").val(1);
   $("[name=booking_type]").val(booking_type);
   if (booking_type == "Check In") {
@@ -381,7 +381,7 @@ $("#btnPayments").click(function () {
     .then(data => {
       let tbody = "";
       data.forEach(payment => {
-        const amount = parseInt(payment.amount).toLocaleString("en-US", { minimumFractionDigits: 2 });
+        const amount = parseFloat(payment.amount).toLocaleString("en-US", { minimumFractionDigits: 2 });
 
         const timeString = payment.booking_payment_added;
         const dateTime = new Date(timeString);
@@ -448,6 +448,7 @@ $(document).on('click', '.with-data', function() {
 
     $('[name=payment_booked_room_id]').val(booked_room_id);
     $('[name=payment_booking_id]').val(booking.booking_id);
+    $('[name=booking_id]').val(booking.booking_id);
 
     $('#returning_guest').hide();
     $('#modalBooking [name=guest_id]').val(booking.guest_id);
@@ -559,7 +560,7 @@ $(document).on('click', '.with-data', function() {
       $("#booking_number").text(booking.booking_number + indicatorText);
     }
 
-    let checkin = moment(booking.check_in).format("YYYY-MM-DD");
-    let checkout = moment(booking.check_out).format("YYYY-MM-DD");
+    let checkin = moment(booking.check_in, "MM/DD/YYYY").format("YYYY-MM-DD");
+    let checkout = moment(booking.check_out, "MM/DD/YYYY").format("YYYY-MM-DD");
     updateAvailableRoom(checkin, checkout);
 });

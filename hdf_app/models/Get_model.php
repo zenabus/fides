@@ -589,6 +589,8 @@ class Get_model extends CI_Model {
 
   function getCustomDCR() {
     return $this->db->select('booking_payment_id, DATE(DATE_ADD(booking_payment_added, INTERVAL 2 HOUR)) as payment_added, count(*) as count, sum(amount) as sum')
+      ->join('bookings', 'bookings.booking_id=booking_payment.booking_id')
+      ->where_not_in('bookings.reservation_status', [4, 6])
       ->group_by('payment_added')
       ->order_by('payment_added', 'DESC')
       ->get('booking_payment')->result_array();
@@ -596,6 +598,8 @@ class Get_model extends CI_Model {
 
   function getCustomDCRTotal($payment_option) {
     return $this->db->select('booking_payment_id, DATE(DATE_ADD(booking_payment_added, INTERVAL 2 HOUR)) as payment_added, sum(amount) as sum')
+      ->join('bookings', 'bookings.booking_id=booking_payment.booking_id')
+      ->where_not_in('bookings.reservation_status', [4, 6])
       ->where_in('payment_option', $payment_option)
       ->group_by('payment_added')
       ->order_by('payment_added', 'DESC')
@@ -626,6 +630,7 @@ class Get_model extends CI_Model {
       ->join('guests', 'guests.guest_id=bookings.guest_id')
       ->where('booking_payment_added >=', $startDate)
       ->where('booking_payment_added <=', $endDate)
+      ->where_not_in('bookings.reservation_status', [4, 6])
       ->group_by('booking_payment.booked_room_id')
       ->get('booking_payment')->result_array();
   }
@@ -674,6 +679,7 @@ class Get_model extends CI_Model {
       ->join('users', 'users.id=booking_payment.user_id')
       ->where('booking_payment_added >=', $startDate)
       ->where('booking_payment_added <', $endDate)
+      ->where_not_in('bookings.reservation_status', [4, 6])
       ->order_by('booking_payment_id', 'DESC')
       ->get('booking_payment')->result_array();
   }
@@ -802,9 +808,12 @@ class Get_model extends CI_Model {
 
   function getHotelSales($date, $period) {
     [$startDate, $endDate] = $this->getTime($date, $period);
-    return $this->db->where_in('payment_for', ['room', 'advance', 'addons'])
+    return $this->db->select('booking_payment.*')
+      ->join('bookings', 'bookings.booking_id=booking_payment.booking_id')
+      ->where_in('payment_for', ['room', 'advance', 'addons'])
       ->where('booking_payment_added >=', $startDate)
       ->where('booking_payment_added <=', $endDate)
+      ->where_not_in('bookings.reservation_status', [4, 6])
       ->get('booking_payment')->result_array();
   }
 
