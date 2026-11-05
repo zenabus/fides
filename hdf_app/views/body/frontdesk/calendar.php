@@ -312,7 +312,7 @@ $now = date('H');
                         <?php
                         if ($data['reservation_status'] == 0 || $data['reservation_status'] == -1) {
                           $color = 'success';
-                        } elseif ($data['reservation_type'] == 'Confirmed') {
+                        } elseif ($data['reservation_status'] == 5 || $data['reservation_type'] == 'Confirmed') {
                           $color = 'info';
                         } else {
                           $color = 'warning';

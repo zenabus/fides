@@ -148,7 +148,7 @@ class Get_model extends CI_Model {
       ->join('booked_rooms', 'booked_rooms.booking_id=bookings.booking_id')
       ->join('rooms', 'rooms.id=booked_rooms.room_id')
       ->join('guests', 'guests.guest_id=bookings.guest_id')
-      ->where_in('reservation_status', [-1, 0, 1, 2])
+      ->where_in('reservation_status', [-1, 0, 1, 2, 3, 5])
       ->where_in('booked_room_archived', $booked_room_archived)
       ->get('bookings')->result_array();
   }
@@ -967,22 +967,34 @@ class Get_model extends CI_Model {
 
   function getOccupiedRoomIdsForToday() {
     $date = date('Y-m-d');
-    $results = $this->db->join('bookings', 'bookings.booking_id=booked_rooms.booking_id')
+    $current_time = date('H:i');
+
+    $this->db->join('bookings', 'bookings.booking_id=booked_rooms.booking_id')
       ->join('guests', 'guests.guest_id=bookings.guest_id', 'left')
       ->where('c_in <=', $date)
-      ->where('c_out >=', $date)
       ->where_not_in('reservation_status', [4, 6])
-      ->where('booked_room_archived', 0)
-      ->select('room_id, first_name, last_name, booking_number')
+      ->where('booked_room_archived', 0);
+
+    // If current time is 12:00 NN or later, rooms checking out today are already past checkout time
+    if ($current_time >= '12:00') {
+      $this->db->where('c_out >', $date);
+    } else {
+      $this->db->where('c_out >=', $date);
+    }
+
+    $results = $this->db->select('room_id, first_name, last_name, booking_number, c_in, c_out')
+      ->order_by('booked_rooms.booked_room_id', 'DESC')
       ->get('booked_rooms')
       ->result_array();
 
     $room_ids = [];
     foreach ($results as $r) {
-      $room_ids[$r['room_id']] = [
-        'name' => trim($r['first_name'] . ' ' . $r['last_name']),
-        'booking_number' => $r['booking_number']
-      ];
+      if (!isset($room_ids[$r['room_id']])) {
+        $room_ids[$r['room_id']] = [
+          'name' => trim($r['first_name'] . ' ' . $r['last_name']),
+          'booking_number' => $r['booking_number']
+        ];
+      }
     }
     return $room_ids;
   }

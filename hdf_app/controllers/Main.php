@@ -183,7 +183,7 @@ class Main extends MY_Controller {
     $data['active'] = 'guests';
     $data['guest'] = $this->get_model->getGuest($guest_id);
     $data['bookings'] = $this->get_model->getBookingsByGuest($guest_id, [0, -1, 6]);
-    $data['reservations'] = $this->get_model->getBookingsByGuest($guest_id, [1, 2, 3]);
+    $data['reservations'] = $this->get_model->getBookingsByGuest($guest_id, [1, 2, 3, 5]);
     $data['charged'] = $this->get_model->getChargedBookings($guest_id);
     $total_collectable = 0;
 

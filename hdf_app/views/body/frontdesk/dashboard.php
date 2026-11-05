@@ -173,122 +173,137 @@
                   </label>
                 </div>
               <?php } ?>
+              <div class="d-inline-block ml-3 align-middle">
+                <label class="switch-vacant-label d-inline-flex align-items-center mb-0" style="cursor: pointer;">
+                  <span class="switch-toggle mr-2">
+                    <input type="checkbox" id="toggle_vacant_only">
+                    <span class="slider round"></span>
+                  </span>
+                  <span class="font-weight-bold text-success" style="font-size: 13px;">Show Vacant Only</span>
+                </label>
+              </div>
             </div>
           </div>
           <div class="px-4 pt-3">
-            <div class="separator mb-4">2nd Floor</div>
-            <div class="row">
-              <?php foreach ($rooms as $data) { ?>
-                <?php if ($data['room_number'] < 299) { ?>
-                  <?php
-                  $is_occupied = array_key_exists($data['room_id'], $occupied_room_ids);
-                  $date_format = date('m/d/Y');
-                  $booking = array_filter($bookings, function ($b) use ($date_format, $data) {
-                    return in_array($date_format, $b['dates_between']) && $data['room_number'] == $b['room_number'];
-                  });
-                  $booking = $booking ? array_merge(...$booking) : null;
-                  ?>
-                  <div class="col-lg-2 col-md-6 col-sm-6 float-left <?= $data['room_type_abbr'] ?>">
-                    <div class="card card-stats border <?= $is_occupied ? 'border-danger' : 'border-success' ?> shadow-none room <?= $booking ? 'with-data pointer' : '' ?>" data='<?= json_encode($data) ?>' <?= $booking ? 'booking="' . htmlspecialchars(json_encode($booking), ENT_QUOTES, 'UTF-8') . '"' : '' ?>>
-                      <div class="card-body ">
-                        <div class="row">
-                          <div class="col-md-7 <?= $is_occupied ? 'text-danger' : 'text-success' ?>">
-                            <h1 class="room_type"><?= $data['room_type_abbr'] ?></h1>
-                          </div>
-                          <div class="col-md-5">
-                            <div class="numbers">
-                              <p class="card-category">Room</p>
-                              <p class="card-title"><?= $data['room_number'] ?></p>
+            <div class="floor-section" id="floor_2">
+              <div class="separator mb-4">2nd Floor</div>
+              <div class="row">
+                <?php foreach ($rooms as $data) { ?>
+                  <?php if ($data['room_number'] < 299) { ?>
+                    <?php
+                    $is_occupied = array_key_exists($data['room_id'], $occupied_room_ids);
+                    $date_format = date('m/d/Y');
+                    $booking = array_filter($bookings, function ($b) use ($date_format, $data) {
+                      return in_array($date_format, $b['dates_between']) && $data['room_number'] == $b['room_number'];
+                    });
+                    $booking = $booking ? array_merge(...$booking) : null;
+                    ?>
+                    <div class="col-lg-2 col-md-6 col-sm-6 float-left room-item <?= $data['room_type_abbr'] ?> <?= $is_occupied ? 'room-occupied' : 'room-vacant' ?>">
+                      <div class="card card-stats border <?= $is_occupied ? 'border-danger' : 'border-success' ?> shadow-none room <?= ($is_occupied && $booking) ? 'with-data pointer' : '' ?>" data='<?= json_encode($data) ?>' <?= ($is_occupied && $booking) ? 'booking="' . htmlspecialchars(json_encode($booking), ENT_QUOTES, 'UTF-8') . '"' : '' ?>>
+                        <div class="card-body ">
+                          <div class="row">
+                            <div class="col-md-7 <?= $is_occupied ? 'text-danger' : 'text-success' ?>">
+                              <h1 class="room_type"><?= $data['room_type_abbr'] ?></h1>
+                            </div>
+                            <div class="col-md-5">
+                              <div class="numbers">
+                                <p class="card-category">Room</p>
+                                <p class="card-title"><?= $data['room_number'] ?></p>
+                              </div>
                             </div>
                           </div>
                         </div>
-                      </div>
-                      <div class="card-footer ">
-                        <hr>
-                        <div class="stats text-center" style="font-size: 13px;">
-                          <span class="fa fa-<?= $is_occupied ? 'bed' : 'check' ?>"></span> <?= $is_occupied ? $occupied_room_ids[$data['room_id']]['name'] : 'Vacant' ?>
+                        <div class="card-footer ">
+                          <hr>
+                          <div class="stats text-center" style="font-size: 13px;">
+                            <span class="fa fa-<?= $is_occupied ? 'bed' : 'check' ?>"></span> <?= $is_occupied ? $occupied_room_ids[$data['room_id']]['name'] : 'Vacant' ?>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-              <?php }
-              } ?>
+                <?php }
+                } ?>
+              </div>
             </div>
-            <div class="separator mb-4">3rd Floor</div>
-            <div class="row">
-              <?php foreach ($rooms as $data) { ?>
-                <?php if ($data['room_number'] < 399 && $data['room_number'] > 300) { ?>
-                  <?php
-                  $is_occupied = array_key_exists($data['room_id'], $occupied_room_ids);
-                  $date_format = date('m/d/Y');
-                  $booking = array_filter($bookings, function ($b) use ($date_format, $data) {
-                    return in_array($date_format, $b['dates_between']) && $data['room_number'] == $b['room_number'];
-                  });
-                  $booking = $booking ? array_merge(...$booking) : null;
-                  ?>
-                  <div class="col-lg-2 col-md-6 col-sm-6 float-left <?= $data['room_type_abbr'] ?>">
-                    <div class="card card-stats border <?= $is_occupied ? 'border-danger' : 'border-success' ?> shadow-none room <?= $booking ? 'with-data pointer' : '' ?>" data='<?= json_encode($data) ?>' <?= $booking ? 'booking="' . htmlspecialchars(json_encode($booking), ENT_QUOTES, 'UTF-8') . '"' : '' ?>>
-                      <div class="card-body ">
-                        <div class="row">
-                          <div class="col-md-7 <?= $is_occupied ? 'text-danger' : 'text-success' ?>">
-                            <h1 class="room_type"><?= $data['room_type_abbr'] ?></h1>
-                          </div>
-                          <div class="col-md-5">
-                            <div class="numbers">
-                              <p class="card-category">Room</p>
-                              <p class="card-title"><?= $data['room_number'] ?></p>
+            <div class="floor-section" id="floor_3">
+              <div class="separator mb-4">3rd Floor</div>
+              <div class="row">
+                <?php foreach ($rooms as $data) { ?>
+                  <?php if ($data['room_number'] < 399 && $data['room_number'] > 300) { ?>
+                    <?php
+                    $is_occupied = array_key_exists($data['room_id'], $occupied_room_ids);
+                    $date_format = date('m/d/Y');
+                    $booking = array_filter($bookings, function ($b) use ($date_format, $data) {
+                      return in_array($date_format, $b['dates_between']) && $data['room_number'] == $b['room_number'];
+                    });
+                    $booking = $booking ? array_merge(...$booking) : null;
+                    ?>
+                    <div class="col-lg-2 col-md-6 col-sm-6 float-left room-item <?= $data['room_type_abbr'] ?> <?= $is_occupied ? 'room-occupied' : 'room-vacant' ?>">
+                      <div class="card card-stats border <?= $is_occupied ? 'border-danger' : 'border-success' ?> shadow-none room <?= ($is_occupied && $booking) ? 'with-data pointer' : '' ?>" data='<?= json_encode($data) ?>' <?= ($is_occupied && $booking) ? 'booking="' . htmlspecialchars(json_encode($booking), ENT_QUOTES, 'UTF-8') . '"' : '' ?>>
+                        <div class="card-body ">
+                          <div class="row">
+                            <div class="col-md-7 <?= $is_occupied ? 'text-danger' : 'text-success' ?>">
+                              <h1 class="room_type"><?= $data['room_type_abbr'] ?></h1>
+                            </div>
+                            <div class="col-md-5">
+                              <div class="numbers">
+                                <p class="card-category">Room</p>
+                                <p class="card-title"><?= $data['room_number'] ?></p>
+                              </div>
                             </div>
                           </div>
                         </div>
-                      </div>
-                      <div class="card-footer ">
-                        <hr>
-                        <div class="stats text-center" style="font-size: 13px;">
-                          <span class="fa fa-<?= $is_occupied ? 'bed' : 'check' ?>"></span> <?= $is_occupied ? $occupied_room_ids[$data['room_id']]['name'] : 'Vacant' ?>
+                        <div class="card-footer ">
+                          <hr>
+                          <div class="stats text-center" style="font-size: 13px;">
+                            <span class="fa fa-<?= $is_occupied ? 'bed' : 'check' ?>"></span> <?= $is_occupied ? $occupied_room_ids[$data['room_id']]['name'] : 'Vacant' ?>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-              <?php }
-              } ?>
+                <?php }
+                } ?>
+              </div>
             </div>
-            <div class="separator mb-4">4th Floor</div>
-            <div class="row">
-              <?php foreach ($rooms as $data) { ?>
-                <?php if ($data['room_number'] < 499 && $data['room_number'] > 400) { ?>
-                  <?php
-                  $is_occupied = array_key_exists($data['room_id'], $occupied_room_ids);
-                  $date_format = date('m/d/Y');
-                  $booking = array_filter($bookings, function ($b) use ($date_format, $data) {
-                    return in_array($date_format, $b['dates_between']) && $data['room_number'] == $b['room_number'];
-                  });
-                  $booking = $booking ? array_merge(...$booking) : null;
-                  ?>
-                  <div class="col-lg-2 col-md-6 col-sm-6 float-left <?= $data['room_type_abbr'] ?>">
-                    <div class="card card-stats border <?= $is_occupied ? 'border-danger' : 'border-success' ?> shadow-none room <?= $booking ? 'with-data pointer' : '' ?>" data='<?= json_encode($data) ?>' <?= $booking ? 'booking="' . htmlspecialchars(json_encode($booking), ENT_QUOTES, 'UTF-8') . '"' : '' ?>>
-                      <div class="card-body ">
-                        <div class="row">
-                          <div class="col-md-7 <?= $is_occupied ? 'text-danger' : 'text-success' ?>">
-                            <h1 class="room_type"><?= $data['room_type_abbr'] ?></h1>
-                          </div>
-                          <div class="col-md-5">
-                            <div class="numbers">
-                              <p class="card-category">Room</p>
-                              <p class="card-title"><?= $data['room_number'] ?></p>
+            <div class="floor-section" id="floor_4">
+              <div class="separator mb-4">4th Floor</div>
+              <div class="row">
+                <?php foreach ($rooms as $data) { ?>
+                  <?php if ($data['room_number'] < 499 && $data['room_number'] > 400) { ?>
+                    <?php
+                    $is_occupied = array_key_exists($data['room_id'], $occupied_room_ids);
+                    $date_format = date('m/d/Y');
+                    $booking = array_filter($bookings, function ($b) use ($date_format, $data) {
+                      return in_array($date_format, $b['dates_between']) && $data['room_number'] == $b['room_number'];
+                    });
+                    $booking = $booking ? array_merge(...$booking) : null;
+                    ?>
+                    <div class="col-lg-2 col-md-6 col-sm-6 float-left room-item <?= $data['room_type_abbr'] ?> <?= $is_occupied ? 'room-occupied' : 'room-vacant' ?>">
+                      <div class="card card-stats border <?= $is_occupied ? 'border-danger' : 'border-success' ?> shadow-none room <?= ($is_occupied && $booking) ? 'with-data pointer' : '' ?>" data='<?= json_encode($data) ?>' <?= ($is_occupied && $booking) ? 'booking="' . htmlspecialchars(json_encode($booking), ENT_QUOTES, 'UTF-8') . '"' : '' ?>>
+                        <div class="card-body ">
+                          <div class="row">
+                            <div class="col-md-7 <?= $is_occupied ? 'text-danger' : 'text-success' ?>">
+                              <h1 class="room_type"><?= $data['room_type_abbr'] ?></h1>
+                            </div>
+                            <div class="col-md-5">
+                              <div class="numbers">
+                                <p class="card-category">Room</p>
+                                <p class="card-title"><?= $data['room_number'] ?></p>
+                              </div>
                             </div>
                           </div>
                         </div>
-                      </div>
-                      <div class="card-footer ">
-                        <hr>
-                        <div class="stats text-center" style="font-size: 13px;">
-                          <span class="fa fa-<?= $is_occupied ? 'bed' : 'check' ?>"></span> <?= $is_occupied ? $occupied_room_ids[$data['room_id']]['name'] : 'Vacant' ?>
+                        <div class="card-footer ">
+                          <hr>
+                          <div class="stats text-center" style="font-size: 13px;">
+                            <span class="fa fa-<?= $is_occupied ? 'bed' : 'check' ?>"></span> <?= $is_occupied ? $occupied_room_ids[$data['room_id']]['name'] : 'Vacant' ?>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-              <?php }
-              } ?>
+                <?php }
+                } ?>
+              </div>
             </div>
           </div>
         </div>
@@ -387,6 +402,52 @@
     .card.room.border-success {
       border-width: 2px !important;
       background-color: #f0fff4 !important;
+      cursor: pointer;
+    }
+
+    .switch-toggle {
+      position: relative;
+      display: inline-block;
+      width: 38px;
+      height: 20px;
+    }
+
+    .switch-toggle input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .switch-toggle .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #cfcfca;
+      transition: .3s;
+      border-radius: 20px;
+    }
+
+    .switch-toggle .slider:before {
+      position: absolute;
+      content: "";
+      height: 14px;
+      width: 14px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: .3s;
+      border-radius: 50%;
+    }
+
+    .switch-toggle input:checked + .slider {
+      background-color: #7AC29A;
+    }
+
+    .switch-toggle input:checked + .slider:before {
+      transform: translateX(18px);
     }
 
     #modalPay,
@@ -446,19 +507,58 @@
       updateAvailableRoom(checkin, checkout);
     });
 
+    function updateDashboardFilters() {
+      const vacantOnly = $('#toggle_vacant_only').is(':checked');
+
+      $('.floor-section').each(function() {
+        const floor = $(this);
+        let visibleCount = 0;
+
+        floor.find('.room-item').each(function() {
+          const room = $(this);
+          const isOccupied = room.hasClass('room-occupied');
+          const typeMatch = room.is(function() {
+            let matched = false;
+            $('.room_types:checked').each(function() {
+              if (room.hasClass($(this).val())) {
+                matched = true;
+                return false;
+              }
+            });
+            return matched;
+          });
+
+          if (typeMatch && (!vacantOnly || !isOccupied)) {
+            room.show();
+            visibleCount++;
+          } else {
+            room.hide();
+          }
+        });
+
+        if (visibleCount === 0) {
+          floor.hide();
+        } else {
+          floor.show();
+        }
+      });
+    }
+
+    $('#toggle_vacant_only').change(function() {
+      updateDashboardFilters();
+    });
+
     $('.room_types').change(function() {
-      const checked = $(this).val();
-      if (this.checked) {
-        $(`.${checked}`).fadeIn();
-        if ($('.room_types:checked').length == 6) $('.all').prop('checked', true);
+      if ($('.room_types:checked').length == 6) {
+        $('.all').prop('checked', true);
       } else {
-        $(`.${checked}`).fadeOut();
         $('.all').prop('checked', false);
       }
+      updateDashboardFilters();
     });
 
     $('.all').change(function() {
-      const checked = $(this).val();
-      $('.room_types').prop('checked', this.checked).trigger('change');
+      $('.room_types').prop('checked', this.checked);
+      updateDashboardFilters();
     });
   </script>

@@ -2,6 +2,7 @@
   "intelephense.diagnostics.exclude": {
     "**/*": [
       "P1132",
+      "P1008",
       "P1006"
     ]
   },
