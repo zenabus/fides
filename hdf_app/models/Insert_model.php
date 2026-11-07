@@ -225,9 +225,9 @@ class Insert_model extends CI_Model {
     $this->db->insert('cash', ['cash_amount' => $cash]);
   }
 
-  function addBookingLog($log) {
+  function addBookingLog($log, $booking_id = NULL) {
     $data = [
-      'booking_id' => $_POST['booking_id'],
+      'booking_id' => $booking_id ?? ($_POST['booking_id'] ?? null),
       'user_id' => $_SESSION['user_id'],
       'activity' => $log
     ];

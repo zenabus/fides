@@ -1318,9 +1318,10 @@ class Main extends MY_Controller {
       $reservation_status = 4;
     }
     $this->update_model->updateReservationStatus($reservation_status, $booking_id);
+    $_POST['booking_id'] = $booking_id;
     $booking_number = 'HDF' . str_pad($booking_id, 5, '0', STR_PAD_LEFT);
     $log = "<b>{$booking_number}</b> → Cancelled a {$type}!";
-    $this->insert_model->addBookingLog($log);
+    $this->insert_model->addBookingLog($log, $booking_id);
     $this->insert_model->log("Cancelled a {$type}: #" . $booking_number, 4);
     $this->session->set_flashdata('success', $type . ' successfully cancelled.');
     $this->redirect();
