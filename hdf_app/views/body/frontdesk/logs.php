@@ -42,17 +42,32 @@
         "type": "POST"
       },
       "ordering": true,
-      "order": [[<?= ($_SESSION['user_type'] == 'Superadmin') ? 3 : 2 ?>, 'desc']],
+      "order": [
+        [<?= ($_SESSION['user_type'] == 'Superadmin') ? 3 : 2 ?>, 'desc']
+      ],
       "autoWidth": false,
-      "columns": [
-        { "data": 0, "width": "18%" },
-        <?php if ($_SESSION['user_type'] == 'Superadmin') { ?>
-          { "data": 1, "width": "18%" },
-          { "data": 2 },
-          { "data": 3, "width": "18%" }
-        <?php } else { ?>
-          { "data": 1 },
-          { "data": 2, "width": "18%" }
+      "columns": [{
+          "data": 0,
+          "width": "18%"
+        },
+        <?php if ($_SESSION['user_type'] == 'Superadmin') { ?> {
+            "data": 1,
+            "width": "18%"
+          },
+          {
+            "data": 2
+          },
+          {
+            "data": 3,
+            "width": "18%"
+          }
+        <?php } else { ?> {
+            "data": 1
+          },
+          {
+            "data": 2,
+            "width": "18%"
+          }
         <?php } ?>
       ]
     });
