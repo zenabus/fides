@@ -522,6 +522,103 @@ class Get_model extends CI_Model {
     return $this->db->get('user_logs')->result_array();
   }
 
+  function getLogsServerSide($post) {
+    $isSuperadmin = (isset($_SESSION['user_type']) && $_SESSION['user_type'] === 'Superadmin');
+    $isAdmin = (isset($_SESSION['user_type']) && $_SESSION['user_type'] === 'Admin');
+
+    if ($isSuperadmin) {
+      $column_order = ['users.name', 'user_logs.ip_address', 'user_logs.content', 'user_logs.date_entered'];
+      $column_search = ['users.name', 'users.user_type', 'user_logs.ip_address', 'user_logs.content', 'user_logs.date_entered'];
+    } else {
+      $column_order = ['users.name', 'user_logs.content', 'user_logs.date_entered'];
+      $column_search = ['users.name', 'users.user_type', 'user_logs.content', 'user_logs.date_entered'];
+    }
+
+    $this->db->from('user_logs');
+    $this->db->join('users', 'users.id=user_logs.user_id');
+
+    if (!$isAdmin && !$isSuperadmin) {
+      $this->db->where('user_logs.user_id', $_SESSION['user_id']);
+    } else {
+      $this->db->where('user_logs.user_id!=', 34);
+    }
+
+    if (!empty($post['search']['value'])) {
+      $searchValue = trim($post['search']['value']);
+      $i = 0;
+      foreach ($column_search as $item) {
+        if ($i === 0) {
+          $this->db->group_start();
+          $this->db->like($item, $searchValue);
+        } else {
+          $this->db->or_like($item, $searchValue);
+        }
+        if (count($column_search) - 1 == $i) {
+          $this->db->group_end();
+        }
+        $i++;
+      }
+    }
+
+    if (isset($post['order']) && isset($column_order[$post['order']['0']['column']])) {
+      $this->db->order_by($column_order[$post['order']['0']['column']], $post['order']['0']['dir']);
+    } else {
+      $this->db->order_by('user_logs.id', 'DESC');
+    }
+
+    $length = isset($post['length']) ? (int)$post['length'] : 25;
+    $start = isset($post['start']) ? (int)$post['start'] : 0;
+    if ($length != -1) {
+      $this->db->limit($length, $start);
+    }
+
+    $query = $this->db->select('user_logs.*, users.name, users.user_type')->get();
+    $data = $query->result_array();
+
+    // Total records count (without search filter)
+    $this->db->from('user_logs');
+    $this->db->join('users', 'users.id=user_logs.user_id');
+    if (!$isAdmin && !$isSuperadmin) {
+      $this->db->where('user_logs.user_id', $_SESSION['user_id']);
+    } else {
+      $this->db->where('user_logs.user_id!=', 34);
+    }
+    $recordsTotal = $this->db->count_all_results();
+
+    // Filtered records count
+    $recordsFiltered = $recordsTotal;
+    if (!empty($post['search']['value'])) {
+      $this->db->from('user_logs');
+      $this->db->join('users', 'users.id=user_logs.user_id');
+      if (!$isAdmin && !$isSuperadmin) {
+        $this->db->where('user_logs.user_id', $_SESSION['user_id']);
+      } else {
+        $this->db->where('user_logs.user_id!=', 34);
+      }
+      $i = 0;
+      foreach ($column_search as $item) {
+        if ($i === 0) {
+          $this->db->group_start();
+          $this->db->like($item, $searchValue);
+        } else {
+          $this->db->or_like($item, $searchValue);
+        }
+        if (count($column_search) - 1 == $i) {
+          $this->db->group_end();
+        }
+        $i++;
+      }
+      $recordsFiltered = $this->db->count_all_results();
+    }
+
+    return [
+      'draw' => isset($post['draw']) ? intval($post['draw']) : 0,
+      'recordsTotal' => $recordsTotal,
+      'recordsFiltered' => $recordsFiltered,
+      'data' => $data
+    ];
+  }
+
   function getDates($booking_id) {
     return $this->db->select('check_in, check_out')->where('booking_id', $booking_id)->get('booked_rooms')->result_array();
   }

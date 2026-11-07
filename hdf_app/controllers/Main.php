@@ -402,13 +402,63 @@ class Main extends MY_Controller {
 
   function logs() {
     $data['active'] = 'logs';
-    $data['logs'] = $this->get_model->getLogs();
-    foreach ($data['logs'] as $i => $log) {
-      $data['logs'][$i]['ago'] = $this->timeAgo($log['date_entered']);
-    }
     $this->load->view('layout/header', $data);
     $this->load->view('body/frontdesk/logs');
     $this->load->view('layout/footer');
+  }
+
+  function logs_dt() {
+    $results = $this->get_model->getLogsServerSide($_POST);
+    $data = [];
+    $isSuperadmin = (isset($_SESSION['user_type']) && $_SESSION['user_type'] === 'Superadmin');
+
+    foreach ($results['data'] as $row) {
+      $sub_array = [];
+
+      // 1. User column
+      $userCol = htmlspecialchars($row['name'], ENT_QUOTES, 'UTF-8') . '<br>';
+      $userCol .= '<small>' . ucfirst(strtolower($row['user_type'])) . '</small>';
+      $sub_array[] = $userCol;
+
+      // 2. IP Address column (Superadmin only)
+      if ($isSuperadmin) {
+        $ipName = array_key_exists($row['ip_address'], IP) ? IP[$row['ip_address']] : 'Unknown';
+        $ipCol = $ipName . '<br><small>' . htmlspecialchars($row['ip_address'], ENT_QUOTES, 'UTF-8') . '</small>';
+        $sub_array[] = $ipCol;
+      }
+
+      // 3. Activity / Content column
+      $content = explode('→', $row['content']);
+      if (isset($content[1])) {
+        $booking_id = explode(' ', $content[0]);
+        $booking_id = strip_tags($booking_id[0]);
+        if (strpos($booking_id, 'HDF') !== false) {
+          $url = base_url('index.php/main/booking/' . $booking_id);
+          $booking_link = "<a href='{$url}' class='text-dark'>{$content[0]}</a>";
+        } else {
+          $booking_link = $content[0];
+        }
+        $i = isset($content[2]) ? 2 : 1;
+        $contentFormatted = "{$booking_link} → {$content[$i]}";
+      } else {
+        $contentFormatted = $content[0];
+      }
+      $logTypeName = isset(LOG_TYPE[$row['log_type']]) ? LOG_TYPE[$row['log_type']] : '';
+      $activityCol = $contentFormatted . '<br><small>' . $logTypeName . '</small>';
+      $sub_array[] = $activityCol;
+
+      // 4. Log Date column
+      $dateTime = date_create($row['date_entered']);
+      $formattedDate = $dateTime ? date_format($dateTime, "M d, Y h:i a") : $row['date_entered'];
+      $ago = ucfirst($this->timeAgo($row['date_entered']));
+      $dateCol = $ago . '<br><small>' . $formattedDate . '</small>';
+      $sub_array[] = $dateCol;
+
+      $data[] = $sub_array;
+    }
+
+    $results['data'] = $data;
+    echo json_encode($results);
   }
 
   function getHotelSales($date, $period) {

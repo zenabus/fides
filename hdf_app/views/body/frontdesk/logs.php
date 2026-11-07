@@ -7,7 +7,7 @@
           <h6>All User Logs</h6>
         </div>
         <div class="card-body">
-          <table class="table table-striped table-bordered datatable">
+          <table class="table table-striped table-bordered datatable" id="tblLogs" style="width: 100%;">
             <thead>
               <tr>
                 <th>User</th>
@@ -19,47 +19,6 @@
               </tr>
             </thead>
             <tbody>
-              <?php foreach ($logs as $row) { ?>
-                <tr>
-                  <td style="white-space: nowrap">
-                    <?= $row['name'] ?><br>
-                    <small><?= ucfirst(strtolower($row['user_type'])) ?></small>
-                  </td>
-                  <?php if ($_SESSION['user_type'] == 'Superadmin') { ?>
-                    <td style="white-space: nowrap">
-                      <?= array_key_exists($row['ip_address'], IP) ? IP[$row['ip_address']] : 'Unknown' ?><br>
-                      <small><?= $row['ip_address'] ?></small>
-                    </td>
-                  <?php } ?>
-                  <td>
-                    <?php
-                    $content = explode('→', $row['content']);
-                    if (isset($content[1])) {
-                      $booking_id = explode(' ', $content[0]);
-                      $booking_id = strip_tags($booking_id[0]);
-                      if (strpos($booking_id, 'HDF') !== false) {
-                        $url = base_url('index.php/main/booking/' . $booking_id);
-                        $booking_id = "<a href='{$url}' class='text-dark'>{$content[0]}</a>";
-                      }
-                      $i = isset($content[2]) ? 2 : 1;
-                      $content = "{$booking_id} → {$content[$i]}";
-                    } else {
-                      $content = $content[0];
-                    }
-                    ?>
-                    <?= $content ?><br>
-                    <small><?= LOG_TYPE[$row['log_type']] ?></small>
-                  </td>
-                  <td>
-                    <?php
-                    $date_time = date_create($row['date_entered']);
-                    $date_time = date_format($date_time, "M d, Y h:i a");
-                    ?>
-                    <?= $row['ago'] ?><br>
-                    <small><?= $date_time ?></small>
-                  </td>
-                </tr>
-              <?php }  ?>
             </tbody>
           </table>
         </div>
@@ -69,11 +28,33 @@
 </div>
 
 <script>
-  const base_url = '<?= base_url() ?>';
-
   $(document).ready(function() {
-    $('.datatable').dataTable({
-      ordering: false
+    $('#tblLogs').DataTable({
+      "processing": true,
+      "serverSide": true,
+      "pageLength": 25,
+      "lengthMenu": [
+        [10, 25, 50, 100],
+        [10, 25, 50, 100]
+      ],
+      "ajax": {
+        "url": "<?= base_url('index.php/main/logs_dt') ?>",
+        "type": "POST"
+      },
+      "ordering": true,
+      "order": [[<?= ($_SESSION['user_type'] == 'Superadmin') ? 3 : 2 ?>, 'desc']],
+      "autoWidth": false,
+      "columns": [
+        { "data": 0, "width": "18%" },
+        <?php if ($_SESSION['user_type'] == 'Superadmin') { ?>
+          { "data": 1, "width": "18%" },
+          { "data": 2 },
+          { "data": 3, "width": "18%" }
+        <?php } else { ?>
+          { "data": 1 },
+          { "data": 2, "width": "18%" }
+        <?php } ?>
+      ]
     });
   });
 </script>
