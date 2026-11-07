@@ -191,12 +191,11 @@ const modalBooking = (obj, booking_type, minDate = 0, booking_number = "") => {
   if (booking_type == "Check In") {
     $(".reservation-div").hide();
     $("#btnChange").hide();
-    if (booking_number) {
-      $("#btnUpdate").show().css("display", "block");
-    }
+    // btnUpdate is handled by caller
+    $("#btnUpdate").addClass("d-none").hide();
   } else {
     if (booking_number) {
-      $("#btnChange").show().css("display", "block");
+      // $("#btnChange").show().css("display", "block");
     }
     $(".reservation-div").show();
     $("[name=check_in]").removeAttr("readonly");
@@ -224,6 +223,8 @@ $("[name=action]").change(function () {
 });
 
 $("#btnCancel").click(function () {
+  const current_booking_id = $("#modalBooking [name=booking_id]").val() || $('[name=booking_id]').val();
+  $("#modalReason [name=booking_id]").val(current_booking_id);
   $("#modalReason").modal("show");
 });
 
@@ -322,7 +323,7 @@ $("#modalBooking").on("hide.bs.modal", function (e) {
   $(".card-div").addClass("d-none").hide();
 
   $("#txt-contact").text("");
-  $("#btnUpdate").hide();
+  $("#btnUpdate").addClass("d-none").hide();
 });
 
 $("[name=payment_option]").change(function () {
@@ -460,6 +461,7 @@ $(document).on('click', '.with-data', function() {
     $("#txt-contact").text(`${booking.contact.length} digits`);
     $('[name=booked_room_id]').val(booking.booked_room_id);
 
+    $('#btnUpdate').addClass('d-none').hide();
     if (booking.reservation_status == 0 || booking.reservation_status == -1) {
       modalBooking(this, 'Check In', 0, booking.booking_number);
       $('#frmBook').attr('action', `${base_url}index.php/main/updateBooking`);
@@ -468,7 +470,7 @@ $(document).on('click', '.with-data', function() {
         $('.form-control').attr('disabled', false);
         $('#modalBooking [name=nights]').attr('readonly', true);
         $('textarea').attr('disabled', false).attr('readonly', false);
-        $('#btnUpdate').removeClass('d-none');
+        $('#btnUpdate').removeClass('d-none').show();
       } else {
         $('.form-control').attr('disabled', true);
         $('textarea').attr('disabled', false).attr('readonly', true);
@@ -479,7 +481,7 @@ $(document).on('click', '.with-data', function() {
       $('#btnRedirect').removeClass('d-none').attr('href', `${base_url}index.php/main/booking/${booking.booking_number}`);
       $('#btnCancel, #btnChange, #btnPay, #btnPayments').addClass('d-none');
       $('.payment_option').show();
-    } else if (booking.reservation_status == 1) {
+    } else if ([1, 2, 3, 5].includes(parseInt(booking.reservation_status))) {
       const [month, day, year] = booking.check_in.split('/')
       const checkin = `${year}-${month}-${day}`;
       modalBooking(this, 'Reservation', 0, booking.booking_number);
@@ -520,7 +522,7 @@ $(document).on('click', '.with-data', function() {
       $('[name=check_in]').removeAttr('readonly');
       $('.form-control').removeAttr('disabled');
       $('#btnRedirect').addClass('d-none');
-      $('#btnCancel, #btnChange, #btnPay, #btnPayments').removeClass('d-none');
+      $('#btnCancel, #btnPay, #btnPayments').removeClass('d-none');
       $('.payment_option').hide();
 
       if (booking.reservation_type == 'Confirmed') {
@@ -537,7 +539,7 @@ $(document).on('click', '.with-data', function() {
       $('.action-div').addClass('d-none');
       $('#btnBooking').hide();
       $('#btnRedirect').removeClass('d-none');
-      $('#btnCancel, #btnChange, #btnPay, #btnPayments').removeClass('d-none');
+      $('#btnCancel, #btnPay, #btnPayments').removeClass('d-none');
       $('.payment_option').hide();
     }
 

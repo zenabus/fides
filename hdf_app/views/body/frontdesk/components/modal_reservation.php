@@ -174,7 +174,7 @@
           </div>
         </div>
 
-        <a href="javascript:" class="btn my-0 btn-block mb-1" id="btnChange">Change Room</a>
+        <a href="javascript:" class="btn my-0 btn-block mb-1 d-none" id="btnChange" style="display:none !important;">Change Room</a>
         <div class="row">
           <div class="col" style="padding-right:2px">
             <a href="javascript:" class="btn btn-danger my-0 d-none btn-block mb-1" id="btnCancel">Cancel Reservation</a>
