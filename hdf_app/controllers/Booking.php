@@ -51,18 +51,28 @@ class Booking extends MY_Controller {
     // Update Status
     $this->update_model->updateReservationStatus(3, $booking->booking_id);
 
+    // Fetch booked rooms to obtain room details, pricing, and dates
+    $booked_rooms = $this->get_model->getBookedRooms($booking->booking_id);
+    $first_room = !empty($booked_rooms) ? $booked_rooms[0] : null;
+
+    $room_type = $first_room ? $first_room['room_type'] : '';
+    $check_in = $first_room ? $first_room['check_in'] : $booking->arrival;
+    $check_out = $first_room ? $first_room['check_out'] : $booking->departure;
+    $nights = $first_room ? $first_room['nights'] : 0;
+    $pricing_type = $first_room ? (float)$first_room['pricing_type'] : 0;
+
     // Prepare Success Email
     $data = [
       'first_name' => $booking->first_name,
       'last_name' => $booking->last_name,
       'booking_number' => $booking->booking_number,
-      'check_in' => $booking->check_in,
-      'check_out' => $booking->check_out,
-      'nights' => $booking->nights,
-      'room_type' => $booking->room_type,
+      'check_in' => $check_in,
+      'check_out' => $check_out,
+      'nights' => $nights,
+      'room_type' => $room_type,
       'remarks' => $booking->remarks,
-      'price' => number_format($booking->pricing_type, 2),
-      'amount' => number_format($booking->pricing_type * 0.25, 2),
+      'price' => number_format($pricing_type, 2),
+      'amount' => number_format($pricing_type * 0.25, 2),
       'payment_details' => $this->config->item('payment_details')
     ];
 

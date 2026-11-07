@@ -209,6 +209,7 @@ class Get_model extends CI_Model {
       ->join('rooms', 'rooms.id=booked_rooms.room_id')
       ->join('room_type', 'room_type.id=rooms.room_type_id')
       ->where_in('reservation_type', $type)
+      ->group_by('bookings.booking_id')
       ->get('bookings')->result_array();
   }
 

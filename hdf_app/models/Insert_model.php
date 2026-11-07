@@ -49,7 +49,16 @@ class Insert_model extends CI_Model {
       $this->load->helper('hdf_utility');
       $dates = datesBetween($_POST['check_in'], $_POST['check_out'], 'Y-m-d');
     }
-    return [
+
+    $occupant = $_POST['occupant'] ?? null;
+    if (empty($occupant) && !empty($_POST['first_name'])) {
+      $guest_name = trim(($_POST['first_name'] ?? '') . ' ' . ($_POST['last_name'] ?? ''));
+      $contact = trim($_POST['contact'] ?? '');
+      $email = trim($_POST['email'] ?? '');
+      $occupant = "{$guest_name} / {$contact} / {$email}";
+    }
+
+    $data = [
       'booking_id' => $booking_id,
       'room_id' => $_POST['room_id'] ?? NULL,
       'check_in' => $_POST['check_in'] ?? '',
@@ -59,6 +68,12 @@ class Insert_model extends CI_Model {
       'nights' => $_POST['nights'] ?? 0,
       'dates' => json_encode($dates),
     ];
+
+    if ($occupant !== null) {
+      $data['occupant'] = $occupant;
+    }
+
+    return $data;
   }
 
   function book() {

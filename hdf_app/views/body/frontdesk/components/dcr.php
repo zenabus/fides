@@ -131,6 +131,11 @@
     .w-150 {
       width: 130px !important;
     }
+
+    .guest-col {
+      width: 130px;
+      word-wrap: break-word;
+    }
   </style>
 </head>
 
@@ -152,7 +157,7 @@
         </tr>
         <tr>
           <th rowspan="2" class="br bl w-150">Room</th>
-          <th rowspan="2" class="br">Guest Name</th>
+          <th rowspan="2" class="br guest-col">Guest Name</th>
           <th rowspan="2" class="br w-150">Room Rate</th>
           <th colspan="2" class="br">Meal Charge</th>
           <th rowspan="2" class="br nw w-150">Add-ons</th>
@@ -207,7 +212,7 @@
         ?>
           <tr>
             <td class="bl"><?= $row['room_number'] ?> <?= $row['room_type_abbr'] ?></td>
-            <td class="nw tl"><span style="color: #e59866; font-size: 5pt; vertical-align: middle; margin-right: 3px; display:none">▶</span> <?= $row['first_name'] ?> <?= $row['middle_name'] ?> <?= $row['last_name'] ?> <?= $row['suffix'] ?></td>
+            <td class="tl guest-col"><span style="color: #e59866; font-size: 5pt; vertical-align: middle; margin-right: 3px; display:none">▶</span> <?= $row['first_name'] ?> <?= $row['middle_name'] ?> <?= $row['last_name'] ?> <?= $row['suffix'] ?></td>
             <td><?= $row['cash_room']->amount ? number_format($row['cash_room']->amount, 2) : '' ?></td>
             <td><?= $row['cash_restaurant']->amount ? number_format($row['cash_restaurant']->amount, 2) : '' ?></td>
             <td><?= $row['cash_coffeeshop']->amount ? number_format($row['cash_coffeeshop']->amount, 2) : '' ?></td>
@@ -238,7 +243,7 @@
         ?>
             <tr>
               <td class="bl"><?= $row['room_number'] ?> <?= $row['room_type_abbr'] ?></td>
-              <td class="nw tl"><?= $row['first_name'] ?> <?= $row['middle_name'] ?> <?= $row['last_name'] ?><?= $row['suffix'] ?><span style="color: #27ae60; font-size: 5pt; vertical-align: middle; margin-left: 3px;">⌂</span></td>
+              <td class="tl guest-col"><?= $row['first_name'] ?> <?= $row['middle_name'] ?> <?= $row['last_name'] ?><?= $row['suffix'] ?><span style="color: #27ae60; font-size: 5pt; vertical-align: middle; margin-left: 3px;">⌂</span></td>
               <td></td>
               <td></td>
               <td></td>
@@ -272,7 +277,7 @@
         ?>
             <tr>
               <td class="bl"><?= $row['room_number'] ?> <?= $row['room_type_abbr'] ?></td>
-              <td class="nw tl"><?= $row['first_name'] ?> <?= $row['middle_name'] ?> <?= $row['last_name'] ?><?= $row['suffix'] ?></td>
+              <td class="tl guest-col"><?= $row['first_name'] ?> <?= $row['middle_name'] ?> <?= $row['last_name'] ?><?= $row['suffix'] ?></td>
               <td></td>
               <td></td>
               <td></td>
@@ -314,7 +319,7 @@
         ?>
             <tr>
               <td class="bl"></td>
-              <td><?= strtoupper($row['sales_type']) ?> PAYMENT / <?= $row['sales_remarks'] ?></td>
+              <td class="tl guest-col"><?= strtoupper($row['sales_type']) ?> PAYMENT / <?= $row['sales_remarks'] ?></td>
               <td></td>
               <td></td>
               <td></td>
@@ -349,7 +354,7 @@
         ?>
           <tr>
             <td class="bl"></td>
-            <td><?= $is_hotel ? 'HOTEL' : 'EVENT' ?> COLLECTABLE / <?= $row['collectable_remarks'] ?></td>
+            <td class="tl guest-col"><?= $is_hotel ? 'HOTEL' : 'EVENT' ?> COLLECTABLE / <?= $row['collectable_remarks'] ?></td>
             <td></td>
             <td></td>
             <td></td>
